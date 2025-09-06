@@ -69,7 +69,7 @@ const Index = () => {
             
             <h1 className="mb-6 font-orbitron text-6xl font-bold tracking-tight text-foreground sm:text-7xl lg:text-8xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
               <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                TechClassroom
+                SchoolTech
               </span>
               <br />
               <span className="text-foreground">Hub</span>
