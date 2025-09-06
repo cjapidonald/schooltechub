@@ -14,7 +14,443 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blog_post_tags: {
+        Row: {
+          blog_post_id: string
+          tag_id: string
+        }
+        Insert: {
+          blog_post_id: string
+          tag_id: string
+        }
+        Update: {
+          blog_post_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_post_tags_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_post_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          content: string
+          created_at: string
+          featured_image_url: string | null
+          grade_band: string | null
+          id: string
+          is_published: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          primary_keyword: string | null
+          published_at: string | null
+          slug: string
+          takeaway: string | null
+          teaser: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          featured_image_url?: string | null
+          grade_band?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          primary_keyword?: string | null
+          published_at?: string | null
+          slug: string
+          takeaway?: string | null
+          teaser?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          featured_image_url?: string | null
+          grade_band?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          primary_keyword?: string | null
+          published_at?: string | null
+          slug?: string
+          takeaway?: string | null
+          teaser?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          additional_notes: string | null
+          booking_type: Database["public"]["Enums"]["booking_type"]
+          confirmation_sent_at: string | null
+          constraints: string | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          devices_available: string | null
+          duration_hours: number | null
+          id: string
+          payment_status: string | null
+          preferred_date: string
+          preferred_time: string | null
+          reminder_sent_at: string | null
+          school_name: string | null
+          status: Database["public"]["Enums"]["booking_status"]
+          topic: string | null
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          booking_type: Database["public"]["Enums"]["booking_type"]
+          confirmation_sent_at?: string | null
+          constraints?: string | null
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          devices_available?: string | null
+          duration_hours?: number | null
+          id?: string
+          payment_status?: string | null
+          preferred_date: string
+          preferred_time?: string | null
+          reminder_sent_at?: string | null
+          school_name?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          topic?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          additional_notes?: string | null
+          booking_type?: Database["public"]["Enums"]["booking_type"]
+          confirmation_sent_at?: string | null
+          constraints?: string | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          devices_available?: string | null
+          duration_hours?: number | null
+          id?: string
+          payment_status?: string | null
+          preferred_date?: string
+          preferred_time?: string | null
+          reminder_sent_at?: string | null
+          school_name?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          topic?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      case_studies: {
+        Row: {
+          challenge: string | null
+          created_at: string
+          featured_image_url: string | null
+          id: string
+          is_published: boolean | null
+          published_at: string | null
+          results: string | null
+          school_name: string | null
+          slug: string
+          solution: string | null
+          testimonial_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          challenge?: string | null
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          published_at?: string | null
+          results?: string | null
+          school_name?: string | null
+          slug: string
+          solution?: string | null
+          testimonial_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          challenge?: string | null
+          created_at?: string
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          published_at?: string | null
+          results?: string | null
+          school_name?: string | null
+          slug?: string
+          solution?: string | null
+          testimonial_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_studies_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tags: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          author_name: string
+          author_role: string | null
+          created_at: string
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          quote: string
+          school_name: string | null
+        }
+        Insert: {
+          author_name: string
+          author_role?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          quote: string
+          school_name?: string | null
+        }
+        Update: {
+          author_name?: string
+          author_role?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          quote?: string
+          school_name?: string | null
+        }
+        Relationships: []
+      }
+      tools_activities: {
+        Row: {
+          accessibility_notes: string | null
+          activity_types: string[] | null
+          best_for: string | null
+          classroom_flow: string | null
+          cost: Database["public"]["Enums"]["cost_type"]
+          created_at: string
+          description: string | null
+          devices: string[] | null
+          external_link: string | null
+          featured_image_url: string | null
+          free_tier_limits: string | null
+          group_sizes: Database["public"]["Enums"]["group_size"][] | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          lesson_idea: string | null
+          name: string
+          offline_option: boolean | null
+          privacy_security_notes: string | null
+          quick_start_steps: Json | null
+          school_stages: Database["public"]["Enums"]["school_stage"][] | null
+          setup_time: string | null
+          slug: string
+          subjects: Database["public"]["Enums"]["subject"][] | null
+          updated_at: string
+        }
+        Insert: {
+          accessibility_notes?: string | null
+          activity_types?: string[] | null
+          best_for?: string | null
+          classroom_flow?: string | null
+          cost?: Database["public"]["Enums"]["cost_type"]
+          created_at?: string
+          description?: string | null
+          devices?: string[] | null
+          external_link?: string | null
+          featured_image_url?: string | null
+          free_tier_limits?: string | null
+          group_sizes?: Database["public"]["Enums"]["group_size"][] | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          lesson_idea?: string | null
+          name: string
+          offline_option?: boolean | null
+          privacy_security_notes?: string | null
+          quick_start_steps?: Json | null
+          school_stages?: Database["public"]["Enums"]["school_stage"][] | null
+          setup_time?: string | null
+          slug: string
+          subjects?: Database["public"]["Enums"]["subject"][] | null
+          updated_at?: string
+        }
+        Update: {
+          accessibility_notes?: string | null
+          activity_types?: string[] | null
+          best_for?: string | null
+          classroom_flow?: string | null
+          cost?: Database["public"]["Enums"]["cost_type"]
+          created_at?: string
+          description?: string | null
+          devices?: string[] | null
+          external_link?: string | null
+          featured_image_url?: string | null
+          free_tier_limits?: string | null
+          group_sizes?: Database["public"]["Enums"]["group_size"][] | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          lesson_idea?: string | null
+          name?: string
+          offline_option?: boolean | null
+          privacy_security_notes?: string | null
+          quick_start_steps?: Json | null
+          school_stages?: Database["public"]["Enums"]["school_stage"][] | null
+          setup_time?: string | null
+          slug?: string
+          subjects?: Database["public"]["Enums"]["subject"][] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tutorial_tags: {
+        Row: {
+          tag_id: string
+          tutorial_id: string
+        }
+        Insert: {
+          tag_id: string
+          tutorial_id: string
+        }
+        Update: {
+          tag_id?: string
+          tutorial_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutorial_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tutorial_tags_tutorial_id_fkey"
+            columns: ["tutorial_id"]
+            isOneToOne: false
+            referencedRelation: "tutorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tutorials: {
+        Row: {
+          content: string
+          created_at: string
+          description: string | null
+          difficulty_level: string | null
+          estimated_time: string | null
+          featured_image_url: string | null
+          id: string
+          is_published: boolean | null
+          learning_outcomes: string[] | null
+          prerequisites: string[] | null
+          published_at: string | null
+          school_stages: Database["public"]["Enums"]["school_stage"][] | null
+          slug: string
+          subjects: Database["public"]["Enums"]["subject"][] | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          estimated_time?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          learning_outcomes?: string[] | null
+          prerequisites?: string[] | null
+          published_at?: string | null
+          school_stages?: Database["public"]["Enums"]["school_stage"][] | null
+          slug: string
+          subjects?: Database["public"]["Enums"]["subject"][] | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          estimated_time?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          learning_outcomes?: string[] | null
+          prerequisites?: string[] | null
+          published_at?: string | null
+          school_stages?: Database["public"]["Enums"]["school_stage"][] | null
+          slug?: string
+          subjects?: Database["public"]["Enums"]["subject"][] | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +459,22 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      booking_type: "consultation" | "mini_audit" | "workshop"
+      cost_type: "Free" | "Paid"
+      group_size: "Solo" | "Pairs" | "Small Group" | "Whole Class"
+      school_stage: "Pre-K" | "K-2" | "3-5" | "6-8" | "9-12"
+      subject:
+        | "Phonics"
+        | "Math"
+        | "Science"
+        | "CS/ICT"
+        | "Social Studies"
+        | "Arts"
+        | "Music"
+        | "PE/Health"
+        | "SEL"
+        | "Languages"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +601,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      booking_type: ["consultation", "mini_audit", "workshop"],
+      cost_type: ["Free", "Paid"],
+      group_size: ["Solo", "Pairs", "Small Group", "Whole Class"],
+      school_stage: ["Pre-K", "K-2", "3-5", "6-8", "9-12"],
+      subject: [
+        "Phonics",
+        "Math",
+        "Science",
+        "CS/ICT",
+        "Social Studies",
+        "Arts",
+        "Music",
+        "PE/Health",
+        "SEL",
+        "Languages",
+      ],
+    },
   },
 } as const
