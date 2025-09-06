@@ -2,94 +2,104 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Futuristic tech design system with neon effects
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Education-themed professional colors */
-    --background: 0 0% 100%;
-    --foreground: 224 71% 4%;
+    /* Futuristic tech colors */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    
+    --card: 217 33% 17%;
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Primary - Electric cyan for futuristic feel */
+    --primary: 198 100% 50%;
+    --primary-foreground: 222 47% 11%;
+    
+    /* Secondary - Neon purple */
+    --secondary: 280 100% 65%;
+    --secondary-foreground: 222 47% 11%;
+    
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 162 100% 50%;
+    --accent-foreground: 222 47% 11%;
+    
+    --destructive: 350 100% 60%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 33% 25%;
+    --input: 217 33% 17%;
+    --ring: 198 100% 50%;
+    
+    --radius: 0.75rem;
+
+    /* Custom properties for glowing effects */
+    --glow-primary: 198 100% 50%;
+    --glow-secondary: 280 100% 65%;
+    --glow-accent: 162 100% 50%;
+    
+    --sidebar-background: 222 47% 9%;
+    --sidebar-foreground: 210 40% 90%;
+    --sidebar-primary: 198 100% 50%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 90%;
+    --sidebar-border: 217 33% 25%;
+    --sidebar-ring: 198 100% 50%;
+  }
+
+  .light {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 222 47% 11%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
+    --popover-foreground: 222 47% 11%;
     
-    /* Primary - Trust blue for education */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Deep tech blue for light mode */
+    --primary: 198 100% 35%;
+    --primary-foreground: 210 40% 98%;
     
-    /* Secondary - Soft sage green for growth */
-    --secondary: 142 25% 94%;
-    --secondary-foreground: 142 43% 20%;
+    /* Secondary - Purple for light mode */
+    --secondary: 280 100% 50%;
+    --secondary-foreground: 210 40% 98%;
     
-    --muted: 214 32% 91%;
+    --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
     
-    --accent: 39 95% 95%;
-    --accent-foreground: 39 95% 25%;
+    --accent: 162 100% 40%;
+    --accent-foreground: 210 40% 98%;
     
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 210 40% 98%;
     
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 217 91% 60%;
+    --ring: 198 100% 35%;
     
-    --radius: 0.5rem;
-
+    /* Custom properties for glowing effects */
+    --glow-primary: 198 100% 35%;
+    --glow-secondary: 280 100% 50%;
+    --glow-accent: 162 100% 40%;
+    
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 198 100% 35%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 60%;
-  }
-
-  .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    
-    --card: 224 71% 8%;
-    --card-foreground: 213 31% 91%;
-    
-    --popover: 224 71% 8%;
-    --popover-foreground: 213 31% 91%;
-    
-    /* Primary - Lighter blue for dark mode */
-    --primary: 217 91% 70%;
-    --primary-foreground: 224 71% 4%;
-    
-    /* Secondary - Darker green for dark mode */
-    --secondary: 142 25% 15%;
-    --secondary-foreground: 142 25% 85%;
-    
-    --muted: 215 25% 27%;
-    --muted-foreground: 215 20% 65%;
-    
-    --accent: 39 95% 15%;
-    --accent-foreground: 39 95% 85%;
-    
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 98%;
-    
-    --border: 215 25% 27%;
-    --input: 215 25% 27%;
-    --ring: 217 91% 70%;
-    
-    --sidebar-background: 224 71% 6%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 217 91% 70%;
-    --sidebar-primary-foreground: 224 71% 4%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217 91% 70%;
+    --sidebar-ring: 198 100% 35%;
   }
 }
 
@@ -99,6 +109,29 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-space;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-orbitron;
+  }
+}
+
+/* Custom glow effects */
+@layer utilities {
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.5);
+  }
+  
+  .glow-secondary {
+    box-shadow: 0 0 20px hsl(var(--glow-secondary) / 0.5);
+  }
+  
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--glow-accent) / 0.5);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 20px currentColor;
   }
 }

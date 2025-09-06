@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        'orbitron': ['Orbitron', 'sans-serif'],
+        'space': ['Space Grotesk', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -80,10 +84,70 @@ export default {
             height: "0",
           },
         },
+        "glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 20px hsl(var(--glow-primary) / 0.5), 0 0 40px hsl(var(--glow-primary) / 0.3)",
+          },
+          "50%": {
+            boxShadow: "0 0 30px hsl(var(--glow-primary) / 0.7), 0 0 60px hsl(var(--glow-primary) / 0.4)",
+          },
+        },
+        "pulse-glow": {
+          "0%, 100%": {
+            opacity: "1",
+            filter: "drop-shadow(0 0 10px hsl(var(--glow-primary) / 0.6))",
+          },
+          "50%": {
+            opacity: "0.8",
+            filter: "drop-shadow(0 0 20px hsl(var(--glow-primary) / 0.8))",
+          },
+        },
+        "float": {
+          "0%, 100%": {
+            transform: "translateY(0px)",
+          },
+          "50%": {
+            transform: "translateY(-20px)",
+          },
+        },
+        "scan": {
+          "0%": {
+            transform: "translateY(-100%)",
+          },
+          "100%": {
+            transform: "translateY(100%)",
+          },
+        },
+        "shimmer": {
+          "0%": {
+            backgroundPosition: "-200% 0",
+          },
+          "100%": {
+            backgroundPosition: "200% 0",
+          },
+        },
+        "neon-pulse": {
+          "0%, 100%": {
+            textShadow: "0 0 10px hsl(var(--glow-primary)), 0 0 20px hsl(var(--glow-primary)), 0 0 30px hsl(var(--glow-primary))",
+          },
+          "50%": {
+            textShadow: "0 0 20px hsl(var(--glow-primary)), 0 0 30px hsl(var(--glow-primary)), 0 0 40px hsl(var(--glow-primary))",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "glow": "glow 2s ease-in-out infinite",
+        "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "float": "float 6s ease-in-out infinite",
+        "scan": "scan 8s linear infinite",
+        "shimmer": "shimmer 2s linear infinite",
+        "neon-pulse": "neon-pulse 1.5s ease-in-out infinite",
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'cyber-grid': 'linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)',
       },
     },
   },
