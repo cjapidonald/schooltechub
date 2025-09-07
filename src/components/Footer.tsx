@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { GraduationCap, Mail, Facebook, Instagram, Linkedin } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
-  const { t } = useLanguage();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -51,7 +49,7 @@ const Footer = () => {
               <span className="font-bold text-lg">School Tech Hub</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              {t('footer.description')}
+              Making educational technology accessible and practical for every teacher
             </p>
             <div className="flex space-x-4">
               <a href="https://www.facebook.com/share/g/1NukWcXVpp/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
@@ -71,11 +69,11 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4">{t('footer.resources')}</h3>
+            <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/tools" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  {t('tools.title')}
+                  Tools & Activities
                 </Link>
               </li>
               <li>
@@ -98,7 +96,7 @@ const Footer = () => {
 
           {/* Services */}
           <div>
-            <h3 className="font-semibold mb-4">{t('footer.services')}</h3>
+            <h3 className="font-semibold mb-4">Services</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -125,31 +123,31 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-semibold mb-4">{t('footer.monthlyTechTips')}</h3>
+            <h3 className="font-semibold mb-4">Monthly Tech Tips</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {t('footer.subscribeNewsletter')}
+              Get practical classroom tech strategies delivered to your inbox
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <Input
                 type="email"
-                placeholder={t('footer.subscribePlaceholder')}
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="text-sm"
               />
               <Button type="submit" className="w-full" disabled={isSubscribing}>
-                {isSubscribing ? "..." : t('footer.subscribeButton')}
+                {isSubscribing ? "..." : "Subscribe"}
               </Button>
             </form>
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t text-center">
-          <p className="text-sm text-muted-foreground mb-2">{t('footer.copyright')}</p>
+          <p className="text-sm text-muted-foreground mb-2">© 2024 SchoolTech Hub. All rights reserved.</p>
           <div className="text-xs text-muted-foreground space-y-1">
-            <p>Email: dcjapi@gmail.com | Phone: +84 72725432</p>
-            <p>{t('contact.location')}: {t('contact.locationText')}</p>
+            <p>Email: dcjapi@gmail.com | Phone: +84 0372725432</p>
+            <p>Available worldwide for online consultations</p>
           </div>
         </div>
       </div>

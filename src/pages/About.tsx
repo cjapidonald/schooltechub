@@ -5,11 +5,9 @@ import { Award, Users, BookOpen, Target, Heart, Lightbulb } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 
 const About = () => {
-  const { t } = useLanguage();
   const mission = [
     {
       icon: Target,
@@ -49,9 +47,9 @@ const About = () => {
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t('about.title')}</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">About SchoolTech Hub</h1>
             <p className="text-xl text-muted-foreground">
-              {t('about.subtitle')}
+              Making educational technology accessible and practical for every teacher
             </p>
           </div>
         </div>
@@ -62,17 +60,17 @@ const About = () => {
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto">
             <Card className="p-8 bg-gradient-to-br from-card to-primary/5">
-              <h2 className="text-2xl font-bold mb-6">{t('about.story')}</h2>
+              <h2 className="text-2xl font-bold mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground">
-                <p>{t('about.storyText')}</p>
+                <p>SchoolTech Hub was founded by educators who saw the gap between amazing technology and overwhelmed teachers. We bridge that gap with practical, proven solutions.</p>
               </div>
               <div className="mt-6 pt-6 border-t">
-                <h3 className="text-xl font-bold mb-4">{t('about.ceoMessage')}</h3>
-                <p className="text-muted-foreground mb-4">{t('about.ceoMessageText')}</p>
+                <h3 className="text-xl font-bold mb-4">CEO Message</h3>
+                <p className="text-muted-foreground mb-4">Technology should empower teachers, not overwhelm them. Our mission is to make every educator confident with the tools that can transform their classrooms.</p>
               </div>
               <div className="mt-6 pt-6 border-t">
-                <h3 className="text-xl font-bold mb-4">{t('about.mission')}</h3>
-                <p className="text-muted-foreground">{t('about.missionText')}</p>
+                <h3 className="text-xl font-bold mb-4">Our Mission</h3>
+                <p className="text-muted-foreground">To democratize educational technology by providing accessible, affordable, and actionable support to educators worldwide.</p>
               </div>
             </Card>
           </div>
@@ -82,7 +80,7 @@ const About = () => {
       {/* Mission Section */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">{t('about.values')}</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Our Values</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {mission.map((item, index) => (
               <Card key={index} className="p-6 text-center">

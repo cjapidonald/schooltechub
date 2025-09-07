@@ -10,12 +10,10 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 
 const Contact = () => {
   const { toast } = useToast();
-  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -101,9 +99,9 @@ const Contact = () => {
       {/* Header */}
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('contact.getInTouch')}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Get In Touch</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {t('contact.subtitle')}
+            Book a consultation or ask us anything about educational technology
           </p>
         </div>
       </section>
@@ -115,28 +113,28 @@ const Contact = () => {
             {/* Contact Information */}
             <div className="lg:col-span-1 space-y-6">
               <Card className="p-6">
-                <h3 className="font-semibold mb-4">{t('contact.quickContact')}</h3>
+                <h3 className="font-semibold mb-4">Quick Contact</h3>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <Mail className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium">{t('contact.email')}</p>
+                      <p className="font-medium">Email</p>
                       <p className="text-sm text-muted-foreground">dcjapi@gmail.com</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Phone className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium">{t('contact.phone')}</p>
-                      <p className="text-sm text-muted-foreground">+84 72725432</p>
-                      <p className="text-sm text-muted-foreground">WhatsApp: +84 72725432</p>
+                      <p className="font-medium">Phone</p>
+                      <p className="text-sm text-muted-foreground">+84 0372725432</p>
+                      <p className="text-sm text-muted-foreground">WhatsApp: +84 0372725432</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <MapPin className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <p className="font-medium">{t('contact.location')}</p>
-                      <p className="text-sm text-muted-foreground">{t('contact.locationText')}</p>
+                      <p className="font-medium">Location</p>
+                      <p className="text-sm text-muted-foreground">Available worldwide for online consultations</p>
                     </div>
                   </div>
                 </div>

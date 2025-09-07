@@ -6,12 +6,10 @@ import { CheckCircle, Clock, Users, Target, Calendar, Shield, CreditCard, FileTe
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 
 const Services = () => {
-  const { t } = useLanguage();
   
   const services = [
     {
@@ -118,9 +116,9 @@ const Services = () => {
       {/* Header */}
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('services.title')}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Services & Pricing</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {t('services.subtitle')}
+            Get the support you need to transform your classroom
           </p>
         </div>
       </section>
@@ -165,7 +163,7 @@ const Services = () => {
                 </div>
 
                 <Link to="/contact">
-                  <Button className="w-full">{t('services.bookNow')}</Button>
+                  <Button className="w-full">Book Now</Button>
                 </Link>
               </Card>
             ))}
@@ -174,9 +172,9 @@ const Services = () => {
           {/* Guarantee */}
           <Card className="p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
             <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-4">{t('services.ourGuarantee')}</h3>
+            <h3 className="text-2xl font-bold mb-4">Our Guarantee</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t('services.guaranteeText')}
+              If you don't learn at least 3 implementable strategies in your first session, we'll refund your payment - no questions asked.
             </p>
           </Card>
         </div>
@@ -185,7 +183,7 @@ const Services = () => {
       {/* Booking Process */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">{t('services.howItWorks')}</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
           
           <Tabs defaultValue="before" className="max-w-3xl mx-auto">
             <TabsList className="grid w-full grid-cols-3">
@@ -277,7 +275,7 @@ const Services = () => {
       {/* FAQs */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">{t('services.faq')}</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {faqs.map((faq, index) => (
               <Card key={index} className="p-6">

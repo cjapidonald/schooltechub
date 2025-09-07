@@ -5,7 +5,6 @@ import MouseGlowEffect from "@/components/MouseGlowEffect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { 
@@ -34,7 +33,6 @@ import aiCollabImage from "@/assets/ai-collaboration.jpg";
 import holoTeachImage from "@/assets/holographic-teaching.jpg";
 
 const Index = () => {
-  const { t } = useLanguage();
   const [counters, setCounters] = useState({ lessons: 0, vr: 0, engagement: 0 });
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -124,33 +122,33 @@ const Index = () => {
           <div className="mx-auto max-w-5xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 backdrop-blur-sm">
               <Cpu className="h-4 w-4 text-primary animate-pulse-glow" />
-              <span className="text-sm font-medium text-primary">{t('features.welcomeFuture')}</span>
+              <span className="text-sm font-medium text-primary">Welcome to the Future</span>
             </div>
             
             <h1 className="mb-6 font-orbitron text-6xl font-bold tracking-tight text-foreground sm:text-7xl lg:text-8xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              <span className="text-foreground">{t('hero.title')}</span>
+              <span className="text-foreground">The Future of</span>
               <br />
               <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                {t('hero.highlight')}
+                Education is Here
               </span>
             </h1>
             
             <p className="mb-8 text-xl text-muted-foreground font-space animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-150">
-              {t('hero.subtitle')}
+              Transform your classroom with AI-powered tools and virtual experiences
             </p>
             
             <div className="mb-12 flex flex-wrap justify-center gap-6 text-sm font-space animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary animate-pulse-glow" />
-                <span className="text-foreground">{t('features.aiPowered')}</span>
+                <span className="text-foreground">AI-Powered</span>
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-accent animate-pulse-glow delay-150" />
-                <span className="text-foreground">{t('features.vrClassrooms')}</span>
+                <span className="text-foreground">VR Classrooms</span>
               </div>
               <div className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-secondary animate-pulse-glow delay-300" />
-                <span className="text-foreground">{t('features.realTime')}</span>
+                <span className="text-foreground">Real-Time Analytics</span>
               </div>
             </div>
             
@@ -161,7 +159,7 @@ const Index = () => {
                   className="group relative overflow-hidden bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-[0_0_40px_hsl(var(--glow-primary)/0.5)] transition-all duration-300"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    {t('hero.cta.start')}
+                    Start Your Journey
                     <Rocket className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -173,7 +171,7 @@ const Index = () => {
                   variant="outline"
                   className="border-primary/30 bg-background/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.3)] transition-all duration-300"
                 >
-                  {t('hero.cta.demo')}
+                  Explore Demo
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -192,7 +190,7 @@ const Index = () => {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t('features.title')}
+              The Future of Education is Here
             </h2>
           </div>
           
@@ -200,56 +198,56 @@ const Index = () => {
             {[
               {
                 icon: Brain,
-                title: t('features.aiTeaching'),
-                description: t('features.aiTeachingDesc'),
+                title: "AI Teaching Assistant",
+                description: "Personalized support for every student with intelligent tutoring systems",
                 color: "primary"
               },
               {
                 icon: Globe,
-                title: t('features.vrLabs'),
-                description: t('features.vrLabsDesc'),
+                title: "Virtual Reality Labs",
+                description: "Immersive learning experiences that bring subjects to life",
                 color: "accent"
               },
               {
                 icon: Gamepad2,
-                title: t('features.gamification'),
-                description: t('features.gamificationDesc'),
+                title: "Gamification",
+                description: "Turn learning into an adventure with game-based education",
                 color: "secondary"
               },
               {
                 icon: Database,
-                title: t('features.dataDriven'),
-                description: t('features.dataDrivenDesc'),
+                title: "Data Driven Decisions",
+                description: "Real-time analytics to track and improve student performance",
                 color: "primary"
               },
               {
                 icon: Layout,
-                title: t('features.virtualClassroom'),
-                description: t('features.virtualClassroomDesc'),
+                title: "Virtual Classroom Management",
+                description: "Streamline your digital classroom with intelligent tools",
                 color: "accent"
               },
               {
                 icon: BookOpen,
-                title: t('features.curriculumDev'),
-                description: t('features.curriculumDevDesc'),
+                title: "Curriculum Development Tools",
+                description: "Create and customize curriculum with AI-powered assistance",
                 color: "secondary"
               },
               {
                 icon: UserCog,
-                title: t('features.teacherManagement'),
-                description: t('features.teacherManagementDesc'),
+                title: "Teacher Management Software",
+                description: "Simplify administrative tasks and focus on teaching",
                 color: "primary"
               },
               {
                 icon: GraduationCap,
-                title: t('features.studentTrackers'),
-                description: t('features.studentTrackersDesc'),
+                title: "Student Trackers",
+                description: "Monitor progress and identify areas for improvement",
                 color: "accent"
               },
               {
                 icon: FileCheck,
-                title: t('features.autoGrading'),
-                description: t('features.autoGradingDesc'),
+                title: "Auto Graded Homework Apps",
+                description: "Save time with automated grading and instant feedback",
                 color: "secondary"
               }
             ].map((feature, index) => (
@@ -263,7 +261,7 @@ const Index = () => {
                   <h3 className="mb-2 text-xl font-semibold font-orbitron">{feature.title}</h3>
                   <p className="text-muted-foreground font-space">{feature.description}</p>
                   <div className="mt-4 flex items-center text-primary group-hover:text-accent transition-colors">
-                    <span className="text-sm font-medium">{t('features.learnMore')}</span>
+                    <span className="text-sm font-medium">Learn more</span>
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -315,7 +313,7 @@ const Index = () => {
                 </Link>
                 <Link to="/services">
                   <Button size="lg" variant="outline" className="border-primary/30 hover:border-primary hover:bg-primary/10">
-                    {t('features.viewPricing')}
+                    View Pricing
                   </Button>
                 </Link>
               </div>

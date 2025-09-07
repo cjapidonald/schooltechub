@@ -4,23 +4,20 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useLanguage } from "@/contexts/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { t } = useLanguage();
 
   const navItems = [
-    { name: t('nav.home'), path: "/" },
-    { name: t('nav.tools'), path: "/tools" },
-    { name: t('nav.services'), path: "/services" },
-    { name: t('nav.tutorials'), path: "/tutorials" },
-    { name: t('nav.blog'), path: "/blog" },
-    { name: t('nav.caseStudies'), path: "/case-studies" },
-    { name: t('nav.about'), path: "/about" },
-    { name: t('nav.contact'), path: "/contact" },
+    { name: "Home", path: "/" },
+    { name: "Tools", path: "/tools" },
+    { name: "Services", path: "/services" },
+    { name: "Tutorials", path: "/tutorials" },
+    { name: "Blog", path: "/blog" },
+    { name: "Case Studies", path: "/case-studies" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
   ];
 
   return (
@@ -49,9 +46,8 @@ const Navigation = () => {
               {item.name}
             </Link>
           ))}
-          <LanguageSwitcher />
           <Link to="/contact">
-            <Button className="ml-4">{t('nav.bookConsultation')}</Button>
+            <Button className="ml-4">Book Consultation</Button>
           </Link>
         </div>
 
@@ -80,12 +76,9 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              <div className="mt-4 flex items-center space-x-4">
-                <LanguageSwitcher />
-                <Link to="/contact" onClick={() => setIsOpen(false)} className="flex-1">
-                  <Button className="w-full">{t('nav.bookConsultation')}</Button>
-                </Link>
-              </div>
+              <Link to="/contact" onClick={() => setIsOpen(false)} className="mt-4">
+                <Button className="w-full">Book Consultation</Button>
+              </Link>
             </div>
           </SheetContent>
         </Sheet>
