@@ -361,92 +361,185 @@ export type Database = {
         }
         Relationships: []
       }
-      tutorial_tags: {
-        Row: {
-          tag_id: string
-          tutorial_id: string
-        }
-        Insert: {
-          tag_id: string
-          tutorial_id: string
-        }
-        Update: {
-          tag_id?: string
-          tutorial_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tutorial_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tutorial_tags_tutorial_id_fkey"
-            columns: ["tutorial_id"]
-            isOneToOne: false
-            referencedRelation: "tutorials"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       tutorials: {
         Row: {
+          author_avatar: string | null
+          author_name: string | null
+          category: string | null
+          created_at: string
+          description: string | null
+          difficulty_level: string | null
+          duration: string | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          language: string | null
+          learning_outcomes: string[] | null
+          likes_count: number | null
+          prerequisites: string[] | null
+          published_at: string | null
+          resources: Json | null
+          slug: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          transcript: string | null
+          updated_at: string
+          video_id: string | null
+          video_url: string
+          view_count: number | null
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_name?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          language?: string | null
+          learning_outcomes?: string[] | null
+          likes_count?: number | null
+          prerequisites?: string[] | null
+          published_at?: string | null
+          resources?: Json | null
+          slug: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          transcript?: string | null
+          updated_at?: string
+          video_id?: string | null
+          video_url: string
+          view_count?: number | null
+        }
+        Update: {
+          author_avatar?: string | null
+          author_name?: string | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          difficulty_level?: string | null
+          duration?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          language?: string | null
+          learning_outcomes?: string[] | null
+          likes_count?: number | null
+          prerequisites?: string[] | null
+          published_at?: string | null
+          resources?: Json | null
+          slug?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          transcript?: string | null
+          updated_at?: string
+          video_id?: string | null
+          video_url?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      use_cases: {
+        Row: {
+          category: string | null
           content: string
           created_at: string
           description: string | null
           difficulty_level: string | null
-          estimated_time: string | null
           featured_image_url: string | null
+          gallery_images: string[] | null
+          grade_level: string[] | null
           id: string
+          implementation_time: string | null
+          is_featured: boolean | null
           is_published: boolean | null
-          learning_outcomes: string[] | null
-          prerequisites: string[] | null
+          meta_description: string | null
+          meta_title: string | null
           published_at: string | null
-          school_stages: Database["public"]["Enums"]["school_stage"][] | null
+          required_tools: string[] | null
+          results: string | null
           slug: string
-          subjects: Database["public"]["Enums"]["subject"][] | null
+          student_count: string | null
+          subject_areas: string[] | null
+          success_metrics: string | null
+          tags: string[] | null
+          testimonial: string | null
+          testimonial_author: string | null
+          testimonial_school: string | null
+          tips: string[] | null
           title: string
           updated_at: string
+          variations: string[] | null
           video_url: string | null
         }
         Insert: {
+          category?: string | null
           content: string
           created_at?: string
           description?: string | null
           difficulty_level?: string | null
-          estimated_time?: string | null
           featured_image_url?: string | null
+          gallery_images?: string[] | null
+          grade_level?: string[] | null
           id?: string
+          implementation_time?: string | null
+          is_featured?: boolean | null
           is_published?: boolean | null
-          learning_outcomes?: string[] | null
-          prerequisites?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_at?: string | null
-          school_stages?: Database["public"]["Enums"]["school_stage"][] | null
+          required_tools?: string[] | null
+          results?: string | null
           slug: string
-          subjects?: Database["public"]["Enums"]["subject"][] | null
+          student_count?: string | null
+          subject_areas?: string[] | null
+          success_metrics?: string | null
+          tags?: string[] | null
+          testimonial?: string | null
+          testimonial_author?: string | null
+          testimonial_school?: string | null
+          tips?: string[] | null
           title: string
           updated_at?: string
+          variations?: string[] | null
           video_url?: string | null
         }
         Update: {
+          category?: string | null
           content?: string
           created_at?: string
           description?: string | null
           difficulty_level?: string | null
-          estimated_time?: string | null
           featured_image_url?: string | null
+          gallery_images?: string[] | null
+          grade_level?: string[] | null
           id?: string
+          implementation_time?: string | null
+          is_featured?: boolean | null
           is_published?: boolean | null
-          learning_outcomes?: string[] | null
-          prerequisites?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_at?: string | null
-          school_stages?: Database["public"]["Enums"]["school_stage"][] | null
+          required_tools?: string[] | null
+          results?: string | null
           slug?: string
-          subjects?: Database["public"]["Enums"]["subject"][] | null
+          student_count?: string | null
+          subject_areas?: string[] | null
+          success_metrics?: string | null
+          tags?: string[] | null
+          testimonial?: string | null
+          testimonial_author?: string | null
+          testimonial_school?: string | null
+          tips?: string[] | null
           title?: string
           updated_at?: string
+          variations?: string[] | null
           video_url?: string | null
         }
         Relationships: []
