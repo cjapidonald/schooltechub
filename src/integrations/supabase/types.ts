@@ -14,7 +14,308 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blog_posts: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          grade_band: string | null
+          id: string
+          is_published: boolean | null
+          primary_keyword: string | null
+          published_at: string | null
+          slug: string | null
+          takeaway: string | null
+          teaser: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          grade_band?: string | null
+          id?: string
+          is_published?: boolean | null
+          primary_keyword?: string | null
+          published_at?: string | null
+          slug?: string | null
+          takeaway?: string | null
+          teaser?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          grade_band?: string | null
+          id?: string
+          is_published?: boolean | null
+          primary_keyword?: string | null
+          published_at?: string | null
+          slug?: string | null
+          takeaway?: string | null
+          teaser?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          additional_notes: string | null
+          booking_type: string
+          created_at: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          preferred_date: string | null
+          preferred_time: string | null
+          school_name: string | null
+          status: string | null
+          topic: string | null
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          booking_type: string
+          created_at?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          preferred_date?: string | null
+          preferred_time?: string | null
+          school_name?: string | null
+          status?: string | null
+          topic?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          booking_type?: string
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          preferred_date?: string | null
+          preferred_time?: string | null
+          school_name?: string | null
+          status?: string | null
+          topic?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      case_studies: {
+        Row: {
+          challenge: string | null
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          results: string[] | null
+          school_name: string
+          solution: string | null
+          testimonial_id: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          challenge?: string | null
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          results?: string[] | null
+          school_name: string
+          solution?: string | null
+          testimonial_id?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          challenge?: string | null
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          results?: string[] | null
+          school_name?: string
+          solution?: string | null
+          testimonial_id?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_testimonial"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          subscribed_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          subscribed_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          subscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          author_name: string
+          author_role: string | null
+          created_at: string | null
+          id: string
+          is_featured: boolean | null
+          quote: string
+          school_name: string | null
+        }
+        Insert: {
+          author_name: string
+          author_role?: string | null
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          quote: string
+          school_name?: string | null
+        }
+        Update: {
+          author_name?: string
+          author_role?: string | null
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          quote?: string
+          school_name?: string | null
+        }
+        Relationships: []
+      }
+      tools_activities: {
+        Row: {
+          accessibility: string | null
+          activity_types: string[] | null
+          best_for: string | null
+          cost: string | null
+          created_at: string | null
+          description: string | null
+          devices: string[] | null
+          grade_bands: string[] | null
+          group_size: string | null
+          id: string
+          name: string
+          quick_start: Json | null
+          school_stages: string[] | null
+          setup_time: string | null
+          subjects: string[] | null
+          tutorial_url: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          accessibility?: string | null
+          activity_types?: string[] | null
+          best_for?: string | null
+          cost?: string | null
+          created_at?: string | null
+          description?: string | null
+          devices?: string[] | null
+          grade_bands?: string[] | null
+          group_size?: string | null
+          id?: string
+          name: string
+          quick_start?: Json | null
+          school_stages?: string[] | null
+          setup_time?: string | null
+          subjects?: string[] | null
+          tutorial_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          accessibility?: string | null
+          activity_types?: string[] | null
+          best_for?: string | null
+          cost?: string | null
+          created_at?: string | null
+          description?: string | null
+          devices?: string[] | null
+          grade_bands?: string[] | null
+          group_size?: string | null
+          id?: string
+          name?: string
+          quick_start?: Json | null
+          school_stages?: string[] | null
+          setup_time?: string | null
+          subjects?: string[] | null
+          tutorial_url?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      tutorials: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty_level: string | null
+          estimated_time: string | null
+          id: string
+          is_published: boolean | null
+          learning_outcomes: string[] | null
+          school_stages: string[] | null
+          title: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          estimated_time?: string | null
+          id?: string
+          is_published?: boolean | null
+          learning_outcomes?: string[] | null
+          school_stages?: string[] | null
+          title: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: string | null
+          estimated_time?: string | null
+          id?: string
+          is_published?: boolean | null
+          learning_outcomes?: string[] | null
+          school_stages?: string[] | null
+          title?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
