@@ -1,3 +1,4 @@
+import { useEffect, useState, useRef } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import MouseGlowEffect from "@/components/MouseGlowEffect";
@@ -18,7 +19,13 @@ import {
   Binary,
   Wifi,
   Monitor,
-  ChevronRight
+  ChevronRight,
+  Gamepad2,
+  Database,
+  UserCog,
+  GraduationCap,
+  FileCheck,
+  Layout
 } from "lucide-react";
 import heroImage from "@/assets/futuristic-classroom-hero.jpg";
 import aiCollabImage from "@/assets/ai-collaboration.jpg";
@@ -26,6 +33,48 @@ import holoTeachImage from "@/assets/holographic-teaching.jpg";
 
 const Index = () => {
   const { t } = useLanguage();
+  const [counters, setCounters] = useState({ lessons: 0, vr: 0, engagement: 0 });
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+            // Animate counters
+            const duration = 2000;
+            const steps = 60;
+            const interval = duration / steps;
+            let currentStep = 0;
+
+            const timer = setInterval(() => {
+              currentStep++;
+              const progress = currentStep / steps;
+              
+              setCounters({
+                lessons: Math.floor(10000 * progress),
+                vr: Math.floor(500 * progress),
+                engagement: Math.floor(98 * progress)
+              });
+
+              if (currentStep >= steps) {
+                clearInterval(timer);
+              }
+            }, interval);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated]);
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <MouseGlowEffect />
@@ -153,27 +202,45 @@ const Index = () => {
                 color: "accent"
               },
               {
-                icon: Binary,
-                title: t('features.quantum'),
-                description: t('features.quantumDesc'),
+                icon: Gamepad2,
+                title: t('features.gamification'),
+                description: t('features.gamificationDesc'),
                 color: "secondary"
               },
               {
-                icon: Shield,
-                title: t('features.blockchain'),
-                description: t('features.blockchainDesc'),
+                icon: Database,
+                title: t('features.dataDriven'),
+                description: t('features.dataDrivenDesc'),
                 color: "primary"
               },
               {
-                icon: Wifi,
-                title: t('features.iot'),
-                description: t('features.iotDesc'),
+                icon: Layout,
+                title: t('features.virtualClassroom'),
+                description: t('features.virtualClassroomDesc'),
                 color: "accent"
               },
               {
-                icon: Monitor,
-                title: t('features.holographic'),
-                description: t('features.holographicDesc'),
+                icon: BookOpen,
+                title: t('features.curriculumDev'),
+                description: t('features.curriculumDevDesc'),
+                color: "secondary"
+              },
+              {
+                icon: UserCog,
+                title: t('features.teacherManagement'),
+                description: t('features.teacherManagementDesc'),
+                color: "primary"
+              },
+              {
+                icon: GraduationCap,
+                title: t('features.studentTrackers'),
+                description: t('features.studentTrackersDesc'),
+                color: "accent"
+              },
+              {
+                icon: FileCheck,
+                title: t('features.autoGrading'),
+                description: t('features.autoGradingDesc'),
                 color: "secondary"
               }
             ].map((feature, index) => (
@@ -197,61 +264,15 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Tech Showcase */}
-      <section className="relative py-20 bg-gradient-to-b from-background via-card/30 to-background">
-        <div className="container">
-          <h2 className="text-4xl font-orbitron font-bold text-center mb-12 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            {t('features.experienceFuture')}
-          </h2>
-          
-          <div className="grid gap-8 lg:grid-cols-2">
-            <Card className="overflow-hidden border-primary/30 bg-card/50 backdrop-blur-sm">
-              <img 
-                src={aiCollabImage} 
-                alt="AI Collaboration" 
-                className="h-64 w-full object-cover opacity-80"
-              />
-              <div className="p-6">
-                <h3 className="text-2xl font-orbitron font-semibold mb-3">{t('features.aiCollabTitle')}</h3>
-                <p className="text-muted-foreground font-space mb-4">
-                  {t('features.aiCollabDesc')}
-                </p>
-                <Button variant="outline" className="group border-primary/30 hover:border-primary hover:bg-primary/10">
-                  {t('features.seeAction')}
-                  <Sparkles className="ml-2 h-4 w-4 group-hover:animate-pulse-glow" />
-                </Button>
-              </div>
-            </Card>
-            
-            <Card className="overflow-hidden border-accent/30 bg-card/50 backdrop-blur-sm">
-              <img 
-                src={holoTeachImage} 
-                alt="Holographic Teaching" 
-                className="h-64 w-full object-cover opacity-80"
-              />
-              <div className="p-6">
-                <h3 className="text-2xl font-orbitron font-semibold mb-3">{t('features.holoTitle')}</h3>
-                <p className="text-muted-foreground font-space mb-4">
-                  {t('features.holoDesc')}
-                </p>
-                <Button variant="outline" className="group border-accent/30 hover:border-accent hover:bg-accent/10">
-                  {t('features.exploreDemos')}
-                  <BookOpen className="ml-2 h-4 w-4 group-hover:animate-pulse-glow" />
-                </Button>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
 
-      {/* Stats Section */}
-      <section className="relative py-20">
+      {/* Stats Section with animated counters */}
+      <section className="relative py-20" ref={statsRef}>
         <div className="container">
           <div className="grid gap-8 md:grid-cols-4">
             {[
-              { value: "10K+", label: "AI-Powered Lessons", icon: Brain },
-              { value: "500+", label: "VR Experiences", icon: Globe },
-              { value: "98%", label: "Engagement Rate", icon: Zap },
+              { value: `${counters.lessons.toLocaleString()}+`, label: "AI-Powered Lessons", icon: Brain },
+              { value: `${counters.vr}+`, label: "VR Experiences", icon: Globe },
+              { value: `${counters.engagement}%`, label: "Engagement Rate", icon: Zap },
               { value: "24/7", label: "Support Available", icon: Shield }
             ].map((stat, index) => (
               <div key={index} className="text-center group">
@@ -272,14 +293,14 @@ const Index = () => {
           <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-12 text-center">
             <div className="absolute inset-0 bg-cyber-grid bg-[size:30px_30px] opacity-10" />
             <div className="relative z-10">
-              <h2 className="text-4xl font-orbitron font-bold mb-4">{t('cta.title')}</h2>
+              <h2 className="text-4xl font-orbitron font-bold mb-4">Ready to Transform Your School?</h2>
               <p className="text-xl text-muted-foreground font-space mb-8 max-w-2xl mx-auto">
-                {t('cta.subtitle')}
+                Join thousands of educators who are already using our platform to create better learning experiences.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/contact">
                   <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:shadow-[0_0_40px_hsl(var(--glow-primary)/0.5)]">
-                    {t('cta.button')}
+                    Get Started
                     <Rocket className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
