@@ -1,9 +1,45 @@
 import { Link } from "react-router-dom";
-import { GraduationCap, Mail, Twitter, Linkedin, Youtube } from "lucide-react";
+import { GraduationCap, Mail, Facebook, Instagram, Linkedin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubscribing(true);
+
+    try {
+      const { error } = await supabase.from("newsletter_subscribers").insert([
+        { email, is_active: true }
+      ]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "You've been subscribed to our monthly tech tips.",
+      });
+      setEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to subscribe. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   return (
     <footer className="bg-gradient-to-b from-background to-muted border-t">
       <div className="container py-12">
@@ -18,18 +54,18 @@ const Footer = () => {
               {t('footer.description')}
             </p>
             <div className="flex space-x-4">
-              <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://www.facebook.com/share/g/1NukWcXVpp/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href="https://www.instagram.com/schooltechhub/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a href="https://www.linkedin.com/in/donald-cjapi-b7800a383/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <Linkedin className="h-5 w-5" />
-              </Link>
-              <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Youtube className="h-5 w-5" />
-              </Link>
-              <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
+              </a>
+              <a href="mailto:dcjapi@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
                 <Mail className="h-5 w-5" />
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -39,7 +75,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link to="/tools" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Tools & Activities
+                  {t('tools.title')}
                 </Link>
               </li>
               <li>
@@ -62,7 +98,7 @@ const Footer = () => {
 
           {/* Services */}
           <div>
-            <h3 className="font-semibold mb-4">Services</h3>
+            <h3 className="font-semibold mb-4">{t('footer.services')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -71,12 +107,12 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Tech Audits
+                  Whole-Staff PD
                 </Link>
               </li>
               <li>
                 <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  PD Workshops
+                  Custom Dashboard Setup
                 </Link>
               </li>
               <li>
@@ -87,31 +123,34 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Newsletter */}
           <div>
-            <h3 className="font-semibold mb-4">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link to="/cookies" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Cookie Policy
-                </Link>
-              </li>
-            </ul>
+            <h3 className="font-semibold mb-4">{t('footer.monthlyTechTips')}</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t('footer.subscribeNewsletter')}
+            </p>
+            <form onSubmit={handleSubscribe} className="space-y-2">
+              <Input
+                type="email"
+                placeholder={t('footer.subscribePlaceholder')}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="text-sm"
+              />
+              <Button type="submit" className="w-full" disabled={isSubscribing}>
+                {isSubscribing ? "..." : t('footer.subscribeButton')}
+              </Button>
+            </form>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>{t('footer.copyright')}</p>
+        <div className="mt-12 pt-8 border-t text-center">
+          <p className="text-sm text-muted-foreground mb-2">{t('footer.copyright')}</p>
+          <div className="text-xs text-muted-foreground space-y-1">
+            <p>Email: dcjapi@gmail.com | Phone: +84 72725432</p>
+            <p>{t('contact.location')}: {t('contact.locationText')}</p>
+          </div>
         </div>
       </div>
     </footer>

@@ -6,13 +6,16 @@ import { CheckCircle, Clock, Users, Target, Calendar, Shield, CreditCard, FileTe
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Services = () => {
+  const { t } = useLanguage();
+  
   const services = [
     {
       id: "consultation",
-      title: "1-Hour 1:1 Coaching",
-      price: "$20/hour",
+      title: "1:1 Coaching",
+      price: "$30/session",
       duration: "60 minutes",
       description: "Get personalized support for your specific classroom tech challenges",
       features: [
@@ -25,34 +28,35 @@ const Services = () => {
       ideal: "Teachers who need quick, targeted solutions",
     },
     {
-      id: "audit",
-      title: "Mini Tech Audit",
-      price: "$150",
-      duration: "3 hours",
-      description: "Comprehensive review of your current tech setup with prioritized recommendations",
+      id: "whole-staff-pd",
+      title: "Whole-Staff PD Program",
+      price: "$60",
+      duration: "per session",
+      description: "Up to 30 staff members (larger groups possible with prior arrangement). Schools can choose any edtech topic most relevant to their needs.",
       features: [
-        "Full inventory of current tools",
-        "Gap analysis for your goals",
-        "Prioritized action roadmap",
-        "Budget-friendly recommendations",
-        "30-day implementation support",
+        "60-90 minutes of live, engaging professional development",
+        "Hands-on activities and demonstrations",
+        "Differentiated by staff experience level (beginners to advanced)",
+        "School receives a digital resource hub (guides, templates, links)",
+        "30-day follow-up Q&A session (online) for continued support",
       ],
-      ideal: "Schools planning tech initiatives",
+      ideal: "Schools wanting affordable, practical training to build staff confidence in technology",
     },
     {
-      id: "workshop",
-      title: "PD Workshop",
-      price: "$500",
-      duration: "90 minutes",
-      description: "Engaging professional development for your entire team",
+      id: "custom-dashboard",
+      title: "Custom School Dashboard & Tracker Setup",
+      price: "$300",
+      duration: "flat rate",
+      description: "Design and implement custom digital dashboards tailored to your school's needs",
       features: [
-        "Up to 30 participants",
-        "Hands-on activities",
-        "Differentiated by experience level",
-        "Resource packet for all attendees",
-        "30-day follow-up Q&A session",
+        "60-minute consultation to identify your priorities and current tools",
+        "Build centralized dashboards (Google Sheets, Airtable, Notion, or Supabase)",
+        "Student performance trackers (grades, attendance, behavior, SEL)",
+        "Teacher workflow dashboards & leadership dashboards",
+        "Ready-to-use templates and staff training",
+        "30-day implementation support (email or video check-ins)",
       ],
-      ideal: "Departments or grade-level teams",
+      ideal: "Schools that want to improve organization, communication, and data-driven decision making",
     },
   ];
 
@@ -90,9 +94,9 @@ const Services = () => {
       {/* Header */}
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Services & Pricing</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('services.title')}</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Practical, next-day classroom impact guaranteed
+            {t('services.subtitle')}
           </p>
         </div>
       </section>
@@ -137,7 +141,7 @@ const Services = () => {
                 </div>
 
                 <Link to="/contact">
-                  <Button className="w-full">Book Now</Button>
+                  <Button className="w-full">{t('services.bookNow')}</Button>
                 </Link>
               </Card>
             ))}
@@ -146,10 +150,9 @@ const Services = () => {
           {/* Guarantee */}
           <Card className="p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
             <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-4">Our Guarantee</h3>
+            <h3 className="text-2xl font-bold mb-4">{t('services.ourGuarantee')}</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Actionable next-day strategies or your fee refunded. We're that confident you'll leave 
-              with practical solutions you can implement immediately.
+              {t('services.guaranteeText')}
             </p>
           </Card>
         </div>
@@ -158,7 +161,7 @@ const Services = () => {
       {/* Booking Process */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">{t('services.howItWorks')}</h2>
           
           <Tabs defaultValue="before" className="max-w-3xl mx-auto">
             <TabsList className="grid w-full grid-cols-3">
@@ -250,7 +253,7 @@ const Services = () => {
       {/* FAQs */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">{t('services.faq')}</h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {faqs.map((faq, index) => (
               <Card key={index} className="p-6">
@@ -268,7 +271,7 @@ const Services = () => {
               </Button>
             </Link>
             <p className="text-sm text-muted-foreground mt-4">
-              Questions? Email us at support@schooltechhub.com
+              Questions? Email us at dcjapi@gmail.com
             </p>
           </div>
         </div>

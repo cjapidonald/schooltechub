@@ -1,15 +1,15 @@
 export const translations = {
   en: {
     nav: {
-      home: 'Home',
-      tools: 'Tools & Activities',
-      services: 'Services',
-      tutorials: 'Tutorials',
-      blog: 'Blog',
-      caseStudies: 'Case Studies',
-      about: 'About',
-      contact: 'Contact',
-      bookConsultation: 'Book Consultation'
+      home: "Home",
+      about: "About",
+      services: "Services",
+      tools: "Tools & Activities",
+      tutorials: "Tutorials",
+      blog: "Blog",
+      caseStudies: "Case Studies",
+      contact: "Contact",
+      bookConsultation: "Book Consultation"
     },
     hero: {
       title: 'Transform Your Classroom with',
@@ -82,325 +82,159 @@ export const translations = {
         role: 'Science Educator'
       }
     },
-    blog: {
-      title: 'Latest from Our Blog',
-      viewAll: 'View All Articles',
-      posts: {
-        ai: {
-          title: 'AI in Education: The Complete Guide',
-          excerpt: 'Discover how artificial intelligence is reshaping the educational landscape...'
-        },
-        vr: {
-          title: 'Virtual Reality: The New Classroom',
-          excerpt: 'Explore the possibilities of VR technology in modern education...'
-        },
-        data: {
-          title: 'Data-Driven Teaching Strategies',
-          excerpt: 'Learn how to leverage analytics to improve student outcomes...'
-        }
-      }
-    },
-    cta: {
-      title: 'Ready to Transform Your School?',
-      subtitle: 'Join thousands of educators already using our platform',
-      button: 'Get Started Today'
-    },
     footer: {
-      description: 'Empowering educators with AI-driven tools for the classroom of tomorrow.',
-      quickLinks: 'Quick Links',
-      resources: 'Resources',
-      followUs: 'Follow Us',
-      copyright: '© 2024 School Tech Hub. All rights reserved.',
-      legal: 'Legal',
-      privacyPolicy: 'Privacy Policy',
-      termsOfService: 'Terms of Service',
-      cookiePolicy: 'Cookie Policy'
+      description: "Empowering educators with innovative technology solutions for tomorrow's classrooms.",
+      copyright: "© 2025 School Tech Hub. All rights reserved.",
+      resources: "Resources",
+      services: "Services",
+      legal: "Legal",
+      privacyPolicy: "Privacy Policy",
+      termsOfService: "Terms of Service",
+      cookiePolicy: "Cookie Policy",
+      monthlyTechTips: "Monthly Tech Tips",
+      subscribeNewsletter: "Subscribe to our newsletter for monthly tech tips and updates",
+      subscribePlaceholder: "Enter your email",
+      subscribeButton: "Subscribe"
     },
     about: {
-      title: 'About School Tech Hub',
-      subtitle: 'From classroom teacher to tech trainer, helping educators embrace technology with confidence',
-      story: {
-        title: 'Our Story',
-        paragraph1: 'School Tech Hub was born from a simple observation: amazing teachers were struggling with technology not because they weren\'t capable, but because tech training wasn\'t designed for real classrooms.',
-        paragraph2: 'After 15 years in the classroom, I watched countless professional development sessions promise revolutionary changes, only to see teachers return to their rooms overwhelmed and unsupported. The gap between what tech could do and what teachers could realistically implement was enormous.',
-        paragraph3: 'That\'s when I made the shift from teaching to training, with one goal: bridge that gap. Every workshop, every consultation, every resource we create starts with one question: "Will this actually work when a teacher has 28 students, limited devices, and 5 minutes to set up?"',
-        paragraph4: 'Today, School Tech Hub supports thousands of teachers across the country, providing practical, tested strategies that respect both the power of technology and the reality of teaching. We\'re not here to add to your plate – we\'re here to help you use tech to make your plate more manageable.',
-        author: '– Sarah Thompson, Founder & Lead Trainer',
-        role: 'Former 5th Grade Teacher, Google Certified Trainer'
-      },
-      mission: {
-        title: 'Our Mission',
-        practical: {
-          title: 'Practical First',
-          description: 'Every strategy must work in real classrooms, not just in theory.'
-        },
-        teacherCentered: {
-          title: 'Teacher-Centered',
-          description: 'We understand the daily challenges and time constraints you face.'
-        },
-        continuous: {
-          title: 'Continuous Learning',
-          description: 'Technology evolves, and so do our methods and recommendations.'
-        }
-      },
-      stats: {
-        years: 'Years Teaching Experience',
-        workshops: 'Workshops Delivered',
-        teachers: 'Teachers Supported',
-        schools: 'Schools Partnered'
-      },
-      credentials: {
-        title: 'Credentials & Partnerships',
-        certifications: 'Certifications',
-        featured: 'Featured In',
-        partnerships: 'School Partnerships',
-        description: 'We\'re proud to work with schools nationwide to pilot new approaches and gather real-world feedback. Our partner schools help us ensure every strategy is classroom-tested and teacher-approved.',
-        partnerBtn: 'Partner With Us'
-      },
-      cta: {
-        title: 'Ready to Transform Your Teaching?',
-        description: 'Join thousands of teachers who\'ve discovered that technology doesn\'t have to be overwhelming.',
-        bookBtn: 'Book a Consultation',
-        browseBtn: 'Browse Free Resources'
-      }
+      title: "About School Tech Hub",
+      subtitle: "Empowering Educators with Technology",
+      story: "Our Story",
+      storyText: "We are located in Vietnam. After helping different schools locally, we are going international after 7 years of experience in testing different tools. Our research will make your school stand out.",
+      mission: "Our Mission",
+      missionText: "We believe that AI can facilitate teachers' work and help make better decisions through data-driven insights for students.",
+      ceoMessage: "Message from the CEO",
+      ceoMessageText: "I believe that AI and Technology can speed up students' progress, help us focus on weaknesses, and strengthen more the strong students. - Donald Cjapi",
+      vision: "Our Vision",
+      visionText: "To create a world where every educator feels confident using technology to enhance student learning and engagement.",
+      values: "Our Values",
+      innovation: "Innovation",
+      innovationText: "Constantly exploring new technologies and methods",
+      accessibility: "Accessibility",
+      accessibilityText: "Making tech solutions available to all educators",
+      support: "Support",
+      supportText: "Providing continuous guidance and assistance",
+      community: "Community",
+      communityText: "Building a network of tech-empowered educators"
     },
     services: {
-      title: 'Services & Pricing',
-      subtitle: 'Practical, next-day classroom impact guaranteed',
-      mostPopular: 'Most Popular',
-      bookNow: 'Book Now',
-      consultation: {
-        title: '1-Hour 1:1 Coaching',
-        price: '$20/hour',
-        duration: '60 minutes',
-        description: 'Get personalized support for your specific classroom tech challenges',
-        features: [
-          'Customized to your exact needs',
-          'Screen sharing for hands-on help',
-          'Action plan you can use tomorrow',
-          'Follow-up resources included',
-          'Recording available for review'
-        ],
-        ideal: 'Teachers who need quick, targeted solutions'
-      },
-      audit: {
-        title: 'Mini Tech Audit',
-        price: '$150',
-        duration: '3 hours',
-        description: 'Comprehensive review of your current tech setup with prioritized recommendations',
-        features: [
-          'Full inventory of current tools',
-          'Gap analysis for your goals',
-          'Prioritized action roadmap',
-          'Budget-friendly recommendations',
-          '30-day implementation support'
-        ],
-        ideal: 'Schools planning tech initiatives'
-      },
-      workshop: {
-        title: 'PD Workshop',
-        price: '$500',
-        duration: '90 minutes',
-        description: 'Engaging professional development for your entire team',
-        features: [
-          'Up to 30 participants',
-          'Hands-on activities',
-          'Differentiated by experience level',
-          'Resource packet for all attendees',
-          '30-day follow-up Q&A session'
-        ],
-        ideal: 'Departments or grade-level teams'
-      },
-      guarantee: {
-        title: 'Our Guarantee',
-        description: 'Actionable next-day strategies or your fee refunded. We\'re that confident you\'ll leave with practical solutions you can implement immediately.'
-      },
-      howItWorks: 'How It Works',
-      before: 'Before',
-      during: 'During',
-      after: 'After',
-      prepare: {
-        title: 'What to Prepare',
-        challenge: 'Your biggest challenge',
-        challengeDesc: 'What\'s the #1 thing you want to solve?',
-        context: 'Your classroom context',
-        contextDesc: 'Grade level, subject, class size',
-        tech: 'Available technology',
-        techDesc: 'What devices and tools you can access'
-      },
-      session: {
-        title: 'Your Session',
-        steps: [
-          'Quick assessment of your current setup',
-          'Hands-on demonstration of solutions',
-          'Practice with immediate feedback',
-          'Q&A for your specific situation'
-        ]
-      },
-      followUp: {
-        title: 'Follow-Up Support',
-        steps: [
-          'Written summary of strategies discussed',
-          'Links to all resources mentioned',
-          'Recording available for 30 days (if applicable)',
-          'Email support for clarifications'
-        ]
-      },
-      faq: {
-        title: 'Frequently Asked Questions',
-        questions: [
-          {
-            q: 'What devices do I need?',
-            a: 'Any device with internet access works! We\'ll adapt to whatever you have - Chromebooks, iPads, laptops, or even smartphones.'
-          },
-          {
-            q: 'What about school filters and restrictions?',
-            a: 'We specialize in working within school constraints. We\'ll find solutions that work with your existing security settings.'
-          },
-          {
-            q: 'How do you handle student privacy?',
-            a: 'All recommendations are COPPA and FERPA compliant. We prioritize tools with strong privacy policies and minimal data collection.'
-          },
-          {
-            q: 'Can you help with LMS integration?',
-            a: 'Yes! We work with Google Classroom, Canvas, Schoology, and most major learning management systems.'
-          },
-          {
-            q: 'Do you provide receipts for reimbursement?',
-            a: 'Absolutely. You\'ll receive detailed invoices suitable for school reimbursement or professional development funds.'
-          },
-          {
-            q: 'What can I expect after one session?',
-            a: 'You\'ll leave with at least 3 implementable strategies, relevant resources, and confidence to try something new immediately.'
-          }
-        ],
-        bookBtn: 'Book Your Session Today',
-        emailText: 'Questions? Email us at support@schooltechhub.com'
-      }
-    },
-    tools: {
-      title: 'Tools & Activities Directory',
-      subtitle: 'Discover classroom-ready tech tools and activities that actually work',
-      search: 'Search tools and activities...',
-      filterBtn: 'Filters',
-      showing: 'Showing',
-      of: 'of',
-      toolsText: 'tools',
-      compare: 'Compare',
-      noResults: 'No tools found matching your criteria. Try adjusting your filters.',
-      bestFor: 'Best for:',
-      tryIt: 'Try it',
-      lessonIdea: 'Lesson idea',
-      filterCategories: {
-        schoolStages: 'School Stages',
-        subjects: 'Subjects',
-        cost: 'Cost',
-        groupSizes: 'Group Sizes'
-      }
-    },
-    tutorials: {
-      title: 'Video Tutorials',
-      subtitle: 'Step-by-step guides to master classroom technology',
-      search: 'Search tutorials...',
-      allLevels: 'All Levels',
-      beginner: 'Beginner',
-      intermediate: 'Intermediate',
-      advanced: 'Advanced',
-      showing: 'Showing',
-      tutorials: 'tutorials',
-      youllLearn: 'You\'ll learn:',
-      watchTutorial: 'Watch Tutorial',
-      noResults: 'No tutorials found. Try adjusting your search or filters.',
-      cta: {
-        title: 'Need Personalized Help?',
-        description: 'Get 1-on-1 support tailored to your specific classroom needs. Book a consultation and solve your tech challenges today.',
-        button: 'Book 1:1 Coaching Session'
-      }
-    },
-    blogPage: {
-      title: 'Teacher Tech Blog',
-      subtitle: 'Practical strategies, tool reviews, and classroom success stories',
-      search: 'Search articles...',
-      keyTakeaway: 'Key Takeaway:',
-      readMore: 'Read More',
-      noResults: 'No articles found. Try adjusting your search.',
-      newsletter: {
-        title: 'Weekly Tech Tips',
-        description: 'Get classroom-ready tech strategies delivered to your inbox every Monday.',
-        button: 'Subscribe Free'
-      },
-      popularTopics: 'Popular Topics',
-      quickResources: 'Quick Resources',
-      browseTools: '→ Browse Tool Directory',
-      videoTutorials: '→ Video Tutorials',
-      coaching: '→ Book 1:1 Coaching'
-    },
-    caseStudies: {
-      title: 'Case Studies',
-      subtitle: 'Real schools, real challenges, real results. See how educators like you transformed their classrooms.',
-      stats: {
-        schools: 'Schools Transformed',
-        engagement: 'Avg. Engagement Increase',
-        timeSaved: 'Weekly Time Saved',
-        satisfaction: 'Teacher Satisfaction'
-      },
-      challenge: 'Challenge',
-      solution: 'Solution',
-      results: 'Results',
-      readFullStory: 'Read Full Story',
-      cta: {
-        title: 'Ready to Write Your Success Story?',
-        description: 'Every transformation starts with a single step. Let\'s discuss how we can help your school achieve similar results.',
-        bookBtn: 'Book a Consultation',
-        partnerBtn: 'Partner With Us'
-      }
+      title: "Services & Pricing",
+      subtitle: "Tailored solutions for your educational technology needs",
+      oneOnOne: "1:1 Coaching",
+      oneOnOneDesc: "Personalized guidance for educators",
+      oneOnOnePrice: "$30/session",
+      wholeStaffPD: "Whole-Staff PD Program",
+      wholeStaffPDDesc: "Engaging professional development for up to 30 staff members",
+      wholeStaffPDPrice: "$60/session",
+      customDashboard: "Custom School Dashboard & Tracker Setup",
+      customDashboardDesc: "Design and implement custom digital dashboards tailored to your school's needs",
+      customDashboardPrice: "$300 flat rate",
+      bookNow: "Book Now",
+      learnMore: "Learn More",
+      getStarted: "Get Started",
+      ourGuarantee: "Our Guarantee",
+      guaranteeText: "With us, you will uplift your school's technology use. Students will have better performance with our practical solutions.",
+      howItWorks: "How It Works",
+      bookSession: "Book a Session",
+      bookSessionDesc: "Choose your service and schedule a convenient time",
+      consultation: "Consultation",
+      consultationDesc: "We'll discuss your needs and create a tailored plan",
+      implementation: "Implementation",
+      implementationDesc: "Receive expert guidance and support throughout",
+      followUp: "Follow-up",
+      followUpDesc: "Ongoing support to ensure lasting success",
+      faq: "Frequently Asked Questions"
     },
     contact: {
-      title: 'Get in Touch',
-      subtitle: 'Ready to transform your classroom with technology? Let\'s start the conversation.',
-      quickContact: 'Quick Contact',
-      email: 'Email',
-      phone: 'Phone',
-      location: 'Location',
-      locationValue: 'Serving schools nationwide (US)',
-      officeHours: 'Office Hours',
-      hours: {
-        weekdays: 'Monday - Friday: 8am - 6pm EST',
-        saturday: 'Saturday: 10am - 2pm EST',
-        sunday: 'Sunday: Closed'
-      },
-      responseTime: 'Response Time',
-      responseDesc: 'We typically respond within 24 hours during business days. Urgent requests are prioritized.',
-      bookSession: 'Book a Session',
-      form: {
-        fullName: 'Full Name *',
-        email: 'Email Address *',
-        phone: 'Phone Number',
-        school: 'School/Organization',
-        serviceType: 'Service Type *',
-        preferredDate: 'Preferred Date',
-        preferredTime: 'Preferred Time',
-        topic: 'Topic/Challenge to Address',
-        topicPlaceholder: 'e.g., Implementing AI tools, Google Classroom setup',
-        message: 'Additional Information',
-        messagePlaceholder: 'Tell us more about your goals and any specific requirements...',
-        submit: 'Send Booking Request',
-        submitting: 'Sending...',
-        terms: 'By submitting this form, you agree to our terms of service and privacy policy. We\'ll never share your information with third parties.'
+      title: "Contact Us",
+      subtitle: "We'd love to hear from you",
+      quickContact: "Quick Contact",
+      getInTouch: "Get in Touch",
+      name: "Name",
+      email: "Email",
+      phone: "Phone (optional)",
+      subject: "Subject",
+      message: "Message",
+      sendMessage: "Send Message",
+      sending: "Sending...",
+      successMessage: "Thank you for your message! We'll get back to you soon.",
+      errorMessage: "Something went wrong. Please try again.",
+      bookSession: "Book a Session",
+      responseTime: "Response Time",
+      responseTimeText: "We typically respond within 24-48 hours",
+      availability: "Availability",
+      availabilityText: "Monday - Friday, 9:00 AM - 5:00 PM EST",
+      emergencySupport: "Emergency Support",
+      emergencySupportText: "For urgent matters, use our priority support channel",
+      privacyNote: "By submitting this form, you agree to our terms of service and privacy policy. We'll never share your information with third parties.",
+      location: "Location",
+      locationText: "Hanoi, Vietnam"
+    },
+    tools: {
+      title: "Tools & Activities Directory",
+      subtitle: "Discover the best educational technology tools",
+      filterBy: "Filter by",
+      allCategories: "All Categories",
+      collaboration: "Collaboration",
+      assessment: "Assessment",
+      creativity: "Creativity",
+      searchPlaceholder: "Search tools...",
+      free: "Free",
+      freemium: "Freemium",
+      paid: "Paid",
+      viewDetails: "View Details",
+      tryNow: "Try Now",
+      bestFor: "Best for"
+    },
+    tutorials: {
+      title: "Video Tutorials",
+      subtitle: "Step-by-step guides to master classroom technology",
+      search: "Search tutorials...",
+      allLevels: "All Levels",
+      beginner: "Beginner",
+      intermediate: "Intermediate",
+      advanced: "Advanced",
+      showing: "Showing",
+      tutorials: "tutorials",
+      youllLearn: "You'll learn:",
+      watchTutorial: "Watch Tutorial",
+      noResults: "No tutorials found. Try adjusting your search or filters.",
+      cta: {
+        title: "Need Personalized Help?",
+        description: "Get 1-on-1 support tailored to your specific classroom needs. Book a consultation and solve your tech challenges today.",
+        button: "Book 1:1 Coaching Session"
+      }
+    },
+    blog: {
+      title: "Latest from Our Blog",
+      viewAll: "View All Articles",
+      posts: {
+        ai: {
+          title: "AI in Education: The Complete Guide",
+          excerpt: "Discover how artificial intelligence is reshaping the educational landscape..."
+        },
+        vr: {
+          title: "Virtual Reality: The New Classroom",
+          excerpt: "Explore the possibilities of VR technology in modern education..."
+        },
+        data: {
+          title: "Data-Driven Teaching Strategies",
+          excerpt: "Learn how to leverage analytics to improve student outcomes..."
+        }
       }
     }
   },
   sq: {
     nav: {
-      home: 'Ballina',
-      tools: 'Mjetet & Aktivitetet',
-      services: 'Shërbimet',
-      tutorials: 'Tutoriale',
-      blog: 'Blog',
-      caseStudies: 'Raste Studimi',
-      about: 'Rreth Nesh',
-      contact: 'Kontakt',
-      bookConsultation: 'Rezervo Konsultim'
+      home: "Ballina",
+      about: "Rreth Nesh",
+      services: "Shërbime",
+      tools: "Mjete & Aktivitete",
+      tutorials: "Tutoriale",
+      blog: "Blog",
+      caseStudies: "Raste Studimi",
+      contact: "Kontakt",
+      bookConsultation: "Rezervo Konsultim"
     },
     hero: {
       title: 'Transformoni Klasën Tuaj me',
@@ -420,21 +254,21 @@ export const translations = {
       holoDesc: 'Jepuni jetë koncepteve abstrakte me projeksione holografike 3D. Nga strukturat molekulare te ngjarjet historike, bëjeni të mësuarit të prekshëm.',
       seeAction: 'Shikojeni në veprim',
       exploreDemos: 'Eksploroni demonstrimet',
-      aiTeaching: 'Asistent Mësimi AI',
+      aiTeaching: 'Asistent Mësimdhënie AI',
       aiTeachingDesc: 'Mbështetje e personalizuar e të mësuarit 24/7 me përpunim të avancuar të gjuhës natyrore',
-      vrLabs: 'Laboratorë me Realitet Virtual',
-      vrLabsDesc: 'Mjedise 3D të angazhuese për përvoja praktike të të mësuarit',
-      quantum: 'Llogaritja Kuantike',
-      quantumDesc: 'Prezantoni studentët me të ardhmen e të menduarit llogaritës',
+      vrLabs: 'Laboratorë të Realitetit Virtual',
+      vrLabsDesc: 'Mjedise 3D zhytëse për përvoja të të mësuarit praktik',
+      quantum: 'Kompjuterizim Kuantik',
+      quantumDesc: 'Prezantoni studentët me të ardhmen e të menduarit kompjuterik',
       blockchain: 'Kredenciale Blockchain',
       blockchainDesc: 'Certifikata dhe arritje dixhitale të sigurta dhe të verifikueshme',
-      iot: 'Integrimi IoT',
-      iotDesc: 'Pajisje të lidhura në klasë për bashkëpunim të përsosur',
+      iot: 'Integrim IoT',
+      iotDesc: 'Pajisje të lidhura në klasë për bashkëpunim të papenguar',
       holographic: 'Ekrane Holografike',
       holographicDesc: 'Projeksione 3D për mësime dhe prezantime interaktive',
       learnMore: 'Mëso më shumë',
       aiPowered: 'Mësim i Fuqizuar me AI',
-      vrClassrooms: 'Klasa me Realitet Virtual',
+      vrClassrooms: 'Klasa të Realitetit Virtual',
       realTime: 'Analitika në Kohë Reale',
       welcomeFuture: 'Mirësevini në të Ardhmen e Arsimit',
       viewPricing: 'Shiko Planet e Çmimeve',
@@ -443,8 +277,8 @@ export const translations = {
         description: 'Rrugë arsimore të personalizuara që përshtaten me stilin dhe ritmin unik të të mësuarit të çdo studenti'
       },
       vr: {
-        title: 'Klasa me Realitet Virtual',
-        description: 'Mjedise 3D të angazhuese që e bëjnë të mësuarit tërheqës dhe të paharrueshëm'
+        title: 'Klasa të Realitetit Virtual',
+        description: 'Mjedise 3D zhytëse që e bëjnë të mësuarit angazhues dhe të paharrueshëm'
       },
       analytics: {
         title: 'Analitika e Avancuar',
@@ -458,7 +292,7 @@ export const translations = {
     testimonials: {
       title: 'Edukatorët e Duan Platformën Tonë',
       sarah: {
-        text: 'Kjo platformë ka revolucionarizuar mënyrën si jap mësim. Studentët e mi janë më të angazhuar se kurrë!',
+        text: 'Kjo platformë ka revolucionarizuar mënyrën se si jap mësim. Studentët e mi janë më të angazhuar se kurrë!',
         name: 'Sarah Johnson',
         role: 'Mësuese e Shkollës së Mesme'
       },
@@ -468,316 +302,150 @@ export const translations = {
         role: 'Drejtor i Shkollës Fillore'
       },
       emily: {
-        text: 'Ekskursionet virtuale dhe simulimet interaktive i kanë dhënë jetë klasave të mia të shkencës!',
+        text: 'Udhëtimet virtuale dhe simulimet interaktive i kanë dhënë jetë klasave të mia të shkencës!',
         name: 'Emily Rodriguez',
         role: 'Edukatore e Shkencës'
       }
     },
-    blog: {
-      title: 'Të Fundit nga Blogu Ynë',
-      viewAll: 'Shiko të Gjithë Artikujt',
-      posts: {
-        ai: {
-          title: 'AI në Arsim: Guida e Plotë',
-          excerpt: 'Zbuloni se si inteligjenca artificiale po riformëson peizazhin arsimor...'
-        },
-        vr: {
-          title: 'Realiteti Virtual: Klasa e Re',
-          excerpt: 'Eksploroni mundësitë e teknologjisë VR në arsimin modern...'
-        },
-        data: {
-          title: 'Strategji Mësimdhënieje të Bazuara në të Dhëna',
-          excerpt: 'Mësoni si të përdorni analitikën për të përmirësuar rezultatet e studentëve...'
-        }
-      }
-    },
-    cta: {
-      title: 'Gati për të Transformuar Shkollën Tuaj?',
-      subtitle: 'Bashkohuni me mijëra edukatorë që tashmë përdorin platformën tonë',
-      button: 'Filloni Sot'
-    },
     footer: {
-      description: 'Fuqizimi i edukatorëve me mjete të drejtuara nga AI për klasën e së nesërmes.',
-      quickLinks: 'Lidhje të Shpejta',
-      resources: 'Burime',
-      followUs: 'Na Ndiqni',
-      copyright: '© 2024 School Tech Hub. Të gjitha të drejtat e rezervuara.',
-      legal: 'Ligjore',
-      privacyPolicy: 'Politika e Privatësisë',
-      termsOfService: 'Kushtet e Shërbimit',
-      cookiePolicy: 'Politika e Cookies'
+      description: "Fuqizojmë edukatorët me zgjidhje teknologjike inovative për klasat e së ardhmes.",
+      copyright: "© 2025 School Tech Hub. Të gjitha të drejtat e rezervuara.",
+      resources: "Burime",
+      services: "Shërbime",
+      legal: "Ligjore",
+      privacyPolicy: "Politika e Privatësisë",
+      termsOfService: "Kushtet e Shërbimit",
+      cookiePolicy: "Politika e Cookie-ve",
+      monthlyTechTips: "Këshilla Mujore Teknologjike",
+      subscribeNewsletter: "Abonohu në buletinin tonë për këshilla dhe përditësime mujore teknologjike",
+      subscribePlaceholder: "Vendos email-in tënd",
+      subscribeButton: "Abonohu"
     },
     about: {
-      title: 'Rreth School Tech Hub',
-      subtitle: 'Nga mësues në klasë në trajner teknologjie, duke ndihmuar edukatorët të përqafojnë teknologjinë me besim',
-      story: {
-        title: 'Historia Jonë',
-        paragraph1: 'School Tech Hub lindi nga një vëzhgim i thjeshtë: mësuesit e mrekullueshëm po hasnin vështirësi me teknologjinë jo sepse nuk ishin të aftë, por sepse trajnimi teknologjik nuk ishte projektuar për klasat reale.',
-        paragraph2: 'Pas 15 vitesh në klasë, pashë sesione të panumërta zhvillimi profesional që premtonin ndryshime revolucionare, vetëm për të parë mësuesit të ktheheshin në klasat e tyre të mbingarkuar dhe të pambështetur. Hendeku midis asaj që teknologjia mund të bënte dhe asaj që mësuesit mund të zbatonin realisht ishte i madh.',
-        paragraph3: 'Atëherë bëra kalimin nga mësimdhënia në trajnim, me një qëllim: të mbyllim atë hendek. Çdo punëtori, çdo konsultim, çdo burim që krijojmë fillon me një pyetje: "A do të funksionojë kjo vërtet kur një mësues ka 28 studentë, pajisje të kufizuara dhe 5 minuta për t\'u përgatitur?"',
-        paragraph4: 'Sot, School Tech Hub mbështet mijëra mësues në të gjithë vendin, duke ofruar strategji praktike dhe të testuara që respektojnë si fuqinë e teknologjisë ashtu edhe realitetin e mësimdhënies. Ne nuk jemi këtu për t\'ju shtuar punë – jemi këtu për t\'ju ndihmuar të përdorni teknologjinë për ta bërë punën tuaj më të menaxhueshme.',
-        author: '– Sarah Thompson, Themeluese & Trajnere Kryesore',
-        role: 'Ish-Mësuese e Klasës së 5-të, Trajnere e Certifikuar nga Google'
-      },
-      mission: {
-        title: 'Misioni Ynë',
-        practical: {
-          title: 'Praktike Së Pari',
-          description: 'Çdo strategji duhet të funksionojë në klasa reale, jo vetëm në teori.'
-        },
-        teacherCentered: {
-          title: 'E Fokusuar te Mësuesi',
-          description: 'Ne kuptojmë sfidat e përditshme dhe kufizimet kohore që hasni.'
-        },
-        continuous: {
-          title: 'Mësim i Vazhdueshëm',
-          description: 'Teknologjia evoluon, dhe kështu edhe metodat dhe rekomandimet tona.'
-        }
-      },
-      stats: {
-        years: 'Vite Përvojë Mësimdhënieje',
-        workshops: 'Punëtori të Realizuara',
-        teachers: 'Mësues të Mbështetur',
-        schools: 'Shkolla Partnere'
-      },
-      credentials: {
-        title: 'Kredenciale & Partneritete',
-        certifications: 'Certifikimet',
-        featured: 'Prezantuar në',
-        partnerships: 'Partneritete Shkollore',
-        description: 'Jemi krenarë që punojmë me shkolla në të gjithë vendin për të pilotuar qasje të reja dhe për të mbledhur komente nga bota reale. Shkollat tona partnere na ndihmojnë të sigurojmë që çdo strategji është testuar në klasë dhe miratuar nga mësuesit.',
-        partnerBtn: 'Bëhuni Partner'
-      },
-      cta: {
-        title: 'Gati për të Transformuar Mësimdhënien Tuaj?',
-        description: 'Bashkohuni me mijëra mësues që kanë zbuluar se teknologjia nuk duhet të jetë mbingarkuese.',
-        bookBtn: 'Rezervoni një Konsultim',
-        browseBtn: 'Shfletoni Burimet Falas'
-      }
+      title: "Rreth School Tech Hub",
+      subtitle: "Fuqizojmë Edukatorët me Teknologji",
+      story: "Historia Jonë",
+      storyText: "Ne jemi të vendosur në Vietnam. Pas ndihmës së shkollave të ndryshme lokale, ne po dalim ndërkombëtarisht pas 7 vitesh përvojë në testimin e mjeteve të ndryshme. Kërkimi ynë do të bëjë që shkolla juaj të dallohet.",
+      mission: "Misioni Ynë",
+      missionText: "Ne besojmë se AI mund të lehtësojë punën e mësuesve dhe të ndihmojë në marrjen e vendimeve më të mira përmes të dhënave për studentët.",
+      ceoMessage: "Mesazh nga CEO",
+      ceoMessageText: "Unë besoj se AI dhe Teknologjia mund të përshpejtojnë progresin e studentëve, të na ndihmojnë të fokusohemi në dobësitë dhe të forcojmë më shumë studentët e fortë. - Donald Cjapi",
+      vision: "Vizioni Ynë",
+      visionText: "Të krijojmë një botë ku çdo edukator ndjehet i sigurt duke përdorur teknologjinë për të përmirësuar të mësuarit dhe angazhimin e studentëve.",
+      values: "Vlerat Tona",
+      innovation: "Inovacion",
+      innovationText: "Eksplorim i vazhdueshëm i teknologjive dhe metodave të reja",
+      accessibility: "Aksesueshmëri",
+      accessibilityText: "Duke i bërë zgjidhjet teknologjike të disponueshme për të gjithë edukatorët",
+      support: "Mbështetje",
+      supportText: "Ofrimi i udhëzimit dhe ndihmës së vazhdueshme",
+      community: "Komuniteti",
+      communityText: "Ndërtimi i një rrjeti edukatorësh të fuqizuar me teknologji"
     },
     services: {
-      title: 'Shërbimet & Çmimet',
-      subtitle: 'Ndikim praktik në klasë të nesërmen i garantuar',
-      mostPopular: 'Më i Popullarit',
-      bookNow: 'Rezervo Tani',
-      consultation: {
-        title: 'Konsultim 1:1 për 1 Orë',
-        price: '$20/orë',
-        duration: '60 minuta',
-        description: 'Merrni mbështetje të personalizuar për sfidat tuaja specifike teknologjike në klasë',
-        features: [
-          'Personalizuar për nevojat tuaja të sakta',
-          'Ndarja e ekranit për ndihmë praktike',
-          'Plan veprimi që mund ta përdorni nesër',
-          'Burime përcjellëse të përfshira',
-          'Regjistrim i disponueshëm për rishikim'
-        ],
-        ideal: 'Mësues që kanë nevojë për zgjidhje të shpejta dhe të targetuara'
-      },
-      audit: {
-        title: 'Mini Auditim Teknologjik',
-        price: '$150',
-        duration: '3 orë',
-        description: 'Rishikim gjithëpërfshirës i konfigurimit tuaj aktual teknologjik me rekomandime të prioritizuara',
-        features: [
-          'Inventar i plotë i mjeteve aktuale',
-          'Analizë e hendekut për qëllimet tuaja',
-          'Hartë rruge veprimi e prioritizuar',
-          'Rekomandime miqësore ndaj buxhetit',
-          'Mbështetje 30-ditore për zbatim'
-        ],
-        ideal: 'Shkolla që planifikojnë iniciativa teknologjike'
-      },
-      workshop: {
-        title: 'Punëtori Zhvillimi Profesional',
-        price: '$500',
-        duration: '90 minuta',
-        description: 'Zhvillim profesional angazhues për të gjithë ekipin tuaj',
-        features: [
-          'Deri në 30 pjesëmarrës',
-          'Aktivitete praktike',
-          'E diferencuar sipas nivelit të përvojës',
-          'Paketë burimesh për të gjithë pjesëmarrësit',
-          'Sesion pyetje-përgjigje 30-ditor'
-        ],
-        ideal: 'Departamente ose ekipe të nivelit të klasës'
-      },
-      guarantee: {
-        title: 'Garancia Jonë',
-        description: 'Strategji të zbatueshme të nesërmen ose tarifa juaj e rimbursuar. Jemi aq të sigurt që do të largoheni me zgjidhje praktike që mund t\'i zbatoni menjëherë.'
-      },
-      howItWorks: 'Si Funksionon',
-      before: 'Para',
-      during: 'Gjatë',
-      after: 'Pas',
-      prepare: {
-        title: 'Çfarë të Përgatisni',
-        challenge: 'Sfida juaj më e madhe',
-        challengeDesc: 'Cila është gjëja #1 që dëshironi të zgjidhni?',
-        context: 'Konteksti i klasës tuaj',
-        contextDesc: 'Niveli i klasës, lënda, madhësia e klasës',
-        tech: 'Teknologjia e disponueshme',
-        techDesc: 'Cilat pajisje dhe mjete mund të aksesoni'
-      },
-      session: {
-        title: 'Sesioni Juaj',
-        steps: [
-          'Vlerësim i shpejtë i konfigurimit tuaj aktual',
-          'Demonstrim praktik i zgjidhjeve',
-          'Praktikë me reagime të menjëhershme',
-          'Pyetje & Përgjigje për situatën tuaj specifike'
-        ]
-      },
-      followUp: {
-        title: 'Mbështetje Përcjellëse',
-        steps: [
-          'Përmbledhje e shkruar e strategjive të diskutuara',
-          'Lidhje me të gjitha burimet e përmendura',
-          'Regjistrimi i disponueshëm për 30 ditë (nëse aplikohet)',
-          'Mbështetje me email për sqarime'
-        ]
-      },
-      faq: {
-        title: 'Pyetjet e Bëra Shpesh',
-        questions: [
-          {
-            q: 'Çfarë pajisjesh kam nevojë?',
-            a: 'Çdo pajisje me akses në internet funksionon! Do të përshtatemi me çfarëdo që keni - Chromebooks, iPads, laptopë, ose edhe smartphone.'
-          },
-          {
-            q: 'Po për sa i përket filtrave dhe kufizimeve shkollore?',
-            a: 'Ne specializohemi në punën brenda kufizimeve shkollore. Do të gjejmë zgjidhje që funksionojnë me cilësimet tuaja ekzistuese të sigurisë.'
-          },
-          {
-            q: 'Si e trajtoni privatësinë e studentëve?',
-            a: 'Të gjitha rekomandimet janë në përputhje me COPPA dhe FERPA. Ne i japim përparësi mjeteve me politika të forta privatësie dhe mbledhje minimale të të dhënave.'
-          },
-          {
-            q: 'A mund të ndihmoni me integrimin e LMS?',
-            a: 'Po! Ne punojmë me Google Classroom, Canvas, Schoology dhe shumicën e sistemeve kryesore të menaxhimit të të mësuarit.'
-          },
-          {
-            q: 'A ofroni fatura për rimbursim?',
-            a: 'Absolutisht. Do të merrni fatura të detajuara të përshtatshme për rimbursim shkollor ose fonde zhvillimi profesional.'
-          },
-          {
-            q: 'Çfarë mund të pres pas një sesioni?',
-            a: 'Do të largoheni me të paktën 3 strategji të zbatueshme, burime relevante dhe besim për të provuar diçka të re menjëherë.'
-          }
-        ],
-        bookBtn: 'Rezervoni Sesionin Tuaj Sot',
-        emailText: 'Pyetje? Na emailoni në support@schooltechhub.com'
-      }
-    },
-    tools: {
-      title: 'Direktoria e Mjeteve & Aktiviteteve',
-      subtitle: 'Zbuloni mjete dhe aktivitete teknologjike të gatshme për klasë që funksionojnë vërtet',
-      search: 'Kërkoni mjete dhe aktivitete...',
-      filterBtn: 'Filtra',
-      showing: 'Duke treguar',
-      of: 'nga',
-      toolsText: 'mjete',
-      compare: 'Krahaso',
-      noResults: 'Nuk u gjetën mjete që përputhen me kriteret tuaja. Provoni të rregulloni filtrat.',
-      bestFor: 'Më e mirë për:',
-      tryIt: 'Provoje',
-      lessonIdea: 'Ide mësimi',
-      filterCategories: {
-        schoolStages: 'Fazat Shkollore',
-        subjects: 'Lëndët',
-        cost: 'Kosto',
-        groupSizes: 'Madhësitë e Grupeve'
-      }
-    },
-    tutorials: {
-      title: 'Video Tutoriale',
-      subtitle: 'Udhëzime hap-pas-hapi për të zotëruar teknologjinë në klasë',
-      search: 'Kërkoni tutoriale...',
-      allLevels: 'Të Gjitha Nivelet',
-      beginner: 'Fillestar',
-      intermediate: 'I Ndërmjetëm',
-      advanced: 'I Avancuar',
-      showing: 'Duke treguar',
-      tutorials: 'tutoriale',
-      youllLearn: 'Do të mësoni:',
-      watchTutorial: 'Shiko Tutorialin',
-      noResults: 'Nuk u gjetën tutoriale. Provoni të rregulloni kërkimin ose filtrat.',
-      cta: {
-        title: 'Keni Nevojë për Ndihmë të Personalizuar?',
-        description: 'Merrni mbështetje 1-me-1 të përshtatur për nevojat tuaja specifike në klasë. Rezervoni një konsultim dhe zgjidhni sfidat tuaja teknologjike sot.',
-        button: 'Rezervoni Sesion Konsultimi 1:1'
-      }
-    },
-    blogPage: {
-      title: 'Blogu i Teknologjisë për Mësues',
-      subtitle: 'Strategji praktike, recensione mjetesh dhe histori suksesi në klasë',
-      search: 'Kërkoni artikuj...',
-      keyTakeaway: 'Pika Kryesore:',
-      readMore: 'Lexo Më Shumë',
-      noResults: 'Nuk u gjetën artikuj. Provoni të rregulloni kërkimin.',
-      newsletter: {
-        title: 'Këshilla Javore Teknologjike',
-        description: 'Merrni strategji teknologjike të gatshme për klasë të dërguara në email-in tuaj çdo të hënë.',
-        button: 'Abonohu Falas'
-      },
-      popularTopics: 'Temat e Popullarizuara',
-      quickResources: 'Burime të Shpejta',
-      browseTools: '→ Shfletoni Direktorinë e Mjeteve',
-      videoTutorials: '→ Video Tutoriale',
-      coaching: '→ Rezervoni Konsultim 1:1'
-    },
-    caseStudies: {
-      title: 'Raste Studimi',
-      subtitle: 'Shkolla reale, sfida reale, rezultate reale. Shihni se si edukatorë si ju transformuan klasat e tyre.',
-      stats: {
-        schools: 'Shkolla të Transformuara',
-        engagement: 'Rritje Mesatare e Angazhimit',
-        timeSaved: 'Kohë e Kursyer Javore',
-        satisfaction: 'Kënaqësia e Mësuesve'
-      },
-      challenge: 'Sfida',
-      solution: 'Zgjidhja',
-      results: 'Rezultatet',
-      readFullStory: 'Lexo Historinë e Plotë',
-      cta: {
-        title: 'Gati për të Shkruar Historinë Tuaj të Suksesit?',
-        description: 'Çdo transformim fillon me një hap të vetëm. Le të diskutojmë se si mund t\'ju ndihmojmë shkollën tuaj të arrijë rezultate të ngjashme.',
-        bookBtn: 'Rezervoni një Konsultim',
-        partnerBtn: 'Bëhuni Partner'
-      }
+      title: "Shërbime & Çmime",
+      subtitle: "Zgjidhje të përshtatura për nevojat tuaja të teknologjisë arsimore",
+      oneOnOne: "Trajnim 1:1",
+      oneOnOneDesc: "Udhëzim i personalizuar për edukatorët",
+      oneOnOnePrice: "$30/seancë",
+      wholeStaffPD: "Programi PD për të Gjithë Stafin",
+      wholeStaffPDDesc: "Zhvillim profesional angazhues për deri në 30 anëtarë të stafit",
+      wholeStaffPDPrice: "$60/seancë",
+      customDashboard: "Konfigurimi i Dashboard-it dhe Gjurmuesit të Shkollës",
+      customDashboardDesc: "Dizajnoni dhe zbatoni dashboard dixhitale të personalizuara sipas nevojave të shkollës suaj",
+      customDashboardPrice: "$300 çmim fiks",
+      bookNow: "Rezervo Tani",
+      learnMore: "Mëso Më Shumë",
+      getStarted: "Fillo",
+      ourGuarantee: "Garancia Jonë",
+      guaranteeText: "Me ne, ju do të ngritni përdorimin e teknologjisë në shkollën tuaj. Studentët do të kenë performancë më të mirë me zgjidhjet tona praktike.",
+      howItWorks: "Si Funksionon",
+      bookSession: "Rezervo një Seancë",
+      bookSessionDesc: "Zgjidhni shërbimin tuaj dhe planifikoni një kohë të përshtatshme",
+      consultation: "Konsultim",
+      consultationDesc: "Do të diskutojmë nevojat tuaja dhe do të krijojmë një plan të përshtatur",
+      implementation: "Zbatim",
+      implementationDesc: "Merrni udhëzime dhe mbështetje eksperte gjatë gjithë procesit",
+      followUp: "Ndjekje",
+      followUpDesc: "Mbështetje e vazhdueshme për të siguruar sukses të qëndrueshëm",
+      faq: "Pyetje të Shpeshta"
     },
     contact: {
-      title: 'Kontaktoni',
-      subtitle: 'Gati për të transformuar klasën tuaj me teknologji? Le të fillojmë bisedën.',
-      quickContact: 'Kontakt i Shpejtë',
-      email: 'Email',
-      phone: 'Telefon',
-      location: 'Vendndodhja',
-      locationValue: 'Shërbime në shkolla në të gjithë vendin (SHBA)',
-      officeHours: 'Orari i Zyrës',
-      hours: {
-        weekdays: 'E hënë - E premte: 8:00 - 18:00 EST',
-        saturday: 'E shtunë: 10:00 - 14:00 EST',
-        sunday: 'E diel: Mbyllur'
-      },
-      responseTime: 'Koha e Përgjigjes',
-      responseDesc: 'Zakonisht përgjigjemi brenda 24 orëve gjatë ditëve të punës. Kërkesat urgjente kanë përparësi.',
-      bookSession: 'Rezervoni një Sesion',
-      form: {
-        fullName: 'Emri i Plotë *',
-        email: 'Adresa Email *',
-        phone: 'Numri i Telefonit',
-        school: 'Shkolla/Organizata',
-        serviceType: 'Lloji i Shërbimit *',
-        preferredDate: 'Data e Preferuar',
-        preferredTime: 'Koha e Preferuar',
-        topic: 'Tema/Sfida për t\'u Adresuar',
-        topicPlaceholder: 'p.sh., Zbatimi i mjeteve AI, konfigurimi i Google Classroom',
-        message: 'Informacion Shtesë',
-        messagePlaceholder: 'Na tregoni më shumë për qëllimet tuaja dhe çdo kërkesë specifike...',
-        submit: 'Dërgo Kërkesën për Rezervim',
-        submitting: 'Duke dërguar...',
-        terms: 'Duke dorëzuar këtë formular, ju pranoni kushtet tona të shërbimit dhe politikën e privatësisë. Ne kurrë nuk do të ndajmë informacionin tuaj me palë të treta.'
+      title: "Na Kontaktoni",
+      subtitle: "Do të donim të dëgjonim nga ju",
+      quickContact: "Kontakt i Shpejtë",
+      getInTouch: "Lidhuni me Ne",
+      name: "Emri",
+      email: "Email",
+      phone: "Telefon (opsional)",
+      subject: "Subjekti",
+      message: "Mesazhi",
+      sendMessage: "Dërgo Mesazhin",
+      sending: "Po dërgohet...",
+      successMessage: "Faleminderit për mesazhin tuaj! Do t'ju përgjigjemi së shpejti.",
+      errorMessage: "Diçka shkoi keq. Ju lutemi provoni përsëri.",
+      bookSession: "Rezervo një Seancë",
+      responseTime: "Koha e Përgjigjes",
+      responseTimeText: "Zakonisht përgjigjemi brenda 24-48 orëve",
+      availability: "Disponueshmëria",
+      availabilityText: "E Hënë - E Premte, 9:00 - 17:00 EST",
+      emergencySupport: "Mbështetje Urgjente",
+      emergencySupportText: "Për çështje urgjente, përdorni kanalin tonë të mbështetjes prioritare",
+      privacyNote: "Duke dorëzuar këtë formular, ju pranoni kushtet tona të shërbimit dhe politikën e privatësisë. Ne kurrë nuk do të ndajmë informacionin tuaj me palë të treta.",
+      location: "Vendndodhja",
+      locationText: "Hanoi, Vietnam"
+    },
+    tools: {
+      title: "Direktoria e Mjeteve & Aktiviteteve",
+      subtitle: "Zbuloni mjetet më të mira teknologjike arsimore",
+      filterBy: "Filtro sipas",
+      allCategories: "Të Gjitha Kategoritë",
+      collaboration: "Bashkëpunim",
+      assessment: "Vlerësim",
+      creativity: "Kreativitet",
+      searchPlaceholder: "Kërko mjete...",
+      free: "Falas",
+      freemium: "Freemium",
+      paid: "Me Pagesë",
+      viewDetails: "Shiko Detajet",
+      tryNow: "Provo Tani",
+      bestFor: "Më e mirë për"
+    },
+    tutorials: {
+      title: "Video Tutoriale",
+      subtitle: "Udhëzime hap pas hapi për të zotëruar teknologjinë në klasë",
+      search: "Kërko tutoriale...",
+      allLevels: "Të Gjitha Nivelet",
+      beginner: "Fillestar",
+      intermediate: "I Ndërmjetëm",
+      advanced: "I Avancuar",
+      showing: "Duke shfaqur",
+      tutorials: "tutoriale",
+      youllLearn: "Do të mësoni:",
+      watchTutorial: "Shiko Tutorialin",
+      noResults: "Nuk u gjetën tutoriale. Provoni të rregulloni kërkimin ose filtrat.",
+      cta: {
+        title: "Keni Nevojë për Ndihmë të Personalizuar?",
+        description: "Merrni mbështetje 1-me-1 të përshtatur për nevojat tuaja specifike në klasë. Rezervoni një konsultim dhe zgjidhni sfidat tuaja teknologjike sot.",
+        button: "Rezervo Seancë Trajnimi 1:1"
+      }
+    },
+    blog: {
+      title: "Më të Rejat nga Blogu Ynë",
+      viewAll: "Shiko të Gjitha Artikujt",
+      posts: {
+        ai: {
+          title: "AI në Arsim: Udhëzuesi i Plotë",
+          excerpt: "Zbuloni se si inteligjenca artificiale po riformëson peizazhin arsimor..."
+        },
+        vr: {
+          title: "Realiteti Virtual: Klasa e Re",
+          excerpt: "Eksploroni mundësitë e teknologjisë VR në arsimin modern..."
+        },
+        data: {
+          title: "Strategjitë e Mësimdhënies së Bazuar në të Dhëna",
+          excerpt: "Mësoni si të përdorni analitikën për të përmirësuar rezultatet e studentëve..."
+        }
       }
     }
   }

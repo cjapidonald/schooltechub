@@ -5,8 +5,10 @@ import { Award, Users, BookOpen, Target, Heart, Lightbulb } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const About = () => {
+  const { t } = useLanguage();
   const mission = [
     {
       icon: Target,
@@ -26,10 +28,10 @@ const About = () => {
   ];
 
   const stats = [
-    { number: "15+", label: "Years Teaching Experience" },
-    { number: "500+", label: "Workshops Delivered" },
-    { number: "10,000+", label: "Teachers Supported" },
-    { number: "200+", label: "Schools Partnered" },
+    { number: "7+", label: "Years Experience" },
+    { number: "100+", label: "Schools Helped" },
+    { number: "1,000+", label: "Teachers Supported" },
+    { number: "50+", label: "Tools Tested" },
   ];
 
   return (
@@ -40,9 +42,9 @@ const About = () => {
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">About School Tech Hub</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{t('about.title')}</h1>
             <p className="text-xl text-muted-foreground">
-              From classroom teacher to tech trainer, helping educators embrace technology with confidence
+              {t('about.subtitle')}
             </p>
           </div>
         </div>
@@ -53,31 +55,17 @@ const About = () => {
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto">
             <Card className="p-8 bg-gradient-to-br from-card to-primary/5">
-              <h2 className="text-2xl font-bold mb-6">Our Story</h2>
+              <h2 className="text-2xl font-bold mb-6">{t('about.story')}</h2>
               <div className="space-y-4 text-muted-foreground">
-                <p>
-                  School Tech Hub was born from a simple observation: amazing teachers were struggling with technology 
-                  not because they weren't capable, but because tech training wasn't designed for real classrooms.
-                </p>
-                <p>
-                  After 15 years in the classroom, I watched countless professional development sessions promise 
-                  revolutionary changes, only to see teachers return to their rooms overwhelmed and unsupported. 
-                  The gap between what tech could do and what teachers could realistically implement was enormous.
-                </p>
-                <p>
-                  That's when I made the shift from teaching to training, with one goal: bridge that gap. Every 
-                  workshop, every consultation, every resource we create starts with one question: "Will this actually 
-                  work when a teacher has 28 students, limited devices, and 5 minutes to set up?"
-                </p>
-                <p>
-                  Today, School Tech Hub supports thousands of teachers across the country, providing practical, 
-                  tested strategies that respect both the power of technology and the reality of teaching. We're 
-                  not here to add to your plate – we're here to help you use tech to make your plate more manageable.
-                </p>
+                <p>{t('about.storyText')}</p>
               </div>
               <div className="mt-6 pt-6 border-t">
-                <p className="font-semibold">– Sarah Thompson, Founder & Lead Trainer</p>
-                <p className="text-sm text-muted-foreground">Former 5th Grade Teacher, Google Certified Trainer</p>
+                <h3 className="text-xl font-bold mb-4">{t('about.ceoMessage')}</h3>
+                <p className="text-muted-foreground mb-4">{t('about.ceoMessageText')}</p>
+              </div>
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="text-xl font-bold mb-4">{t('about.mission')}</h3>
+                <p className="text-muted-foreground">{t('about.missionText')}</p>
               </div>
             </Card>
           </div>
@@ -87,7 +75,7 @@ const About = () => {
       {/* Mission Section */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Mission</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">{t('about.values')}</h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {mission.map((item, index) => (
               <Card key={index} className="p-6 text-center">
