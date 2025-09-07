@@ -7,6 +7,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 
 const CaseStudies = () => {
   const [caseStudies, setCaseStudies] = useState<any[]>([]);
@@ -95,6 +97,12 @@ const CaseStudies = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Case Studies"
+        description="Real EdTech success stories from schools. See how 200+ schools transformed with technology. 73% engagement increase, 95% teacher satisfaction."
+        keywords="EdTech case studies, school technology success stories, classroom transformation examples, education technology results, school digital transformation"
+        canonicalUrl="https://schooltechhub.com/case-studies"
+      />
       <Navigation />
 
       {/* Header */}

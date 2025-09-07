@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 
 const Blog = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -106,6 +108,22 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Teacher Tech Blog"
+        description="Practical EdTech strategies, tool reviews, and classroom success stories. Get weekly tech tips and learn how to integrate technology effectively in your classroom."
+        keywords="teacher technology blog, EdTech strategies, classroom tech tips, educational technology articles, Google Classroom tips, AI in education blog"
+        canonicalUrl="https://schooltechhub.com/blog"
+      />
+      <StructuredData 
+        type="Article" 
+        data={{
+          headline: "Teacher Tech Blog - Practical EdTech Strategies",
+          description: "Latest educational technology insights and classroom strategies",
+          image: "https://schooltechhub.com/blog-hero.jpg",
+          datePublished: new Date().toISOString(),
+          url: "https://schooltechhub.com/blog"
+        }} 
+      />
       <Navigation />
 
       {/* Header */}

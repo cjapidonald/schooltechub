@@ -9,6 +9,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Search, Filter, Clock, Users, Zap, ExternalLink, BookOpen, Plus, Check } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -118,6 +120,12 @@ const Tools = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Tools & Activities"
+        description="Discover classroom-ready EdTech tools and activities. Browse our curated directory of educational technology solutions for K-12 teachers. Free and paid options available."
+        keywords="educational tools, classroom activities, K-12 technology, teaching resources, EdTech directory, free educational apps, classroom management tools"
+        canonicalUrl="https://schooltechhub.com/tools"
+      />
       <Navigation />
 
       {/* Header */}

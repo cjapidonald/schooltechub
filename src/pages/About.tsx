@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SEO } from "@/components/SEO";
 
 const About = () => {
   const { t } = useLanguage();
@@ -36,6 +37,12 @@ const About = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="About Us"
+        description="Learn about SchoolTech Hub's mission to make educational technology accessible. 7+ years experience, 100+ schools helped, certified educators supporting your tech journey."
+        keywords="about SchoolTech Hub, educational technology company, EdTech consultants, teacher training experts, classroom technology specialists"
+        canonicalUrl="https://schooltechhub.com/about"
+      />
       <Navigation />
 
       {/* Hero Section */}

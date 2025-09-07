@@ -9,6 +9,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 
 const Tutorials = () => {
   const [tutorials, setTutorials] = useState<any[]>([]);
@@ -142,6 +144,25 @@ const Tutorials = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Video Tutorials"
+        description="Free step-by-step video guides for classroom technology. Learn Google Classroom, AI tools, interactive whiteboards, and more. Perfect for K-12 educators."
+        keywords="educational video tutorials, teacher training videos, Google Classroom tutorial, AI in education, Kahoot tutorial, EdTech how-to guides"
+        canonicalUrl="https://schooltechhub.com/tutorials"
+      />
+      <StructuredData 
+        type="FAQPage" 
+        data={{
+          questions: tutorials.slice(0, 5).map(t => ({
+            "@type": "Question",
+            "name": `How to ${t.title}?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": t.description
+            }
+          }))
+        }} 
+      />
       <Navigation />
 
       {/* Header */}

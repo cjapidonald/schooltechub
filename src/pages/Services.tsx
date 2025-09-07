@@ -7,6 +7,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 
 const Services = () => {
   const { t } = useLanguage();
@@ -89,6 +91,28 @@ const Services = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Services & Pricing"
+        description="Professional EdTech consulting services. 1:1 coaching ($30), whole-school PD programs ($60), and custom dashboard setup. Transform your classroom with expert guidance."
+        keywords="EdTech consulting, teacher coaching, professional development, school technology training, educational dashboard, classroom technology support"
+        canonicalUrl="https://schooltechhub.com/services"
+      />
+      <StructuredData 
+        type="Service" 
+        data={{
+          serviceType: "Educational Technology Consulting",
+          services: services.map(s => ({
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": s.title,
+              "description": s.description,
+              "price": s.price.replace(/[^0-9.]/g, ''),
+              "priceCurrency": "USD"
+            }
+          }))
+        }} 
+      />
       <Navigation />
 
       {/* Header */}

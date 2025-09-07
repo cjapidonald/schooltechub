@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SEO } from "@/components/SEO";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -89,6 +90,12 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Contact & Book a Session"
+        description="Book your EdTech consultation today. Get personalized 1:1 coaching or whole-school training. Contact SchoolTech Hub for expert educational technology support."
+        keywords="book consultation, EdTech support, contact education consultant, schedule training, teacher coaching booking"
+        canonicalUrl="https://schooltechhub.com/contact"
+      />
       <Navigation />
 
       {/* Header */}

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { 
   Cpu, 
   Brain, 
@@ -77,6 +79,13 @@ const Index = () => {
   }, [hasAnimated]);
   return (
     <div className="min-h-screen bg-background overflow-hidden">
+      <SEO 
+        title="Home"
+        description="Transform your classroom with AI-powered educational technology. Virtual reality labs, gamification, teacher management software, and comprehensive EdTech solutions for modern education."
+        keywords="AI education platform, virtual reality classroom, gamification in education, teacher management software, student tracking system, curriculum development tools, educational technology Albania, auto graded homework, classroom management software"
+        canonicalUrl="https://schooltechhub.com"
+      />
+      <StructuredData type="Organization" data={{}} />
       <MouseGlowEffect />
       <Navigation />
       
@@ -89,7 +98,7 @@ const Index = () => {
         <div className="absolute inset-0">
           <img 
             src={heroImage} 
-            alt="Futuristic Classroom" 
+            alt="Futuristic classroom with advanced educational technology - AI-powered learning environment" 
             className="h-full w-full object-cover opacity-40"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
