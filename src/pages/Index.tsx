@@ -66,7 +66,7 @@ const Index = () => {
           <div className="mx-auto max-w-5xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 backdrop-blur-sm">
               <Cpu className="h-4 w-4 text-primary animate-pulse-glow" />
-              <span className="text-sm font-medium text-primary">Welcome to the Future of Education</span>
+              <span className="text-sm font-medium text-primary">{t('features.welcomeFuture')}</span>
             </div>
             
             <h1 className="mb-6 font-orbitron text-6xl font-bold tracking-tight text-foreground sm:text-7xl lg:text-8xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -84,15 +84,15 @@ const Index = () => {
             <div className="mb-12 flex flex-wrap justify-center gap-6 text-sm font-space animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary animate-pulse-glow" />
-                <span className="text-foreground">AI-Powered Learning</span>
+                <span className="text-foreground">{t('features.aiPowered')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-accent animate-pulse-glow delay-150" />
-                <span className="text-foreground">Virtual Reality Classrooms</span>
+                <span className="text-foreground">{t('features.vrClassrooms')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-secondary animate-pulse-glow delay-300" />
-                <span className="text-foreground">Real-time Analytics</span>
+                <span className="text-foreground">{t('features.realTime')}</span>
               </div>
             </div>
             
@@ -142,38 +142,38 @@ const Index = () => {
             {[
               {
                 icon: Brain,
-                title: "AI Teaching Assistant",
-                description: "24/7 personalized learning support with advanced natural language processing",
+                title: t('features.aiTeaching'),
+                description: t('features.aiTeachingDesc'),
                 color: "primary"
               },
               {
                 icon: Globe,
-                title: "Virtual Reality Labs",
-                description: "Immersive 3D environments for hands-on learning experiences",
+                title: t('features.vrLabs'),
+                description: t('features.vrLabsDesc'),
                 color: "accent"
               },
               {
                 icon: Binary,
-                title: "Quantum Computing",
-                description: "Introduce students to the future of computational thinking",
+                title: t('features.quantum'),
+                description: t('features.quantumDesc'),
                 color: "secondary"
               },
               {
                 icon: Shield,
-                title: "Blockchain Credentials",
-                description: "Secure, verifiable digital certificates and achievements",
+                title: t('features.blockchain'),
+                description: t('features.blockchainDesc'),
                 color: "primary"
               },
               {
                 icon: Wifi,
-                title: "IoT Integration",
-                description: "Connected classroom devices for seamless collaboration",
+                title: t('features.iot'),
+                description: t('features.iotDesc'),
                 color: "accent"
               },
               {
                 icon: Monitor,
-                title: "Holographic Displays",
-                description: "3D projections for interactive lessons and presentations",
+                title: t('features.holographic'),
+                description: t('features.holographicDesc'),
                 color: "secondary"
               }
             ].map((feature, index) => (
@@ -187,7 +187,7 @@ const Index = () => {
                   <h3 className="mb-2 text-xl font-semibold font-orbitron">{feature.title}</h3>
                   <p className="text-muted-foreground font-space">{feature.description}</p>
                   <div className="mt-4 flex items-center text-primary group-hover:text-accent transition-colors">
-                    <span className="text-sm font-medium">Learn more</span>
+                    <span className="text-sm font-medium">{t('features.learnMore')}</span>
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -201,7 +201,7 @@ const Index = () => {
       <section className="relative py-20 bg-gradient-to-b from-background via-card/30 to-background">
         <div className="container">
           <h2 className="text-4xl font-orbitron font-bold text-center mb-12 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Experience the Future Today
+            {t('features.experienceFuture')}
           </h2>
           
           <div className="grid gap-8 lg:grid-cols-2">
@@ -212,13 +212,12 @@ const Index = () => {
                 className="h-64 w-full object-cover opacity-80"
               />
               <div className="p-6">
-                <h3 className="text-2xl font-orbitron font-semibold mb-3">AI-Powered Collaboration</h3>
+                <h3 className="text-2xl font-orbitron font-semibold mb-3">{t('features.aiCollabTitle')}</h3>
                 <p className="text-muted-foreground font-space mb-4">
-                  Students work alongside AI tutors for personalized learning paths, instant feedback, 
-                  and adaptive challenges that grow with their abilities.
+                  {t('features.aiCollabDesc')}
                 </p>
                 <Button variant="outline" className="group border-primary/30 hover:border-primary hover:bg-primary/10">
-                  See it in action
+                  {t('features.seeAction')}
                   <Sparkles className="ml-2 h-4 w-4 group-hover:animate-pulse-glow" />
                 </Button>
               </div>
@@ -231,13 +230,12 @@ const Index = () => {
                 className="h-64 w-full object-cover opacity-80"
               />
               <div className="p-6">
-                <h3 className="text-2xl font-orbitron font-semibold mb-3">Holographic Learning</h3>
+                <h3 className="text-2xl font-orbitron font-semibold mb-3">{t('features.holoTitle')}</h3>
                 <p className="text-muted-foreground font-space mb-4">
-                  Bring abstract concepts to life with 3D holographic projections. From molecular 
-                  structures to historical events, make learning tangible.
+                  {t('features.holoDesc')}
                 </p>
                 <Button variant="outline" className="group border-accent/30 hover:border-accent hover:bg-accent/10">
-                  Explore demos
+                  {t('features.exploreDemos')}
                   <BookOpen className="ml-2 h-4 w-4 group-hover:animate-pulse-glow" />
                 </Button>
               </div>
@@ -287,7 +285,7 @@ const Index = () => {
                 </Link>
                 <Link to="/services">
                   <Button size="lg" variant="outline" className="border-primary/30 hover:border-primary hover:bg-primary/10">
-                    View Pricing Plans
+                    {t('features.viewPricing')}
                   </Button>
                 </Link>
               </div>
