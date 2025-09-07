@@ -222,19 +222,13 @@ const Contact = () => {
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="consultation" id="consultation" />
                         <Label htmlFor="consultation" className="font-normal">
-                          1-Hour Consultation ($20)
+                          1:1 Consulting ($30)
                         </Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="mini_audit" id="mini_audit" />
-                        <Label htmlFor="mini_audit" className="font-normal">
-                          Mini Tech Audit ($150)
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="workshop" id="workshop" />
-                        <Label htmlFor="workshop" className="font-normal">
-                          PD Workshop ($500)
+                        <RadioGroupItem value="whole_school" id="whole_school" />
+                        <Label htmlFor="whole_school" className="font-normal">
+                          Whole School Consulting ($60)
                         </Label>
                       </div>
                     </RadioGroup>

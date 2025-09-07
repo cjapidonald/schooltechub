@@ -50,7 +50,9 @@ const Navigation = () => {
             </Link>
           ))}
           <LanguageSwitcher />
-          <Button className="ml-4">{t('nav.bookConsultation')}</Button>
+          <Link to="/contact">
+            <Button className="ml-4">{t('nav.bookConsultation')}</Button>
+          </Link>
         </div>
 
         {/* Mobile Navigation */}
@@ -80,7 +82,9 @@ const Navigation = () => {
               ))}
               <div className="mt-4 flex items-center space-x-4">
                 <LanguageSwitcher />
-                <Button className="flex-1">{t('nav.bookConsultation')}</Button>
+                <Link to="/contact" onClick={() => setIsOpen(false)} className="flex-1">
+                  <Button className="w-full">{t('nav.bookConsultation')}</Button>
+                </Link>
               </div>
             </div>
           </SheetContent>
