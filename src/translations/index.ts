@@ -250,7 +250,7 @@ export const translations = {
           }
         ],
         bookBtn: 'Book Your Session Today',
-        questions: 'Questions? Email us at support@schooltechhub.com'
+        emailText: 'Questions? Email us at support@schooltechhub.com'
       }
     },
     tools: {
@@ -616,7 +616,7 @@ export const translations = {
           }
         ],
         bookBtn: 'Rezervoni Sesionin Tuaj Sot',
-        questions: 'Pyetje? Na emailoni në support@schooltechhub.com'
+        emailText: 'Pyetje? Na emailoni në support@schooltechhub.com'
       }
     },
     tools: {
