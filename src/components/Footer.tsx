@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { GraduationCap, Mail, Twitter, Linkedin, Youtube } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { t } = useLanguage();
   return (
     <footer className="bg-gradient-to-b from-background to-muted border-t">
       <div className="container py-12">
@@ -13,7 +15,7 @@ const Footer = () => {
               <span className="font-bold text-lg">School Tech Hub</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Built by teachers for teachers. Empowering educators with practical tech solutions.
+              {t('footer.description')}
             </p>
             <div className="flex space-x-4">
               <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
@@ -33,7 +35,7 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
+            <h3 className="font-semibold mb-4">{t('footer.resources')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/tools" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -109,8 +111,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} School Tech Hub. All rights reserved.</p>
-          <p className="mt-2">Empowering educators with classroom tech that works.</p>
+          <p>{t('footer.copyright')}</p>
         </div>
       </div>
     </footer>

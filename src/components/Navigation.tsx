@@ -4,20 +4,23 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { t } = useLanguage();
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Tools & Activities", path: "/tools" },
-    { name: "Services", path: "/services" },
-    { name: "Tutorials", path: "/tutorials" },
-    { name: "Blog", path: "/blog" },
-    { name: "Case Studies", path: "/case-studies" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
+    { name: t('nav.home'), path: "/" },
+    { name: t('nav.tools'), path: "/tools" },
+    { name: t('nav.services'), path: "/services" },
+    { name: t('nav.tutorials'), path: "/tutorials" },
+    { name: t('nav.blog'), path: "/blog" },
+    { name: t('nav.caseStudies'), path: "/case-studies" },
+    { name: t('nav.about'), path: "/about" },
+    { name: t('nav.contact'), path: "/contact" },
   ];
 
   return (
@@ -46,7 +49,8 @@ const Navigation = () => {
               {item.name}
             </Link>
           ))}
-          <Button className="ml-4">Book Consultation</Button>
+          <LanguageSwitcher />
+          <Button className="ml-4">{t('nav.bookConsultation')}</Button>
         </div>
 
         {/* Mobile Navigation */}
@@ -74,7 +78,10 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              <Button className="mt-4 w-full">Book Consultation</Button>
+              <div className="mt-4 flex items-center space-x-4">
+                <LanguageSwitcher />
+                <Button className="flex-1">{t('nav.bookConsultation')}</Button>
+              </div>
             </div>
           </SheetContent>
         </Sheet>
