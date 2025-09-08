@@ -6,7 +6,7 @@
   
   <!-- Homepage - Highest priority -->
   <url>
-    <loc>https://schooltechhub.com/</loc>
+    <loc>https://schooltechub.com/</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -14,49 +14,49 @@
   
   <!-- Main navigation pages - High priority -->
   <url>
-    <loc>https://schooltechhub.com/tools</loc>
+    <loc>https://schooltechub.com/tools</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://schooltechhub.com/services</loc>
+    <loc>https://schooltechub.com/services</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://schooltechhub.com/tutorials</loc>
+    <loc>https://schooltechub.com/tutorials</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://schooltechhub.com/blog</loc>
+    <loc>https://schooltechub.com/blog</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://schooltechhub.com/about</loc>
+    <loc>https://schooltechub.com/about</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>https://schooltechhub.com/case-studies</loc>
+    <loc>https://schooltechub.com/case-studies</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://schooltechhub.com/contact</loc>
+    <loc>https://schooltechub.com/contact</loc>
     <lastmod>2024-12-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

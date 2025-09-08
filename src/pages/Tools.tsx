@@ -13,16 +13,19 @@ import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
+
+type ToolActivity = Database["public"]["Tables"]["tools_activities"]["Row"];
 
 const Tools = () => {
-  const [tools, setTools] = useState<any[]>([]);
-  const [filteredTools, setFilteredTools] = useState<any[]>([]);
+  const [tools, setTools] = useState<ToolActivity[]>([]);
+  const [filteredTools, setFilteredTools] = useState<ToolActivity[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     schoolStages: [] as string[],
     subjects: [] as string[],
     cost: [] as string[],
-    groupSizes: [] as string[],
+    groupSize: [] as string[],
   });
   const [compareList, setCompareList] = useState<string[]>([]);
   const { toast } = useToast();
@@ -31,7 +34,7 @@ const Tools = () => {
     schoolStages: ["Pre-K", "K-2", "3-5", "6-8", "9-12"],
     subjects: ["Phonics", "Math", "Science", "CS/ICT", "Social Studies", "Arts", "Music", "PE/Health", "SEL", "Languages"],
     cost: ["Free", "Paid"],
-    groupSizes: ["Solo", "Pairs", "Small Group", "Whole Class"],
+    groupSize: ["Solo", "Pairs", "Small Group", "Whole Class"],
   };
 
   useEffect(() => {
@@ -46,7 +49,6 @@ const Tools = () => {
     const { data, error } = await supabase
       .from("tools_activities")
       .select("*")
-      .eq("is_published", true)
       .order("name");
 
     if (error) {
@@ -90,9 +92,9 @@ const Tools = () => {
       filtered = filtered.filter((tool) => selectedFilters.cost.includes(tool.cost));
     }
 
-    if (selectedFilters.groupSizes.length > 0) {
+    if (selectedFilters.groupSize.length > 0) {
       filtered = filtered.filter((tool) =>
-        tool.group_sizes?.some((size: string) => selectedFilters.groupSizes.includes(size))
+        selectedFilters.groupSize.includes(tool.group_size || "")
       );
     }
 
@@ -295,10 +297,10 @@ const ToolCard = ({ tool, isComparing, onToggleCompare }: any) => {
             <span>{tool.setup_time}</span>
           </div>
         )}
-        {tool.group_sizes && tool.group_sizes[0] && (
+        {tool.group_size && (
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>{tool.group_sizes[0]}</span>
+            <span>{tool.group_size}</span>
           </div>
         )}
         <Badge variant={tool.cost === "Free" ? "secondary" : "default"}>
