@@ -71,39 +71,15 @@ const Blog = () => {
       primary_keyword: "iPad phonics centers",
     },
     {
-  id: "6",
-  title: "Best Font for Kindergarten Classes",
-  slug: "best-font-for-kindergarten-classes",
-  teaser: "Discover the perfect font for teaching young learners — KG Primary Penmanship makes phonics and handwriting easier for kids.",
-  takeaway: "Use KG Primary Penmanship for phonics and writing lessons",
-  published_at: new Date().toISOString(),
-  grade_band: "K-2",
-  primary_keyword: "KG Primary Penmanship",
-  content: `
-    <p>So many fonts out there! Choosing the best font for your class can be a bit overwhelming, especially seeing that there are so many options. Problems arise when there are fonts we like, but then comes the letter <strong>a</strong>, which in some fonts is written as “a”.</p>
-
-    <p>Luckily for us teachers, there is a font that is particularly made for primary: <strong>KG Primary Penmanship</strong> and <strong>KG Primary Penmanship Lined</strong>. Both are fantastic when it comes to teaching phonics lessons and showing kids how to write.</p>
-
-    <p>When using it, I felt confident in my presentation — and kids loved it!</p>
-
-    <figure>
-      <img src="https://ruybexkjupmannggnstn.supabase.co/storage/v1/object/public/Blogpost%20images/Best%20font%20for%20kindergarten%20Classes.%20-%20visual%20selection%20(4).png" alt="Font Example 1" />
-      <figcaption>Example 1 — KG Primary Penmanship in action</figcaption>
-    </figure>
-
-    <h3>How to use this font?</h3>
-    <p>This font can easily be found in most presentation tools like Canva or PowerPoint.</p>
-
-    <p>You can use the underscore to identify letter placement with <strong>KG Primary Penmanship Lined</strong>. On top, you can use the “KG Primary Penmanship” letters and apply appearing effects as you like. Here’s an example in Canva:</p>
-
-    <p><a href="https://www.canva.com/design/DAGyffZPZRg/xHDY_lCn8Ss27qkHqycK7Q/edit" target="_blank">View Canva Example</a></p>
-
-    <figure>
-      <img src="https://ruybexkjupmannggnstn.supabase.co/storage/v1/object/public/Blogpost%20images/Best%20font%20for%20kindergarten%20Classes.%20-%20visual%20selection%20(5).png" alt="Font Example 2" />
-      <figcaption>Example 2 — Using KG Primary Penmanship in Canva</figcaption>
-    </figure>
-  `
-},
+      id: "7",
+      title: "isdfsdfsdfsdf(K-2)",
+      slug: "ipad-centers-phonics",
+      teaser: "Set up engaging phonics centers using just 2-3 iPads in your classroom.",
+      takeaway: "Rotate stations every 15 minutes",
+      published_at: new Date().toISOString(),
+      grade_band: "K-2",
+      primary_keyword: "iPad phonics centers",
+    },
   ];
 
   useEffect(() => {
