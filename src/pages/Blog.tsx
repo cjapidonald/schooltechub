@@ -74,8 +74,7 @@ const Blog = () => {
   id: "6",
   title: "Best Font for Kindergarten Classes",
   slug: "best-font-for-kindergarten-classes",
-  teaser: `
-    <p>So many fonts out there! Choosing the best font for your class can be a bit overwhelming, especially seeing that there are so many options. Problems arise when there are fonts we like, but then comes the letter <strong>a</strong>, which in some fonts is written as “a”.</p>
+  teaser: "<p>So many fonts out there! Choosing the best font for your class can be a bit overwhelming, especially seeing that there are so many options. Problems arise when there are fonts we like, but then comes the letter <strong>a</strong>, which in some fonts is written as “a”.</p>
 
     <p>Luckily for us teachers, there is a font that is particularly made for primary: <strong>KG Primary Penmanship</strong> and <strong>KG Primary Penmanship Lined</strong>. Both are fantastic when it comes to teaching phonics lessons and showing kids how to write.</p>
 
@@ -97,12 +96,11 @@ const Blog = () => {
       <img src="https://ruybexkjupmannggnstn.supabase.co/storage/v1/object/public/Blogpost%20images/Best%20font%20for%20kindergarten%20Classes.%20-%20visual%20selection%20(5).png" alt="Font Example 2" />
       <figcaption>Example 2 — Using KG Primary Penmanship in Canva</figcaption>
     </figure>
-  `
+  `",
   takeaway: "Use KG Primary Penmanship for phonics and writing lessons",
   published_at: new Date().toISOString(),
   grade_band: "K-2",
   primary_keyword: "KG Primary Penmanship",
-
 },
   ];
 
