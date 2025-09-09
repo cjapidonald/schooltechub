@@ -97,7 +97,9 @@ const Index = () => {
           <img 
             src={heroImage} 
             alt="Futuristic classroom with advanced educational technology - AI-powered learning environment" 
-            className="h-full w-full object-cover opacity-40"
+                  className="h-full w-full object-cover opacity-40"
+                  loading="eager"
+                  fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
         </div>
@@ -251,21 +253,22 @@ const Index = () => {
                 color: "secondary"
               }
             ].map((feature, index) => (
-              <Card 
-                key={index}
-                className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.2)]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative p-6">
-                  <feature.icon className={`mb-4 h-12 w-12 text-${feature.color} animate-pulse-glow`} />
-                  <h3 className="mb-2 text-xl font-semibold font-orbitron">{feature.title}</h3>
-                  <p className="text-muted-foreground font-space">{feature.description}</p>
-                  <div className="mt-4 flex items-center text-primary group-hover:text-accent transition-colors">
-                    <span className="text-sm font-medium">Learn more</span>
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <Link to="/tools" key={index} className="block">
+                <Card 
+                  className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.2)] cursor-pointer h-full"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative p-6">
+                    <feature.icon className={`mb-4 h-12 w-12 text-${feature.color} animate-pulse-glow`} />
+                    <h3 className="mb-2 text-xl font-semibold font-orbitron">{feature.title}</h3>
+                    <p className="text-muted-foreground font-space">{feature.description}</p>
+                    <div className="mt-4 flex items-center text-primary group-hover:text-accent transition-colors">
+                      <span className="text-sm font-medium">Explore Tools</span>
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
