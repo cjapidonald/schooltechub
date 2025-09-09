@@ -80,6 +80,35 @@ const Blog = () => {
       grade_band: "K-2",
       primary_keyword: "iPad phonics centers",
     },
+    {
+  id: "7",
+  title: "How AI Can Simplify Lesson Planning",
+  slug: "ai-simplify-lesson-planning",
+  teaser: `
+    <p>Lesson planning can take hours each week. With AI tools like ChatGPT and Canva Magic Write, 
+    teachers can save time by generating draft lesson plans, worksheets, and quizzes in minutes.</p>
+
+    <p>AI doesn’t replace the teacher’s creativity or expertise—it supports it. 
+    Teachers can focus on adapting the AI-generated content to their students’ needs.</p>
+
+    <h3>Practical Tips</h3>
+    <ul>
+      <li>Use ChatGPT to generate differentiated reading passages.</li>
+      <li>Create quizzes quickly with tools like Quizizz AI.</li>
+      <li>Build worksheets in Canva using AI text-to-worksheet templates.</li>
+    </ul>
+
+    <figure>
+      <img src="https://via.placeholder.com/800x400.png?text=AI+Lesson+Planning" alt="AI lesson planning demo" />
+      <figcaption>Example of AI-assisted worksheet creation</figcaption>
+    </figure>
+  `,
+  takeaway: "Start by using AI for one simple task, like quiz creation, to save hours each week.",
+  published_at: new Date().toISOString(),
+  grade_band: "All Grades",
+  primary_keyword: "AI lesson planning",
+}
+
   ];
 
   useEffect(() => {
