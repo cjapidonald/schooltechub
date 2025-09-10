@@ -23,9 +23,18 @@ interface BlogPost {
   primary_keyword: string;
 }
 
+interface RelatedPost {
+  id: string;
+  title: string;
+  slug: string;
+  teaser: string | null;
+  primary_keyword: string | null;
+}
+
 const BlogPost = () => {
   const { slug } = useParams();
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,9 +60,35 @@ const BlogPost = () => {
 
       setPost(data);
       setLoading(false);
+      
+      // Fetch related posts with the same primary_keyword
+      if (data && data.primary_keyword) {
+        fetchRelatedPosts(data.primary_keyword, data.id);
+      }
     } catch (err) {
       console.error("Error loading blog post:", err);
       setLoading(false);
+    }
+  };
+
+  const fetchRelatedPosts = async (keyword: string, currentPostId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("id, title, slug, teaser, primary_keyword")
+        .eq("primary_keyword", keyword)
+        .eq("is_published", true)
+        .neq("id", currentPostId)
+        .limit(3);
+
+      if (error) {
+        console.error("Error fetching related posts:", error);
+        return;
+      }
+
+      setRelatedPosts(data || []);
+    } catch (err) {
+      console.error("Error loading related posts:", err);
     }
   };
 
@@ -158,6 +193,35 @@ const BlogPost = () => {
           <div className="prose prose-lg max-w-none">
             <RichContent content={post.content as any} className="text-base leading-relaxed" />
           </div>
+
+          {/* Related posts section */}
+          {relatedPosts.length > 0 && (
+            <div className="mt-12 border-t pt-12">
+              <h3 className="text-2xl font-bold mb-6">Topics You Might Be Interested In</h3>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {relatedPosts.map((relatedPost) => (
+                  <Link key={relatedPost.id} to={`/blog/${relatedPost.slug}`}>
+                    <Card className="h-full hover:shadow-lg transition-shadow duration-200 p-6">
+                      <h4 className="font-semibold text-lg mb-2 line-clamp-2">
+                        {relatedPost.title}
+                      </h4>
+                      {relatedPost.teaser && (
+                        <p className="text-sm text-muted-foreground line-clamp-3">
+                          {relatedPost.teaser}
+                        </p>
+                      )}
+                      {relatedPost.primary_keyword && (
+                        <Badge variant="outline" className="mt-3">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {relatedPost.primary_keyword}
+                        </Badge>
+                      )}
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Call to action */}
           <Card className="mt-12 p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
