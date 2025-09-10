@@ -35,21 +35,26 @@ const BlogPost = () => {
   const fetchPost = async () => {
     if (!slug) return;
     
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .eq("slug", slug)
-      .eq("is_published", true)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("slug", slug)
+        .eq("is_published", true)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Error fetching post:", error);
+      if (error) {
+        console.error("Error fetching post:", error);
+        setLoading(false);
+        return;
+      }
+
+      setPost(data);
       setLoading(false);
-      return;
+    } catch (err) {
+      console.error("Error loading blog post:", err);
+      setLoading(false);
     }
-
-    setPost(data);
-    setLoading(false);
   };
 
   const formatDate = (dateString: string) => {
