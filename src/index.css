@@ -135,3 +135,14 @@ All colors MUST be HSL.
     text-shadow: 0 0 20px currentColor;
   }
 }
+
+/* Fix for blog post images overlapping text */
+.prose p, .prose h1, .prose h2, .prose h3, .prose ul, .prose ol {
+  position: relative;
+  z-index: 10;
+}
+
+.prose img {
+  position: relative;
+  z-index: 1;
+}
