@@ -360,7 +360,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_newsletter_subscriber_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      is_email_subscribed: {
+        Args: { check_email: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
