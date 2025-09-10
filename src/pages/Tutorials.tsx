@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
+import type { Json } from "@/integrations/supabase/types";
 
 const Tutorials = () => {
   const [tutorials, setTutorials] = useState<any[]>([]);
@@ -121,9 +122,21 @@ const Tutorials = () => {
   };
 
   const filteredTutorials = tutorials.filter((tutorial) => {
-    const matchesSearch =
-      tutorial.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tutorial.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const titleMatch = tutorial.title.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Handle both legacy string and new jsonb format for description
+    let descriptionMatch = false;
+    if (tutorial.description) {
+      if (typeof tutorial.description === 'string') {
+        descriptionMatch = tutorial.description.toLowerCase().includes(searchTerm.toLowerCase());
+      } else if (Array.isArray(tutorial.description)) {
+        descriptionMatch = tutorial.description.some((block: any) => 
+          block.type === 'paragraph' && block.text?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+    }
+    
+    const matchesSearch = titleMatch || descriptionMatch;
     const matchesLevel =
       selectedLevel === "all" || tutorial.difficulty_level === selectedLevel;
     return matchesSearch && matchesLevel;
@@ -229,9 +242,18 @@ const Tutorials = () => {
 
                 <div className="p-6">
                   <h3 className="font-semibold text-lg mb-2">{tutorial.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {tutorial.description}
-                  </p>
+                  <div className="text-sm text-muted-foreground mb-4">
+                    {typeof tutorial.description === 'string' ? (
+                      <p>{tutorial.description}</p>
+                    ) : Array.isArray(tutorial.description) ? (
+                      tutorial.description
+                        .filter((block: any) => block.type === 'paragraph')
+                        .slice(0, 1)
+                        .map((block: any, idx: number) => (
+                          <p key={idx}>{block.text}</p>
+                        ))
+                    ) : null}
+                  </div>
 
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                     <div className="flex items-center gap-1">

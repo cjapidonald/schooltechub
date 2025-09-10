@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
+import RichContent from "@/components/RichContent";
+import type { Json } from "@/integrations/supabase/types";
 
 const CaseStudies = () => {
   const [caseStudies, setCaseStudies] = useState<any[]>([]);
@@ -167,7 +169,13 @@ const CaseStudies = () => {
                       <Users className="h-4 w-4 text-primary" />
                       <span className="font-semibold text-sm">Solution</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{study.solution}</p>
+                    <div className="text-sm">
+                      {typeof study.solution === 'string' ? (
+                        <p className="text-muted-foreground">{study.solution}</p>
+                      ) : (
+                        <RichContent content={study.solution as any} />
+                      )}
+                    </div>
                   </div>
 
                   {/* Results */}
@@ -176,7 +184,21 @@ const CaseStudies = () => {
                       <TrendingUp className="h-4 w-4 text-secondary" />
                       <span className="font-semibold text-sm">Results</span>
                     </div>
-                    <p className="text-sm font-medium text-foreground">{study.results}</p>
+                    <div className="text-sm font-medium text-foreground">
+                      {typeof study.results === 'string' ? (
+                        <p>{study.results}</p>
+                      ) : Array.isArray(study.results) && typeof (study.results as any[])[0] === 'string' ? (
+                        // Handle legacy text[] format
+                        <ul className="list-disc list-inside space-y-1">
+                          {(study.results as string[]).map((result: string, idx: number) => (
+                            <li key={idx}>{result}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        // Handle new jsonb format
+                        <RichContent content={study.results as any} />
+                      )}
+                    </div>
                   </div>
 
                   {/* Testimonial */}

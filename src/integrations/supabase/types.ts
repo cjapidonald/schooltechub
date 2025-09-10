@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       blog_posts: {
         Row: {
-          content: string | null
+          content: Json | null
           created_at: string | null
           grade_band: string | null
           id: string
@@ -30,7 +30,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          content?: string | null
+          content?: Json | null
           created_at?: string | null
           grade_band?: string | null
           id?: string
@@ -44,7 +44,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          content?: string | null
+          content?: Json | null
           created_at?: string | null
           grade_band?: string | null
           id?: string
@@ -116,9 +116,9 @@ export type Database = {
           created_at: string | null
           id: string
           is_published: boolean | null
-          results: string[] | null
+          results: Json | null
           school_name: string
-          solution: string | null
+          solution: Json | null
           testimonial_id: string | null
           title: string
           updated_at: string | null
@@ -128,9 +128,9 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_published?: boolean | null
-          results?: string[] | null
+          results?: Json | null
           school_name: string
-          solution?: string | null
+          solution?: Json | null
           testimonial_id?: string | null
           title: string
           updated_at?: string | null
@@ -140,9 +140,9 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_published?: boolean | null
-          results?: string[] | null
+          results?: Json | null
           school_name?: string
-          solution?: string | null
+          solution?: Json | null
           testimonial_id?: string | null
           title?: string
           updated_at?: string | null
@@ -159,7 +159,7 @@ export type Database = {
       }
       faq: {
         Row: {
-          answer: string
+          answer: Json
           category: string | null
           created_at: string
           display_order: number | null
@@ -169,7 +169,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          answer: string
+          answer: Json
           category?: string | null
           created_at?: string
           display_order?: number | null
@@ -179,7 +179,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          answer?: string
+          answer?: Json
           category?: string | null
           created_at?: string
           display_order?: number | null
@@ -251,7 +251,7 @@ export type Database = {
           best_for: string | null
           cost: string | null
           created_at: string | null
-          description: string | null
+          description: Json | null
           devices: string[] | null
           grade_bands: string[] | null
           group_size: string | null
@@ -271,7 +271,7 @@ export type Database = {
           best_for?: string | null
           cost?: string | null
           created_at?: string | null
-          description?: string | null
+          description?: Json | null
           devices?: string[] | null
           grade_bands?: string[] | null
           group_size?: string | null
@@ -291,7 +291,7 @@ export type Database = {
           best_for?: string | null
           cost?: string | null
           created_at?: string | null
-          description?: string | null
+          description?: Json | null
           devices?: string[] | null
           grade_bands?: string[] | null
           group_size?: string | null
@@ -310,7 +310,7 @@ export type Database = {
       tutorials: {
         Row: {
           created_at: string | null
-          description: string | null
+          description: Json | null
           difficulty_level: string | null
           estimated_time: string | null
           id: string
@@ -323,7 +323,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          description?: string | null
+          description?: Json | null
           difficulty_level?: string | null
           estimated_time?: string | null
           id?: string
@@ -336,7 +336,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          description?: string | null
+          description?: Json | null
           difficulty_level?: string | null
           estimated_time?: string | null
           id?: string

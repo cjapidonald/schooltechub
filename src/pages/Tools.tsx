@@ -13,7 +13,7 @@ import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
 type ToolActivity = Database["public"]["Tables"]["tools_activities"]["Row"];
 
@@ -68,11 +68,24 @@ const Tools = () => {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(
-        (tool) =>
-          tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tool.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((tool) => {
+        const nameMatch = tool.name.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Handle both legacy string and new jsonb format for description
+        let descriptionMatch = false;
+        if (tool.description) {
+          if (typeof tool.description === 'string') {
+            descriptionMatch = tool.description.toLowerCase().includes(searchTerm.toLowerCase());
+          } else if (Array.isArray(tool.description)) {
+            // Search through all text blocks in the jsonb array
+            descriptionMatch = tool.description.some((block: any) => 
+              block.type === 'paragraph' && block.text?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+          }
+        }
+        
+        return nameMatch || descriptionMatch;
+      });
     }
 
     // Apply filters

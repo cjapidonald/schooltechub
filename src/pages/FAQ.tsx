@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { HelpCircle } from "lucide-react";
+import RichContent from "@/components/RichContent";
+import type { Json } from "@/integrations/supabase/types";
 
 interface FAQItem {
   id: string;
   question: string;
-  answer: string;
+  answer: Json;
   category: string;
   display_order: number;
 }
@@ -93,7 +95,7 @@ const FAQ = () => {
                               {faq.question}
                             </AccordionTrigger>
                             <AccordionContent>
-                              <p className="text-muted-foreground">{faq.answer}</p>
+                              <RichContent content={faq.answer as any} />
                             </AccordionContent>
                           </AccordionItem>
                         ))}
