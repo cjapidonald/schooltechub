@@ -146,7 +146,7 @@ const Contact = () => {
               </Card>
 
               <Card className="p-6 bg-gradient-to-br from-primary/5 to-secondary/5">
-                <Calendar className="h-8 w-8 text-primary mb-3" />
+                <CalendarIcon className="h-8 w-8 text-primary mb-3" />
                 <h3 className="font-semibold mb-2">Office Hours</h3>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <p>Monday - Friday: 8am - 6pm EST</p>

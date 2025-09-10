@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Users, Target, ArrowLeft, Quote } from "lucide-react";
+import { TrendingUp, Users, Target, ArrowLeft, Quote, Clock, Calendar } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import RichContent from "@/components/RichContent";
@@ -16,15 +16,87 @@ interface CaseStudy {
   title: string;
   school_name: string;
   challenge: string;
-  solution: Json;
-  results: Json;
-  testimonial?: any;
+  solution: any;
+  results: any;
+  testimonial?: {
+    quote: string;
+    author_name: string;
+    author_role: string;
+    school_name?: string;
+    picture_url?: string;
+    company?: string;
+  };
+  created_at?: string;
 }
 
 const CaseStudyDetail = () => {
   const { slug } = useParams();
   const [caseStudy, setCaseStudy] = useState<CaseStudy | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Sample case studies matching those from CaseStudies page
+  const sampleCaseStudies: Record<string, CaseStudy> = {
+    "lincoln-elementary-transformation": {
+      id: "1",
+      title: "Lincoln Elementary: From Tech-Shy to Tech-Savvy",
+      school_name: "Lincoln Elementary School",
+      challenge: "Teachers were overwhelmed by new 1:1 Chromebook initiative with minimal training",
+      solution: "Implemented phased training program with peer mentoring and weekly tech tips",
+      results: "85% of teachers now integrate tech daily, student engagement up 40%",
+      testimonial: {
+        quote: "The transformation has been incredible. Our teachers went from avoiding technology to actively seeking new tools.",
+        author_name: "Dr. Maria Rodriguez",
+        author_role: "Principal",
+        company: "Lincoln School District"
+      },
+      created_at: new Date().toISOString()
+    },
+    "riverside-high-stem": {
+      id: "2",
+      title: "Riverside High: Revolutionizing STEM with Simple Tools",
+      school_name: "Riverside High School",
+      challenge: "Limited budget for STEM resources, outdated computer lab",
+      solution: "Leveraged free tools like Google Colab and Tinkercad for virtual labs",
+      results: "STEM enrollment increased 60%, AP Computer Science pass rate up 35%",
+      testimonial: {
+        quote: "We thought we needed expensive equipment. Turns out, we just needed the right strategy.",
+        author_name: "James Chen",
+        author_role: "STEM Coordinator",
+        company: "Riverside Unified"
+      },
+      created_at: new Date().toISOString()
+    },
+    "oakwood-middle-gamification": {
+      id: "3",
+      title: "Oakwood Middle: Engagement Through Gamification",
+      school_name: "Oakwood Middle School",
+      challenge: "Post-pandemic engagement crisis, especially in math classes",
+      solution: "Introduced classroom gamification with free tools and peer competitions",
+      results: "Math scores improved 28%, disciplinary issues down 45%",
+      testimonial: {
+        quote: "Students are actually excited about math now. The energy in classrooms has completely changed.",
+        author_name: "Sarah Williams",
+        author_role: "Math Department Head",
+        company: "Oakwood School District"
+      },
+      created_at: new Date().toISOString()
+    },
+    "maple-grove-special-ed": {
+      id: "4",
+      title: "Maple Grove Primary: Special Ed Success Story",
+      school_name: "Maple Grove Primary",
+      challenge: "Supporting diverse special education needs with limited resources",
+      solution: "Customized iPad stations with accessibility features and differentiated apps",
+      results: "IEP goal achievement up 50%, parent satisfaction scores at all-time high",
+      testimonial: {
+        quote: "Technology became the great equalizer for our special needs students.",
+        author_name: "Jennifer Park",
+        author_role: "Special Education Director",
+        company: "Maple Grove School System"
+      },
+      created_at: new Date().toISOString()
+    }
+  };
 
   useEffect(() => {
     fetchCaseStudy();
@@ -33,24 +105,39 @@ const CaseStudyDetail = () => {
   const fetchCaseStudy = async () => {
     if (!slug) return;
     
+    // First try to get from database
     const { data, error } = await supabase
       .from("case_studies")
       .select(`
         *,
         testimonial:testimonials(*)
       `)
-      .eq("id", slug)
+      .eq("slug", slug)
       .eq("is_published", true)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error fetching case study:", error);
-      setLoading(false);
-      return;
     }
 
-    setCaseStudy(data);
+    // If no data from database, use sample data
+    if (data) {
+      setCaseStudy(data);
+    } else if (sampleCaseStudies[slug]) {
+      setCaseStudy(sampleCaseStudies[slug]);
+    } else {
+      setCaseStudy(null);
+    }
+    
     setLoading(false);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   if (loading) {
@@ -112,6 +199,18 @@ const CaseStudyDetail = () => {
           <header className="mb-12">
             <Badge className="mb-4">{caseStudy.school_name}</Badge>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">{caseStudy.title}</h1>
+            {caseStudy.created_at && (
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>{new Date(caseStudy.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span>5 min read</span>
+                </div>
+              </div>
+            )}
           </header>
 
           {/* Challenge Section */}
@@ -130,7 +229,11 @@ const CaseStudyDetail = () => {
               <h2 className="text-2xl font-bold">The Solution</h2>
             </div>
             <div className="text-lg">
-              <RichContent content={caseStudy.solution as any} />
+              {typeof caseStudy.solution === 'string' ? (
+                <p>{caseStudy.solution}</p>
+              ) : (
+                <RichContent content={caseStudy.solution as any} />
+              )}
             </div>
           </Card>
 
@@ -164,9 +267,21 @@ const CaseStudyDetail = () => {
               <blockquote className="text-xl italic mb-4">
                 "{caseStudy.testimonial.quote}"
               </blockquote>
-              <footer>
-                <p className="font-semibold">{caseStudy.testimonial.author_name}</p>
-                <p className="text-muted-foreground">{caseStudy.testimonial.author_role}</p>
+              <footer className="flex items-center gap-4">
+                {caseStudy.testimonial.picture_url && (
+                  <img 
+                    src={caseStudy.testimonial.picture_url} 
+                    alt={caseStudy.testimonial.author_name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                )}
+                <div>
+                  <p className="font-semibold">{caseStudy.testimonial.author_name}</p>
+                  <p className="text-muted-foreground">{caseStudy.testimonial.author_role}</p>
+                  {caseStudy.testimonial.company && (
+                    <p className="text-sm text-muted-foreground">{caseStudy.testimonial.company}</p>
+                  )}
+                </div>
               </footer>
             </Card>
           )}

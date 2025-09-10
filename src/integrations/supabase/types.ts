@@ -218,27 +218,33 @@ export type Database = {
         Row: {
           author_name: string
           author_role: string | null
+          company: string | null
           created_at: string | null
           id: string
           is_featured: boolean | null
+          picture_url: string | null
           quote: string
           school_name: string | null
         }
         Insert: {
           author_name: string
           author_role?: string | null
+          company?: string | null
           created_at?: string | null
           id?: string
           is_featured?: boolean | null
+          picture_url?: string | null
           quote: string
           school_name?: string | null
         }
         Update: {
           author_name?: string
           author_role?: string | null
+          company?: string | null
           created_at?: string | null
           id?: string
           is_featured?: boolean | null
+          picture_url?: string | null
           quote?: string
           school_name?: string | null
         }
