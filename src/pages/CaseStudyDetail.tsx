@@ -8,6 +8,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import RichContent from "@/components/RichContent";
 import { SEO } from "@/components/SEO";
+import { ShareButton } from "@/components/ShareButton";
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = "https://ruybexkjupmannggnstn.supabase.co";
@@ -319,8 +320,14 @@ const CaseStudyDetail = () => {
             </Card>
           )}
 
+          {/* Share section */}
+          <div className="mt-12 border-t pt-12 text-center">
+            <h3 className="text-xl font-semibold mb-4">Found this case study valuable?</h3>
+            <ShareButton title="Share this case study" />
+          </div>
+
           {/* Call to action */}
-          <Card className="p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
+          <Card className="mt-12 p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
             <h3 className="text-2xl font-bold mb-4">Ready to Transform Your School?</h3>
             <p className="text-muted-foreground mb-6">
               Let's discuss how we can help you achieve similar results.

@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import RichContent from "@/components/RichContent";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
+import { ShareButton } from "@/components/ShareButton";
 import type { Json } from "@/integrations/supabase/types";
 
 interface BlogPost {
@@ -192,6 +193,12 @@ const BlogPost = () => {
           {/* Article content */}
           <div className="prose prose-lg max-w-none">
             <RichContent content={post.content as any} className="text-base leading-relaxed" />
+          </div>
+
+          {/* Share section */}
+          <div className="mt-12 border-t pt-12 text-center">
+            <h3 className="text-xl font-semibold mb-4">Found this helpful?</h3>
+            <ShareButton title="Share this post" />
           </div>
 
           {/* Related posts section */}
