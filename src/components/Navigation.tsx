@@ -23,11 +23,12 @@ const Navigation = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
-          <GraduationCap className="h-8 w-8 text-primary" />
-          <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            School Tech Hub
-          </span>
+        <Link to="/" className="flex items-center">
+          <img 
+            src="/lovable-uploads/cd87d5dd-fde0-4233-8906-ef61d77a97ae.png" 
+            alt="School Tech Hub Solutions" 
+            className="h-12 w-auto"
+          />
         </Link>
 
         {/* Desktop Navigation */}

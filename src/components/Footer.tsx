@@ -44,9 +44,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <GraduationCap className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">School Tech Hub</span>
+            <div className="flex items-center">
+              <img 
+                src="/lovable-uploads/cd87d5dd-fde0-4233-8906-ef61d77a97ae.png" 
+                alt="School Tech Hub Solutions" 
+                className="h-10 w-auto"
+              />
             </div>
             <p className="text-sm text-muted-foreground">
               Making educational technology accessible and practical for every teacher

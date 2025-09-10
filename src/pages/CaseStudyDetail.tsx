@@ -94,7 +94,7 @@ const CaseStudyDetail = () => {
         title={caseStudy.title}
         description={`Learn how ${caseStudy.school_name} transformed their classroom with technology. ${caseStudy.challenge}`}
         keywords="school technology case study, edtech success story, classroom transformation"
-        canonicalUrl={`https://schooltechhub.com/case-studies/${caseStudy.slug}`}
+        canonicalUrl={`https://schooltechhub.com/case-studies/${slug}`}
       />
       <Navigation />
 

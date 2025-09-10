@@ -260,7 +260,7 @@ const Contact = () => {
                             {formData.preferredDate ? format(new Date(formData.preferredDate), "PPP") : <span>Pick a date</span>}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent className="w-auto p-0 z-[100]" align="start">
                           <Calendar
                             mode="single"
                             selected={formData.preferredDate ? new Date(formData.preferredDate) : undefined}
@@ -288,7 +288,7 @@ const Contact = () => {
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select preferred time" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[100]">
                           <SelectItem value="09:00">9:00 AM</SelectItem>
                           <SelectItem value="10:00">10:00 AM</SelectItem>
                           <SelectItem value="11:00">11:00 AM</SelectItem>

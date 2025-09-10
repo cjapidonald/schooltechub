@@ -305,6 +305,14 @@ const Blog = () => {
                       → Book 1:1 Coaching
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      to="/contact"
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      → Book Whole School Training
+                    </Link>
+                  </li>
                 </ul>
               </Card>
             </aside>

@@ -26,7 +26,11 @@ import {
   UserCog,
   GraduationCap,
   FileCheck,
-  Layout
+  Layout,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Mail
 } from "lucide-react";
 import heroImage from "@/assets/futuristic-classroom-hero.jpg";
 import aiCollabImage from "@/assets/ai-collaboration.jpg";
@@ -307,7 +311,7 @@ const Index = () => {
               <p className="text-xl text-muted-foreground font-space mb-8 max-w-2xl mx-auto">
                 Join thousands of educators who are already using our platform to create better learning experiences.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link to="/contact">
                   <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:shadow-[0_0_40px_hsl(var(--glow-primary)/0.5)]">
                     Get Started
@@ -319,6 +323,44 @@ const Index = () => {
                     View Pricing
                   </Button>
                 </Link>
+              </div>
+              
+              {/* Social Media Icons */}
+              <div className="flex justify-center space-x-4">
+                <a 
+                  href="https://www.facebook.com/share/g/1NukWcXVpp/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-muted-foreground hover:text-primary transition-colors" 
+                  aria-label="Facebook"
+                >
+                  <Facebook className="h-6 w-6" />
+                </a>
+                <a 
+                  href="https://www.instagram.com/schooltechhub/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-muted-foreground hover:text-primary transition-colors" 
+                  aria-label="Instagram"
+                >
+                  <Instagram className="h-6 w-6" />
+                </a>
+                <a 
+                  href="https://www.linkedin.com/in/donald-cjapi-b7800a383/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-muted-foreground hover:text-primary transition-colors" 
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="h-6 w-6" />
+                </a>
+                <a 
+                  href="mailto:dcjapi@gmail.com" 
+                  className="text-muted-foreground hover:text-primary transition-colors" 
+                  aria-label="Email"
+                >
+                  <Mail className="h-6 w-6" />
+                </a>
               </div>
             </div>
           </Card>
