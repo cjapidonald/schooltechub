@@ -7,9 +7,12 @@ import { TrendingUp, Users, Target, ArrowLeft, Quote, Clock, Calendar } from "lu
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import RichContent from "@/components/RichContent";
-import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
-import type { Json } from "@/integrations/supabase/types";
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = "https://ruybexkjupmannggnstn.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1eWJleGtqdXBtYW5uZ2duc3RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTk3MTYsImV4cCI6MjA3MjgzNTcxNn0.n2MlQf65ggrUVW1nSXKMvoSsyBe9cxY_ElOHvMD5Das";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 interface CaseStudy {
   id: string;
@@ -105,30 +108,60 @@ const CaseStudyDetail = () => {
   const fetchCaseStudy = async () => {
     if (!slug) return;
     
-    // First try to get from database
-    const { data, error } = await supabase
+    // First try to get from database with simplified query - use 'as any' to avoid type depth issue
+    const result: any = await supabase
       .from("case_studies")
-      .select(`
-        *,
-        testimonial:testimonials(*)
-      `)
+      .select("*")
       .eq("slug", slug)
       .eq("is_published", true)
       .maybeSingle();
+    
+    const { data, error } = result;
 
     if (error) {
       console.error("Error fetching case study:", error);
+      
+      // If no data from database, use sample data
+      if (sampleCaseStudies[slug]) {
+        setCaseStudy(sampleCaseStudies[slug]);
+      } else {
+        setCaseStudy(null);
+      }
+      setLoading(false);
+      return;
     }
 
-    // If no data from database, use sample data
-    if (data) {
-      setCaseStudy(data);
-    } else if (sampleCaseStudies[slug]) {
-      setCaseStudy(sampleCaseStudies[slug]);
-    } else {
-      setCaseStudy(null);
+    // If we have a case study, fetch its testimonial separately
+    let caseStudyToSet: CaseStudy = {
+      id: data.id,
+      title: data.title,
+      school_name: data.school_name,
+      challenge: data.challenge || "",
+      solution: data.solution,
+      results: data.results,
+      created_at: data.created_at
+    };
+
+    if (data && data.testimonial_id) {
+      const { data: testimonialData } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("id", data.testimonial_id)
+        .single();
+      
+      if (testimonialData) {
+        caseStudyToSet.testimonial = {
+          quote: testimonialData.quote,
+          author_name: testimonialData.author_name,
+          author_role: testimonialData.author_role || "",
+          school_name: testimonialData.school_name,
+          picture_url: testimonialData.picture_url,
+          company: testimonialData.company
+        };
+      }
     }
-    
+
+    setCaseStudy(caseStudyToSet);
     setLoading(false);
   };
 
