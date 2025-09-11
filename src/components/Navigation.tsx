@@ -10,15 +10,11 @@ const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: "Home", path: "/" },
     { name: "Tools", path: "/tools" },
     { name: "Learn", path: "/learn" },
-    { name: "Evidence", path: "/evidence" },
-    { name: "Community", path: "/community" },
+    { name: "Blog", path: "/blog" },
+    { name: "Events", path: "/events" },
     { name: "Services", path: "/services" },
-  ];
-
-  const secondaryItems = [
     { name: "About", path: "/about" },
     { name: "Contact", path: "/contact" },
   ];
@@ -52,25 +48,9 @@ const Navigation = () => {
               </Link>
             ))}
           </div>
-          <div className="flex items-center gap-4 pl-4 border-l">
-            {secondaryItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "text-sm transition-colors hover:text-primary",
-                  location.pathname === item.path
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
-            <Button asChild>
-              <Link to="/contact">Book Consultation</Link>
-            </Button>
-          </div>
+          <Button asChild>
+            <Link to="/contact">Book Consultation</Link>
+          </Button>
         </div>
 
         {/* Mobile Navigation */}
@@ -98,23 +78,6 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              <div className="border-t pt-4 mt-4">
-                {secondaryItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsOpen(false)}
-                    className={cn(
-                      "block py-2 transition-colors hover:text-primary",
-                      location.pathname === item.path
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
               <Link to="/contact" onClick={() => setIsOpen(false)} className="mt-4">
                 <Button className="w-full">Book Consultation</Button>
               </Link>

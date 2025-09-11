@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, Video, MapPin, Globe, Mic, BookOpen } from "lucide-react";
+import { Calendar, Clock, Users, Video, MapPin, Hammer, Mic } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
@@ -16,11 +16,11 @@ const Events = () => {
 
   const eventCategories = [
     {
-      icon: Calendar,
-      title: "Professional Development",
-      description: "Training sessions and workshops for educators",
-      link: "/events/professional-development",
-      color: "text-blue-500"
+      icon: Hammer,
+      title: "Workshops",
+      description: "Hands-on learning experiences",
+      link: "/events/workshops",
+      color: "text-yellow-500"
     },
     {
       icon: Video,
@@ -31,31 +31,10 @@ const Events = () => {
     },
     {
       icon: Users,
-      title: "Teacher Meetups",
+      title: "Meetups",
       description: "Local and virtual networking opportunities",
       link: "/events/meetups",
       color: "text-green-500"
-    },
-    {
-      icon: Mic,
-      title: "Conferences",
-      description: "Major education technology conferences",
-      link: "/events/conferences",
-      color: "text-red-500"
-    },
-    {
-      icon: BookOpen,
-      title: "Workshops",
-      description: "Hands-on learning experiences",
-      link: "/events/workshops",
-      color: "text-yellow-500"
-    },
-    {
-      icon: Globe,
-      title: "Global Events",
-      description: "International education initiatives",
-      link: "/events/global",
-      color: "text-indigo-500"
     }
   ];
 
