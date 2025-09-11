@@ -1,0 +1,28 @@
+# Netlify redirect rules
+
+# Handle trailing slashes - redirect to non-trailing slash URLs
+/tools/ /tools 301
+/services/ /services 301
+/tutorials/ /tutorials 301
+/blog/ /blog 301
+/about/ /about 301
+/case-studies/ /case-studies 301
+/contact/ /contact 301
+/faq/ /faq 301
+/sitemap/ /sitemap 301
+
+# Handle common typos and variations
+/tool /tools 301
+/service /services 301
+/tutorial /tutorials 301
+/case-study /case-studies 301
+/cases /case-studies 301
+/faqs /faq 301
+
+# Handle old or alternative URLs
+/blog-posts /blog 301
+/articles /blog 301
+/resources /tutorials 301
+
+# SPA fallback - must be last
+/* /index.html 200

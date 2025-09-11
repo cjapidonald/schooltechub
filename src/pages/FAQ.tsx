@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { HelpCircle } from "lucide-react";
 import RichContent from "@/components/RichContent";
 import type { Json } from "@/integrations/supabase/types";
@@ -53,10 +54,26 @@ const FAQ = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO 
-        title="FAQ - School Tech Hub"
-        description="Find answers to frequently asked questions about our educational technology services and tools"
-        keywords="FAQ, frequently asked questions, edtech help, tech support"
+        title="FAQ"
+        description="Find answers to frequently asked questions about our educational technology services, AI tools, VR classrooms, and teacher management software"
+        keywords="FAQ, frequently asked questions, edtech help, tech support, AI education, VR learning, teacher tools"
+        canonicalUrl="https://schooltechub.com/faq"
       />
+      {faqs.length > 0 && (
+        <StructuredData
+          type="FAQPage"
+          data={{
+            mainEntity: faqs.map(faq => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: typeof faq.answer === 'string' ? faq.answer : JSON.stringify(faq.answer)
+              }
+            }))
+          }}
+        />
+      )}
       <Navigation />
       
       <main className="flex-1">

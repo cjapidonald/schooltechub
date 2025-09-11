@@ -18,6 +18,7 @@ const NotFound = () => {
       <SEO 
         title="404 - Page Not Found"
         description="The page you're looking for doesn't exist. Return to SchoolTech Hub homepage to explore our educational technology resources."
+        canonicalUrl="https://schooltechub.com/404"
       />
       <Navigation />
       

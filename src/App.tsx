@@ -13,6 +13,8 @@ import BlogPost from "./pages/BlogPost";
 import About from "./pages/About";
 import CaseStudies from "./pages/CaseStudies";
 import CaseStudyDetail from "./pages/CaseStudyDetail";
+import TutorialDetail from "./pages/TutorialDetail";
+import ToolDetail from "./pages/ToolDetail";
 import Contact from "./pages/Contact";
 import Sitemap from "./pages/Sitemap";
 import FAQ from "./pages/FAQ";
@@ -30,8 +32,10 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/tools" element={<Tools />} />
+              <Route path="/tools/:id" element={<ToolDetail />} />
               <Route path="/services" element={<Services />} />
               <Route path="/tutorials" element={<Tutorials />} />
+              <Route path="/tutorials/:id" element={<TutorialDetail />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/about" element={<About />} />
