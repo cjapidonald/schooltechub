@@ -13,22 +13,52 @@ const Sitemap = () => {
         { title: "Home", url: "/" },
         { title: "About", url: "/about" },
         { title: "Contact", url: "/contact" },
+        { title: "FAQ", url: "/faq" },
       ]
     },
     {
-      title: "Resources",
+      title: "Tools Hub",
       links: [
-        { title: "Tools & Activities", url: "/tools" },
-        { title: "Tutorials", url: "/tutorials" },
-        { title: "Blog", url: "/blog" },
-        { title: "Case Studies", url: "/case-studies" },
+        { title: "Tools Directory", url: "/tools" },
+        { title: "Templates", url: "/tools/templates" },
+      ]
+    },
+    {
+      title: "Learn Hub",
+      links: [
+        { title: "Learn Overview", url: "/learn" },
+        { title: "Tutorials", url: "/learn/tutorials" },
+        { title: "Teaching Techniques", url: "/learn/teaching-techniques" },
+        { title: "Activities", url: "/learn/activities" },
+        { title: "Lesson Plans", url: "/learn/lesson-plans" },
+        { title: "Teacher Tips", url: "/learn/teacher-tips" },
+      ]
+    },
+    {
+      title: "Blog Hub",
+      links: [
+        { title: "Blog Posts", url: "/blog" },
+        { title: "Case Studies", url: "/blog/case-studies" },
+        { title: "Research", url: "/blog/research" },
+        { title: "Research Questions", url: "/blog/research-questions" },
+      ]
+    },
+    {
+      title: "Events Hub",
+      links: [
+        { title: "All Events", url: "/events" },
+        { title: "Workshops", url: "/events/workshops" },
+        { title: "Webinars", url: "/events/webinars" },
+        { title: "Meetups", url: "/events/meetups" },
       ]
     },
     {
       title: "Services",
       links: [
         { title: "All Services", url: "/services" },
-        { title: "Book Consultation", url: "/contact" },
+        { title: "AI Tools Training", url: "/services/ai-tools-training" },
+        { title: "Dashboard Setup", url: "/services/dashboard-setup" },
+        { title: "Custom Workshops", url: "/services/custom-workshops" },
       ]
     }
   ];

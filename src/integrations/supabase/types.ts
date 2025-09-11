@@ -238,6 +238,81 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          author: Json | null
+          body: Json | null
+          created_at: string | null
+          description: string | null
+          end_time: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          is_online: boolean | null
+          language: string | null
+          location: string | null
+          media: Json[] | null
+          recording_url: string | null
+          registration_url: string | null
+          seo: Json | null
+          slug: string
+          stages: string[] | null
+          start_time: string
+          status: Database["public"]["Enums"]["event_status"] | null
+          subjects: string[] | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author?: Json | null
+          body?: Json | null
+          created_at?: string | null
+          description?: string | null
+          end_time: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_online?: boolean | null
+          language?: string | null
+          location?: string | null
+          media?: Json[] | null
+          recording_url?: string | null
+          registration_url?: string | null
+          seo?: Json | null
+          slug: string
+          stages?: string[] | null
+          start_time: string
+          status?: Database["public"]["Enums"]["event_status"] | null
+          subjects?: string[] | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author?: Json | null
+          body?: Json | null
+          created_at?: string | null
+          description?: string | null
+          end_time?: string
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_online?: boolean | null
+          language?: string | null
+          location?: string | null
+          media?: Json[] | null
+          recording_url?: string | null
+          registration_url?: string | null
+          seo?: Json | null
+          slug?: string
+          stages?: string[] | null
+          start_time?: string
+          status?: Database["public"]["Enums"]["event_status"] | null
+          subjects?: string[] | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       faq: {
         Row: {
           answer: Json
@@ -470,6 +545,8 @@ export type Database = {
         | "student_project"
         | "news"
       cost_type: "free" | "freemium" | "paid"
+      event_status: "draft" | "published" | "archived"
+      event_type: "workshop" | "webinar" | "meetup"
       hub_type:
         | "tools"
         | "learn"
@@ -624,6 +701,8 @@ export const Constants = {
         "news",
       ],
       cost_type: ["free", "freemium", "paid"],
+      event_status: ["draft", "published", "archived"],
+      event_type: ["workshop", "webinar", "meetup"],
       hub_type: [
         "tools",
         "learn",
