@@ -157,6 +157,87 @@ export type Database = {
           },
         ]
       }
+      content: {
+        Row: {
+          activity_meta: Json | null
+          author: Json | null
+          body: Json | null
+          content_type: Database["public"]["Enums"]["content_type_enum"]
+          cost: Database["public"]["Enums"]["cost_type"] | null
+          created_at: string | null
+          duration_minutes: number | null
+          event_meta: Json | null
+          group_sizes: string[] | null
+          hub: Database["public"]["Enums"]["hub_type"]
+          id: string
+          language: string | null
+          media: Json[] | null
+          published_at: string | null
+          seo: Json | null
+          slug: string
+          stages: string[] | null
+          status: Database["public"]["Enums"]["content_status"] | null
+          subjects: string[] | null
+          tags: string[] | null
+          title: string
+          tool_meta: Json | null
+          translations: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          activity_meta?: Json | null
+          author?: Json | null
+          body?: Json | null
+          content_type: Database["public"]["Enums"]["content_type_enum"]
+          cost?: Database["public"]["Enums"]["cost_type"] | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          event_meta?: Json | null
+          group_sizes?: string[] | null
+          hub: Database["public"]["Enums"]["hub_type"]
+          id?: string
+          language?: string | null
+          media?: Json[] | null
+          published_at?: string | null
+          seo?: Json | null
+          slug: string
+          stages?: string[] | null
+          status?: Database["public"]["Enums"]["content_status"] | null
+          subjects?: string[] | null
+          tags?: string[] | null
+          title: string
+          tool_meta?: Json | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          activity_meta?: Json | null
+          author?: Json | null
+          body?: Json | null
+          content_type?: Database["public"]["Enums"]["content_type_enum"]
+          cost?: Database["public"]["Enums"]["cost_type"] | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          event_meta?: Json | null
+          group_sizes?: string[] | null
+          hub?: Database["public"]["Enums"]["hub_type"]
+          id?: string
+          language?: string | null
+          media?: Json[] | null
+          published_at?: string | null
+          seo?: Json | null
+          slug?: string
+          stages?: string[] | null
+          status?: Database["public"]["Enums"]["content_status"] | null
+          subjects?: string[] | null
+          tags?: string[] | null
+          title?: string
+          tool_meta?: Json | null
+          translations?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       faq: {
         Row: {
           answer: Json
@@ -370,7 +451,32 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      content_status: "draft" | "published" | "archived"
+      content_type_enum:
+        | "tool"
+        | "template"
+        | "tutorial"
+        | "teaching_technique"
+        | "activity"
+        | "lesson_plan"
+        | "teacher_tip"
+        | "blog"
+        | "case_study"
+        | "research"
+        | "research_question"
+        | "event"
+        | "course"
+        | "consulting"
+        | "student_project"
+        | "news"
+      cost_type: "free" | "freemium" | "paid"
+      hub_type:
+        | "tools"
+        | "learn"
+        | "evidence"
+        | "community"
+        | "services"
+        | "about"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -497,6 +603,35 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      content_status: ["draft", "published", "archived"],
+      content_type_enum: [
+        "tool",
+        "template",
+        "tutorial",
+        "teaching_technique",
+        "activity",
+        "lesson_plan",
+        "teacher_tip",
+        "blog",
+        "case_study",
+        "research",
+        "research_question",
+        "event",
+        "course",
+        "consulting",
+        "student_project",
+        "news",
+      ],
+      cost_type: ["free", "freemium", "paid"],
+      hub_type: [
+        "tools",
+        "learn",
+        "evidence",
+        "community",
+        "services",
+        "about",
+      ],
+    },
   },
 } as const
