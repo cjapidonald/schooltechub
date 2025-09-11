@@ -180,6 +180,96 @@ const About = () => {
         </div>
       </section>
 
+      {/* Certifications Section */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">Certifications & Expertise</h2>
+          <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <Card className="p-6 text-center">
+              <Award className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">ClassDojo Mentorship</h3>
+            </Card>
+            <Card className="p-6 text-center">
+              <Award className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">Wordwall Certified</h3>
+            </Card>
+            <Card className="p-6 text-center">
+              <Award className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">Canvas Certification</h3>
+            </Card>
+            <Card className="p-6 text-center">
+              <Award className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">Microsoft Educator</h3>
+            </Card>
+            <Card className="p-6 text-center">
+              <Award className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">AI Education</h3>
+            </Card>
+            <Card className="p-6 text-center">
+              <Award className="h-8 w-8 text-primary mx-auto mb-3" />
+              <h3 className="font-semibold text-sm">Leadership Management</h3>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 px-4">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">What Teachers Say</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="p-6">
+              <p className="text-muted-foreground mb-4 italic">
+                "The AI tools training transformed how I create lesson plans. I'm saving hours every week!"
+              </p>
+              <p className="font-semibold">Sarah M.</p>
+              <p className="text-sm text-muted-foreground">5th Grade Teacher</p>
+            </Card>
+            <Card className="p-6">
+              <p className="text-muted-foreground mb-4 italic">
+                "Finally, someone who understands classroom reality and doesn't just push the latest tech trends."
+              </p>
+              <p className="font-semibold">Mike T.</p>
+              <p className="text-sm text-muted-foreground">High School Science</p>
+            </Card>
+            <Card className="p-6">
+              <p className="text-muted-foreground mb-4 italic">
+                "The dashboard setup service revolutionized our school's data management. Highly recommend!"
+              </p>
+              <p className="font-semibold">Principal Johnson</p>
+              <p className="text-sm text-muted-foreground">Elementary School</p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-muted/30" id="faq">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+          <div className="max-w-3xl mx-auto space-y-4">
+            <Card className="p-6">
+              <h3 className="font-semibold mb-2">How do you stay current with EdTech?</h3>
+              <p className="text-muted-foreground">
+                We continuously test new tools, attend conferences, and collaborate with teachers worldwide to ensure our recommendations are cutting-edge yet practical.
+              </p>
+            </Card>
+            <Card className="p-6">
+              <h3 className="font-semibold mb-2">Do you work with schools outside Vietnam?</h3>
+              <p className="text-muted-foreground">
+                Yes! While based in Vietnam, we offer online consulting and training services globally, with experience across multiple education systems.
+              </p>
+            </Card>
+            <Card className="p-6">
+              <h3 className="font-semibold mb-2">What makes your approach different?</h3>
+              <p className="text-muted-foreground">
+                We focus on practical, immediately implementable solutions that work within real classroom constraints, not theoretical best practices.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );

@@ -6,112 +6,52 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Filter, Clock, Users, Zap, ExternalLink, BookOpen, Plus, Check } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Filter, Clock, Users, ExternalLink, BookOpen, Plus, Check, FileText, Layout, Package } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
-import { StructuredData } from "@/components/StructuredData";
-import { supabase } from "@/integrations/supabase/client";
+import { useContent, type ContentItem } from "@/hooks/useContent";
 import { useToast } from "@/hooks/use-toast";
-import type { Database, Json } from "@/integrations/supabase/types";
-
-type ToolActivity = Database["public"]["Tables"]["tools_activities"]["Row"];
+import { Link } from "react-router-dom";
 
 const Tools = () => {
-  const [tools, setTools] = useState<ToolActivity[]>([]);
-  const [filteredTools, setFilteredTools] = useState<ToolActivity[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("tools");
   const [selectedFilters, setSelectedFilters] = useState({
-    schoolStages: [] as string[],
+    stages: [] as string[],
     subjects: [] as string[],
     cost: [] as string[],
-    groupSize: [] as string[],
+    groupSizes: [] as string[],
   });
   const [compareList, setCompareList] = useState<string[]>([]);
   const { toast } = useToast();
 
+  // Fetch tools and templates
+  const { content: tools, loading: toolsLoading } = useContent({
+    hub: 'tools',
+    contentTypes: ['tool'],
+    stages: selectedFilters.stages,
+    subjects: selectedFilters.subjects,
+    cost: selectedFilters.cost.map(c => c.toLowerCase() as 'free' | 'freemium' | 'paid'),
+    groupSizes: selectedFilters.groupSizes,
+    searchTerm: searchTerm,
+  });
+
+  const { content: templates, loading: templatesLoading } = useContent({
+    hub: 'tools',
+    contentTypes: ['template'],
+    stages: selectedFilters.stages,
+    subjects: selectedFilters.subjects,
+    cost: selectedFilters.cost.map(c => c.toLowerCase() as 'free' | 'freemium' | 'paid'),
+    searchTerm: searchTerm,
+  });
+
   const filters = {
-    schoolStages: ["Pre-K", "K-2", "3-5", "6-8", "9-12"],
+    stages: ["Kindergarten", "Primary", "Middle", "High School"],
     subjects: ["Phonics", "Math", "Science", "CS/ICT", "Social Studies", "Arts", "Music", "PE/Health", "SEL", "Languages"],
-    cost: ["Free", "Paid"],
-    groupSize: ["Solo", "Pairs", "Small Group", "Whole Class"],
-  };
-
-  useEffect(() => {
-    fetchTools();
-  }, []);
-
-  useEffect(() => {
-    filterTools();
-  }, [searchTerm, selectedFilters, tools]);
-
-  const fetchTools = async () => {
-    const { data, error } = await supabase
-      .from("tools_activities")
-      .select("*")
-      .order("name");
-
-    if (error) {
-      toast({
-        title: "Error fetching tools",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      setTools(data || []);
-      setFilteredTools(data || []);
-    }
-  };
-
-  const filterTools = () => {
-    let filtered = tools;
-
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter((tool) => {
-        const nameMatch = tool.name.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        // Handle both legacy string and new jsonb format for description
-        let descriptionMatch = false;
-        if (tool.description) {
-          if (typeof tool.description === 'string') {
-            descriptionMatch = tool.description.toLowerCase().includes(searchTerm.toLowerCase());
-          } else if (Array.isArray(tool.description)) {
-            // Search through all text blocks in the jsonb array
-            descriptionMatch = tool.description.some((block: any) => 
-              block.type === 'paragraph' && block.text?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-          }
-        }
-        
-        return nameMatch || descriptionMatch;
-      });
-    }
-
-    // Apply filters
-    if (selectedFilters.schoolStages.length > 0) {
-      filtered = filtered.filter((tool) =>
-        tool.school_stages?.some((stage: string) => selectedFilters.schoolStages.includes(stage))
-      );
-    }
-
-    if (selectedFilters.subjects.length > 0) {
-      filtered = filtered.filter((tool) =>
-        tool.subjects?.some((subject: string) => selectedFilters.subjects.includes(subject))
-      );
-    }
-
-    if (selectedFilters.cost.length > 0) {
-      filtered = filtered.filter((tool) => selectedFilters.cost.includes(tool.cost));
-    }
-
-    if (selectedFilters.groupSize.length > 0) {
-      filtered = filtered.filter((tool) =>
-        selectedFilters.groupSize.includes(tool.group_size || "")
-      );
-    }
-
-    setFilteredTools(filtered);
+    cost: ["Free", "Freemium", "Paid"],
+    groupSizes: ["1:1", "Small Group", "Whole Class"],
   };
 
   const toggleFilter = (category: keyof typeof selectedFilters, value: string) => {
@@ -133,12 +73,15 @@ const Tools = () => {
     );
   };
 
+  const activeContent = activeTab === "tools" ? tools : templates;
+  const loading = activeTab === "tools" ? toolsLoading : templatesLoading;
+
   return (
     <div className="min-h-screen flex flex-col">
       <SEO 
-        title="Tools & Activities"
-        description="Discover classroom-ready EdTech tools and activities. Browse our curated directory of educational technology solutions for K-12 teachers. Free and paid options available."
-        keywords="educational tools, classroom activities, K-12 technology, teaching resources, EdTech directory, free educational apps, classroom management tools"
+        title="Tools Hub - Educational Technology & Resources"
+        description="Discover classroom-ready EdTech tools and templates. Browse our curated directory of educational technology solutions and resources for K-12 teachers."
+        keywords="educational tools, classroom templates, K-12 technology, teaching resources, EdTech directory, free educational apps"
         canonicalUrl="https://schooltechhub.com/tools"
       />
       <Navigation />
@@ -146,9 +89,9 @@ const Tools = () => {
       {/* Header */}
       <section className="py-12 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto">
-          <h1 className="text-4xl font-bold mb-4">Tools & Activities Directory</h1>
+          <h1 className="text-4xl font-bold mb-4">Tools Hub</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Discover classroom-ready tech tools and activities that actually work
+            Discover classroom-ready tech tools and templates that actually work
           </p>
 
           {/* Search Bar */}
@@ -156,7 +99,7 @@ const Tools = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
             <Input
               type="text"
-              placeholder="Search tools and activities..."
+              placeholder="Search tools and templates..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-6 text-lg"
@@ -165,74 +108,88 @@ const Tools = () => {
         </div>
       </section>
 
-      {/* Filters and Results */}
+      {/* Tabs and Content */}
       <section className="py-8 px-4 flex-1">
         <div className="container mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Filters Sidebar */}
-            <aside className="lg:w-64">
-              <Sheet>
-                <SheetTrigger asChild className="lg:hidden">
-                  <Button variant="outline" className="w-full mb-4">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-[300px]">
-                  <SheetHeader>
-                    <SheetTitle>Filter Tools</SheetTitle>
-                  </SheetHeader>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="tools" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Technologies
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Templates
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Filters Sidebar */}
+              <aside className="lg:w-64">
+                <Sheet>
+                  <SheetTrigger asChild className="lg:hidden">
+                    <Button variant="outline" className="w-full mb-4">
+                      <Filter className="mr-2 h-4 w-4" />
+                      Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[300px]">
+                    <SheetHeader>
+                      <SheetTitle>Filter {activeTab === "tools" ? "Tools" : "Templates"}</SheetTitle>
+                    </SheetHeader>
+                    <FilterContent
+                      filters={filters}
+                      selectedFilters={selectedFilters}
+                      toggleFilter={toggleFilter}
+                    />
+                  </SheetContent>
+                </Sheet>
+
+                <div className="hidden lg:block">
+                  <h3 className="font-semibold mb-4">Filters</h3>
                   <FilterContent
                     filters={filters}
                     selectedFilters={selectedFilters}
                     toggleFilter={toggleFilter}
                   />
-                </SheetContent>
-              </Sheet>
+                </div>
+              </aside>
 
-              <div className="hidden lg:block">
-                <h3 className="font-semibold mb-4">Filters</h3>
-                <FilterContent
-                  filters={filters}
-                  selectedFilters={selectedFilters}
-                  toggleFilter={toggleFilter}
-                />
-              </div>
-            </aside>
+              {/* Results Grid */}
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-6">
+                  <p className="text-muted-foreground">
+                    {loading ? "Loading..." : `Showing ${activeContent.length} ${activeTab}`}
+                  </p>
+                  {compareList.length > 0 && activeTab === "tools" && (
+                    <Button variant="outline">
+                      Compare ({compareList.length})
+                    </Button>
+                  )}
+                </div>
 
-            {/* Results Grid */}
-            <div className="flex-1">
-              <div className="flex justify-between items-center mb-6">
-                <p className="text-muted-foreground">
-                  Showing {filteredTools.length} of {tools.length} tools
-                </p>
-                {compareList.length > 0 && (
-                  <Button variant="outline">
-                    Compare ({compareList.length})
-                  </Button>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {activeContent.map((item) => (
+                    <ContentCard
+                      key={item.id}
+                      item={item}
+                      isComparing={compareList.includes(item.id)}
+                      onToggleCompare={() => toggleCompare(item.id)}
+                      showCompare={activeTab === "tools"}
+                    />
+                  ))}
+                </div>
+
+                {!loading && activeContent.length === 0 && (
+                  <Card className="p-12 text-center">
+                    <p className="text-muted-foreground">
+                      No {activeTab} found matching your criteria. Try adjusting your filters.
+                    </p>
+                  </Card>
                 )}
               </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {filteredTools.map((tool) => (
-                  <ToolCard
-                    key={tool.id}
-                    tool={tool}
-                    isComparing={compareList.includes(tool.id)}
-                    onToggleCompare={() => toggleCompare(tool.id)}
-                  />
-                ))}
-              </div>
-
-              {filteredTools.length === 0 && (
-                <Card className="p-12 text-center">
-                  <p className="text-muted-foreground">
-                    No tools found matching your criteria. Try adjusting your filters.
-                  </p>
-                </Card>
-              )}
             </div>
-          </div>
+          </Tabs>
         </div>
       </section>
 
@@ -247,7 +204,9 @@ const FilterContent = ({ filters, selectedFilters, toggleFilter }: any) => {
       {Object.entries(filters).map(([category, values]) => (
         <div key={category}>
           <Label className="text-sm font-semibold mb-3 block">
-            {category.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
+            {category === "stages" ? "School Stages" : 
+             category === "groupSizes" ? "Group Sizes" :
+             category.charAt(0).toUpperCase() + category.slice(1)}
           </Label>
           <div className="space-y-2">
             {(values as string[]).map((value) => (
@@ -272,31 +231,41 @@ const FilterContent = ({ filters, selectedFilters, toggleFilter }: any) => {
   );
 };
 
-const ToolCard = ({ tool, isComparing, onToggleCompare }: any) => {
+const ContentCard = ({ item, isComparing, onToggleCompare, showCompare }: {
+  item: ContentItem;
+  isComparing: boolean;
+  onToggleCompare: () => void;
+  showCompare: boolean;
+}) => {
+  const toolMeta = item.tool_meta as any;
+  const teaser = item.body?.teaser || "";
+  
   return (
     <Card className="p-6 hover:shadow-large transition-shadow">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-xl font-semibold">{tool.name}</h3>
-        <Button
-          variant={isComparing ? "secondary" : "outline"}
-          size="sm"
-          onClick={onToggleCompare}
-        >
-          {isComparing ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-        </Button>
+        <h3 className="text-xl font-semibold">{item.title}</h3>
+        {showCompare && (
+          <Button
+            variant={isComparing ? "secondary" : "outline"}
+            size="sm"
+            onClick={onToggleCompare}
+          >
+            {isComparing ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          </Button>
+        )}
       </div>
 
-      {tool.best_for && (
-        <p className="text-sm text-muted-foreground mb-4">Best for: {tool.best_for}</p>
+      {teaser && (
+        <p className="text-sm text-muted-foreground mb-4">{teaser}</p>
       )}
 
       <div className="flex flex-wrap gap-2 mb-4">
-        {tool.school_stages?.map((stage: string) => (
+        {item.stages?.map((stage: string) => (
           <Badge key={stage} variant="secondary">
             {stage}
           </Badge>
         ))}
-        {tool.subjects?.slice(0, 3).map((subject: string) => (
+        {item.subjects?.slice(0, 3).map((subject: string) => (
           <Badge key={subject} variant="outline">
             {subject}
           </Badge>
@@ -304,35 +273,39 @@ const ToolCard = ({ tool, isComparing, onToggleCompare }: any) => {
       </div>
 
       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-        {tool.setup_time && (
+        {item.duration_minutes && (
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            <span>{tool.setup_time}</span>
+            <span>{item.duration_minutes} min</span>
           </div>
         )}
-        {tool.group_size && (
+        {item.group_sizes && item.group_sizes.length > 0 && (
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            <span>{tool.group_size}</span>
+            <span>{item.group_sizes[0]}</span>
           </div>
         )}
-        <Badge variant={tool.cost === "Free" ? "secondary" : "default"}>
-          {tool.cost}
-        </Badge>
+        {item.cost && (
+          <Badge variant={item.cost === "free" ? "secondary" : "default"}>
+            {item.cost.charAt(0).toUpperCase() + item.cost.slice(1)}
+          </Badge>
+        )}
       </div>
 
       <div className="flex gap-2">
-        {tool.external_link && (
+        {toolMeta?.website_url && (
           <Button variant="outline" size="sm" asChild>
-            <a href={tool.external_link} target="_blank" rel="noopener noreferrer">
+            <a href={toolMeta.website_url} target="_blank" rel="noopener noreferrer">
               Try it
               <ExternalLink className="ml-2 h-3 w-3" />
             </a>
           </Button>
         )}
-        <Button variant="outline" size="sm">
-          <BookOpen className="mr-2 h-3 w-3" />
-          Lesson idea
+        <Button variant="outline" size="sm" asChild>
+          <Link to={`/tools/${item.slug}`}>
+            <BookOpen className="mr-2 h-3 w-3" />
+            View Details
+          </Link>
         </Button>
       </div>
     </Card>

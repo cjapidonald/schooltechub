@@ -1,13 +1,15 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Clock, Users, Target, Calendar, Shield, CreditCard, FileText } from "lucide-react";
+import { CheckCircle, Clock, Users, Target, Calendar, Shield, GraduationCap, ArrowRight, FileText } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
+import { useContent, type ContentItem } from "@/hooks/useContent";
 
 const Services = () => {
   
