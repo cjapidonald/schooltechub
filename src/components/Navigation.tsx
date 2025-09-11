@@ -10,6 +10,7 @@ const Navigation = () => {
   const location = useLocation();
 
   const navItems = [
+    { name: "Home", path: "/" },
     { name: "Tools", path: "/tools" },
     { name: "Learn", path: "/learn" },
     { name: "Blog", path: "/blog" },
