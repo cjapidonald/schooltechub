@@ -66,7 +66,17 @@ const About = () => {
               </div>
               <div className="mt-6 pt-6 border-t">
                 <h3 className="text-xl font-bold mb-4">CEO Message</h3>
-                <p className="text-muted-foreground mb-4">Technology should empower teachers, not overwhelm them. Our mission is to make every educator confident with the tools that can transform their classrooms.</p>
+                <div className="flex flex-col md:flex-row gap-6 items-center">
+                  <img 
+                    src="/lovable-uploads/96483919-4154-4163-b949-8ebebd6fb820.png" 
+                    alt="CEO Photo" 
+                    className="w-32 h-32 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <p className="text-muted-foreground mb-2">Technology should empower teachers, not overwhelm them. Our mission is to make every educator confident with the tools that can transform their classrooms.</p>
+                    <p className="font-semibold text-sm">- CEO & Founder</p>
+                  </div>
+                </div>
               </div>
               <div className="mt-6 pt-6 border-t">
                 <h3 className="text-xl font-bold mb-4">Our Mission</h3>

@@ -115,7 +115,7 @@ const Tools = () => {
             <TabsList className="grid w-full max-w-md grid-cols-2">
               <TabsTrigger value="tools" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                Technologies
+                Tools
               </TabsTrigger>
               <TabsTrigger value="templates" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />

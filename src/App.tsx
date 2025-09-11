@@ -9,8 +9,8 @@ import Tools from "./pages/Tools";
 import Services from "./pages/Services";
 import Tutorials from "./pages/Tutorials";
 import Learn from "./pages/Learn";
-import Evidence from "./pages/Evidence";
-import Community from "./pages/Community";
+import Blog from "./pages/Blog";
+import Events from "./pages/Events";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Sitemap from "./pages/Sitemap";
@@ -30,8 +30,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/tools" element={<Tools />} />
               <Route path="/learn" element={<Learn />} />
-              <Route path="/evidence" element={<Evidence />} />
-              <Route path="/community" element={<Community />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/events" element={<Events />} />
               <Route path="/services" element={<Services />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
