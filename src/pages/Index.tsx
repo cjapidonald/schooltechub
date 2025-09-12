@@ -83,7 +83,7 @@ const Index = () => {
     <div className="min-h-screen bg-background overflow-hidden">
       <SEO 
         title="Home"
-        description="Transform your classroom with AI-powered educational technology. Virtual reality labs, gamification, teacher management software, and comprehensive EdTech solutions for modern education."
+        description="Transform your classroom with SchoolTech Hub's AI-powered educational technology. Explore VR labs, gamification tools, and teacher management software. Get started for free today"
         keywords="AI education platform, virtual reality classroom, gamification in education, teacher management software, student tracking system, curriculum development tools, educational technology Albania, auto graded homework, classroom management software"
         canonicalUrl="https://schooltechhub.com"
       />
