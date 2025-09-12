@@ -9,16 +9,15 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Tools", path: "/tools" },
-    { name: "Learn", path: "/learn" },
-    { name: "Blog", path: "/blog" },
-    { name: "Events", path: "/events" },
-    { name: "Services", path: "/services" },
-    { name: "About", path: "/about" },
-    { name: "Contact", path: "/contact" },
-  ];
+const navItems = [
+  { name: "Home", path: "/" },
+  { name: "Edutech", path: "/edutech" },
+  { name: "Blog", path: "/blog" },
+  { name: "Events", path: "/events" },
+  { name: "Services", path: "/services" },
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
+];
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

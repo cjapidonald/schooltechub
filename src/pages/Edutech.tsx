@@ -6,16 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Calendar, ArrowRight } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Clock, Users, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
-import { format } from "date-fns";
 
-const Blog = () => {
+const Edutech = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [content, setContent] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFilters, setSelectedFilters] = useState({
     grades: [] as string[],
@@ -25,11 +24,10 @@ const Blog = () => {
 
   const categories = [
     { value: "all", label: "All" },
-    { value: "ideas", label: "Ideas" },
-    { value: "research", label: "Research" },
-    { value: "research-questions", label: "Research Questions" },
-    { value: "case-studies", label: "Case Studies" },
-    { value: "lesson-planning", label: "Lesson Planning" },
+    { value: "tutorial", label: "Tutorials" },
+    { value: "technique", label: "Techniques" },
+    { value: "activity", label: "Activities" },
+    { value: "lesson-plan", label: "Lesson Plans" },
   ];
 
   const filterOptions = {
@@ -39,14 +37,14 @@ const Blog = () => {
   };
 
   useEffect(() => {
-    fetchBlogPosts();
+    fetchContent();
   }, [searchTerm, selectedCategory, selectedFilters]);
 
-  const fetchBlogPosts = async () => {
+  const fetchContent = async () => {
     try {
       setLoading(true);
       let query = supabase
-        .from("blog")
+        .from("edtech")
         .select("*")
         .eq("is_published", true);
 
@@ -55,7 +53,7 @@ const Blog = () => {
       }
 
       if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,excerpt.ilike.%${searchTerm}%`);
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
       }
 
       if (selectedFilters.grades.length > 0) {
@@ -70,12 +68,12 @@ const Blog = () => {
         query = query.contains("activity_type", selectedFilters.activityTypes);
       }
 
-      const { data, error } = await query.order("published_at", { ascending: false });
+      const { data, error } = await query.order("created_at", { ascending: false });
 
       if (error) throw error;
-      setBlogPosts(data || []);
+      setContent(data || []);
     } catch (error) {
-      console.error("Error fetching blog posts:", error);
+      console.error("Error fetching content:", error);
     } finally {
       setLoading(false);
     }
@@ -93,19 +91,18 @@ const Blog = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Blog & Research: Ideas, Case Studies & Questions"
-        description="EdTech ideas, research notes, research questions, and case studies for K-12. Practical strategies to integrate technology, improve engagement, and save time."
-        canonicalUrl="https://schooltechhub.com/blog"
-        type="website"
+        title="Edutech Hub: Tutorials, Techniques & Lesson Planning"
+        description="Learn classroom technology the practical way: tutorials, teaching techniques, activities, and AI lesson planning. Filter by grade, subject, and time to implement."
+        canonicalUrl="https://schooltechhub.com/edutech"
       />
       <Navigation />
       
       <main className="flex-1">
         <div className="container py-12">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Blog & Research Hub</h1>
+            <h1 className="text-4xl font-bold mb-2">Edutech Hub</h1>
             <p className="text-muted-foreground">
-              Ideas, research notes, research questions, and case studies for K-12 EdTech.
+              Learn new technologies, teaching techniques, activities, and AI lesson planning.
             </p>
           </div>
 
@@ -114,7 +111,7 @@ const Blog = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search blog posts, research, case studies..."
+                placeholder="Search tutorials, techniques, activities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -123,7 +120,7 @@ const Blog = () => {
           </div>
 
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-5">
               {categories.map((cat) => (
                 <TabsTrigger key={cat.value} value={cat.value}>
                   {cat.label}
@@ -190,62 +187,55 @@ const Blog = () => {
             <div className="lg:col-span-3">
               {loading ? (
                 <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">Loading blog posts...</p>
+                  <p className="text-muted-foreground">Loading content...</p>
                 </div>
-              ) : blogPosts.length === 0 ? (
+              ) : content.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">No blog posts found matching your criteria.</p>
+                  <p className="text-muted-foreground">No content found matching your criteria.</p>
                 </div>
               ) : (
                 <div className="grid gap-6">
-                  {blogPosts.map((post) => (
-                    <Card key={post.id}>
+                  {content.map((item) => (
+                    <Card key={item.id}>
                       <CardContent className="p-6">
                         <div className="flex justify-between items-start mb-4">
                           <Badge variant="secondary" className="capitalize">
-                            {post.category.replace("-", " ")}
+                            {item.category.replace("-", " ")}
                           </Badge>
-                          {post.published_at && (
+                          {item.duration && (
                             <div className="flex items-center text-sm text-muted-foreground">
-                              <Calendar className="h-4 w-4 mr-1" />
-                              {format(new Date(post.published_at), "MMM d, yyyy")}
+                              <Clock className="h-4 w-4 mr-1" />
+                              {item.duration} min
                             </div>
                           )}
                         </div>
                         <h3 className="text-xl font-semibold mb-2">
-                          <Link to={`/blog/${post.slug}`} className="hover:text-primary">
-                            {post.title}
+                          <Link to={`/edutech/${item.slug}`} className="hover:text-primary">
+                            {item.title}
                           </Link>
                         </h3>
-                        <p className="text-muted-foreground mb-4">
-                          {post.excerpt || "Click to read more..."}
-                        </p>
+                        <p className="text-muted-foreground mb-4">{item.description}</p>
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {post.grade_levels?.map((grade: string) => (
+                          {item.grade_levels?.map((grade: string) => (
                             <Badge key={grade} variant="outline">
                               {grade}
                             </Badge>
                           ))}
-                          {post.subjects?.map((subject: string) => (
+                          {item.subjects?.map((subject: string) => (
                             <Badge key={subject} variant="outline">
                               {subject}
                             </Badge>
                           ))}
                         </div>
-                        {post.activity_type && post.activity_type.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {post.activity_type.map((type: string) => (
+                        {item.activity_type && item.activity_type.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {item.activity_type.map((type: string) => (
                               <Badge key={type} variant="secondary" className="capitalize">
                                 {type.replace("-", " ")}
                               </Badge>
                             ))}
                           </div>
                         )}
-                        <Link to={`/blog/${post.slug}`}>
-                          <Button variant="link" className="p-0">
-                            Read More <ArrowRight className="h-4 w-4 ml-1" />
-                          </Button>
-                        </Link>
                       </CardContent>
                     </Card>
                   ))}
@@ -261,4 +251,4 @@ const Blog = () => {
   );
 };
 
-export default Blog;
+export default Edutech;
