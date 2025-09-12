@@ -14,227 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
-      blog_posts: {
+      blog: {
         Row: {
-          content: Json | null
-          created_at: string | null
-          grade_band: string | null
-          id: string
-          is_published: boolean | null
-          primary_keyword: string | null
-          published_at: string | null
-          slug: string | null
-          takeaway: string | null
-          teaser: string | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          content?: Json | null
-          created_at?: string | null
-          grade_band?: string | null
-          id?: string
-          is_published?: boolean | null
-          primary_keyword?: string | null
-          published_at?: string | null
-          slug?: string | null
-          takeaway?: string | null
-          teaser?: string | null
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          content?: Json | null
-          created_at?: string | null
-          grade_band?: string | null
-          id?: string
-          is_published?: boolean | null
-          primary_keyword?: string | null
-          published_at?: string | null
-          slug?: string | null
-          takeaway?: string | null
-          teaser?: string | null
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      bookings: {
-        Row: {
-          additional_notes: string | null
-          booking_type: string
-          created_at: string | null
-          customer_email: string
-          customer_name: string
-          customer_phone: string | null
-          id: string
-          preferred_date: string | null
-          preferred_time: string | null
-          school_name: string | null
-          status: string | null
-          topic: string | null
-          total_amount: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          additional_notes?: string | null
-          booking_type: string
-          created_at?: string | null
-          customer_email: string
-          customer_name: string
-          customer_phone?: string | null
-          id?: string
-          preferred_date?: string | null
-          preferred_time?: string | null
-          school_name?: string | null
-          status?: string | null
-          topic?: string | null
-          total_amount?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          additional_notes?: string | null
-          booking_type?: string
-          created_at?: string | null
-          customer_email?: string
-          customer_name?: string
-          customer_phone?: string | null
-          id?: string
-          preferred_date?: string | null
-          preferred_time?: string | null
-          school_name?: string | null
-          status?: string | null
-          topic?: string | null
-          total_amount?: number | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      case_studies: {
-        Row: {
-          challenge: string | null
-          created_at: string | null
-          id: string
-          is_published: boolean | null
-          results: Json | null
-          school_name: string
-          solution: Json | null
-          testimonial_id: string | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          challenge?: string | null
-          created_at?: string | null
-          id?: string
-          is_published?: boolean | null
-          results?: Json | null
-          school_name: string
-          solution?: Json | null
-          testimonial_id?: string | null
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          challenge?: string | null
-          created_at?: string | null
-          id?: string
-          is_published?: boolean | null
-          results?: Json | null
-          school_name?: string
-          solution?: Json | null
-          testimonial_id?: string | null
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_testimonial"
-            columns: ["testimonial_id"]
-            isOneToOne: false
-            referencedRelation: "testimonials"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      content: {
-        Row: {
-          activity_meta: Json | null
+          activity_type: string[] | null
           author: Json | null
-          body: Json | null
-          content_type: Database["public"]["Enums"]["content_type_enum"]
-          cost: Database["public"]["Enums"]["cost_type"] | null
+          category: string
+          content: Json
           created_at: string | null
-          duration_minutes: number | null
-          event_meta: Json | null
-          group_sizes: string[] | null
-          hub: Database["public"]["Enums"]["hub_type"]
+          excerpt: string | null
+          featured_image: string | null
+          grade_levels: string[] | null
           id: string
-          language: string | null
-          media: Json[] | null
+          is_published: boolean | null
+          keywords: string[] | null
+          meta_description: string | null
+          meta_title: string | null
           published_at: string | null
-          seo: Json | null
           slug: string
-          stages: string[] | null
-          status: Database["public"]["Enums"]["content_status"] | null
           subjects: string[] | null
-          tags: string[] | null
           title: string
-          tool_meta: Json | null
-          translations: Json | null
           updated_at: string | null
+          video_url: string | null
+          view_count: number | null
         }
         Insert: {
-          activity_meta?: Json | null
+          activity_type?: string[] | null
           author?: Json | null
-          body?: Json | null
-          content_type: Database["public"]["Enums"]["content_type_enum"]
-          cost?: Database["public"]["Enums"]["cost_type"] | null
+          category: string
+          content: Json
           created_at?: string | null
-          duration_minutes?: number | null
-          event_meta?: Json | null
-          group_sizes?: string[] | null
-          hub: Database["public"]["Enums"]["hub_type"]
+          excerpt?: string | null
+          featured_image?: string | null
+          grade_levels?: string[] | null
           id?: string
-          language?: string | null
-          media?: Json[] | null
+          is_published?: boolean | null
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_at?: string | null
-          seo?: Json | null
           slug: string
-          stages?: string[] | null
-          status?: Database["public"]["Enums"]["content_status"] | null
           subjects?: string[] | null
-          tags?: string[] | null
           title: string
-          tool_meta?: Json | null
-          translations?: Json | null
           updated_at?: string | null
+          video_url?: string | null
+          view_count?: number | null
         }
         Update: {
-          activity_meta?: Json | null
+          activity_type?: string[] | null
           author?: Json | null
-          body?: Json | null
-          content_type?: Database["public"]["Enums"]["content_type_enum"]
-          cost?: Database["public"]["Enums"]["cost_type"] | null
+          category?: string
+          content?: Json
           created_at?: string | null
-          duration_minutes?: number | null
-          event_meta?: Json | null
-          group_sizes?: string[] | null
-          hub?: Database["public"]["Enums"]["hub_type"]
+          excerpt?: string | null
+          featured_image?: string | null
+          grade_levels?: string[] | null
           id?: string
-          language?: string | null
-          media?: Json[] | null
+          is_published?: boolean | null
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
           published_at?: string | null
-          seo?: Json | null
           slug?: string
-          stages?: string[] | null
-          status?: Database["public"]["Enums"]["content_status"] | null
           subjects?: string[] | null
-          tags?: string[] | null
           title?: string
-          tool_meta?: Json | null
-          translations?: Json | null
           updated_at?: string | null
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      edtech: {
+        Row: {
+          activity_type: string[] | null
+          attachments: Json | null
+          author: Json | null
+          category: string
+          content: Json
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          duration: number | null
+          featured_image: string | null
+          grade_levels: string[] | null
+          group_sizes: string[] | null
+          id: string
+          is_published: boolean | null
+          keywords: string[] | null
+          materials_needed: string[] | null
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          slug: string
+          subjects: string[] | null
+          tech_requirements: string[] | null
+          title: string
+          tools_used: string[] | null
+          updated_at: string | null
+          video_url: string | null
+          view_count: number | null
+        }
+        Insert: {
+          activity_type?: string[] | null
+          attachments?: Json | null
+          author?: Json | null
+          category: string
+          content: Json
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration?: number | null
+          featured_image?: string | null
+          grade_levels?: string[] | null
+          group_sizes?: string[] | null
+          id?: string
+          is_published?: boolean | null
+          keywords?: string[] | null
+          materials_needed?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug: string
+          subjects?: string[] | null
+          tech_requirements?: string[] | null
+          title: string
+          tools_used?: string[] | null
+          updated_at?: string | null
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          activity_type?: string[] | null
+          attachments?: Json | null
+          author?: Json | null
+          category?: string
+          content?: Json
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration?: number | null
+          featured_image?: string | null
+          grade_levels?: string[] | null
+          group_sizes?: string[] | null
+          id?: string
+          is_published?: boolean | null
+          keywords?: string[] | null
+          materials_needed?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug?: string
+          subjects?: string[] | null
+          tech_requirements?: string[] | null
+          title?: string
+          tools_used?: string[] | null
+          updated_at?: string | null
+          video_url?: string | null
+          view_count?: number | null
         }
         Relationships: []
       }
@@ -243,17 +178,19 @@ export type Database = {
           author: Json | null
           body: Json | null
           created_at: string | null
+          current_attendees: number | null
           description: string | null
           end_time: string
           event_type: Database["public"]["Enums"]["event_type"]
+          featured_image: string | null
           id: string
           is_online: boolean | null
-          language: string | null
           location: string | null
-          media: Json[] | null
+          max_attendees: number | null
+          meta_description: string | null
+          meta_title: string | null
           recording_url: string | null
           registration_url: string | null
-          seo: Json | null
           slug: string
           stages: string[] | null
           start_time: string
@@ -267,17 +204,19 @@ export type Database = {
           author?: Json | null
           body?: Json | null
           created_at?: string | null
+          current_attendees?: number | null
           description?: string | null
           end_time: string
           event_type: Database["public"]["Enums"]["event_type"]
+          featured_image?: string | null
           id?: string
           is_online?: boolean | null
-          language?: string | null
           location?: string | null
-          media?: Json[] | null
+          max_attendees?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
           recording_url?: string | null
           registration_url?: string | null
-          seo?: Json | null
           slug: string
           stages?: string[] | null
           start_time: string
@@ -291,17 +230,19 @@ export type Database = {
           author?: Json | null
           body?: Json | null
           created_at?: string | null
+          current_attendees?: number | null
           description?: string | null
           end_time?: string
           event_type?: Database["public"]["Enums"]["event_type"]
+          featured_image?: string | null
           id?: string
           is_online?: boolean | null
-          language?: string | null
           location?: string | null
-          media?: Json[] | null
+          max_attendees?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
           recording_url?: string | null
           registration_url?: string | null
-          seo?: Json | null
           slug?: string
           stages?: string[] | null
           start_time?: string
@@ -317,32 +258,32 @@ export type Database = {
         Row: {
           answer: Json
           category: string | null
-          created_at: string
+          created_at: string | null
           display_order: number | null
           id: string
           is_published: boolean | null
           question: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           answer: Json
           category?: string | null
-          created_at?: string
+          created_at?: string | null
           display_order?: number | null
           id?: string
           is_published?: boolean | null
           question: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           answer?: Json
           category?: string | null
-          created_at?: string
+          created_at?: string | null
           display_order?: number | null
           id?: string
           is_published?: boolean | null
           question?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -380,7 +321,9 @@ export type Database = {
           is_featured: boolean | null
           picture_url: string | null
           quote: string
+          rating: number | null
           school_name: string | null
+          updated_at: string | null
         }
         Insert: {
           author_name: string
@@ -391,7 +334,9 @@ export type Database = {
           is_featured?: boolean | null
           picture_url?: string | null
           quote: string
+          rating?: number | null
           school_name?: string | null
+          updated_at?: string | null
         }
         Update: {
           author_name?: string
@@ -402,112 +347,9 @@ export type Database = {
           is_featured?: boolean | null
           picture_url?: string | null
           quote?: string
+          rating?: number | null
           school_name?: string | null
-        }
-        Relationships: []
-      }
-      tools_activities: {
-        Row: {
-          accessibility: string | null
-          activity_types: string[] | null
-          best_for: string | null
-          cost: string | null
-          created_at: string | null
-          description: Json | null
-          devices: string[] | null
-          grade_bands: string[] | null
-          group_size: string | null
-          id: string
-          name: string
-          quick_start: Json | null
-          school_stages: string[] | null
-          setup_time: string | null
-          subjects: string[] | null
-          tutorial_url: string | null
-          updated_at: string | null
-          website_url: string | null
-        }
-        Insert: {
-          accessibility?: string | null
-          activity_types?: string[] | null
-          best_for?: string | null
-          cost?: string | null
-          created_at?: string | null
-          description?: Json | null
-          devices?: string[] | null
-          grade_bands?: string[] | null
-          group_size?: string | null
-          id?: string
-          name: string
-          quick_start?: Json | null
-          school_stages?: string[] | null
-          setup_time?: string | null
-          subjects?: string[] | null
-          tutorial_url?: string | null
           updated_at?: string | null
-          website_url?: string | null
-        }
-        Update: {
-          accessibility?: string | null
-          activity_types?: string[] | null
-          best_for?: string | null
-          cost?: string | null
-          created_at?: string | null
-          description?: Json | null
-          devices?: string[] | null
-          grade_bands?: string[] | null
-          group_size?: string | null
-          id?: string
-          name?: string
-          quick_start?: Json | null
-          school_stages?: string[] | null
-          setup_time?: string | null
-          subjects?: string[] | null
-          tutorial_url?: string | null
-          updated_at?: string | null
-          website_url?: string | null
-        }
-        Relationships: []
-      }
-      tutorials: {
-        Row: {
-          created_at: string | null
-          description: Json | null
-          difficulty_level: string | null
-          estimated_time: string | null
-          id: string
-          is_published: boolean | null
-          learning_outcomes: string[] | null
-          school_stages: string[] | null
-          title: string
-          updated_at: string | null
-          video_url: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: Json | null
-          difficulty_level?: string | null
-          estimated_time?: string | null
-          id?: string
-          is_published?: boolean | null
-          learning_outcomes?: string[] | null
-          school_stages?: string[] | null
-          title: string
-          updated_at?: string | null
-          video_url?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: Json | null
-          difficulty_level?: string | null
-          estimated_time?: string | null
-          id?: string
-          is_published?: boolean | null
-          learning_outcomes?: string[] | null
-          school_stages?: string[] | null
-          title?: string
-          updated_at?: string | null
-          video_url?: string | null
         }
         Relationships: []
       }
@@ -526,7 +368,6 @@ export type Database = {
       }
     }
     Enums: {
-      content_status: "draft" | "published" | "archived"
       content_type_enum:
         | "tool"
         | "template"
@@ -544,16 +385,8 @@ export type Database = {
         | "consulting"
         | "student_project"
         | "news"
-      cost_type: "free" | "freemium" | "paid"
-      event_status: "draft" | "published" | "archived"
-      event_type: "workshop" | "webinar" | "meetup"
-      hub_type:
-        | "tools"
-        | "learn"
-        | "evidence"
-        | "community"
-        | "services"
-        | "about"
+      event_status: "draft" | "published" | "archived" | "cancelled"
+      event_type: "workshop" | "webinar" | "meetup" | "conference"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -681,7 +514,6 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      content_status: ["draft", "published", "archived"],
       content_type_enum: [
         "tool",
         "template",
@@ -700,17 +532,8 @@ export const Constants = {
         "student_project",
         "news",
       ],
-      cost_type: ["free", "freemium", "paid"],
-      event_status: ["draft", "published", "archived"],
-      event_type: ["workshop", "webinar", "meetup"],
-      hub_type: [
-        "tools",
-        "learn",
-        "evidence",
-        "community",
-        "services",
-        "about",
-      ],
+      event_status: ["draft", "published", "archived", "cancelled"],
+      event_type: ["workshop", "webinar", "meetup", "conference"],
     },
   },
 } as const
