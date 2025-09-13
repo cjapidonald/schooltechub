@@ -14,344 +14,432 @@ export type Database = {
   }
   public: {
     Tables: {
-      blog: {
+      content_master: {
         Row: {
-          activity_type: string[] | null
+          activity_type:
+            | Database["public"]["Enums"]["activity_type_enum"]
+            | null
+          age_grade: string | null
+          audience: string | null
           author: Json | null
-          category: string
-          content: Json
+          billing: Database["public"]["Enums"]["billing_enum"] | null
+          bloom_level: Database["public"]["Enums"]["bloom_enum"] | null
+          case_study_tags: string | null
+          category: Database["public"]["Enums"]["category_enum"] | null
+          content: Json | null
+          content_type: Database["public"]["Enums"]["content_type_enum"]
           created_at: string | null
+          currency: string | null
+          curriculum_alignment: string | null
+          data_compliance: string | null
+          deliverables: string | null
+          delivery_type:
+            | Database["public"]["Enums"]["delivery_type_enum"]
+            | null
+          device_os: string | null
+          diary_type: string | null
+          end_datetime: string | null
+          engagement_features: string | null
+          event_capacity: number | null
+          event_certificate_pd: boolean | null
+          event_duration: string | null
+          event_host: string | null
+          event_language: string | null
+          event_mode: Database["public"]["Enums"]["event_mode_enum"] | null
+          event_price_type:
+            | Database["public"]["Enums"]["event_price_type_enum"]
+            | null
+          event_registered: number | null
+          event_status: Database["public"]["Enums"]["event_status_enum"] | null
+          event_timezone: string | null
+          event_type: Database["public"]["Enums"]["event_type_enum"] | null
           excerpt: string | null
+          faq_json: Json | null
           featured_image: string | null
-          grade_levels: string[] | null
+          file_format: string | null
+          forum_category: string | null
+          guarantee: string | null
           id: string
+          idea_tips: string | null
+          instruction_type:
+            | Database["public"]["Enums"]["instruction_type_enum"]
+            | null
           is_published: boolean | null
           keywords: string[] | null
+          language: string | null
+          language_level:
+            | Database["public"]["Enums"]["language_level_enum"]
+            | null
+          learning_goals: string | null
+          license: string | null
+          login_method: string | null
+          materials_devices: string | null
           meta_description: string | null
           meta_title: string | null
+          mood: string | null
+          newsletter_segment: string | null
+          page: Database["public"]["Enums"]["page_enum"]
+          payment: Database["public"]["Enums"]["payment_enum"] | null
+          prep_level: string | null
+          price: number | null
           published_at: string | null
-          slug: string
-          subjects: string[] | null
-          title: string
-          updated_at: string | null
-          video_url: string | null
-          view_count: number | null
-        }
-        Insert: {
-          activity_type?: string[] | null
-          author?: Json | null
-          category: string
-          content: Json
-          created_at?: string | null
-          excerpt?: string | null
-          featured_image?: string | null
-          grade_levels?: string[] | null
-          id?: string
-          is_published?: boolean | null
-          keywords?: string[] | null
-          meta_description?: string | null
-          meta_title?: string | null
-          published_at?: string | null
-          slug: string
-          subjects?: string[] | null
-          title: string
-          updated_at?: string | null
-          video_url?: string | null
-          view_count?: number | null
-        }
-        Update: {
-          activity_type?: string[] | null
-          author?: Json | null
-          category?: string
-          content?: Json
-          created_at?: string | null
-          excerpt?: string | null
-          featured_image?: string | null
-          grade_levels?: string[] | null
-          id?: string
-          is_published?: boolean | null
-          keywords?: string[] | null
-          meta_description?: string | null
-          meta_title?: string | null
-          published_at?: string | null
-          slug?: string
-          subjects?: string[] | null
-          title?: string
-          updated_at?: string | null
-          video_url?: string | null
-          view_count?: number | null
-        }
-        Relationships: []
-      }
-      edtech: {
-        Row: {
-          activity_type: string[] | null
-          attachments: Json | null
-          author: Json | null
-          category: string
-          content: Json
-          created_at: string | null
-          description: string | null
-          difficulty: string | null
-          duration: number | null
-          featured_image: string | null
-          grade_levels: string[] | null
-          group_sizes: string[] | null
-          id: string
-          is_published: boolean | null
-          keywords: string[] | null
-          materials_needed: string[] | null
-          meta_description: string | null
-          meta_title: string | null
-          published_at: string | null
-          slug: string
-          subjects: string[] | null
-          tech_requirements: string[] | null
-          title: string
-          tools_used: string[] | null
-          updated_at: string | null
-          video_url: string | null
-          view_count: number | null
-        }
-        Insert: {
-          activity_type?: string[] | null
-          attachments?: Json | null
-          author?: Json | null
-          category: string
-          content: Json
-          created_at?: string | null
-          description?: string | null
-          difficulty?: string | null
-          duration?: number | null
-          featured_image?: string | null
-          grade_levels?: string[] | null
-          group_sizes?: string[] | null
-          id?: string
-          is_published?: boolean | null
-          keywords?: string[] | null
-          materials_needed?: string[] | null
-          meta_description?: string | null
-          meta_title?: string | null
-          published_at?: string | null
-          slug: string
-          subjects?: string[] | null
-          tech_requirements?: string[] | null
-          title: string
-          tools_used?: string[] | null
-          updated_at?: string | null
-          video_url?: string | null
-          view_count?: number | null
-        }
-        Update: {
-          activity_type?: string[] | null
-          attachments?: Json | null
-          author?: Json | null
-          category?: string
-          content?: Json
-          created_at?: string | null
-          description?: string | null
-          difficulty?: string | null
-          duration?: number | null
-          featured_image?: string | null
-          grade_levels?: string[] | null
-          group_sizes?: string[] | null
-          id?: string
-          is_published?: boolean | null
-          keywords?: string[] | null
-          materials_needed?: string[] | null
-          meta_description?: string | null
-          meta_title?: string | null
-          published_at?: string | null
-          slug?: string
-          subjects?: string[] | null
-          tech_requirements?: string[] | null
-          title?: string
-          tools_used?: string[] | null
-          updated_at?: string | null
-          video_url?: string | null
-          view_count?: number | null
-        }
-        Relationships: []
-      }
-      events: {
-        Row: {
-          author: Json | null
-          body: Json | null
-          created_at: string | null
-          current_attendees: number | null
-          description: string | null
-          end_time: string
-          event_type: Database["public"]["Enums"]["event_type"]
-          featured_image: string | null
-          id: string
-          is_online: boolean | null
-          location: string | null
-          max_attendees: number | null
-          meta_description: string | null
-          meta_title: string | null
+          read_time: number | null
           recording_url: string | null
           registration_url: string | null
+          research_question_tags: string | null
+          research_type: string | null
+          resource_type:
+            | Database["public"]["Enums"]["resource_type_enum"]
+            | null
+          service_model:
+            | Database["public"]["Enums"]["service_model_enum"]
+            | null
+          sla_tier: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug: string
-          stages: string[] | null
-          start_time: string
-          status: Database["public"]["Enums"]["event_status"] | null
-          subjects: string[] | null
+          stage: Database["public"]["Enums"]["stage_enum"] | null
+          standards_other: string | null
+          start_datetime: string | null
+          subcategory: Database["public"]["Enums"]["subcategory_enum"] | null
+          subject: Database["public"]["Enums"]["subject_enum"] | null
+          subtitle: string | null
           tags: string[] | null
+          testimonials_json: Json | null
+          time_required: string | null
           title: string
+          translation_of: string | null
           updated_at: string | null
+          venue: string | null
+          view_count: number | null
         }
         Insert: {
+          activity_type?:
+            | Database["public"]["Enums"]["activity_type_enum"]
+            | null
+          age_grade?: string | null
+          audience?: string | null
           author?: Json | null
-          body?: Json | null
+          billing?: Database["public"]["Enums"]["billing_enum"] | null
+          bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
+          case_study_tags?: string | null
+          category?: Database["public"]["Enums"]["category_enum"] | null
+          content?: Json | null
+          content_type: Database["public"]["Enums"]["content_type_enum"]
           created_at?: string | null
-          current_attendees?: number | null
-          description?: string | null
-          end_time: string
-          event_type: Database["public"]["Enums"]["event_type"]
+          currency?: string | null
+          curriculum_alignment?: string | null
+          data_compliance?: string | null
+          deliverables?: string | null
+          delivery_type?:
+            | Database["public"]["Enums"]["delivery_type_enum"]
+            | null
+          device_os?: string | null
+          diary_type?: string | null
+          end_datetime?: string | null
+          engagement_features?: string | null
+          event_capacity?: number | null
+          event_certificate_pd?: boolean | null
+          event_duration?: string | null
+          event_host?: string | null
+          event_language?: string | null
+          event_mode?: Database["public"]["Enums"]["event_mode_enum"] | null
+          event_price_type?:
+            | Database["public"]["Enums"]["event_price_type_enum"]
+            | null
+          event_registered?: number | null
+          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
+          event_timezone?: string | null
+          event_type?: Database["public"]["Enums"]["event_type_enum"] | null
+          excerpt?: string | null
+          faq_json?: Json | null
           featured_image?: string | null
+          file_format?: string | null
+          forum_category?: string | null
+          guarantee?: string | null
           id?: string
-          is_online?: boolean | null
-          location?: string | null
-          max_attendees?: number | null
+          idea_tips?: string | null
+          instruction_type?:
+            | Database["public"]["Enums"]["instruction_type_enum"]
+            | null
+          is_published?: boolean | null
+          keywords?: string[] | null
+          language?: string | null
+          language_level?:
+            | Database["public"]["Enums"]["language_level_enum"]
+            | null
+          learning_goals?: string | null
+          license?: string | null
+          login_method?: string | null
+          materials_devices?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          mood?: string | null
+          newsletter_segment?: string | null
+          page: Database["public"]["Enums"]["page_enum"]
+          payment?: Database["public"]["Enums"]["payment_enum"] | null
+          prep_level?: string | null
+          price?: number | null
+          published_at?: string | null
+          read_time?: number | null
           recording_url?: string | null
           registration_url?: string | null
+          research_question_tags?: string | null
+          research_type?: string | null
+          resource_type?:
+            | Database["public"]["Enums"]["resource_type_enum"]
+            | null
+          service_model?:
+            | Database["public"]["Enums"]["service_model_enum"]
+            | null
+          sla_tier?: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug: string
-          stages?: string[] | null
-          start_time: string
-          status?: Database["public"]["Enums"]["event_status"] | null
-          subjects?: string[] | null
+          stage?: Database["public"]["Enums"]["stage_enum"] | null
+          standards_other?: string | null
+          start_datetime?: string | null
+          subcategory?: Database["public"]["Enums"]["subcategory_enum"] | null
+          subject?: Database["public"]["Enums"]["subject_enum"] | null
+          subtitle?: string | null
           tags?: string[] | null
+          testimonials_json?: Json | null
+          time_required?: string | null
           title: string
+          translation_of?: string | null
           updated_at?: string | null
+          venue?: string | null
+          view_count?: number | null
         }
         Update: {
+          activity_type?:
+            | Database["public"]["Enums"]["activity_type_enum"]
+            | null
+          age_grade?: string | null
+          audience?: string | null
           author?: Json | null
-          body?: Json | null
+          billing?: Database["public"]["Enums"]["billing_enum"] | null
+          bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
+          case_study_tags?: string | null
+          category?: Database["public"]["Enums"]["category_enum"] | null
+          content?: Json | null
+          content_type?: Database["public"]["Enums"]["content_type_enum"]
           created_at?: string | null
-          current_attendees?: number | null
-          description?: string | null
-          end_time?: string
-          event_type?: Database["public"]["Enums"]["event_type"]
+          currency?: string | null
+          curriculum_alignment?: string | null
+          data_compliance?: string | null
+          deliverables?: string | null
+          delivery_type?:
+            | Database["public"]["Enums"]["delivery_type_enum"]
+            | null
+          device_os?: string | null
+          diary_type?: string | null
+          end_datetime?: string | null
+          engagement_features?: string | null
+          event_capacity?: number | null
+          event_certificate_pd?: boolean | null
+          event_duration?: string | null
+          event_host?: string | null
+          event_language?: string | null
+          event_mode?: Database["public"]["Enums"]["event_mode_enum"] | null
+          event_price_type?:
+            | Database["public"]["Enums"]["event_price_type_enum"]
+            | null
+          event_registered?: number | null
+          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
+          event_timezone?: string | null
+          event_type?: Database["public"]["Enums"]["event_type_enum"] | null
+          excerpt?: string | null
+          faq_json?: Json | null
           featured_image?: string | null
+          file_format?: string | null
+          forum_category?: string | null
+          guarantee?: string | null
           id?: string
-          is_online?: boolean | null
-          location?: string | null
-          max_attendees?: number | null
+          idea_tips?: string | null
+          instruction_type?:
+            | Database["public"]["Enums"]["instruction_type_enum"]
+            | null
+          is_published?: boolean | null
+          keywords?: string[] | null
+          language?: string | null
+          language_level?:
+            | Database["public"]["Enums"]["language_level_enum"]
+            | null
+          learning_goals?: string | null
+          license?: string | null
+          login_method?: string | null
+          materials_devices?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          mood?: string | null
+          newsletter_segment?: string | null
+          page?: Database["public"]["Enums"]["page_enum"]
+          payment?: Database["public"]["Enums"]["payment_enum"] | null
+          prep_level?: string | null
+          price?: number | null
+          published_at?: string | null
+          read_time?: number | null
           recording_url?: string | null
           registration_url?: string | null
+          research_question_tags?: string | null
+          research_type?: string | null
+          resource_type?:
+            | Database["public"]["Enums"]["resource_type_enum"]
+            | null
+          service_model?:
+            | Database["public"]["Enums"]["service_model_enum"]
+            | null
+          sla_tier?: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug?: string
-          stages?: string[] | null
-          start_time?: string
-          status?: Database["public"]["Enums"]["event_status"] | null
-          subjects?: string[] | null
+          stage?: Database["public"]["Enums"]["stage_enum"] | null
+          standards_other?: string | null
+          start_datetime?: string | null
+          subcategory?: Database["public"]["Enums"]["subcategory_enum"] | null
+          subject?: Database["public"]["Enums"]["subject_enum"] | null
+          subtitle?: string | null
           tags?: string[] | null
+          testimonials_json?: Json | null
+          time_required?: string | null
           title?: string
+          translation_of?: string | null
           updated_at?: string | null
+          venue?: string | null
+          view_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "content_master_translation_of_fkey"
+            columns: ["translation_of"]
+            isOneToOne: false
+            referencedRelation: "content_master"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       faq: {
         Row: {
-          answer: Json
-          category: string | null
+          answer: string
           created_at: string | null
           display_order: number | null
           id: string
           is_published: boolean | null
+          page: Database["public"]["Enums"]["page_enum"] | null
           question: string
+          tags: string[] | null
           updated_at: string | null
         }
         Insert: {
-          answer: Json
-          category?: string | null
+          answer: string
           created_at?: string | null
           display_order?: number | null
           id?: string
           is_published?: boolean | null
+          page?: Database["public"]["Enums"]["page_enum"] | null
           question: string
+          tags?: string[] | null
           updated_at?: string | null
         }
         Update: {
-          answer?: Json
-          category?: string | null
+          answer?: string
           created_at?: string | null
           display_order?: number | null
           id?: string
           is_published?: boolean | null
+          page?: Database["public"]["Enums"]["page_enum"] | null
           question?: string
+          tags?: string[] | null
           updated_at?: string | null
         }
         Relationships: []
       }
       newsletter_subscribers: {
         Row: {
+          audience: string | null
           created_at: string | null
           email: string
           id: string
-          is_active: boolean | null
+          locale: string | null
+          name: string | null
+          segments: string[] | null
+          status: string | null
           subscribed_at: string | null
         }
         Insert: {
+          audience?: string | null
           created_at?: string | null
           email: string
           id?: string
-          is_active?: boolean | null
+          locale?: string | null
+          name?: string | null
+          segments?: string[] | null
+          status?: string | null
           subscribed_at?: string | null
         }
         Update: {
+          audience?: string | null
           created_at?: string | null
           email?: string
           id?: string
-          is_active?: boolean | null
+          locale?: string | null
+          name?: string | null
+          segments?: string[] | null
+          status?: string | null
           subscribed_at?: string | null
         }
         Relationships: []
       }
       testimonials: {
         Row: {
-          author_name: string
-          author_role: string | null
-          company: string | null
+          consent: boolean | null
+          content: string
           created_at: string | null
+          email: string | null
           id: string
           is_featured: boolean | null
-          picture_url: string | null
-          quote: string
+          job_title: string | null
+          name: string
+          organization: string | null
+          page: Database["public"]["Enums"]["page_enum"] | null
           rating: number | null
-          school_name: string | null
+          related_content_id: string | null
           updated_at: string | null
         }
         Insert: {
-          author_name: string
-          author_role?: string | null
-          company?: string | null
+          consent?: boolean | null
+          content: string
           created_at?: string | null
+          email?: string | null
           id?: string
           is_featured?: boolean | null
-          picture_url?: string | null
-          quote: string
+          job_title?: string | null
+          name: string
+          organization?: string | null
+          page?: Database["public"]["Enums"]["page_enum"] | null
           rating?: number | null
-          school_name?: string | null
+          related_content_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          author_name?: string
-          author_role?: string | null
-          company?: string | null
+          consent?: boolean | null
+          content?: string
           created_at?: string | null
+          email?: string | null
           id?: string
           is_featured?: boolean | null
-          picture_url?: string | null
-          quote?: string
+          job_title?: string | null
+          name?: string
+          organization?: string | null
+          page?: Database["public"]["Enums"]["page_enum"] | null
           rating?: number | null
-          school_name?: string | null
+          related_content_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "testimonials_related_content_id_fkey"
+            columns: ["related_content_id"]
+            isOneToOne: false
+            referencedRelation: "content_master"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -368,25 +456,137 @@ export type Database = {
       }
     }
     Enums: {
+      activity_type_enum:
+        | "1:1"
+        | "Pairs"
+        | "Small Group"
+        | "Whole Class"
+        | "Stations"
+        | "Clubs"
+      billing_enum: "Hourly" | "Fixed" | "Retainer"
+      bloom_enum:
+        | "Remember"
+        | "Understand"
+        | "Apply"
+        | "Analyze"
+        | "Evaluate"
+        | "Create"
+      category_enum: "Lesson Planning" | "Engagement" | "Assessment"
       content_type_enum:
-        | "tool"
-        | "template"
-        | "tutorial"
-        | "teaching_technique"
-        | "activity"
-        | "lesson_plan"
-        | "teacher_tip"
         | "blog"
         | "case_study"
         | "research"
         | "research_question"
+        | "teaching_technique"
+        | "activity"
+        | "tutorial"
+        | "diary_entry"
         | "event"
-        | "course"
-        | "consulting"
-        | "student_project"
-        | "news"
-      event_status: "draft" | "published" | "archived" | "cancelled"
-      event_type: "workshop" | "webinar" | "meetup" | "conference"
+        | "service"
+        | "about"
+      delivery_type_enum:
+        | "In-class"
+        | "Online"
+        | "Hybrid"
+        | "Self-paced"
+        | "Distance Learning"
+        | "Live"
+      event_mode_enum: "Online" | "In-person" | "Hybrid" | "Live"
+      event_price_type_enum: "Free" | "Paid"
+      event_status_enum:
+        | "Upcoming"
+        | "Before"
+        | "During"
+        | "After"
+        | "Follow-Up"
+      event_type_enum: "Workshop" | "Webinar" | "Meetup"
+      instruction_type_enum:
+        | "Direct Instruction"
+        | "Differentiated Instruction"
+        | "Inquiry-Based Learning"
+        | "Project-Based Learning"
+        | "Problem-Based Learning"
+        | "Play-Based Learning"
+        | "Game-Based Learning"
+        | "Gamification"
+        | "Cooperative Learning"
+        | "Experiential Learning"
+        | "Design Thinking"
+        | "Socratic Seminar"
+        | "Station Rotation"
+        | "Blended Learning"
+      language_level_enum: "A1" | "A2" | "B1" | "B2" | "C1" | "C2"
+      page_enum:
+        | "research_blog"
+        | "edutech"
+        | "teacher_diary"
+        | "events"
+        | "services"
+        | "about"
+      payment_enum:
+        | "Free"
+        | "Freemium"
+        | "Paid"
+        | "Free Trial"
+        | "Education Discount"
+      resource_type_enum:
+        | "Worksheets"
+        | "Printables"
+        | "Task Cards"
+        | "Flashcards"
+        | "Mats"
+        | "Slides"
+        | "Presentations"
+        | "Videos"
+        | "Animations"
+        | "Pictures"
+        | "Posters"
+        | "Readers"
+        | "eBooks"
+        | "Audio"
+        | "Podcasts"
+        | "Quizzes"
+        | "Interactive Activities"
+        | "Labs"
+        | "Experiments"
+        | "Simulations"
+        | "Coding Challenges"
+        | "Spreadsheets"
+      service_model_enum: "1:1" | "Whole Staff PD" | "Audit" | "Custom"
+      sla_tier_enum: "Basic" | "Standard" | "Pro" | "Enterprise"
+      stage_enum:
+        | "Early Childhood"
+        | "Pre-K"
+        | "Kindergarten"
+        | "Lower Primary"
+        | "Upper Primary"
+        | "Primary"
+        | "Secondary"
+        | "High School"
+        | "K-12"
+        | "K-5"
+      subcategory_enum:
+        | "Lesson Planning"
+        | "Lesson Delivery"
+        | "Engagement"
+        | "Evaluation"
+      subject_enum:
+        | "Phonics"
+        | "Reading"
+        | "Writing"
+        | "Grammar"
+        | "Spelling"
+        | "Vocabulary"
+        | "English/ELA"
+        | "Math"
+        | "Science"
+        | "Biology"
+        | "Chemistry"
+        | "Physics"
+        | "Earth Science"
+        | "ICT"
+        | "STEM"
+        | "STEAM"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -514,26 +714,143 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_type_enum: [
+        "1:1",
+        "Pairs",
+        "Small Group",
+        "Whole Class",
+        "Stations",
+        "Clubs",
+      ],
+      billing_enum: ["Hourly", "Fixed", "Retainer"],
+      bloom_enum: [
+        "Remember",
+        "Understand",
+        "Apply",
+        "Analyze",
+        "Evaluate",
+        "Create",
+      ],
+      category_enum: ["Lesson Planning", "Engagement", "Assessment"],
       content_type_enum: [
-        "tool",
-        "template",
-        "tutorial",
-        "teaching_technique",
-        "activity",
-        "lesson_plan",
-        "teacher_tip",
         "blog",
         "case_study",
         "research",
         "research_question",
+        "teaching_technique",
+        "activity",
+        "tutorial",
+        "diary_entry",
         "event",
-        "course",
-        "consulting",
-        "student_project",
-        "news",
+        "service",
+        "about",
       ],
-      event_status: ["draft", "published", "archived", "cancelled"],
-      event_type: ["workshop", "webinar", "meetup", "conference"],
+      delivery_type_enum: [
+        "In-class",
+        "Online",
+        "Hybrid",
+        "Self-paced",
+        "Distance Learning",
+        "Live",
+      ],
+      event_mode_enum: ["Online", "In-person", "Hybrid", "Live"],
+      event_price_type_enum: ["Free", "Paid"],
+      event_status_enum: ["Upcoming", "Before", "During", "After", "Follow-Up"],
+      event_type_enum: ["Workshop", "Webinar", "Meetup"],
+      instruction_type_enum: [
+        "Direct Instruction",
+        "Differentiated Instruction",
+        "Inquiry-Based Learning",
+        "Project-Based Learning",
+        "Problem-Based Learning",
+        "Play-Based Learning",
+        "Game-Based Learning",
+        "Gamification",
+        "Cooperative Learning",
+        "Experiential Learning",
+        "Design Thinking",
+        "Socratic Seminar",
+        "Station Rotation",
+        "Blended Learning",
+      ],
+      language_level_enum: ["A1", "A2", "B1", "B2", "C1", "C2"],
+      page_enum: [
+        "research_blog",
+        "edutech",
+        "teacher_diary",
+        "events",
+        "services",
+        "about",
+      ],
+      payment_enum: [
+        "Free",
+        "Freemium",
+        "Paid",
+        "Free Trial",
+        "Education Discount",
+      ],
+      resource_type_enum: [
+        "Worksheets",
+        "Printables",
+        "Task Cards",
+        "Flashcards",
+        "Mats",
+        "Slides",
+        "Presentations",
+        "Videos",
+        "Animations",
+        "Pictures",
+        "Posters",
+        "Readers",
+        "eBooks",
+        "Audio",
+        "Podcasts",
+        "Quizzes",
+        "Interactive Activities",
+        "Labs",
+        "Experiments",
+        "Simulations",
+        "Coding Challenges",
+        "Spreadsheets",
+      ],
+      service_model_enum: ["1:1", "Whole Staff PD", "Audit", "Custom"],
+      sla_tier_enum: ["Basic", "Standard", "Pro", "Enterprise"],
+      stage_enum: [
+        "Early Childhood",
+        "Pre-K",
+        "Kindergarten",
+        "Lower Primary",
+        "Upper Primary",
+        "Primary",
+        "Secondary",
+        "High School",
+        "K-12",
+        "K-5",
+      ],
+      subcategory_enum: [
+        "Lesson Planning",
+        "Lesson Delivery",
+        "Engagement",
+        "Evaluation",
+      ],
+      subject_enum: [
+        "Phonics",
+        "Reading",
+        "Writing",
+        "Grammar",
+        "Spelling",
+        "Vocabulary",
+        "English/ELA",
+        "Math",
+        "Science",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Earth Science",
+        "ICT",
+        "STEM",
+        "STEAM",
+      ],
     },
   },
 } as const
