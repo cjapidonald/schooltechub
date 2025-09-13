@@ -4,79 +4,82 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Calendar, Clock, BookOpen, HelpCircle, FileText } from "lucide-react";
+import { Search, Calendar, PenLine, HelpCircle, Lightbulb, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
 
-const Blog = () => {
+const TeacherDiary = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
-  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [entries, setEntries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    blogType: searchParams.getAll("blogType") || [],
+    diaryType: searchParams.getAll("diaryType") || [],
     stage: searchParams.getAll("stage") || [],
-    subject: searchParams.getAll("subject") || [],
-    activityType: searchParams.getAll("activityType") || [],
-    instructionType: searchParams.getAll("instructionType") || [],
-    tags: searchParams.getAll("tags") || []
+    subject: searchParams.getAll("subject") || []
   });
 
   const categories = [
     { value: "all", label: "All" },
     { value: "Lesson Planning", label: "Lesson Planning" },
+    { value: "Lesson Delivery", label: "Lesson Delivery" },
     { value: "Engagement", label: "Engagement" },
-    { value: "Assessment", label: "Assessment" }
+    { value: "Evaluation", label: "Evaluation" }
   ];
 
   const filterOptions = {
-    blogType: ["case_study", "research_question", "research"],
+    diaryType: ["question", "challenge", "reflection"],
     stage: ["Early Childhood", "Pre-K", "Kindergarten", "Lower Primary", "Upper Primary", "Primary", "Secondary", "High School", "K-12", "K-5"],
-    subject: ["Phonics", "Reading", "Writing", "Grammar", "Spelling", "Vocabulary", "English/ELA", "Math", "Science", "Biology", "Chemistry", "Physics", "Earth Science", "ICT", "STEM", "STEAM"],
-    activityType: ["1:1", "Pairs", "Small Group", "Whole Class", "Stations", "Clubs"],
-    instructionType: ["Direct Instruction", "Differentiated Instruction", "Inquiry-Based Learning", "Project-Based Learning", "Problem-Based Learning", "Play-Based Learning", "Game-Based Learning", "Gamification", "Cooperative Learning", "Experiential Learning", "Design Thinking", "Socratic Seminar", "Station Rotation", "Blended Learning"]
+    subject: ["Phonics", "Reading", "Writing", "Grammar", "Spelling", "Vocabulary", "English/ELA", "Math", "Science", "Biology", "Chemistry", "Physics", "Earth Science", "ICT", "STEM", "STEAM"]
   };
 
-  const blogTypeIcons = {
-    case_study: <FileText className="h-4 w-4" />,
-    research_question: <HelpCircle className="h-4 w-4" />,
-    research: <BookOpen className="h-4 w-4" />
+  const diaryTypeIcons = {
+    question: <HelpCircle className="h-4 w-4" />,
+    challenge: <MessageSquare className="h-4 w-4" />,
+    reflection: <Lightbulb className="h-4 w-4" />
   };
 
-  const blogTypeLabels = {
-    case_study: "Case Study",
-    research_question: "Research Question",
-    research: "Research"
+  const diaryTypeLabels = {
+    question: "Question",
+    challenge: "Challenge",
+    reflection: "Reflection"
+  };
+
+  const moodColors = {
+    optimistic: "bg-green-100 text-green-800",
+    neutral: "bg-gray-100 text-gray-800",
+    frustrated: "bg-red-100 text-red-800",
+    excited: "bg-yellow-100 text-yellow-800",
+    thoughtful: "bg-blue-100 text-blue-800"
   };
 
   useEffect(() => {
-    fetchBlogPosts();
+    fetchEntries();
   }, [searchTerm, selectedCategory, filters]);
 
-  const fetchBlogPosts = async () => {
+  const fetchEntries = async () => {
     try {
       setLoading(true);
       let query = supabase
         .from("content_master")
         .select("*")
-        .eq("page", "research_blog")
+        .eq("page", "teacher_diary")
         .eq("is_published", true);
 
       if (selectedCategory !== "all") {
-        query = query.eq("category", selectedCategory);
+        query = query.or(`category.eq.${selectedCategory},subcategory.eq.${selectedCategory}`);
       }
 
       if (searchTerm) {
         query = query.or(`title.ilike.%${searchTerm}%,excerpt.ilike.%${searchTerm}%`);
       }
 
-      if (filters.blogType.length > 0) {
-        query = query.in("content_type", filters.blogType);
+      if (filters.diaryType.length > 0) {
+        query = query.in("diary_type", filters.diaryType);
       }
 
       if (filters.stage.length > 0) {
@@ -87,20 +90,12 @@ const Blog = () => {
         query = query.in("subject", filters.subject);
       }
 
-      if (filters.activityType.length > 0) {
-        query = query.in("activity_type", filters.activityType);
-      }
-
-      if (filters.instructionType.length > 0) {
-        query = query.in("instruction_type", filters.instructionType);
-      }
-
       const { data, error } = await query.order("published_at", { ascending: false });
 
       if (error) throw error;
-      setBlogPosts(data || []);
+      setEntries(data || []);
     } catch (error) {
-      console.error("Error fetching blog posts:", error);
+      console.error("Error fetching diary entries:", error);
     } finally {
       setLoading(false);
     }
@@ -125,19 +120,21 @@ const Blog = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Blog & Research: Ideas, Case Studies & Questions"
-        description="EdTech ideas, research notes, research questions, and case studies for K-12. Practical strategies to integrate technology, improve engagement, and save time."
-        canonicalUrl="https://schooltechhub.com/blog"
-        type="website"
+        title="Teacher Diary: Reflections & Classroom Insights"
+        description="Real teacher reflections, challenges, and insights from the classroom. Learn what works, what doesn't, and practical tips for your teaching journey."
+        canonicalUrl="https://schooltechhub.com/diary"
       />
       <Navigation />
       
       <main className="flex-1">
         <div className="container py-12">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Blog & Research Hub</h1>
+            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+              <PenLine className="h-10 w-10" />
+              Teacher Diary
+            </h1>
             <p className="text-muted-foreground">
-              Ideas, research notes, research questions, and case studies for K-12 EdTech.
+              Reflections, what worked/what to change. Questions, Challenges, Reflections.
             </p>
           </div>
 
@@ -146,7 +143,7 @@ const Blog = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search blog posts, research, case studies..."
+                placeholder="Search diary entries..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -155,7 +152,7 @@ const Blog = () => {
           </div>
 
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               {categories.map((cat) => (
                 <TabsTrigger key={cat.value} value={cat.value}>
                   {cat.label}
@@ -172,18 +169,18 @@ const Blog = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <h4 className="font-medium mb-3">Blog Type</h4>
-                    {filterOptions.blogType.map((type) => (
+                    <h4 className="font-medium mb-3">Type</h4>
+                    {filterOptions.diaryType.map((type) => (
                       <label key={type} className="flex items-center space-x-2 mb-2">
                         <input
                           type="checkbox"
-                          checked={filters.blogType.includes(type)}
-                          onChange={() => toggleFilter("blogType", type)}
+                          checked={filters.diaryType.includes(type)}
+                          onChange={() => toggleFilter("diaryType", type)}
                           className="rounded border-gray-300"
                         />
-                        <span className="text-sm flex items-center gap-1">
-                          {blogTypeIcons[type as keyof typeof blogTypeIcons]}
-                          {blogTypeLabels[type as keyof typeof blogTypeLabels]}
+                        <span className="text-sm flex items-center gap-1 capitalize">
+                          {diaryTypeIcons[type as keyof typeof diaryTypeIcons]}
+                          {diaryTypeLabels[type as keyof typeof diaryTypeLabels]}
                         </span>
                       </label>
                     ))}
@@ -218,36 +215,6 @@ const Blog = () => {
                       </label>
                     ))}
                   </div>
-
-                  <div>
-                    <h4 className="font-medium mb-3">Activity Type</h4>
-                    {filterOptions.activityType.map((type) => (
-                      <label key={type} className="flex items-center space-x-2 mb-2">
-                        <input
-                          type="checkbox"
-                          checked={filters.activityType.includes(type)}
-                          onChange={() => toggleFilter("activityType", type)}
-                          className="rounded border-gray-300"
-                        />
-                        <span className="text-sm">{type}</span>
-                      </label>
-                    ))}
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium mb-3">Instruction Type</h4>
-                    {filterOptions.instructionType.map((type) => (
-                      <label key={type} className="flex items-center space-x-2 mb-2">
-                        <input
-                          type="checkbox"
-                          checked={filters.instructionType.includes(type)}
-                          onChange={() => toggleFilter("instructionType", type)}
-                          className="rounded border-gray-300"
-                        />
-                        <span className="text-sm">{type}</span>
-                      </label>
-                    ))}
-                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -255,63 +222,63 @@ const Blog = () => {
             <div className="lg:col-span-3">
               {loading ? (
                 <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">Loading blog posts...</p>
+                  <p className="text-muted-foreground">Loading diary entries...</p>
                 </div>
-              ) : blogPosts.length === 0 ? (
+              ) : entries.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">No blog posts found matching your criteria.</p>
+                  <p className="text-muted-foreground">No diary entries found matching your criteria.</p>
                 </div>
               ) : (
-                <div className="grid gap-6">
-                  {blogPosts.map((post) => (
-                    <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                <div className="space-y-6">
+                  {entries.map((entry) => (
+                    <Card key={entry.id} className="hover:shadow-lg transition-shadow">
                       <CardContent className="p-6">
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex gap-2">
-                            <Badge variant="secondary" className="flex items-center gap-1">
-                              {blogTypeIcons[post.content_type as keyof typeof blogTypeIcons]}
-                              {blogTypeLabels[post.content_type as keyof typeof blogTypeLabels]}
-                            </Badge>
-                            {post.category && (
-                              <Badge variant="outline">{post.category}</Badge>
+                            {entry.diary_type && (
+                              <Badge variant="secondary" className="flex items-center gap-1">
+                                {diaryTypeIcons[entry.diary_type as keyof typeof diaryTypeIcons]}
+                                {diaryTypeLabels[entry.diary_type as keyof typeof diaryTypeLabels]}
+                              </Badge>
+                            )}
+                            {entry.mood && (
+                              <Badge className={moodColors[entry.mood as keyof typeof moodColors] || "bg-gray-100 text-gray-800"}>
+                                {entry.mood}
+                              </Badge>
                             )}
                           </div>
-                          {post.published_at && (
+                          {entry.published_at && (
                             <div className="flex items-center text-sm text-muted-foreground">
                               <Calendar className="h-4 w-4 mr-1" />
-                              {format(new Date(post.published_at), "MMM d, yyyy")}
+                              {format(new Date(entry.published_at), "MMM d, yyyy")}
                             </div>
                           )}
                         </div>
                         
                         <h3 className="text-xl font-semibold mb-2">
-                          <Link to={`/blog/${post.slug}`} className="hover:text-primary">
-                            {post.title}
+                          <Link to={`/diary/${entry.slug}`} className="hover:text-primary">
+                            {entry.title}
                           </Link>
                         </h3>
                         
-                        {post.subtitle && (
-                          <p className="text-sm text-muted-foreground mb-2">{post.subtitle}</p>
+                        {entry.subtitle && (
+                          <p className="text-sm text-muted-foreground mb-2">{entry.subtitle}</p>
                         )}
                         
                         <p className="text-muted-foreground mb-4">
-                          {post.excerpt || "Click to read more..."}
+                          {entry.excerpt || "Click to read more..."}
                         </p>
                         
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {post.stage && <Badge variant="outline">{post.stage}</Badge>}
-                          {post.subject && <Badge variant="outline">{post.subject}</Badge>}
-                          {post.time_required && (
-                            <Badge variant="outline" className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {post.time_required}
-                            </Badge>
-                          )}
+                          {entry.category && <Badge variant="outline">{entry.category}</Badge>}
+                          {entry.subcategory && <Badge variant="outline">{entry.subcategory}</Badge>}
+                          {entry.stage && <Badge variant="outline">{entry.stage}</Badge>}
+                          {entry.subject && <Badge variant="outline">{entry.subject}</Badge>}
                         </div>
                         
-                        {post.tags && post.tags.length > 0 && (
+                        {entry.tags && entry.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2">
-                            {post.tags.map((tag: string) => (
+                            {entry.tags.map((tag: string) => (
                               <Badge key={tag} variant="secondary">
                                 {tag}
                               </Badge>
@@ -333,4 +300,4 @@ const Blog = () => {
   );
 };
 
-export default Blog;
+export default TeacherDiary;
