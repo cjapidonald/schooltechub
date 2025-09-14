@@ -13,8 +13,8 @@ import type { Json } from "@/integrations/supabase/types";
 interface FAQItem {
   id: string;
   question: string;
-  answer: Json;
-  category: string;
+  answer: string;
+  category?: string;
   display_order: number;
 }
 

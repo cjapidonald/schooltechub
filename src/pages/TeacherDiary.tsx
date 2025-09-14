@@ -83,11 +83,11 @@ const TeacherDiary = () => {
       }
 
       if (filters.stage.length > 0) {
-        query = query.in("stage", filters.stage);
+        query = query.in("stage", filters.stage as any);
       }
 
       if (filters.subject.length > 0) {
-        query = query.in("subject", filters.subject);
+        query = query.in("subject", filters.subject as any);
       }
 
       const { data, error } = await query.order("published_at", { ascending: false });

@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
-import { useContent, type ContentItem } from "@/hooks/useContent";
+// Import removed - useContent hook no longer exists
 
 const Services = () => {
   

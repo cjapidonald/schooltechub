@@ -68,7 +68,7 @@ const Blog = () => {
         .eq("is_published", true);
 
       if (selectedCategory !== "all") {
-        query = query.eq("category", selectedCategory);
+        query = query.eq("category", selectedCategory as any);
       }
 
       if (searchTerm) {
@@ -76,23 +76,23 @@ const Blog = () => {
       }
 
       if (filters.blogType.length > 0) {
-        query = query.in("content_type", filters.blogType);
+        query = query.in("content_type", filters.blogType as any);
       }
 
       if (filters.stage.length > 0) {
-        query = query.in("stage", filters.stage);
+        query = query.in("stage", filters.stage as any);
       }
 
       if (filters.subject.length > 0) {
-        query = query.in("subject", filters.subject);
+        query = query.in("subject", filters.subject as any);
       }
 
       if (filters.activityType.length > 0) {
-        query = query.in("activity_type", filters.activityType);
+        query = query.in("activity_type", filters.activityType as any);
       }
 
       if (filters.instructionType.length > 0) {
-        query = query.in("instruction_type", filters.instructionType);
+        query = query.in("instruction_type", filters.instructionType as any);
       }
 
       const { data, error } = await query.order("published_at", { ascending: false });

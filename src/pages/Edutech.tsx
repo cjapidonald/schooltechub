@@ -77,27 +77,27 @@ const Edutech = () => {
       }
 
       if (filters.contentType.length > 0) {
-        query = query.in("content_type", filters.contentType);
+        query = query.in("content_type", filters.contentType as any);
       }
 
       if (filters.deliveryType.length > 0) {
-        query = query.in("delivery_type", filters.deliveryType);
+        query = query.in("delivery_type", filters.deliveryType as any);
       }
 
       if (filters.payment.length > 0) {
-        query = query.in("payment", filters.payment);
+        query = query.in("payment", filters.payment as any);
       }
 
       if (filters.stage.length > 0) {
-        query = query.in("stage", filters.stage);
+        query = query.in("stage", filters.stage as any);
       }
 
       if (filters.subject.length > 0) {
-        query = query.in("subject", filters.subject);
+        query = query.in("subject", filters.subject as any);
       }
 
       if (filters.instructionType.length > 0) {
-        query = query.in("instruction_type", filters.instructionType);
+        query = query.in("instruction_type", filters.instructionType as any);
       }
 
       const { data, error } = await query.order("published_at", { ascending: false });

@@ -67,7 +67,7 @@ const Events = () => {
       } else if (selectedType === "past") {
         query = query.lt("start_datetime", new Date().toISOString());
       } else if (selectedType !== "all") {
-        query = query.eq("event_type", selectedType);
+        query = query.eq("event_type", selectedType as any);
       }
 
       if (searchTerm) {
@@ -75,19 +75,19 @@ const Events = () => {
       }
 
       if (filters.eventMode.length > 0) {
-        query = query.in("event_mode", filters.eventMode);
+        query = query.in("event_mode", filters.eventMode as any);
       }
 
       if (filters.eventPriceType.length > 0) {
-        query = query.in("event_price_type", filters.eventPriceType);
+        query = query.in("event_price_type", filters.eventPriceType as any);
       }
 
       if (filters.stage.length > 0) {
-        query = query.in("stage", filters.stage);
+        query = query.in("stage", filters.stage as any);
       }
 
       if (filters.subject.length > 0) {
-        query = query.in("subject", filters.subject);
+        query = query.in("subject", filters.subject as any);
       }
 
       const { data, error } = await query.order("start_datetime", { ascending: true });
