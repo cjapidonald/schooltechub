@@ -14,11 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      comments: {
+        Row: {
+          content: string
+          content_id: string | null
+          created_at: string | null
+          id: string
+          parent_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          parent_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          parent_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_master"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_master: {
         Row: {
-          activity_type:
-            | Database["public"]["Enums"]["activity_type_enum"]
-            | null
           age_grade: string | null
           audience: string | null
           author: Json | null
@@ -57,13 +99,11 @@ export type Database = {
           faq_json: Json | null
           featured_image: string | null
           file_format: string | null
+          filter_type: Database["public"]["Enums"]["filter_type_enum"] | null
           forum_category: string | null
           guarantee: string | null
           id: string
           idea_tips: string | null
-          instruction_type:
-            | Database["public"]["Enums"]["instruction_type_enum"]
-            | null
           is_published: boolean | null
           keywords: string[] | null
           language: string | null
@@ -80,6 +120,7 @@ export type Database = {
           newsletter_segment: string | null
           page: Database["public"]["Enums"]["page_enum"]
           payment: Database["public"]["Enums"]["payment_enum"] | null
+          platform: Database["public"]["Enums"]["platform_enum"] | null
           prep_level: string | null
           price: number | null
           published_at: string | null
@@ -99,7 +140,6 @@ export type Database = {
           stage: Database["public"]["Enums"]["stage_enum"] | null
           standards_other: string | null
           start_datetime: string | null
-          subcategory: Database["public"]["Enums"]["subcategory_enum"] | null
           subject: Database["public"]["Enums"]["subject_enum"] | null
           subtitle: string | null
           tags: string[] | null
@@ -112,9 +152,6 @@ export type Database = {
           view_count: number | null
         }
         Insert: {
-          activity_type?:
-            | Database["public"]["Enums"]["activity_type_enum"]
-            | null
           age_grade?: string | null
           audience?: string | null
           author?: Json | null
@@ -153,13 +190,11 @@ export type Database = {
           faq_json?: Json | null
           featured_image?: string | null
           file_format?: string | null
+          filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
           forum_category?: string | null
           guarantee?: string | null
           id?: string
           idea_tips?: string | null
-          instruction_type?:
-            | Database["public"]["Enums"]["instruction_type_enum"]
-            | null
           is_published?: boolean | null
           keywords?: string[] | null
           language?: string | null
@@ -176,6 +211,7 @@ export type Database = {
           newsletter_segment?: string | null
           page: Database["public"]["Enums"]["page_enum"]
           payment?: Database["public"]["Enums"]["payment_enum"] | null
+          platform?: Database["public"]["Enums"]["platform_enum"] | null
           prep_level?: string | null
           price?: number | null
           published_at?: string | null
@@ -195,7 +231,6 @@ export type Database = {
           stage?: Database["public"]["Enums"]["stage_enum"] | null
           standards_other?: string | null
           start_datetime?: string | null
-          subcategory?: Database["public"]["Enums"]["subcategory_enum"] | null
           subject?: Database["public"]["Enums"]["subject_enum"] | null
           subtitle?: string | null
           tags?: string[] | null
@@ -208,9 +243,6 @@ export type Database = {
           view_count?: number | null
         }
         Update: {
-          activity_type?:
-            | Database["public"]["Enums"]["activity_type_enum"]
-            | null
           age_grade?: string | null
           audience?: string | null
           author?: Json | null
@@ -249,13 +281,11 @@ export type Database = {
           faq_json?: Json | null
           featured_image?: string | null
           file_format?: string | null
+          filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
           forum_category?: string | null
           guarantee?: string | null
           id?: string
           idea_tips?: string | null
-          instruction_type?:
-            | Database["public"]["Enums"]["instruction_type_enum"]
-            | null
           is_published?: boolean | null
           keywords?: string[] | null
           language?: string | null
@@ -272,6 +302,7 @@ export type Database = {
           newsletter_segment?: string | null
           page?: Database["public"]["Enums"]["page_enum"]
           payment?: Database["public"]["Enums"]["payment_enum"] | null
+          platform?: Database["public"]["Enums"]["platform_enum"] | null
           prep_level?: string | null
           price?: number | null
           published_at?: string | null
@@ -291,7 +322,6 @@ export type Database = {
           stage?: Database["public"]["Enums"]["stage_enum"] | null
           standards_other?: string | null
           start_datetime?: string | null
-          subcategory?: Database["public"]["Enums"]["subcategory_enum"] | null
           subject?: Database["public"]["Enums"]["subject_enum"] | null
           subtitle?: string | null
           tags?: string[] | null
@@ -354,9 +384,12 @@ export type Database = {
           audience: string | null
           created_at: string | null
           email: string
+          full_name: string | null
           id: string
+          job_position: string | null
           locale: string | null
           name: string | null
+          role: Database["public"]["Enums"]["user_role_enum"] | null
           segments: string[] | null
           status: string | null
           subscribed_at: string | null
@@ -365,9 +398,12 @@ export type Database = {
           audience?: string | null
           created_at?: string | null
           email: string
+          full_name?: string | null
           id?: string
+          job_position?: string | null
           locale?: string | null
           name?: string | null
+          role?: Database["public"]["Enums"]["user_role_enum"] | null
           segments?: string[] | null
           status?: string | null
           subscribed_at?: string | null
@@ -376,12 +412,42 @@ export type Database = {
           audience?: string | null
           created_at?: string | null
           email?: string
+          full_name?: string | null
           id?: string
+          job_position?: string | null
           locale?: string | null
           name?: string | null
+          role?: Database["public"]["Enums"]["user_role_enum"] | null
           segments?: string[] | null
           status?: string | null
           subscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role_enum"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["user_role_enum"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role_enum"] | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -484,13 +550,7 @@ export type Database = {
         | "event"
         | "service"
         | "about"
-      delivery_type_enum:
-        | "In-class"
-        | "Online"
-        | "Hybrid"
-        | "Self-paced"
-        | "Distance Learning"
-        | "Live"
+      delivery_type_enum: "In-class" | "Online" | "Live" | "Homework"
       event_mode_enum: "Online" | "In-person" | "Hybrid" | "Live"
       event_price_type_enum: "Free" | "Paid"
       event_status_enum:
@@ -500,6 +560,17 @@ export type Database = {
         | "After"
         | "Follow-Up"
       event_type_enum: "Workshop" | "Webinar" | "Meetup"
+      filter_type_enum:
+        | "Edu Tech"
+        | "Tutorials"
+        | "Teaching Techniques"
+        | "Class Activity"
+        | "Teacher Reflection"
+        | "Tips"
+        | "Shop"
+        | "Case Study"
+        | "Research"
+        | "Teacher Debates"
       instruction_type_enum:
         | "Direct Instruction"
         | "Differentiated Instruction"
@@ -523,12 +594,14 @@ export type Database = {
         | "events"
         | "services"
         | "about"
-      payment_enum:
-        | "Free"
-        | "Freemium"
-        | "Paid"
-        | "Free Trial"
-        | "Education Discount"
+      payment_enum: "Free" | "Paid" | "Education Discount"
+      platform_enum:
+        | "Mobile App"
+        | "Webapp"
+        | "Smartphone"
+        | "Smartboard"
+        | "Mac"
+        | "Windows"
       resource_type_enum:
         | "Worksheets"
         | "Printables"
@@ -558,8 +631,6 @@ export type Database = {
         | "Early Childhood"
         | "Pre-K"
         | "Kindergarten"
-        | "Lower Primary"
-        | "Upper Primary"
         | "Primary"
         | "Secondary"
         | "High School"
@@ -572,21 +643,24 @@ export type Database = {
         | "Evaluation"
       subject_enum:
         | "Phonics"
-        | "Reading"
-        | "Writing"
-        | "Grammar"
-        | "Spelling"
-        | "Vocabulary"
-        | "English/ELA"
+        | "English"
         | "Math"
         | "Science"
         | "Biology"
         | "Chemistry"
         | "Physics"
         | "Earth Science"
+        | "History"
+        | "Geography"
+        | "Music"
+        | "Arts"
         | "ICT"
-        | "STEM"
+        | "PE"
+        | "Global Perspective"
+        | "Circle Time"
+        | "Break Time"
         | "STEAM"
+      user_role_enum: "Teacher" | "Admin" | "Parent" | "Student" | "Other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -745,18 +819,23 @@ export const Constants = {
         "service",
         "about",
       ],
-      delivery_type_enum: [
-        "In-class",
-        "Online",
-        "Hybrid",
-        "Self-paced",
-        "Distance Learning",
-        "Live",
-      ],
+      delivery_type_enum: ["In-class", "Online", "Live", "Homework"],
       event_mode_enum: ["Online", "In-person", "Hybrid", "Live"],
       event_price_type_enum: ["Free", "Paid"],
       event_status_enum: ["Upcoming", "Before", "During", "After", "Follow-Up"],
       event_type_enum: ["Workshop", "Webinar", "Meetup"],
+      filter_type_enum: [
+        "Edu Tech",
+        "Tutorials",
+        "Teaching Techniques",
+        "Class Activity",
+        "Teacher Reflection",
+        "Tips",
+        "Shop",
+        "Case Study",
+        "Research",
+        "Teacher Debates",
+      ],
       instruction_type_enum: [
         "Direct Instruction",
         "Differentiated Instruction",
@@ -782,12 +861,14 @@ export const Constants = {
         "services",
         "about",
       ],
-      payment_enum: [
-        "Free",
-        "Freemium",
-        "Paid",
-        "Free Trial",
-        "Education Discount",
+      payment_enum: ["Free", "Paid", "Education Discount"],
+      platform_enum: [
+        "Mobile App",
+        "Webapp",
+        "Smartphone",
+        "Smartboard",
+        "Mac",
+        "Windows",
       ],
       resource_type_enum: [
         "Worksheets",
@@ -819,8 +900,6 @@ export const Constants = {
         "Early Childhood",
         "Pre-K",
         "Kindergarten",
-        "Lower Primary",
-        "Upper Primary",
         "Primary",
         "Secondary",
         "High School",
@@ -835,22 +914,25 @@ export const Constants = {
       ],
       subject_enum: [
         "Phonics",
-        "Reading",
-        "Writing",
-        "Grammar",
-        "Spelling",
-        "Vocabulary",
-        "English/ELA",
+        "English",
         "Math",
         "Science",
         "Biology",
         "Chemistry",
         "Physics",
         "Earth Science",
+        "History",
+        "Geography",
+        "Music",
+        "Arts",
         "ICT",
-        "STEM",
+        "PE",
+        "Global Perspective",
+        "Circle Time",
+        "Break Time",
         "STEAM",
       ],
+      user_role_enum: ["Teacher", "Admin", "Parent", "Student", "Other"],
     },
   },
 } as const
