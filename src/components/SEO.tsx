@@ -13,6 +13,7 @@ interface SEOProps {
   section?: string;
   tags?: string[];
   canonicalUrl?: string;
+  lang?: "en" | "sq" | "vi";
 }
 
 export function SEO({
@@ -27,13 +28,17 @@ export function SEO({
   modifiedTime,
   section,
   tags = [],
-  canonicalUrl
+  canonicalUrl,
+  lang = "en",
 }: SEOProps) {
   const siteName = "SchoolTech Hub";
   const fullTitle = `${title} | ${siteName} - AI Education Solutions`;
+  const langLabel = lang === "sq" ? "Albanian" : lang === "vi" ? "Vietnamese" : "English";
+  const ogLocale = lang === "sq" ? "sq_AL" : lang === "vi" ? "vi_VN" : "en_US";
+  const canonical = canonicalUrl || url;
   
   return (
-    <Helmet>
+    <Helmet htmlAttributes={{ lang }}>
       {/* Primary Meta Tags */}
       <title>{fullTitle}</title>
       <meta name="title" content={fullTitle} />
@@ -41,11 +46,16 @@ export function SEO({
       <meta name="keywords" content={keywords} />
       <meta name="author" content={author || "SchoolTech Hub"} />
       <meta name="robots" content="index, follow" />
-      <meta name="language" content="English" />
+      <meta name="language" content={langLabel} />
       <meta name="revisit-after" content="7 days" />
       
       {/* Canonical URL */}
-      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      {canonical && <link rel="canonical" href={canonical} />}
+      {/* Alternate locales */}
+      <link rel="alternate" hrefLang="en" href={`${canonical.split('?')[0]}?lang=en`} />
+      <link rel="alternate" hrefLang="sq" href={`${canonical.split('?')[0]}?lang=sq`} />
+      <link rel="alternate" hrefLang="vi" href={`${canonical.split('?')[0]}?lang=vi`} />
+      <link rel="alternate" hrefLang="x-default" href={canonical} />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
@@ -54,7 +64,7 @@ export function SEO({
       <meta property="og:description" content={description} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content={siteName} />
-      <meta property="og:locale" content="en_US" />
+      <meta property="og:locale" content={ogLocale} />
       <meta property="og:locale:alternate" content="sq_AL" />
       
       {/* Article specific tags */}

@@ -24,6 +24,7 @@ const Blog = () => {
   const [newsletterJob, setNewsletterJob] = useState("");
   const [newsletterRole, setNewsletterRole] = useState("Teacher");
   const { toast } = useToast();
+  const lang = searchParams.get("lang") || "en";
   
   const [filters, setFilters] = useState({
     filterType: searchParams.getAll("filterType") || [],
@@ -57,7 +58,7 @@ const Blog = () => {
 
   useEffect(() => {
     fetchBlogPosts();
-  }, [searchTerm, filters]);
+  }, [searchTerm, filters, lang]);
 
   const fetchBlogPosts = async () => {
     try {
@@ -65,11 +66,12 @@ const Blog = () => {
       let query = supabase
         .from("content_master")
         .select("*")
-        .in("page", ["research_blog", "edutech", "teacher_diary"])
-        .eq("is_published", true);
+        .in("page", ["research_blog", "edutech", "teacher_diary"]) 
+        .eq("is_published", true)
+        .eq("language", lang);
 
       if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,excerpt.ilike.%${searchTerm}%`);
+        query = query.or(`title.ilike.%${searchTerm}%,subtitle.ilike.%${searchTerm}%,excerpt.ilike.%${searchTerm}%`);
       }
 
       if (filters.filterType.length > 0) {
@@ -179,6 +181,7 @@ const Blog = () => {
         description="Explore EdTech ideas, research notes, teaching techniques, and case studies for K-12. Find practical strategies to integrate technology and improve engagement."
         canonicalUrl="https://schooltechhub.com/blog"
         type="website"
+        lang={lang}
       />
       <Navigation />
       

@@ -14,13 +14,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const urlParams = new URLSearchParams(location.search);
+  const initialLang = (urlParams.get("lang") || localStorage.getItem("lang") || "en") as "en" | "sq" | "vi";
+  const [selectedLang, setSelectedLang] = useState<"en" | "sq" | "vi">(initialLang);
+
+  useEffect(() => {
+    // Sync state if URL param changes externally
+    const current = new URLSearchParams(location.search).get("lang") as "en" | "sq" | "vi" | null;
+    if (current && current !== selectedLang) {
+      setSelectedLang(current);
+      localStorage.setItem("lang", current);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -45,9 +57,18 @@ const Navigation = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/blog?search=${encodeURIComponent(searchQuery)}`);
+      const params = new URLSearchParams();
+      params.set("search", searchQuery);
+      params.set("lang", selectedLang);
+      navigate(`/blog?${params.toString()}`);
       setSearchQuery("");
     }
+  };
+
+  const withLang = (path: string) => {
+    const params = new URLSearchParams(location.search);
+    params.set("lang", selectedLang);
+    return `${path}?${params.toString()}`;
   };
 
   const handleSignOut = async () => {
@@ -58,7 +79,7 @@ const Navigation = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center">
+        <Link to={withLang("/"} className="flex items-center">
           <img 
             src="/lovable-uploads/cd87d5dd-fde0-4233-8906-ef61d77a97ae.png" 
             alt="School Tech Hub Solutions" 
@@ -72,7 +93,7 @@ const Navigation = () => {
             {navItems.map((item) => (
               <Link
                 key={item.path}
-                to={item.path}
+                to={withLang(item.path)}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-primary whitespace-nowrap",
                   location.pathname.startsWith(item.path === "/" ? "/home" : item.path)
@@ -98,6 +119,27 @@ const Navigation = () => {
               className="pl-9 pr-3 w-48 lg:w-64"
             />
           </form>
+
+          {/* Language Select */}
+          <Select
+            value={selectedLang}
+            onValueChange={(val) => {
+              setSelectedLang(val as "en" | "sq" | "vi");
+              localStorage.setItem("lang", val);
+              const params = new URLSearchParams(location.search);
+              params.set("lang", val);
+              navigate(`${location.pathname}?${params.toString()}`);
+            }}
+          >
+            <SelectTrigger className="w-24">
+              <SelectValue placeholder="Lang" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="sq">Shqip</SelectItem>
+              <SelectItem value="vi">Tiếng Việt</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Auth Button */}
           {user ? (
@@ -150,7 +192,7 @@ const Navigation = () => {
               {navItems.map((item) => (
                 <Link
                   key={item.path}
-                  to={item.path}
+                  to={withLang(item.path)}
                   onClick={() => setIsOpen(false)}
                   className={cn(
                     "text-lg font-medium transition-colors hover:text-primary py-2",
@@ -162,6 +204,30 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
+
+              {/* Language Select mobile */}
+              <div className="pt-2">
+                <Select
+                  value={selectedLang}
+                  onValueChange={(val) => {
+                    setSelectedLang(val as "en" | "sq" | "vi");
+                    localStorage.setItem("lang", val);
+                    const params = new URLSearchParams(location.search);
+                    params.set("lang", val);
+                    navigate(`${location.pathname}?${params.toString()}`);
+                    setIsOpen(false);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="sq">Shqip</SelectItem>
+                    <SelectItem value="vi">Tiếng Việt</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               
               {user ? (
                 <div className="space-y-2 pt-4 border-t">
