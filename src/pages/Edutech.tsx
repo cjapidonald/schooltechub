@@ -97,7 +97,7 @@ const Edutech = () => {
       }
 
       if (filters.instructionType.length > 0) {
-        query = query.in("instruction_type", filters.instructionType as any);
+        query = query.in("delivery_type", filters.instructionType as any);
       }
 
       const { data, error } = await query.order("published_at", { ascending: false });

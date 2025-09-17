@@ -15,6 +15,8 @@ import Contact from "./pages/Contact";
 import Sitemap from "./pages/Sitemap";
 import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
+import BlogPost from "./pages/BlogPost";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +30,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="/edutech" element={<Edutech />} />
               <Route path="/edutech/:slug" element={<Edutech />} />
               <Route path="/diary" element={<TeacherDiary />} />

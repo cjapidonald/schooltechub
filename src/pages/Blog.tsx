@@ -138,7 +138,7 @@ const Blog = () => {
         email: newsletterEmail,
         full_name: newsletterName,
         job_position: newsletterJob,
-        role: newsletterRole,
+        role: newsletterRole as "Teacher" | "Admin" | "Parent" | "Student" | "Other" | undefined,
         segments: ["teacher_updates"]
       });
 

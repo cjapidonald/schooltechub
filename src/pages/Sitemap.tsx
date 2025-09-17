@@ -4,8 +4,26 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Sitemap = () => {
+  // Fetch blog posts for sitemap
+  const { data: blogPosts } = useQuery({
+    queryKey: ["sitemap-blog-posts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("content_master")
+        .select("slug, title, updated_at")
+        .eq("page", "research_blog")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const sitemapSections = [
     {
       title: "Main Pages",
