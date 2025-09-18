@@ -79,7 +79,7 @@ const Navigation = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <Link to={withLang("/"} className="flex items-center">
+        <Link to={withLang("/")} className="flex items-center">
           <img 
             src="/lovable-uploads/cd87d5dd-fde0-4233-8906-ef61d77a97ae.png" 
             alt="School Tech Hub Solutions" 

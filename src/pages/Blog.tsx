@@ -24,7 +24,8 @@ const Blog = () => {
   const [newsletterJob, setNewsletterJob] = useState("");
   const [newsletterRole, setNewsletterRole] = useState("Teacher");
   const { toast } = useToast();
-  const lang = searchParams.get("lang") || "en";
+  const langParam = searchParams.get("lang");
+  const lang: "en" | "sq" | "vi" = langParam === "sq" || langParam === "vi" ? langParam : "en";
   
   const [filters, setFilters] = useState({
     filterType: searchParams.getAll("filterType") || [],
@@ -34,6 +35,11 @@ const Blog = () => {
     payment: searchParams.getAll("payment") || [],
     platform: searchParams.getAll("platform") || []
   });
+
+  useEffect(() => {
+    // Sync search term from URL when it changes
+    setSearchTerm(searchParams.get("search") || "");
+  }, [searchParams]);
 
   const filterCategories = [
     { value: "Edu Tech", label: "Edu Tech", icon: <BookOpen className="h-4 w-4" /> },

@@ -21,14 +21,15 @@ const Auth = () => {
   const [role, setRole] = useState("Teacher");
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Set up auth state listener FIRST to handle redirects/code exchange
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         navigate("/");
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Then check for existing session (also triggers code exchange on redirect)
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/");
       }
