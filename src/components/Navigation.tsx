@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Search, User, LogOut } from "lucide-react";
+import { Menu, Search, User, LogOut, Languages } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,7 +62,7 @@ const Navigation = () => {
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center">
           <img 
-            src="/lovable-uploads/cd87d5dd-fde0-4233-8906-ef61d77a97ae.png" 
+            src="/logo.png" 
             alt="School Tech Hub Solutions" 
             className="h-12 w-auto"
           />
@@ -108,8 +108,11 @@ const Navigation = () => {
               setLanguage(val as "en" | "sq" | "vi");
             }}
           >
-            <SelectTrigger className="w-24">
-              <SelectValue placeholder="Lang" />
+            <SelectTrigger className="w-28">
+              <div className="flex items-center gap-1">
+                <Languages className="h-4 w-4" />
+                <SelectValue placeholder="Lang" />
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="en">English</SelectItem>
@@ -192,7 +195,10 @@ const Navigation = () => {
                   }}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Language" />
+                    <div className="flex items-center gap-2">
+                      <Languages className="h-4 w-4" />
+                      <SelectValue placeholder="Language" />
+                    </div>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">English</SelectItem>

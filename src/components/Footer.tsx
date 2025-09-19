@@ -48,7 +48,7 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center">
               <img 
-                src="/lovable-uploads/cd87d5dd-fde0-4233-8906-ef61d77a97ae.png" 
+                src="/logo.png" 
                 alt="School Tech Hub Solutions" 
                 className="h-10 w-auto"
               />
