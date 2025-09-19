@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Cpu, 
   Brain, 
@@ -40,6 +41,7 @@ const Index = () => {
   const [counters, setCounters] = useState({ lessons: 0, vr: 0, engagement: 0 });
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -128,19 +130,17 @@ const Index = () => {
           <div className="mx-auto max-w-5xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 backdrop-blur-sm">
               <Cpu className="h-4 w-4 text-primary animate-pulse-glow" />
-              <span className="text-sm font-medium text-primary">Welcome to the Future</span>
+              <span className="text-sm font-medium text-primary">{t.hero.subtitle}</span>
             </div>
             
             <h1 className="mb-6 font-orbitron text-6xl font-bold tracking-tight text-foreground sm:text-7xl lg:text-8xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              <span className="text-foreground">The Future of</span>
-              <br />
               <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                Education is Here
+                {t.hero.title}
               </span>
             </h1>
             
             <p className="mb-8 text-xl text-muted-foreground font-space animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-150">
-              Transform your classroom with AI-powered tools and virtual experiences
+              {t.hero.description}
             </p>
             
             <div className="mb-12 flex flex-wrap justify-center gap-6 text-sm font-space animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
@@ -165,19 +165,19 @@ const Index = () => {
                   className="group relative overflow-hidden bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-[0_0_40px_hsl(var(--glow-primary)/0.5)] transition-all duration-300"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    Start Your Journey
+                    {t.hero.getStarted}
                     <Rocket className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Button>
               </Link>
-              <Link to="/tools">
+              <Link to="/edutech">
                 <Button 
                   size="lg" 
                   variant="outline"
                   className="border-primary/30 bg-background/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.3)] transition-all duration-300"
                 >
-                  Explore Demo
+                  {t.hero.learnMore}
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -196,7 +196,7 @@ const Index = () => {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              The Future of Education is Here
+              {t.features.title}
             </h2>
           </div>
           
@@ -204,60 +204,42 @@ const Index = () => {
             {[
               {
                 icon: Brain,
-                title: "AI Teaching Assistant",
-                description: "Personalized support for every student with intelligent tutoring systems",
+                title: t.features.feature1.title,
+                description: t.features.feature1.description,
                 color: "primary"
               },
               {
                 icon: Globe,
-                title: "Virtual Reality Labs",
-                description: "Immersive learning experiences that bring subjects to life",
+                title: t.features.feature2.title,
+                description: t.features.feature2.description,
                 color: "accent"
               },
               {
                 icon: Gamepad2,
-                title: "Gamification",
-                description: "Turn learning into an adventure with game-based education",
+                title: t.features.feature3.title,
+                description: t.features.feature3.description,
                 color: "secondary"
               },
               {
                 icon: Database,
-                title: "Data Driven Decisions",
-                description: "Real-time analytics to track and improve student performance",
+                title: t.features.feature4.title,
+                description: t.features.feature4.description,
                 color: "primary"
               },
               {
                 icon: Layout,
-                title: "Virtual Classroom Management",
-                description: "Streamline your digital classroom with intelligent tools",
+                title: t.features.feature5.title,
+                description: t.features.feature5.description,
                 color: "accent"
               },
               {
                 icon: BookOpen,
-                title: "Curriculum Development Tools",
-                description: "Create and customize curriculum with AI-powered assistance",
-                color: "secondary"
-              },
-              {
-                icon: UserCog,
-                title: "Teacher Management Software",
-                description: "Simplify administrative tasks and focus on teaching",
-                color: "primary"
-              },
-              {
-                icon: GraduationCap,
-                title: "Student Trackers",
-                description: "Monitor progress and identify areas for improvement",
-                color: "accent"
-              },
-              {
-                icon: FileCheck,
-                title: "Auto Graded Homework Apps",
-                description: "Save time with automated grading and instant feedback",
+                title: t.features.feature6.title,
+                description: t.features.feature6.description,
                 color: "secondary"
               }
             ].map((feature, index) => (
-              <Link to="/tools" key={index} className="block">
+              <Link to="/edutech" key={index} className="block">
                 <Card 
                   className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.2)] cursor-pointer h-full"
                 >
@@ -267,7 +249,7 @@ const Index = () => {
                     <h3 className="mb-2 text-xl font-semibold font-orbitron">{feature.title}</h3>
                     <p className="text-muted-foreground font-space">{feature.description}</p>
                     <div className="mt-4 flex items-center text-primary group-hover:text-accent transition-colors">
-                      <span className="text-sm font-medium">Explore Tools</span>
+                      <span className="text-sm font-medium">{t.hero.learnMore}</span>
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>

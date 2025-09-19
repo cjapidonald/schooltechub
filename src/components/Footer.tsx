@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +54,7 @@ const Footer = () => {
               />
             </div>
             <p className="text-sm text-muted-foreground">
-              Making educational technology accessible and practical for every teacher
+              {t.footer.tagline}
             </p>
             <div className="flex space-x-4">
               <a href="https://www.facebook.com/share/g/1NukWcXVpp/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
@@ -76,26 +78,26 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
+            <h3 className="font-semibold mb-4">{t.footer.quickLinks}</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/tools" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Tools & Activities
+                <Link to="/edutech" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  {t.nav.edutech}
                 </Link>
               </li>
               <li>
-                <Link to="/tutorials" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Tutorials
+                <Link to="/diary" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  {t.nav.teacherDiary}
                 </Link>
               </li>
               <li>
                 <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Blog
+                  {t.nav.blog}
                 </Link>
               </li>
               <li>
-                <Link to="/case-studies" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Case Studies
+                <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  {t.nav.faq}
                 </Link>
               </li>
             </ul>
@@ -103,26 +105,26 @@ const Footer = () => {
 
           {/* Services */}
           <div>
-            <h3 className="font-semibold mb-4">Services</h3>
+            <h3 className="font-semibold mb-4">{t.nav.services}</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  1:1 Coaching
+                <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  {t.services.lms.title}
+                </Link>
+              </li>
+              <li>
+                <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  {t.services.virtual.title}
+                </Link>
+              </li>
+              <li>
+                <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  {t.services.assessment.title}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Whole-Staff PD
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Custom Dashboard Setup
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Contact Us
+                  {t.nav.contact}
                 </Link>
               </li>
             </ul>
@@ -130,28 +132,28 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-semibold mb-4">Monthly Tech Tips</h3>
+            <h3 className="font-semibold mb-4">{t.footer.newsletter}</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Get practical classroom tech strategies delivered to your inbox
+              {t.footer.newsletterText}
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder={t.footer.emailPlaceholder}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="text-sm"
               />
               <Button type="submit" className="w-full" disabled={isSubscribing}>
-                {isSubscribing ? "..." : "Subscribe"}
+                {isSubscribing ? "..." : t.footer.subscribe}
               </Button>
             </form>
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t text-center">
-          <p className="text-sm text-muted-foreground mb-2">© 2024 SchoolTech Hub. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground mb-2">© 2024 SchoolTech Hub. {t.footer.allRights}.</p>
           <div className="text-xs text-muted-foreground space-y-1">
             <p>Email: dcjapi@gmail.com | Phone: +84 0372725432</p>
             <p>Available worldwide for online consultations</p>
