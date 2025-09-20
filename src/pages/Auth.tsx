@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/SEO";
 import { Chrome } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -20,23 +22,25 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState("Teacher");
 
+  const { language } = useLanguage();
+
   useEffect(() => {
     // Set up auth state listener FIRST to handle redirects/code exchange
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate("/");
+        navigate(getLocalizedPath("/", language));
       }
     });
 
     // Then check for existing session (also triggers code exchange on redirect)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/");
+        navigate(getLocalizedPath("/", language));
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, language]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,7 +238,7 @@ const Auth = () => {
           </Button>
           
           <div className="mt-4 text-center text-sm">
-            <Link to="/" className="text-primary hover:underline">
+            <Link to={getLocalizedPath("/", language)} className="text-primary hover:underline">
               Back to Home
             </Link>
           </div>

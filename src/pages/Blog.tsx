@@ -361,7 +361,10 @@ const Blog = () => {
                         <div className="absolute bottom-0 p-6">
                           <Badge className="mb-2">{featuredPost.filter_type || "Featured"}</Badge>
                           <h2 className="text-2xl font-bold mb-2">
-                            <Link to={`/blog/${featuredPost.slug}`} className="hover:text-primary">
+                            <Link
+                              to={getLocalizedPath(`/blog/${featuredPost.slug}`, language)}
+                              className="hover:text-primary"
+                            >
                               {featuredPost.title}
                             </Link>
                           </h2>

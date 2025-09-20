@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const Footer = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,22 +82,34 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">{t.footer.quickLinks}</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/edutech" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/edutech", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.nav.edutech}
                 </Link>
               </li>
               <li>
-                <Link to="/diary" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/teacher-diary", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.nav.teacherDiary}
                 </Link>
               </li>
               <li>
-                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/blog", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.nav.blog}
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/faq", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.nav.faq}
                 </Link>
               </li>
@@ -108,22 +121,34 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">{t.nav.services}</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/services", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.services.lms.title}
                 </Link>
               </li>
               <li>
-                <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/services", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.services.virtual.title}
                 </Link>
               </li>
               <li>
-                <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/services", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.services.assessment.title}
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to={getLocalizedPath("/contact", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
                   {t.nav.contact}
                 </Link>
               </li>

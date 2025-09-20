@@ -5,9 +5,12 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const NotFound = () => {
   const location = useLocation();
+  const { language } = useLanguage();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
@@ -30,7 +33,7 @@ const NotFound = () => {
             Oops! The page you're looking for doesn't exist. It might have been moved or deleted.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/">
+            <Link to={getLocalizedPath("/", language)}>
               <Button>
                 <Home className="mr-2 h-4 w-4" />
                 Go to Homepage

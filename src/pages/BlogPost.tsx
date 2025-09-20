@@ -102,7 +102,7 @@ export default function BlogPost() {
         description: "Please log in to comment",
         variant: "destructive"
       });
-      navigate("/auth");
+      navigate(getLocalizedPath("/auth", language));
       return;
     }
 
@@ -139,7 +139,7 @@ export default function BlogPost() {
         description: "Please log in to reply",
         variant: "destructive"
       });
-      navigate("/auth");
+      navigate(getLocalizedPath("/auth", language));
       return;
     }
 
@@ -191,7 +191,7 @@ export default function BlogPost() {
         <Card className="p-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Blog Post Not Found</h1>
           <p className="text-muted-foreground mb-6">The blog post you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate("/blog")}>
+          <Button onClick={() => navigate(getLocalizedPath("/blog", language))}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Blog
           </Button>
@@ -403,7 +403,7 @@ export default function BlogPost() {
                 <p className="text-muted-foreground mb-4">
                   Please log in to leave a comment
                 </p>
-                <Button onClick={() => navigate("/auth")}>
+                <Button onClick={() => navigate(getLocalizedPath("/auth", language))}>
                   Log In to Comment
                 </Button>
               </Card>

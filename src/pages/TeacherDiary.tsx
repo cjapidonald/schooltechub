@@ -10,6 +10,8 @@ import { Search, Calendar, PenLine, HelpCircle, Lightbulb, MessageSquare } from 
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const TeacherDiary = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +24,7 @@ const TeacherDiary = () => {
     stage: searchParams.getAll("stage") || [],
     subject: searchParams.getAll("subject") || []
   });
+  const { language } = useLanguage();
 
   const categories = [
     { value: "all", label: "All" },
@@ -122,7 +125,7 @@ const TeacherDiary = () => {
       <SEO
         title="Teacher Diary: Reflections & Classroom Insights"
         description="Real teacher reflections, challenges, and insights from the classroom. Learn what works, what doesn't, and practical tips for your teaching journey."
-        canonicalUrl="https://schooltechhub.com/diary"
+        canonicalUrl="https://schooltechhub.com/teacher-diary"
       />
       <Navigation />
       
@@ -256,7 +259,10 @@ const TeacherDiary = () => {
                         </div>
                         
                         <h3 className="text-xl font-semibold mb-2">
-                          <Link to={`/diary/${entry.slug}`} className="hover:text-primary">
+                          <Link
+                            to={getLocalizedPath(`/teacher-diary/${entry.slug}`, language)}
+                            className="hover:text-primary"
+                          >
                             {entry.title}
                           </Link>
                         </h3>

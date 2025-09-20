@@ -6,8 +6,11 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const About = () => {
+  const { language } = useLanguage();
   const mission = [
     {
       icon: Target,
@@ -175,10 +178,10 @@ const About = () => {
                 Join thousands of teachers who've discovered that technology doesn't have to be overwhelming.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/services">
+                <Link to={getLocalizedPath("/services", language)}>
                   <Button size="lg">Book a Consultation</Button>
                 </Link>
-                <Link to="/tools">
+                <Link to={getLocalizedPath("/tools", language)}>
                   <Button size="lg" variant="outline">
                     <BookOpen className="mr-2 h-5 w-5" />
                     Browse Free Resources

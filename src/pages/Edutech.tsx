@@ -10,6 +10,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Clock, Zap, Cpu, BookOpen, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const Edutech = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,6 +27,7 @@ const Edutech = () => {
     subject: searchParams.getAll("subject") || [],
     instructionType: searchParams.getAll("instructionType") || []
   });
+  const { language } = useLanguage();
 
   const categories = [
     { value: "all", label: "All" },
@@ -312,7 +315,10 @@ const Edutech = () => {
                         </div>
                         
                         <h3 className="text-lg font-semibold mb-2">
-                          <Link to={`/edutech/${item.slug}`} className="hover:text-primary">
+                          <Link
+                            to={getLocalizedPath(`/edutech/${item.slug}`, language)}
+                            className="hover:text-primary"
+                          >
                             {item.title}
                           </Link>
                         </h3>
