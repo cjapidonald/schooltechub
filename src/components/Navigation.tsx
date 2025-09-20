@@ -74,8 +74,8 @@ const Navigation = () => {
           </div>
         </Link>
 
-        <div className="hidden md:flex flex-1 items-center gap-6">
-          <div className="flex items-center gap-4 mr-auto">
+        <div className="hidden md:flex flex-1 flex-wrap items-center gap-4 lg:gap-6">
+          <div className="flex items-center gap-4 flex-1 min-w-[220px] order-1">
             {/* Search Bar */}
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -115,7 +115,7 @@ const Navigation = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-center gap-8 mx-auto">
+          <div className="flex order-3 w-full basis-full flex-wrap items-center justify-center gap-4 lg:order-2 lg:basis-auto lg:flex-1 lg:w-auto lg:gap-8">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -133,7 +133,7 @@ const Navigation = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-3 ml-auto flex-shrink-0 order-2 lg:order-3">
             {/* Language Select */}
             <Select
               value={language}
@@ -141,7 +141,7 @@ const Navigation = () => {
                 setLanguage(val as "en" | "sq" | "vi");
               }}
             >
-              <SelectTrigger className="w-28">
+              <SelectTrigger className="min-w-[5.5rem] px-3 lg:min-w-[7rem]">
                 <div className="flex items-center gap-1">
                   <Languages className="h-4 w-4" />
                   <SelectValue placeholder="Lang" />
