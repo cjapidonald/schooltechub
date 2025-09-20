@@ -265,8 +265,8 @@ const Events = () => {
                     return (
                       <Card key={event.id} className={`hover:shadow-lg transition-shadow ${isPast ? 'opacity-75' : ''}`}>
                         <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex gap-2">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
+                            <div className="flex flex-wrap gap-2">
                               <Badge variant={isPast ? "secondary" : "default"}>
                                 {event.event_type}
                               </Badge>
@@ -286,15 +286,19 @@ const Events = () => {
                                 </Badge>
                               )}
                             </div>
-                            {!isPast && countdown && (
-                              <Badge variant="destructive">{countdown}</Badge>
-                            )}
-                            {isPast && event.recording_url && (
-                              <Badge className="bg-green-100 text-green-800">
-                                <Video className="h-3 w-3 mr-1" />
-                                Recording Available
-                              </Badge>
-                            )}
+                            {(!isPast && countdown) || (isPast && event.recording_url) ? (
+                              <div className="flex flex-wrap gap-2 sm:justify-end">
+                                {!isPast && countdown && (
+                                  <Badge variant="destructive">{countdown}</Badge>
+                                )}
+                                {isPast && event.recording_url && (
+                                  <Badge className="bg-green-100 text-green-800">
+                                    <Video className="h-3 w-3 mr-1" />
+                                    Recording Available
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : null}
                           </div>
                           
                           <h3 className="text-xl font-semibold mb-2">
