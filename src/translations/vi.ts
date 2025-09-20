@@ -270,6 +270,29 @@ export const vi = {
       }
     }
   },
+  sitemap: {
+    title: "Sơ đồ trang",
+    description: "Tìm tất cả các trang và tài nguyên có trên School Tech Hub",
+    sections: {
+      englishPages: "Trang tiếng Anh",
+      localizedPages: "Trang {{language}}",
+      freshContent: "Nội dung mới",
+      blogPosts: "Bài viết blog",
+      events: "Sự kiện",
+      teacherDiaryEntries: "Nhật ký giáo viên",
+      xmlTitle: "Sơ đồ trang XML",
+      xmlDescription: "Dành cho công cụ tìm kiếm và công cụ tự động, truy cập sơ đồ trang XML của chúng tôi:"
+    },
+    links: {
+      authPortal: "Cổng xác thực",
+      sitemap: "Sơ đồ trang"
+    },
+    languages: {
+      en: "Tiếng Anh",
+      sq: "Tiếng Albania",
+      vi: "Tiếng Việt"
+    }
+  },
   common: {
     loading: "Đang tải...",
     error: "Đã xảy ra lỗi",
