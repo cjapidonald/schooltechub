@@ -64,31 +64,73 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center gap-6">
-        <Link to={getLocalizedNavPath("/")} className="flex items-center gap-2">
+      <div className="container flex h-16 items-center gap-4">
+        <Link to={getLocalizedNavPath("/")} className="flex items-center gap-2 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-primary-foreground" />
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold">SchoolTech</span>
           </div>
         </Link>
 
-        <div className="hidden md:flex flex-1 flex-wrap items-center gap-4 lg:gap-6">
-          <div className="flex items-center gap-4 flex-1 min-w-[220px] order-1">
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder={t.common.search}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-3 w-48 lg:w-64"
-              />
-            </form>
+        <div className="flex flex-1 items-center justify-end gap-3">
+          {/* Desktop search */}
+          <form
+            onSubmit={handleSearch}
+            className="relative hidden flex-1 items-center md:flex md:max-w-xs lg:max-w-sm xl:max-w-md"
+          >
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={t.common.search}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-10 w-full rounded-full pl-9 pr-3"
+            />
+          </form>
 
-            {/* Auth Button */}
+          {/* Desktop navigation links */}
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={getLocalizedNavPath(item.path)}
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap",
+                  "border border-transparent hover:border-primary/40 hover:bg-primary/5 hover:text-primary",
+                  location.pathname === getLocalizedNavPath(item.path) ||
+                    (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "text-muted-foreground"
+                )}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop actions */}
+          <div className="hidden items-center gap-3 md:flex">
+            <Select
+              value={language}
+              onValueChange={(val) => {
+                setLanguage(val as "en" | "sq" | "vi");
+              }}
+            >
+              <SelectTrigger className="h-10 min-w-[5.5rem] px-3 lg:min-w-[6.5rem]">
+                <div className="flex items-center gap-1">
+                  <Languages className="h-4 w-4" />
+                  <SelectValue placeholder="Lang" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="sq">Shqip</SelectItem>
+                <SelectItem value="vi">Tiếng Việt</SelectItem>
+              </SelectContent>
+            </Select>
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -108,139 +150,98 @@ const Navigation = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild>
+              <Button asChild className="whitespace-nowrap">
                 <Link to={getLocalizedNavPath("/auth")}>{t.nav.signUp} / {t.nav.signIn}</Link>
               </Button>
             )}
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="flex order-3 w-full basis-full flex-wrap items-center justify-center gap-4 lg:order-2 lg:basis-auto lg:flex-1 lg:w-auto lg:gap-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={getLocalizedNavPath(item.path)}
-                className={cn(
-                  "text-lg font-semibold whitespace-nowrap px-4 py-2 transition-colors rounded-full border border-transparent hover:text-primary hover:border-primary/40 hover:bg-primary/5",
-                  location.pathname === getLocalizedNavPath(item.path) ||
-                    (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
-                    ? "text-primary border-primary bg-primary/10"
-                    : "text-muted-foreground"
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
+          {/* Mobile navigation */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[380px]">
+              <div className="mt-8 flex flex-col space-y-4">
+                {/* Mobile Search */}
+                <form onSubmit={handleSearch} className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder={t.common.search}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-10 w-full rounded-full pl-9 pr-3"
+                  />
+                </form>
 
-          <div className="flex items-center gap-3 ml-auto flex-shrink-0 order-2 lg:order-3">
-            {/* Language Select */}
-            <Select
-              value={language}
-              onValueChange={(val) => {
-                setLanguage(val as "en" | "sq" | "vi");
-              }}
-            >
-              <SelectTrigger className="min-w-[5.5rem] px-3 lg:min-w-[7rem]">
-                <div className="flex items-center gap-1">
-                  <Languages className="h-4 w-4" />
-                  <SelectValue placeholder="Lang" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="sq">Shqip</SelectItem>
-                <SelectItem value="vi">Tiếng Việt</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-            <div className="flex flex-col space-y-4 mt-8">
-              {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  type="text"
-                  placeholder={t.common.search}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-3 w-full"
-                />
-              </form>
-
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={getLocalizedNavPath(item.path)}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "text-lg font-medium transition-colors hover:text-primary py-2",
-                    location.pathname === getLocalizedNavPath(item.path) ||
-                    (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-              {/* Language Select mobile */}
-              <div className="pt-2">
-                <Select
-                  value={language}
-                  onValueChange={(val) => {
-                    setLanguage(val as "en" | "sq" | "vi");
-                    setIsOpen(false);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <div className="flex items-center gap-2">
-                      <Languages className="h-4 w-4" />
-                      <SelectValue placeholder="Language" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="sq">Shqip</SelectItem>
-                    <SelectItem value="vi">Tiếng Việt</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {user ? (
-                <div className="space-y-2 pt-4 border-t">
-                  <p className="text-sm text-muted-foreground px-2">{user.email}</p>
-                  <Button 
-                    onClick={() => {
-                      handleSignOut();
-                      setIsOpen(false);
-                    }} 
-                    className="w-full"
-                    variant="outline"
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={getLocalizedNavPath(item.path)}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "py-2 text-lg font-medium transition-colors",
+                      location.pathname === getLocalizedNavPath(item.path) ||
+                        (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary"
+                    )}
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    {t.nav.signOut}
-                  </Button>
+                    {item.name}
+                  </Link>
+                ))}
+
+                {/* Language Select mobile */}
+                <div className="pt-2">
+                  <Select
+                    value={language}
+                    onValueChange={(val) => {
+                      setLanguage(val as "en" | "sq" | "vi");
+                      setIsOpen(false);
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <div className="flex items-center gap-2">
+                        <Languages className="h-4 w-4" />
+                        <SelectValue placeholder="Language" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="sq">Shqip</SelectItem>
+                      <SelectItem value="vi">Tiếng Việt</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              ) : (
-                <Link to={getLocalizedNavPath("/auth")} onClick={() => setIsOpen(false)} className="mt-4">
-                  <Button className="w-full">{t.nav.signUp} / {t.nav.signIn}</Button>
-                </Link>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+
+                {user ? (
+                  <div className="border-t pt-4">
+                    <p className="px-2 text-sm text-muted-foreground">{user.email}</p>
+                    <Button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsOpen(false);
+                      }}
+                      className="mt-3 w-full"
+                      variant="outline"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {t.nav.signOut}
+                    </Button>
+                  </div>
+                ) : (
+                  <Link to={getLocalizedNavPath("/auth")} onClick={() => setIsOpen(false)}>
+                    <Button className="w-full">{t.nav.signUp} / {t.nav.signIn}</Button>
+                  </Link>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </nav>
   );
