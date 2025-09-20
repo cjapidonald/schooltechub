@@ -1,8 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { SEO } from "@/components/SEO";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft } from "lucide-react";
 
@@ -20,8 +18,6 @@ const NotFound = () => {
         description="The page you're looking for doesn't exist. Return to SchoolTech Hub homepage to explore our educational technology resources."
         canonicalUrl="https://schooltechub.com/404"
       />
-      <Navigation />
-      
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
@@ -44,7 +40,6 @@ const NotFound = () => {
         </div>
       </div>
       
-      <Footer />
     </div>
   );
 };

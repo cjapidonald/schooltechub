@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -143,8 +141,6 @@ const Edutech = () => {
         description="Learn classroom technology the practical way: tutorials, teaching techniques, activities, and AI lesson planning. Filter by grade, subject, and time to implement."
         canonicalUrl="https://schooltechhub.com/edutech"
       />
-      <Navigation />
-      
       <main className="flex-1">
         <div className="container py-12">
           <div className="mb-8">
@@ -361,7 +357,6 @@ const Edutech = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

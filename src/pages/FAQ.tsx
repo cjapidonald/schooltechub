@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,8 +72,6 @@ const FAQ = () => {
           }}
         />
       )}
-      <Navigation />
-      
       <main className="flex-1">
         <div className="container py-12">
           <div className="max-w-4xl mx-auto">
@@ -141,7 +137,6 @@ const FAQ = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

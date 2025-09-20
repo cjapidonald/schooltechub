@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, Clock, Users, Target, Calendar, Shield, GraduationCap, ArrowRight, FileText } from "lucide-react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
@@ -91,14 +89,14 @@ const Services = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO 
+      <SEO
         title="Services & Pricing"
         description="Professional EdTech consulting services. 1:1 coaching ($30), whole-school PD programs ($60), and custom dashboard setup. Transform your classroom with expert guidance."
         keywords="EdTech consulting, teacher coaching, professional development, school technology training, educational dashboard, classroom technology support"
         canonicalUrl="https://schooltechhub.com/services"
       />
-      <StructuredData 
-        type="Service" 
+      <StructuredData
+        type="Service"
         data={{
           serviceType: "Educational Technology Consulting",
           services: services.map(s => ({
@@ -111,9 +109,8 @@ const Services = () => {
               "priceCurrency": "USD"
             }
           }))
-        }} 
+        }}
       />
-      <Navigation />
 
       {/* Header */}
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
@@ -300,8 +297,6 @@ const Services = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

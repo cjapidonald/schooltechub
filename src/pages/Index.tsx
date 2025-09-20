@@ -1,6 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import MouseGlowEffect from "@/components/MouseGlowEffect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -91,8 +89,6 @@ const Index = () => {
       />
       <StructuredData type="Organization" data={{}} />
       <MouseGlowEffect />
-      <Navigation />
-      
       {/* Cyber Grid Background */}
       <div className="fixed inset-0 bg-cyber-grid bg-[size:50px_50px] opacity-20" />
       
@@ -349,7 +345,6 @@ const Index = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };
