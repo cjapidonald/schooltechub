@@ -20,7 +20,17 @@ const translations: Record<Language, Translations> = {
 };
 const supportedLanguages = Object.keys(translations) as Language[];
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const defaultLanguageContext: LanguageContextType = {
+  language: 'en',
+  setLanguage: (lang: Language) => {
+    console.warn(
+      `setLanguage called outside of LanguageProvider. Requested language: ${lang}`
+    );
+  },
+  t: translations.en,
+};
+
+const LanguageContext = createContext<LanguageContextType>(defaultLanguageContext);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -80,8 +90,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 export const useLanguage = () => {
   const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+
+  if (context === defaultLanguageContext) {
+    console.warn('useLanguage was called outside of a LanguageProvider. Falling back to defaults.');
   }
+
   return context;
 };
