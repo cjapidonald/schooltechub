@@ -16,8 +16,19 @@ interface ContentBlock {
   url?: string;
 }
 
+interface EditorJSBlock {
+  type: string;
+  data?: Record<string, unknown>;
+}
+
+interface EditorJSContent {
+  blocks: EditorJSBlock[];
+}
+
+type RichContentInput = ContentBlock[] | ContentBlock | EditorJSContent | string | null;
+
 interface RichContentProps {
-  content: ContentBlock[] | string | null;
+  content: RichContentInput;
   className?: string;
 }
 
@@ -32,8 +43,87 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
     return <p className={`text-muted-foreground ${className}`}>{content}</p>;
   }
 
-  // Ensure content is an array
-  const contentArray = Array.isArray(content) ? content : [content];
+  const isEditorJSContent = (value: unknown): value is EditorJSContent => {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      Array.isArray((value as EditorJSContent).blocks)
+    );
+  };
+
+  const textToChildren = (rawText?: unknown): TextChild[] | undefined => {
+    if (typeof rawText !== "string") return undefined;
+    const sanitizedText = rawText
+      .replace(/<br\s*\/?>(\n)?/gi, "\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .trim();
+
+    if (!sanitizedText) return undefined;
+
+    return [{ text: sanitizedText }];
+  };
+
+  const normalizeEditorBlocks = (blocks: EditorJSBlock[]): ContentBlock[] => {
+    return blocks
+      .map((block) => {
+        const data = block.data ?? {};
+
+        switch (block.type) {
+          case "paragraph": {
+            const children = textToChildren((data as { text?: string }).text);
+            if (!children) return null;
+            return { type: "paragraph", children };
+          }
+          case "header":
+          case "heading": {
+            const headingData = data as { text?: string; level?: number | string };
+            const children = textToChildren(headingData.text);
+            if (!children) return null;
+            const normalizedLevel =
+              typeof headingData.level === "number"
+                ? headingData.level
+                : typeof headingData.level === "string"
+                  ? parseInt(headingData.level, 10)
+                  : undefined;
+            return {
+              type: "heading",
+              level: Number.isNaN(normalizedLevel) ? undefined : normalizedLevel,
+              children,
+            };
+          }
+          case "image": {
+            const imageData = data as {
+              file?: { url?: string };
+              url?: string;
+              caption?: string;
+              alt?: string;
+            };
+            const src = imageData.file?.url || imageData.url;
+            if (!src) return null;
+            return {
+              type: "image",
+              src,
+              alt: imageData.alt || imageData.caption,
+              caption: imageData.caption,
+            };
+          }
+          default:
+            return null;
+        }
+      })
+      .filter((block): block is ContentBlock => block !== null);
+  };
+
+  let contentArray: ContentBlock[];
+
+  if (isEditorJSContent(content)) {
+    contentArray = normalizeEditorBlocks(content.blocks);
+  } else if (Array.isArray(content)) {
+    contentArray = content;
+  } else {
+    contentArray = [content];
+  }
 
   // Helper function to render text children
   const renderTextChildren = (children: TextChild[] | undefined) => {
@@ -57,7 +147,7 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
               </p>
             );
           
-          case "heading":
+          case "heading": {
             const Tag = `h${block.level || 2}` as keyof JSX.IntrinsicElements;
             const headingClasses = {
               2: "text-2xl font-bold mt-8 mb-4",
@@ -69,6 +159,7 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
                 {renderTextChildren(block.children)}
               </Tag>
             );
+          }
           
           case "image":
             return (
