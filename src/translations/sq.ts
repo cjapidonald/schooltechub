@@ -526,7 +526,18 @@ export const sq = {
   },
   faq: {
     title: "Pyetje të Shpeshta",
-    subtitle: "Gjeni përgjigje për pyetjet e zakonshme rreth shërbimeve tona"
+    subtitle: "Gjeni përgjigje për pyetjet e zakonshme rreth shërbimeve tona",
+    hero: {
+      title: "Pyetje të Shpeshta",
+      subtitle: "Merrni përgjigje për pyetjet e zakonshme rreth shërbimeve dhe mjeteve tona"
+    },
+    loading: "Duke ngarkuar pyetjet...",
+    empty: "Aktualisht nuk ka pyetje të disponueshme.",
+    cta: {
+      title: "Ende keni pyetje?",
+      subtitle: "Ekipi ynë është këtu për t'ju ndihmuar me çdo pyetje shtesë",
+      button: "Na kontaktoni"
+    }
   },
   edutech: {
     title: "Burimet e Teknologjisë Arsimore",

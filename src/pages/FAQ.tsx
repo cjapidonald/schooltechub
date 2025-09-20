@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { HelpCircle } from "lucide-react";
 import RichContent from "@/components/RichContent";
 import type { Json } from "@/integrations/supabase/types";
@@ -17,6 +18,7 @@ interface FAQItem {
 }
 
 const FAQ = () => {
+  const { t } = useLanguage();
   const [faqs, setFaqs] = useState<FAQItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -79,18 +81,18 @@ const FAQ = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                 <HelpCircle className="h-8 w-8 text-primary" />
               </div>
-              <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
+              <h1 className="text-4xl font-bold mb-4">{t.faq.hero.title}</h1>
               <p className="text-lg text-muted-foreground">
-                Get answers to common questions about our services and tools
+                {t.faq.hero.subtitle}
               </p>
             </div>
 
             {loading ? (
-              <div className="text-center py-8">Loading FAQs...</div>
+              <div className="text-center py-8">{t.faq.loading}</div>
             ) : Object.keys(groupedFAQs).length === 0 ? (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  No FAQs available at the moment.
+                  {t.faq.empty}
                 </CardContent>
               </Card>
             ) : (
@@ -121,15 +123,15 @@ const FAQ = () => {
 
             <Card className="mt-12">
               <CardContent className="py-6 text-center">
-                <h3 className="text-lg font-semibold mb-2">Still have questions?</h3>
+                <h3 className="text-lg font-semibold mb-2">{t.faq.cta.title}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Our team is here to help you with any additional questions
+                  {t.faq.cta.subtitle}
                 </p>
-                <a 
-                  href="/contact" 
+                <a
+                  href="/contact"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
                 >
-                  Contact Us
+                  {t.faq.cta.button}
                 </a>
               </CardContent>
             </Card>
