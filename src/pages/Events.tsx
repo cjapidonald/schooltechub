@@ -171,7 +171,7 @@ const Events = () => {
           </div>
 
           <Tabs value={selectedType} onValueChange={setSelectedType} className="mb-8">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {eventTypes.map((type) => (
                 <TabsTrigger key={type.value} value={type.value}>
                   {type.label}
