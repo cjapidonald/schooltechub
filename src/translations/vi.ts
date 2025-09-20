@@ -237,6 +237,35 @@ export const vi = {
       errorMessage: "Vui lòng thử lại sau."
     }
   },
+  blogPost: {
+    backToBlog: "Quay lại Blog",
+    share: "Chia sẻ",
+    comments: "Bình luận",
+    commentPlaceholder: "Chia sẻ suy nghĩ của bạn...",
+    postComment: "Đăng bình luận",
+    loginPrompt: "Vui lòng đăng nhập để để lại bình luận",
+    loginCta: "Đăng nhập để bình luận",
+    reply: "Trả lời",
+    replyPlaceholder: "Viết phản hồi của bạn...",
+    postReply: "Đăng phản hồi",
+    cancel: "Hủy",
+    emptyState: "Chưa có bình luận. Hãy là người đầu tiên chia sẻ suy nghĩ của bạn!",
+    notFound: {
+      title: "Không tìm thấy bài viết",
+      description: "Bài viết bạn tìm không tồn tại."
+    },
+    toast: {
+      authRequiredTitle: "Cần đăng nhập",
+      authRequiredComment: "Vui lòng đăng nhập để bình luận",
+      authRequiredReply: "Vui lòng đăng nhập để trả lời",
+      errorTitle: "Lỗi",
+      commentError: "Không thể đăng bình luận",
+      replyError: "Không thể đăng phản hồi",
+      successTitle: "Thành công",
+      commentSuccess: "Đăng bình luận thành công",
+      replySuccess: "Đăng phản hồi thành công"
+    }
+  },
   contact: {
     title: "Liên hệ",
     subtitle: "Chúng tôi ở đây để giúp chuyển đổi tổ chức giáo dục của bạn",

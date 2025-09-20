@@ -237,6 +237,35 @@ export const sq = {
       errorMessage: "Ju lutemi provoni përsëri më vonë."
     }
   },
+  blogPost: {
+    backToBlog: "Kthehu te Blogu",
+    share: "Ndaj",
+    comments: "Komentet",
+    commentPlaceholder: "Ndani mendimet tuaja...",
+    postComment: "Posto Komentin",
+    loginPrompt: "Ju lutemi hyni për të lënë një koment",
+    loginCta: "Hyni për të komentuar",
+    reply: "Përgjigju",
+    replyPlaceholder: "Shkruani përgjigjen tuaj...",
+    postReply: "Posto Përgjigjen",
+    cancel: "Anulo",
+    emptyState: "Ende nuk ka komente. Bëhuni i pari që ndani mendimet tuaja!",
+    notFound: {
+      title: "Postimi i Blogut Nuk u Gjet",
+      description: "Postimi i blogut që po kërkoni nuk ekziston."
+    },
+    toast: {
+      authRequiredTitle: "Kërkohet autentifikimi",
+      authRequiredComment: "Ju lutemi hyni për të komentuar",
+      authRequiredReply: "Ju lutemi hyni për t'u përgjigjur",
+      errorTitle: "Gabim",
+      commentError: "Dështoi publikimi i komentit",
+      replyError: "Dështoi publikimi i përgjigjes",
+      successTitle: "Sukses",
+      commentSuccess: "Komenti u postua me sukses",
+      replySuccess: "Përgjigjja u postua me sukses"
+    }
+  },
   contact: {
     title: "Na Kontaktoni",
     subtitle: "Jemi këtu për të ndihmuar në transformimin e institucionit tuaj arsimor",

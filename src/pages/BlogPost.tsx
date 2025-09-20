@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ShareButton } from "@/components/ShareButton";
 import RichContent from "@/components/RichContent";
@@ -143,8 +142,8 @@ export default function BlogPost() {
     
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "Please log in to comment",
+        title: t.blogPost.toast.authRequiredTitle,
+        description: t.blogPost.toast.authRequiredComment,
         variant: "destructive"
       });
       navigate(getLocalizedPath("/auth", language));
@@ -164,15 +163,15 @@ export default function BlogPost() {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to post comment",
+        title: t.blogPost.toast.errorTitle,
+        description: t.blogPost.toast.commentError,
         variant: "destructive"
       });
     } else {
       setComment("");
       toast({
-        title: "Success",
-        description: "Comment posted successfully"
+        title: t.blogPost.toast.successTitle,
+        description: t.blogPost.toast.commentSuccess
       });
     }
   };
@@ -180,8 +179,8 @@ export default function BlogPost() {
   const handleReply = async (parentId: string) => {
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "Please log in to reply",
+        title: t.blogPost.toast.authRequiredTitle,
+        description: t.blogPost.toast.authRequiredReply,
         variant: "destructive"
       });
       navigate(getLocalizedPath("/auth", language));
@@ -201,16 +200,16 @@ export default function BlogPost() {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to post reply",
+        title: t.blogPost.toast.errorTitle,
+        description: t.blogPost.toast.replyError,
         variant: "destructive"
       });
     } else {
       setReplyText("");
       setReplyTo(null);
       toast({
-        title: "Success",
-        description: "Reply posted successfully"
+        title: t.blogPost.toast.successTitle,
+        description: t.blogPost.toast.replySuccess
       });
     }
   };
@@ -234,11 +233,11 @@ export default function BlogPost() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 text-center">
-          <h1 className="text-2xl font-bold mb-4">Blog Post Not Found</h1>
-          <p className="text-muted-foreground mb-6">The blog post you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-bold mb-4">{t.blogPost.notFound.title}</h1>
+          <p className="text-muted-foreground mb-6">{t.blogPost.notFound.description}</p>
           <Button onClick={() => navigate(getLocalizedPath("/blog", language))}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Blog
+            {t.blogPost.backToBlog}
           </Button>
         </Card>
       </div>
@@ -292,16 +291,16 @@ export default function BlogPost() {
                 onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
               >
                 <MessageCircle className="h-3 w-3 mr-1" />
-                Reply
+                {t.blogPost.reply}
               </Button>
             </div>
           </div>
           <p className="text-sm mt-2">{comment.content}</p>
-          
+
           {replyTo === comment.id && (
             <div className="mt-4 space-y-2">
               <Textarea
-                placeholder="Write your reply..."
+                placeholder={t.blogPost.replyPlaceholder}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 className="min-h-[80px]"
@@ -311,7 +310,7 @@ export default function BlogPost() {
                   size="sm"
                   onClick={() => handleReply(comment.id)}
                 >
-                  Post Reply
+                  {t.blogPost.postReply}
                 </Button>
                 <Button
                   size="sm"
@@ -321,7 +320,7 @@ export default function BlogPost() {
                     setReplyText("");
                   }}
                 >
-                  Cancel
+                  {t.blogPost.cancel}
                 </Button>
               </div>
             </div>
@@ -375,7 +374,7 @@ export default function BlogPost() {
             className="mb-6"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Blog
+            {t.blogPost.backToBlog}
           </Button>
 
           {/* Featured Image */}
@@ -454,7 +453,7 @@ export default function BlogPost() {
               <ShareButton
                 url={canonicalUrl}
                 title={post.title}
-                buttonLabel="Share"
+                buttonLabel={t.blogPost.share}
               />
             </div>
           </header>
@@ -468,7 +467,7 @@ export default function BlogPost() {
           <section className="border-t pt-8">
             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
               <MessageCircle className="h-6 w-6" />
-              Comments ({comments.filter(c => !c.parent_id).length})
+              {t.blogPost.comments} ({comments.filter(c => !c.parent_id).length})
             </h2>
 
             {/* Comment Form */}
@@ -476,21 +475,21 @@ export default function BlogPost() {
               <Card className="p-4 mb-6">
                 <form onSubmit={handleCommentSubmit}>
                   <Textarea
-                    placeholder="Share your thoughts..."
+                    placeholder={t.blogPost.commentPlaceholder}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     className="min-h-[100px] mb-4"
                   />
-                  <Button type="submit">Post Comment</Button>
+                  <Button type="submit">{t.blogPost.postComment}</Button>
                 </form>
               </Card>
             ) : (
               <Card className="p-4 mb-6 text-center">
                 <p className="text-muted-foreground mb-4">
-                  Please log in to leave a comment
+                  {t.blogPost.loginPrompt}
                 </p>
                 <Button onClick={() => navigate(getLocalizedPath("/auth", language))}>
-                  Log In to Comment
+                  {t.blogPost.loginCta}
                 </Button>
               </Card>
             )}
@@ -505,7 +504,7 @@ export default function BlogPost() {
                 <Card className="p-8 text-center">
                   <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground">
-                    No comments yet. Be the first to share your thoughts!
+                    {t.blogPost.emptyState}
                   </p>
                 </Card>
               )}
