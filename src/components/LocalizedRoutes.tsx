@@ -1,0 +1,74 @@
+import React from 'react';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { LanguageProvider } from '@/contexts/LanguageContext';
+import Index from '@/pages/Index';
+import About from '@/pages/About';
+import Services from '@/pages/Services';
+import Blog from '@/pages/Blog';
+import BlogPost from '@/pages/BlogPost';
+import Events from '@/pages/Events';
+import Contact from '@/pages/Contact';
+import FAQ from '@/pages/FAQ';
+import Edutech from '@/pages/Edutech';
+import TeacherDiary from '@/pages/TeacherDiary';
+import Auth from '@/pages/Auth';
+import NotFound from '@/pages/NotFound';
+import Sitemap from '@/pages/Sitemap';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
+
+const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { lang } = useParams<{ lang?: string }>();
+  const validLangs = ['en', 'sq', 'vi'];
+  
+  // If lang is provided but invalid, redirect to English version
+  if (lang && !validLangs.includes(lang)) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return (
+    <>
+      <Navigation />
+      {children}
+      <Footer />
+    </>
+  );
+};
+
+export const LocalizedRoutes = () => {
+  return (
+    <Routes>
+      {/* English routes (default) */}
+      <Route path="/" element={<RouteWrapper><Index /></RouteWrapper>} />
+      <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
+      <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
+      <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
+      <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
+      <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
+      <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
+      <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
+      <Route path="/edutech" element={<RouteWrapper><Edutech /></RouteWrapper>} />
+      <Route path="/teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
+      <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
+      <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
+      
+      {/* Localized routes for Albanian and Vietnamese */}
+      <Route path="/:lang">
+        <Route index element={<RouteWrapper><Index /></RouteWrapper>} />
+        <Route path="about" element={<RouteWrapper><About /></RouteWrapper>} />
+        <Route path="services" element={<RouteWrapper><Services /></RouteWrapper>} />
+        <Route path="blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
+        <Route path="blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
+        <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
+        <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
+        <Route path="faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
+        <Route path="edutech" element={<RouteWrapper><Edutech /></RouteWrapper>} />
+        <Route path="teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
+        <Route path="auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
+        <Route path="sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
+      </Route>
+      
+      <Route path="*" element={<RouteWrapper><NotFound /></RouteWrapper>} />
+    </Routes>
+  );
+};

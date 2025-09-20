@@ -4,7 +4,7 @@ export const sq = {
     about: "Rreth Nesh",
     services: "Shërbimet",
     blog: "Blog",
-    events: "Ngjarjet",
+    events: "Evente",
     contact: "Kontakt",
     edutech: "Teknologji Edukative",
     teacherDiary: "Ditari i Mësuesit",

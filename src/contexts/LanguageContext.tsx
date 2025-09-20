@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { en } from '../translations/en';
 import { sq } from '../translations/sq';
 import { vi } from '../translations/vi';
@@ -22,28 +22,40 @@ const translations: Record<Language, Translations> = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const langParam = searchParams.get('lang');
-  const initialLang: Language = (langParam === 'sq' || langParam === 'vi') ? langParam : 'en';
+  const { lang } = useParams<{ lang?: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Determine initial language from URL param or default to 'en'
+  const initialLang: Language = (lang === 'sq' || lang === 'vi') ? lang : 'en';
   const [language, setLanguageState] = useState<Language>(initialLang);
 
   useEffect(() => {
-    const langParam = searchParams.get('lang');
-    const newLang: Language = (langParam === 'sq' || langParam === 'vi') ? langParam : 'en';
-    if (newLang !== language) {
-      setLanguageState(newLang);
+    // Update language state when URL param changes
+    const urlLang: Language = (lang === 'sq' || lang === 'vi') ? lang : 'en';
+    if (urlLang !== language) {
+      setLanguageState(urlLang);
     }
-  }, [searchParams, language]);
+  }, [lang]);
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    const newParams = new URLSearchParams(searchParams);
-    if (lang === 'en') {
-      newParams.delete('lang');
-    } else {
-      newParams.set('lang', lang);
+  const setLanguage = (newLang: Language) => {
+    setLanguageState(newLang);
+    
+    // Get current path without language prefix
+    let currentPath = location.pathname;
+    
+    // Remove existing language prefix if present
+    const langPrefixRegex = /^\/(sq|vi)(\/|$)/;
+    if (langPrefixRegex.test(currentPath)) {
+      currentPath = currentPath.replace(langPrefixRegex, '/');
     }
-    setSearchParams(newParams);
+    
+    // Navigate to new language path
+    if (newLang === 'en') {
+      navigate(currentPath);
+    } else {
+      navigate(`/${newLang}${currentPath === '/' ? '' : currentPath}`);
+    }
   };
 
   const t = translations[language];

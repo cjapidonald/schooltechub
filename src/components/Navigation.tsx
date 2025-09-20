@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Search, User, LogOut, Languages } from "lucide-react";
+import { Menu, Search, User, LogOut, Languages, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,11 +44,15 @@ const Navigation = () => {
     { name: t.nav.services, path: "/services" },
     { name: t.nav.about, path: "/about" },
   ];
+  
+  const getLocalizedNavPath = (path: string) => {
+    return getLocalizedPath(path, language);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/blog?search=${encodeURIComponent(searchQuery)}`);
+      navigate(getLocalizedNavPath(`/blog?search=${encodeURIComponent(searchQuery)}`));
       setSearchQuery("");
     }
   };
@@ -60,12 +65,13 @@ const Navigation = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center">
-          <img 
-            src="/logo.png" 
-            alt="School Tech Hub Solutions" 
-            className="h-12 w-auto"
-          />
+        <Link to={getLocalizedNavPath("/")} className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold">SchoolTech</span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -74,10 +80,11 @@ const Navigation = () => {
             {navItems.map((item) => (
               <Link
                 key={item.path}
-                to={item.path}
+                to={getLocalizedNavPath(item.path)}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-primary whitespace-nowrap",
-                  location.pathname.startsWith(item.path === "/" ? "/home" : item.path)
+                  location.pathname === getLocalizedNavPath(item.path) ||
+                  (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
                     ? "text-primary"
                     : "text-muted-foreground"
                 )}
@@ -142,7 +149,7 @@ const Navigation = () => {
             </DropdownMenu>
           ) : (
             <Button asChild>
-              <Link to="/auth">{t.nav.signUp} / {t.nav.signIn}</Link>
+              <Link to={getLocalizedNavPath("/auth")}>{t.nav.signUp} / {t.nav.signIn}</Link>
             </Button>
           )}
         </div>

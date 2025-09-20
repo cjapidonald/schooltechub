@@ -64,6 +64,8 @@ export type Database = {
           age_grade: string | null
           audience: string | null
           author: Json | null
+          author_image: string | null
+          author_job_title: string | null
           billing: Database["public"]["Enums"]["billing_enum"] | null
           bloom_level: Database["public"]["Enums"]["bloom_enum"] | null
           case_study_tags: string | null
@@ -155,6 +157,8 @@ export type Database = {
           age_grade?: string | null
           audience?: string | null
           author?: Json | null
+          author_image?: string | null
+          author_job_title?: string | null
           billing?: Database["public"]["Enums"]["billing_enum"] | null
           bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
           case_study_tags?: string | null
@@ -246,6 +250,8 @@ export type Database = {
           age_grade?: string | null
           audience?: string | null
           author?: Json | null
+          author_image?: string | null
+          author_job_title?: string | null
           billing?: Database["public"]["Enums"]["billing_enum"] | null
           bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
           case_study_tags?: string | null
