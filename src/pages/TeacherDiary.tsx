@@ -23,7 +23,6 @@ const TeacherDiary = () => {
     stage: searchParams.getAll("stage") || [],
     subject: searchParams.getAll("subject") || []
   });
-  const { language } = useLanguage();
 
   const categories = [
     { value: "all", label: "All" },
