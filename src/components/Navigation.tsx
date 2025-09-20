@@ -64,7 +64,7 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center gap-6">
         <Link to={getLocalizedNavPath("/")} className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
@@ -74,7 +74,7 @@ const Navigation = () => {
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-4 mr-8">
+        <div className="hidden md:flex items-center gap-4">
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -86,26 +86,6 @@ const Navigation = () => {
               className="pl-9 pr-3 w-48 lg:w-64"
             />
           </form>
-
-          {/* Language Select */}
-          <Select
-            value={language}
-            onValueChange={(val) => {
-              setLanguage(val as "en" | "sq" | "vi");
-            }}
-          >
-            <SelectTrigger className="w-28">
-              <div className="flex items-center gap-1">
-                <Languages className="h-4 w-4" />
-                <SelectValue placeholder="Lang" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="sq">Shqip</SelectItem>
-              <SelectItem value="vi">Tiếng Việt</SelectItem>
-            </SelectContent>
-          </Select>
 
           {/* Auth Button */}
           {user ? (
@@ -134,13 +114,13 @@ const Navigation = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8 ml-auto">
+        <div className="hidden md:flex flex-1 items-center justify-center gap-8">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={getLocalizedNavPath(item.path)}
               className={cn(
-                "text-base font-semibold whitespace-nowrap px-4 py-2 transition-colors rounded-full border border-transparent hover:text-primary hover:border-primary/40 hover:bg-primary/5",
+                "text-lg font-semibold whitespace-nowrap px-4 py-2 transition-colors rounded-full border border-transparent hover:text-primary hover:border-primary/40 hover:bg-primary/5",
                 location.pathname === getLocalizedNavPath(item.path) ||
                   (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
                   ? "text-primary border-primary bg-primary/10"
@@ -150,6 +130,28 @@ const Navigation = () => {
               {item.name}
             </Link>
           ))}
+        </div>
+
+        <div className="hidden md:flex items-center gap-4 ml-auto">
+          {/* Language Select */}
+          <Select
+            value={language}
+            onValueChange={(val) => {
+              setLanguage(val as "en" | "sq" | "vi");
+            }}
+          >
+            <SelectTrigger className="w-28">
+              <div className="flex items-center gap-1">
+                <Languages className="h-4 w-4" />
+                <SelectValue placeholder="Lang" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="sq">Shqip</SelectItem>
+              <SelectItem value="vi">Tiếng Việt</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Mobile Navigation */}
