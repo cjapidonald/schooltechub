@@ -218,7 +218,18 @@ export const en = {
   },
   faq: {
     title: "Frequently Asked Questions",
-    subtitle: "Find answers to common questions about our services"
+    subtitle: "Find answers to common questions about our services",
+    hero: {
+      title: "Frequently Asked Questions",
+      subtitle: "Get answers to common questions about our services and tools"
+    },
+    loading: "Loading FAQs...",
+    empty: "No FAQs available at the moment.",
+    cta: {
+      title: "Still have questions?",
+      subtitle: "Our team is here to help you with any additional questions",
+      button: "Contact Us"
+    }
   },
   edutech: {
     title: "Educational Technology Resources",

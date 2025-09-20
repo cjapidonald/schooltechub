@@ -218,7 +218,18 @@ export const vi = {
   },
   faq: {
     title: "Câu hỏi thường gặp",
-    subtitle: "Tìm câu trả lời cho các câu hỏi phổ biến về dịch vụ của chúng tôi"
+    subtitle: "Tìm câu trả lời cho các câu hỏi phổ biến về dịch vụ của chúng tôi",
+    hero: {
+      title: "Câu hỏi thường gặp",
+      subtitle: "Nhận câu trả lời cho những thắc mắc phổ biến về dịch vụ và công cụ của chúng tôi"
+    },
+    loading: "Đang tải câu hỏi...",
+    empty: "Hiện chưa có câu hỏi nào.",
+    cta: {
+      title: "Vẫn còn thắc mắc?",
+      subtitle: "Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn với mọi câu hỏi bổ sung",
+      button: "Liên hệ với chúng tôi"
+    }
   },
   edutech: {
     title: "Tài nguyên công nghệ giáo dục",
