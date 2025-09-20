@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import RichContent from "@/components/RichContent";
 import { ArrowLeft, Calendar, PenLine, HelpCircle, Lightbulb, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
@@ -96,13 +97,55 @@ const TeacherDiaryEntry = () => {
     );
   }
 
+  const siteUrl = "https://schooltechhub.com";
+  const languagePrefix = language === "en" ? "" : `/${language}`;
+  const diaryPath = entry.slug ? `/teacher-diary/${entry.slug}` : "/teacher-diary";
+  const canonicalUrl = `${siteUrl}${languagePrefix}${diaryPath}`;
+  const publishedAtISO = entry.published_at ? new Date(entry.published_at).toISOString() : undefined;
+  const modifiedAtISO = entry.updated_at ? new Date(entry.updated_at).toISOString() : publishedAtISO;
+  const description = entry.meta_description || entry.excerpt || "";
+  const authorName =
+    typeof entry.author === "object" && entry.author !== null
+      ? (entry.author as any).name || "SchoolTech Hub"
+      : entry.author || "SchoolTech Hub";
+  const keywordList = Array.isArray(entry.keywords)
+    ? entry.keywords
+    : typeof entry.keywords === "string"
+      ? entry.keywords.split(",").map(keyword => keyword.trim()).filter(Boolean)
+      : [];
+  const tags = Array.isArray(entry.tags)
+    ? entry.tags
+    : typeof entry.tags === "string"
+      ? entry.tags.split(",").map(tag => tag.trim()).filter(Boolean)
+      : [];
+
   return (
     <>
       <SEO
         title={entry.meta_title || entry.title}
-        description={entry.meta_description || entry.excerpt}
+        description={description}
         image={entry.featured_image || undefined}
-        keywords={entry.keywords?.join(", ")}
+        keywords={keywordList.length > 0 ? keywordList.join(", ") : undefined}
+        type="article"
+        author={authorName}
+        publishedTime={publishedAtISO}
+        modifiedTime={modifiedAtISO}
+        section={entry.category || undefined}
+        tags={tags}
+        canonicalUrl={canonicalUrl}
+        lang={language}
+      />
+
+      <StructuredData
+        type="Article"
+        data={{
+          headline: entry.meta_title || entry.title,
+          description,
+          image: entry.featured_image ? [entry.featured_image] : undefined,
+          datePublished: publishedAtISO,
+          dateModified: modifiedAtISO,
+          url: canonicalUrl,
+        }}
       />
 
       <article className="min-h-screen bg-background">

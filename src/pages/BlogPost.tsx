@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ShareButton } from "@/components/ShareButton";
 import RichContent from "@/components/RichContent";
 import { SEO } from "@/components/SEO";
+import { StructuredData } from "@/components/StructuredData";
 import { ArrowLeft, Calendar, User, Clock, Tag, MessageCircle, ThumbsUp, Flag } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -246,6 +247,23 @@ export default function BlogPost() {
 
   const tags = extractTags(post.tags);
   const readTimeLabel = getReadTimeLabel(post.read_time, post.time_required);
+  const siteUrl = "https://schooltechhub.com";
+  const languagePrefix = language === "en" ? "" : `/${language}`;
+  const sanitizedSlug = (post.slug || slug || "").toString();
+  const articlePath = sanitizedSlug ? `/blog/${sanitizedSlug}` : "/blog";
+  const canonicalUrl = `${siteUrl}${languagePrefix}${articlePath}`;
+  const authorName =
+    typeof post.author === "object" && post.author !== null
+      ? (post.author as any).name || "SchoolTech Hub"
+      : post.author || "SchoolTech Hub";
+  const publishedAtISO = post.published_at ? new Date(post.published_at).toISOString() : undefined;
+  const modifiedAtISO = post.updated_at ? new Date(post.updated_at).toISOString() : publishedAtISO;
+  const description = post.meta_description || post.excerpt || "";
+  const keywordList = Array.isArray(post.keywords)
+    ? post.keywords
+    : typeof post.keywords === "string"
+      ? post.keywords.split(",").map(keyword => keyword.trim()).filter(Boolean)
+      : [];
 
   const renderComment = (comment: any, depth = 0) => {
     const replies = comments.filter(c => c.parent_id === comment.id);
@@ -323,11 +341,31 @@ export default function BlogPost() {
     <>
       <SEO
         title={post.meta_title || post.title}
-        description={post.meta_description || post.excerpt}
-        keywords={post.keywords?.join(", ")}
+        description={description}
+        keywords={keywordList.length > 0 ? keywordList.join(", ") : undefined}
         image={post.featured_image}
+        type="article"
+        author={authorName}
+        publishedTime={publishedAtISO}
+        modifiedTime={modifiedAtISO}
+        section={post.category || undefined}
+        tags={tags}
+        canonicalUrl={canonicalUrl}
+        lang={language}
       />
-      
+
+      <StructuredData
+        type="Article"
+        data={{
+          headline: post.meta_title || post.title,
+          description,
+          image: post.featured_image ? [post.featured_image] : undefined,
+          datePublished: publishedAtISO,
+          dateModified: modifiedAtISO,
+          url: canonicalUrl,
+        }}
+      />
+
       <article className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Back Button */}
@@ -413,9 +451,10 @@ export default function BlogPost() {
             </div>
 
             <div className="mt-4">
-              <ShareButton 
-                url={window.location.href} 
+              <ShareButton
+                url={canonicalUrl}
                 title={post.title}
+                buttonLabel="Share"
               />
             </div>
           </header>
