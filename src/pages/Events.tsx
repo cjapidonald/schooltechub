@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -143,8 +141,7 @@ const Events = () => {
         description="Join live EdTech webinars, workshops, and meetups. Browse upcoming and past events, and watch recordings to level up your classroom technology skills."
         canonicalUrl="https://schooltechhub.com/events"
       />
-      <Navigation />
-      
+
       <main className="flex-1">
         <div className="container py-12">
           <div className="mb-8">
@@ -365,8 +362,6 @@ const Events = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

@@ -2,8 +2,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Award, Users, BookOpen, Target, Heart, Lightbulb } from "lucide-react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 
@@ -35,13 +33,12 @@ const About = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO 
+      <SEO
         title="About Us"
         description="Learn about SchoolTech Hub's mission to make educational technology accessible. 7+ years experience, 100+ schools helped, certified educators supporting your tech journey."
         keywords="about SchoolTech Hub, educational technology company, EdTech consultants, teacher training experts, classroom technology specialists"
         canonicalUrl="https://schooltechhub.com/about"
       />
-      <Navigation />
 
       {/* Hero Section */}
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
@@ -279,8 +276,6 @@ const About = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

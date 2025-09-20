@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -124,8 +122,7 @@ const TeacherDiary = () => {
         description="Real teacher reflections, challenges, and insights from the classroom. Learn what works, what doesn't, and practical tips for your teaching journey."
         canonicalUrl="https://schooltechhub.com/diary"
       />
-      <Navigation />
-      
+
       <main className="flex-1">
         <div className="container py-12">
           <div className="mb-8">
@@ -294,8 +291,6 @@ const TeacherDiary = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

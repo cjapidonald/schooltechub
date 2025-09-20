@@ -1,7 +1,5 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SEO } from "@/components/SEO";
 import { useQuery } from "@tanstack/react-query";
@@ -88,8 +86,6 @@ const Sitemap = () => {
         description="Navigate through all pages and resources available on School Tech Hub"
         keywords="sitemap, navigation, school tech hub pages"
       />
-      <Navigation />
-      
       <main className="flex-1">
         <div className="container py-12">
           <h1 className="text-4xl font-bold mb-2">Sitemap</h1>
@@ -142,7 +138,6 @@ const Sitemap = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };
