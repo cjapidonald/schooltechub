@@ -74,28 +74,7 @@ const Navigation = () => {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6 flex-1 max-w-3xl mx-8">
-          <div className="flex items-center space-x-6">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={getLocalizedNavPath(item.path)}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-primary whitespace-nowrap",
-                  location.pathname === getLocalizedNavPath(item.path) ||
-                  (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-4 mr-8">
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -152,6 +131,25 @@ const Navigation = () => {
               <Link to={getLocalizedNavPath("/auth")}>{t.nav.signUp} / {t.nav.signIn}</Link>
             </Button>
           )}
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8 ml-auto">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={getLocalizedNavPath(item.path)}
+              className={cn(
+                "text-base font-semibold transition-colors hover:text-primary whitespace-nowrap",
+                location.pathname === getLocalizedNavPath(item.path) ||
+                  (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}
+            >
+              {item.name}
+            </Link>
+          ))}
         </div>
 
         {/* Mobile Navigation */}
