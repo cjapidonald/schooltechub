@@ -5,13 +5,51 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Search, Calendar, Clock, GraduationCap, Lightbulb, MessageSquare, ChevronDown, BookOpen, Microscope, ShoppingBag, User } from "lucide-react";
+import { Search, Calendar, Clock, GraduationCap, Lightbulb, MessageSquare, ChevronDown, BookOpen, Microscope, ShoppingBag, Tag, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+
+const extractTags = (tags: string[] | string | null | undefined) => {
+  if (Array.isArray(tags)) {
+    return tags;
+  }
+
+  if (typeof tags === "string") {
+    return tags
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const getReadTimeLabel = (
+  readTime?: number | string | null,
+  timeRequired?: string | null
+) => {
+  if (readTime !== null && readTime !== undefined && readTime !== "") {
+    const parsed = typeof readTime === "number" ? readTime : parseInt(readTime, 10);
+
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return `${parsed} min read`;
+    }
+  }
+
+  if (timeRequired) {
+    const normalized = String(timeRequired).trim();
+
+    if (normalized.length > 0) {
+      return normalized.toLowerCase().includes("read") ? normalized : `${normalized} read`;
+    }
+  }
+
+  return null;
+};
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -178,6 +216,9 @@ const Blog = () => {
     const category = filterCategories.find(cat => cat.value === filterType);
     return category?.icon || <BookOpen className="h-4 w-4" />;
   };
+
+  const featuredTags = extractTags(featuredPost?.tags);
+  const featuredReadTime = getReadTimeLabel(featuredPost?.read_time, featuredPost?.time_required);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -351,15 +392,47 @@ const Blog = () => {
                     <Card className="overflow-hidden">
                       <div className="relative h-64 bg-gradient-to-br from-primary/10 to-primary/5">
                         {featuredPost.featured_image && (
-                          <img 
-                            src={featuredPost.featured_image} 
+                          <img
+                            src={featuredPost.featured_image}
                             alt={featuredPost.title}
                             className="w-full h-full object-cover"
                           />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
                         <div className="absolute bottom-0 p-6">
-                          <Badge className="mb-2">{featuredPost.filter_type || "Featured"}</Badge>
+                          <div className="flex flex-col gap-3 mb-3">
+                            <div className="flex flex-wrap gap-2">
+                              {featuredPost.filter_type && (
+                                <Badge variant="secondary" className="flex items-center gap-1">
+                                  {getCategoryIcon(featuredPost.filter_type)}
+                                  {featuredPost.filter_type}
+                                </Badge>
+                              )}
+                              {!featuredPost.filter_type && (
+                                <Badge variant="secondary">Featured</Badge>
+                              )}
+                              {featuredTags.map(tag => (
+                                <Badge key={tag} variant="outline" className="flex items-center gap-1">
+                                  <Tag className="h-3 w-3" />
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                              {featuredPost.published_at && (
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  <span>{format(new Date(featuredPost.published_at), "MMM d, yyyy")}</span>
+                                </div>
+                              )}
+                              {featuredReadTime && (
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{featuredReadTime}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                           <h2 className="text-2xl font-bold mb-2">
                             <Link
                               to={getLocalizedPath(`/blog/${featuredPost.slug}`, language)}
@@ -383,73 +456,92 @@ const Blog = () => {
                     </div>
                   ) : (
                     <div className="grid gap-6">
-                      {blogPosts.map((post) => (
-                        <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                          <CardContent className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="flex gap-2">
-                                {post.filter_type && (
-                                  <Badge variant="secondary" className="flex items-center gap-1">
-                                    {getCategoryIcon(post.filter_type)}
-                                    {post.filter_type}
-                                  </Badge>
-                                )}
-                              </div>
-                              {post.published_at && (
-                                <div className="flex items-center text-sm text-muted-foreground">
-                                  <Calendar className="h-4 w-4 mr-1" />
-                                  {format(new Date(post.published_at), "MMM d, yyyy")}
+                      {blogPosts.map((post) => {
+                        const tags = extractTags(post.tags);
+                        const readTimeLabel = getReadTimeLabel(post.read_time, post.time_required);
+
+                        return (
+                          <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                            <CardContent className="p-6">
+                              <div className="flex flex-col gap-3 mb-4">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {post.filter_type && (
+                                    <Badge variant="secondary" className="flex items-center gap-1">
+                                      {getCategoryIcon(post.filter_type)}
+                                      {post.filter_type}
+                                    </Badge>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                            
-                            <h3 className="text-xl font-semibold mb-2">
-                              <Link to={getLocalizedPath(`/blog/${post.slug}`, language)} className="hover:text-primary">
-                                {post.title}
-                              </Link>
-                            </h3>
-                            
-                            {post.excerpt && (
-                              <p className="text-muted-foreground mb-4">{post.excerpt}</p>
-                            )}
-                            
-                            {(post.author || post.author_image || post.author_job_title) && (
-                              <div className="flex items-center gap-3 mb-3">
-                                {post.author_image ? (
-                                  <img 
-                                    src={post.author_image} 
-                                    alt={typeof post.author === 'object' ? post.author.name : "Author"} 
-                                    className="w-10 h-10 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <User className="h-5 w-5 text-primary" />
+
+                                {tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-2">
+                                    {tags.map(tag => (
+                                      <Badge key={tag} variant="outline" className="flex items-center gap-1">
+                                        <Tag className="h-3 w-3" />
+                                        {tag}
+                                      </Badge>
+                                    ))}
                                   </div>
                                 )}
-                                <div className="text-sm">
-                                  <p className="font-medium">
-                                    {typeof post.author === 'object' ? post.author.name : "SchoolTechHub Team"}
-                                  </p>
-                                  {post.author_job_title && (
-                                    <p className="text-muted-foreground">{post.author_job_title}</p>
+
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                                  {post.published_at && (
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>{format(new Date(post.published_at), "MMM d, yyyy")}</span>
+                                    </div>
+                                  )}
+                                  {readTimeLabel && (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      <span>{readTimeLabel}</span>
+                                    </div>
                                   )}
                                 </div>
                               </div>
-                            )}
-                            
-                            <div className="flex flex-wrap gap-2">
-                              {post.stage && <Badge variant="outline">{post.stage}</Badge>}
-                              {post.subject && <Badge variant="outline">{post.subject}</Badge>}
-                              {post.time_required && (
-                                <Badge variant="outline" className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {post.time_required}
-                                </Badge>
+
+                              <h3 className="text-xl font-semibold mb-2">
+                                <Link to={getLocalizedPath(`/blog/${post.slug}`, language)} className="hover:text-primary">
+                                  {post.title}
+                                </Link>
+                              </h3>
+
+                              {post.excerpt && (
+                                <p className="text-muted-foreground mb-4">{post.excerpt}</p>
                               )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+
+                              {(post.author || post.author_image || post.author_job_title) && (
+                                <div className="flex items-center gap-3 mb-3">
+                                  {post.author_image ? (
+                                    <img
+                                      src={post.author_image}
+                                      alt={typeof post.author === 'object' ? post.author.name : "Author"}
+                                      className="w-10 h-10 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                      <User className="h-5 w-5 text-primary" />
+                                    </div>
+                                  )}
+                                  <div className="text-sm">
+                                    <p className="font-medium">
+                                      {typeof post.author === 'object' ? post.author.name : "SchoolTechHub Team"}
+                                    </p>
+                                    {post.author_job_title && (
+                                      <p className="text-muted-foreground">{post.author_job_title}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="flex flex-wrap gap-2">
+                                {post.stage && <Badge variant="outline">{post.stage}</Badge>}
+                                {post.subject && <Badge variant="outline">{post.subject}</Badge>}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   )}
 
