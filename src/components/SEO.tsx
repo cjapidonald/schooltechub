@@ -16,6 +16,32 @@ interface SEOProps {
   lang?: "en" | "sq" | "vi";
 }
 
+const SUPPORTED_LANGS = ["en", "sq", "vi"] as const;
+const LOCALIZED_PREFIXES = new Set<typeof SUPPORTED_LANGS[number]>(
+  SUPPORTED_LANGS.filter(locale => locale !== "en"),
+);
+
+const normalizePathname = (path: string | undefined | null) => {
+  if (!path) {
+    return "/";
+  }
+
+  if (path !== "/" && path.endsWith("/")) {
+    const trimmed = path.replace(/\/+$/, "");
+    return trimmed === "" ? "/" : trimmed;
+  }
+
+  return path;
+};
+
+const buildAbsoluteUrl = (origin: string, path: string) => {
+  if (!origin) {
+    return path;
+  }
+
+  return `${origin}${path}`;
+};
+
 export function SEO({
   title,
   description,
@@ -35,8 +61,59 @@ export function SEO({
   const fullTitle = `${title} | ${siteName} - AI Education Solutions`;
   const langLabel = lang === "sq" ? "Albanian" : lang === "vi" ? "Vietnamese" : "English";
   const ogLocale = lang === "sq" ? "sq_AL" : lang === "vi" ? "vi_VN" : "en_US";
-  const canonical = canonicalUrl || url;
-  
+
+  let origin = "";
+  let pathname = "/";
+
+  if (typeof window !== "undefined" && window.location) {
+    origin = window.location.origin;
+    pathname = window.location.pathname || "/";
+  } else {
+    const fallback = canonicalUrl || url;
+
+    if (fallback) {
+      try {
+        if (fallback.startsWith("http")) {
+          const parsed = new URL(fallback);
+          origin = parsed.origin;
+          pathname = parsed.pathname;
+        } else {
+          const parsed = new URL(fallback, "http://placeholder.local");
+          pathname = parsed.pathname;
+        }
+      } catch (error) {
+        // Ignore parsing errors and fall back to defaults.
+      }
+    }
+  }
+
+  const rawPathname = normalizePathname(pathname);
+
+  const pathSegments = rawPathname.split("/");
+  const potentialLang = pathSegments[1];
+  const hasLocalePrefix = potentialLang ? LOCALIZED_PREFIXES.has(potentialLang as typeof SUPPORTED_LANGS[number]) : false;
+
+  const basePathSegments = hasLocalePrefix ? pathSegments.slice(2) : pathSegments.slice(1);
+  const basePath = normalizePathname(`/${basePathSegments.filter(Boolean).join("/")}`);
+  const normalizedBasePath = basePath === "" ? "/" : basePath;
+
+  const englishPath = normalizedBasePath;
+  const albanianPath = normalizedBasePath === "/" ? "/sq" : `/sq${normalizedBasePath}`;
+  const vietnamesePath = normalizedBasePath === "/" ? "/vi" : `/vi${normalizedBasePath}`;
+
+  const canonicalPath = rawPathname || "/";
+  const canonical =
+    canonicalUrl ||
+    (origin ? `${origin}${canonicalPath}` : (url ? url.split(/[?#]/)[0] : ""));
+
+  const alternateLinks = {
+    en: buildAbsoluteUrl(origin, englishPath),
+    sq: buildAbsoluteUrl(origin, albanianPath),
+    vi: buildAbsoluteUrl(origin, vietnamesePath),
+  };
+
+  const ogUrl = canonical || url;
+
   return (
     <Helmet htmlAttributes={{ lang }}>
       {/* Primary Meta Tags */}
@@ -52,14 +129,14 @@ export function SEO({
       {/* Canonical URL */}
       {canonical && <link rel="canonical" href={canonical} />}
       {/* Alternate locales */}
-      <link rel="alternate" hrefLang="en" href={`${canonical.split('?')[0]}?lang=en`} />
-      <link rel="alternate" hrefLang="sq" href={`${canonical.split('?')[0]}?lang=sq`} />
-      <link rel="alternate" hrefLang="vi" href={`${canonical.split('?')[0]}?lang=vi`} />
-      <link rel="alternate" hrefLang="x-default" href={canonical} />
+      <link rel="alternate" hrefLang="en" href={alternateLinks.en} />
+      <link rel="alternate" hrefLang="sq" href={alternateLinks.sq} />
+      <link rel="alternate" hrefLang="vi" href={alternateLinks.vi} />
+      <link rel="alternate" hrefLang="x-default" href={alternateLinks.en} />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
+      <meta property="og:url" content={ogUrl} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={image} />
@@ -82,7 +159,7 @@ export function SEO({
       
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url} />
+      <meta property="twitter:url" content={ogUrl} />
       <meta property="twitter:title" content={fullTitle} />
       <meta property="twitter:description" content={description} />
       <meta property="twitter:image" content={image} />
