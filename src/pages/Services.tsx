@@ -7,10 +7,13 @@ import { CheckCircle, Clock, Users, Target, Calendar, Shield, GraduationCap, Arr
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 // Import removed - useContent hook no longer exists
 
 const Services = () => {
-  
+  const { language } = useLanguage();
+
   const services = [
     {
       id: "consultation",
@@ -161,7 +164,7 @@ const Services = () => {
                   </p>
                 </div>
 
-                <Link to="/contact">
+                <Link to={getLocalizedPath("/contact", language)}>
                   <Button className="w-full">Book Now</Button>
                 </Link>
               </Card>
@@ -285,7 +288,7 @@ const Services = () => {
           </div>
           
           <div className="text-center mt-12">
-            <Link to="/contact">
+            <Link to={getLocalizedPath("/contact", language)}>
               <Button size="lg" className="shadow-large">
                 Book Your Session Today
                 <Calendar className="ml-2 h-5 w-5" />

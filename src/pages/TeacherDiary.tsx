@@ -23,6 +23,7 @@ const TeacherDiary = () => {
     stage: searchParams.getAll("stage") || [],
     subject: searchParams.getAll("subject") || []
   });
+  const { language } = useLanguage();
 
   const categories = [
     { value: "all", label: "All" },
@@ -123,7 +124,7 @@ const TeacherDiary = () => {
       <SEO
         title="Teacher Diary: Reflections & Classroom Insights"
         description="Real teacher reflections, challenges, and insights from the classroom. Learn what works, what doesn't, and practical tips for your teaching journey."
-        canonicalUrl="https://schooltechhub.com/diary"
+        canonicalUrl="https://schooltechhub.com/teacher-diary"
       />
 
       <main className="flex-1">

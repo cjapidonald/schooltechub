@@ -25,6 +25,7 @@ const Events = () => {
     stage: searchParams.getAll("stage") || [],
     subject: searchParams.getAll("subject") || []
   });
+  const { language } = useLanguage();
 
   const eventTypes = [
     { value: "all", label: "All Events" },

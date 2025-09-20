@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { 
   Cpu, 
   Brain, 
@@ -39,7 +40,7 @@ const Index = () => {
   const [counters, setCounters] = useState({ lessons: 0, vr: 0, engagement: 0 });
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -155,9 +156,9 @@ const Index = () => {
             </div>
             
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
-              <Link to="/contact">
-                <Button 
-                  size="lg" 
+              <Link to={getLocalizedPath("/contact", language)}>
+                <Button
+                  size="lg"
                   className="group relative overflow-hidden bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-[0_0_40px_hsl(var(--glow-primary)/0.5)] transition-all duration-300"
                 >
                   <span className="relative z-10 flex items-center gap-2">
@@ -167,9 +168,9 @@ const Index = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Button>
               </Link>
-              <Link to="/edutech">
-                <Button 
-                  size="lg" 
+              <Link to={getLocalizedPath("/edutech", language)}>
+                <Button
+                  size="lg"
                   variant="outline"
                   className="border-primary/30 bg-background/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.3)] transition-all duration-300"
                 >
@@ -235,8 +236,8 @@ const Index = () => {
                 color: "secondary"
               }
             ].map((feature, index) => (
-              <Link to="/edutech" key={index} className="block">
-                <Card 
+              <Link to={getLocalizedPath("/edutech", language)} key={index} className="block">
+                <Card
                   className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.2)] cursor-pointer h-full"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -290,13 +291,13 @@ const Index = () => {
                 Join thousands of educators who are already using our platform to create better learning experiences.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                <Link to="/contact">
+                <Link to={getLocalizedPath("/contact", language)}>
                   <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:shadow-[0_0_40px_hsl(var(--glow-primary)/0.5)]">
                     Get Started
                     <Rocket className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link to="/services">
+                <Link to={getLocalizedPath("/services", language)}>
                   <Button size="lg" variant="outline" className="border-primary/30 hover:border-primary hover:bg-primary/10">
                     View Pricing
                   </Button>

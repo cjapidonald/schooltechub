@@ -59,7 +59,7 @@ const Navigation = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/");
+    navigate(getLocalizedNavPath("/"));
   };
 
   return (
