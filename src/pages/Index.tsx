@@ -136,7 +136,7 @@ const Index = () => {
       <div className="pointer-events-none fixed inset-0 bg-cyber-grid bg-[size:50px_50px] opacity-20" />
       
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[600px] lg:min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0">
           <img 
@@ -225,7 +225,7 @@ const Index = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="relative py-20">
+      <section className="relative py-12 lg:py-20">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -295,7 +295,7 @@ const Index = () => {
 
 
       {/* Stats Section with animated counters */}
-      <section className="relative py-20" ref={statsRef}>
+      <section className="relative py-12 lg:py-20" ref={statsRef}>
         <div className="container">
           <div className="grid gap-8 md:grid-cols-4">
             {statsData.map((stat, index) => (
@@ -312,7 +312,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-20">
+      <section className="relative py-12 lg:py-20">
         <div className="container">
           <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-12 text-center">
             <div className="absolute inset-0 bg-cyber-grid bg-[size:30px_30px] opacity-10" />
