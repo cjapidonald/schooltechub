@@ -911,6 +911,134 @@ export const en = {
       vi: "Vietnamese"
     }
   },
+  account: {
+    seo: {
+      title: "My Account | SchoolTech Hub",
+      description: "Manage your SchoolTech Hub profile, preferences, notifications, and security settings in one place.",
+      canonical: "https://schooltechhub.com/account"
+    },
+    heading: {
+      title: "My Account",
+      subtitle: "Keep your personal details, privacy settings, and activity up to date."
+    },
+    image: {
+      title: "Ready to upload",
+      description: "Upload a square image under 2MB. We'll optimise it across SchoolTech Hub.",
+      changeButton: "Change avatar",
+      uploadButton: "Save new avatar"
+    },
+    actions: {
+      backToHome: "Back to homepage"
+    },
+    tabs: {
+      overview: "Overview",
+      security: "Security",
+      activity: "Activity"
+    },
+    profile: {
+      title: "Profile details",
+      description: "This information is visible to collaborators across the platform.",
+      fullNameLabel: "Full name",
+      fullNamePlaceholder: "Your name as it should appear",
+      roleLabel: "Role",
+      rolePlaceholder: "Select a role",
+      roles: {
+        Teacher: "Teacher",
+        Admin: "Administrator",
+        Parent: "Parent",
+        Student: "Student",
+        Other: "Other"
+      },
+      bioLabel: "Bio",
+      bioPlaceholder: "Tell the community a little about yourself (optional)"
+    },
+    settings: {
+      title: "Account preferences",
+      description: "Customise how SchoolTech Hub works for you.",
+      timezone: "Time zone",
+      timezonePlaceholder: "e.g. GMT+1, Hanoi",
+      language: "Content language",
+      languagePlaceholder: "Choose a language",
+      theme: "Theme",
+      themePlaceholder: "Select a theme",
+      themeOptions: {
+        system: "Match system",
+        light: "Light",
+        dark: "Dark"
+      }
+    },
+    notifications: {
+      title: "Notifications",
+      description: "Decide when you'd like to hear from us.",
+      updates: "Product and newsletter updates",
+      updatesDescription: "Occasional product announcements and curated resources.",
+      commentReplies: "Comment replies",
+      commentRepliesDescription: "Email me when someone responds to my comments.",
+      productAnnouncements: "Service announcements",
+      productAnnouncementsDescription: "Important information about maintenance or downtime.",
+      blogMentions: "Blog mentions",
+      blogMentionsDescription: "Alerts when one of my articles is published or featured."
+    },
+    activity: {
+      title: "Activity summary",
+      description: "Track your engagement at a glance.",
+      comments: "Comments",
+      posts: "Published posts",
+      lastLogin: "Last sign in",
+      neverLoggedIn: "No sign-in recorded yet"
+    },
+    support: {
+      title: "Need help?",
+      description: "Our team is here to support any account changes.",
+      contact: "Contact us if you need assistance updating your details or accessing content.",
+      response: "We reply to most messages within one business day.",
+      cta: "Contact support"
+    },
+    password: {
+      title: "Reset password",
+      description: "Choose a strong password that you haven't used elsewhere.",
+      newPassword: "New password",
+      newPasswordPlaceholder: "Enter a new password",
+      confirmPassword: "Confirm password",
+      confirmPasswordPlaceholder: "Re-enter the new password",
+      updateButton: "Update password"
+    },
+    securityTips: {
+      title: "Security recommendations",
+      description: "Best practices to keep your account safe.",
+      tips: [
+        "Enable multi-factor authentication when it becomes available.",
+        "Use a password manager to generate unique passwords.",
+        "Review your account activity regularly for unfamiliar changes.",
+        "Sign out on shared devices after each session."
+      ]
+    },
+    comments: {
+      title: "My comments",
+      description: "Jump back into conversations you've started or joined.",
+      empty: "You haven't posted any comments yet.",
+      viewPost: "View blog post"
+    },
+    blogs: {
+      title: "My blog posts",
+      description: "Keep an eye on the posts you're contributing to.",
+      empty: "No blog posts are linked to your account yet.",
+      statusPublished: "Published",
+      statusDraft: "Draft",
+      readPost: "Open article"
+    },
+    toast: {
+      profileUpdated: "Profile updated",
+      passwordMismatch: "Passwords must match",
+      passwordLength: "Passwords need to be at least 8 characters.",
+      passwordUpdated: "Password updated",
+      passwordError: "We couldn't update your password",
+      notificationsUpdated: "Notification preferences saved",
+      settingsUpdated: "Account settings saved",
+      avatarUpdated: "Profile image updated",
+      avatarError: "We couldn't upload that image"
+    }
+  },
   common: {
     loading: "Loading...",
     error: "An error occurred",

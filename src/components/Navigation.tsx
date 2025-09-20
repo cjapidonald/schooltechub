@@ -138,9 +138,16 @@ const Navigation = () => {
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem className="text-sm text-muted-foreground">
                     {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => navigate(getLocalizedNavPath("/account"))}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    {t.nav.profile}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
@@ -219,14 +226,22 @@ const Navigation = () => {
                 </div>
 
                 {user ? (
-                  <div className="border-t pt-4">
+                  <div className="border-t pt-4 space-y-3">
                     <p className="px-2 text-sm text-muted-foreground">{user.email}</p>
+                    <Link
+                      to={getLocalizedNavPath("/account")}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Button className="w-full" variant="secondary">
+                        {t.nav.profile}
+                      </Button>
+                    </Link>
                     <Button
                       onClick={() => {
                         handleSignOut();
                         setIsOpen(false);
                       }}
-                      className="mt-3 w-full"
+                      className="w-full"
                       variant="outline"
                     >
                       <LogOut className="mr-2 h-4 w-4" />

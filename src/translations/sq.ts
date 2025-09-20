@@ -915,6 +915,134 @@ export const sq = {
       vi: "Vietnamisht"
     }
   },
+  account: {
+    seo: {
+      title: "Llogaria Ime | SchoolTech Hub",
+      description: "Menaxho profilin, preferencat, njoftimet dhe sigurinë tënde në një vend.",
+      canonical: "https://schooltechhub.com/account"
+    },
+    heading: {
+      title: "Llogaria ime",
+      subtitle: "Përditëso të dhënat personale dhe qëndro në kontroll të aktivitetit tënd."
+    },
+    image: {
+      title: "Gati për ngarkim",
+      description: "Ngarkoni një foto katrore nën 2MB. Ne e optimizojmë në të gjithë SchoolTech Hub.",
+      changeButton: "Ndrysho foton",
+      uploadButton: "Ruaj avatarin"
+    },
+    actions: {
+      backToHome: "Kthehu në faqen kryesore"
+    },
+    tabs: {
+      overview: "Përmbledhje",
+      security: "Siguria",
+      activity: "Aktiviteti"
+    },
+    profile: {
+      title: "Detajet e profilit",
+      description: "Këto të dhëna duken nga bashkëpunëtorët tuaj në platformë.",
+      fullNameLabel: "Emri i plotë",
+      fullNamePlaceholder: "Emri që dëshironi të shfaqet",
+      roleLabel: "Roli",
+      rolePlaceholder: "Zgjidh një rol",
+      roles: {
+        Teacher: "Mësues",
+        Admin: "Administrator",
+        Parent: "Prind",
+        Student: "Student",
+        Other: "Tjetër"
+      },
+      bioLabel: "Bio",
+      bioPlaceholder: "Tregoni pak për veten (opsionale)"
+    },
+    settings: {
+      title: "Preferencat e llogarisë",
+      description: "Përshtat përvojën tënde në SchoolTech Hub.",
+      timezone: "Zona kohore",
+      timezonePlaceholder: "p.sh. GMT+1, Tiranë",
+      language: "Gjuha e përmbajtjes",
+      languagePlaceholder: "Zgjidh gjuhën",
+      theme: "Tema",
+      themePlaceholder: "Zgjidh temën",
+      themeOptions: {
+        system: "Si sistemi",
+        light: "E çelët",
+        dark: "E errët"
+      }
+    },
+    notifications: {
+      title: "Njoftimet",
+      description: "Zgjidh kur dëshiron të të kontaktojmë.",
+      updates: "Përditësime dhe newsletter",
+      updatesDescription: "Njoftime të rralla rreth risive dhe burimeve kryesore.",
+      commentReplies: "Përgjigjet e komenteve",
+      commentRepliesDescription: "Merr email kur dikush përgjigjet në komentet e tua.",
+      productAnnouncements: "Njoftime shërbimi",
+      productAnnouncementsDescription: "Informacione të rëndësishme për mirëmbajtje ose ndërprerje.",
+      blogMentions: "Përmendje në blog",
+      blogMentionsDescription: "Sinjalizime kur artikujt e tu publikohen ose veçohen."
+    },
+    activity: {
+      title: "Përmbledhja e aktivitetit",
+      description: "Shiko shpejt angazhimin tënd.",
+      comments: "Komente",
+      posts: "Postime",
+      lastLogin: "Hyrja e fundit",
+      neverLoggedIn: "Nuk ka ende hyrje të regjistruar"
+    },
+    support: {
+      title: "Keni nevojë për ndihmë?",
+      description: "Ekipi ynë është gati të ndihmojë për çdo ndryshim në llogari.",
+      contact: "Na kontaktoni nëse keni nevojë për asistencë me të dhënat ose qasjen.",
+      response: "Përgjigjemi zakonisht brenda një dite pune.",
+      cta: "Kontakto mbështetjen"
+    },
+    password: {
+      title: "Rivendos fjalëkalimin",
+      description: "Zgjidh një fjalëkalim të fortë dhe unik.",
+      newPassword: "Fjalëkalimi i ri",
+      newPasswordPlaceholder: "Shkruaj fjalëkalimin e ri",
+      confirmPassword: "Konfirmo fjalëkalimin",
+      confirmPasswordPlaceholder: "Rishkruaj fjalëkalimin e ri",
+      updateButton: "Përditëso fjalëkalimin"
+    },
+    securityTips: {
+      title: "Rekomandime sigurie",
+      description: "Praktikat më të mira për të mbrojtur llogarinë.",
+      tips: [
+        "Aktivizo verifikimin me shumë faktorë kur të jetë i disponueshëm.",
+        "Përdor një menaxher fjalëkalimesh për të krijuar kode unike.",
+        "Rishiko rregullisht aktivitetin e llogarisë për ndryshime të panjohura.",
+        "Dil nga pajisjet e përbashkëta pasi të përfundosh."
+      ]
+    },
+    comments: {
+      title: "Komentet e mia",
+      description: "Rikthehu shpejt te bisedat ku ke marrë pjesë.",
+      empty: "Nuk keni postuar ende komente.",
+      viewPost: "Shiko artikullin"
+    },
+    blogs: {
+      title: "Postimet e mia",
+      description: "Ndjek statusin e artikujve ku ke kontribuar.",
+      empty: "Asnjë postim blogu nuk lidhet me llogarinë tuaj.",
+      statusPublished: "Publikuar",
+      statusDraft: "Draft",
+      readPost: "Hap artikullin"
+    },
+    toast: {
+      profileUpdated: "Profili u përditësua",
+      passwordMismatch: "Fjalëkalimet duhet të përputhen",
+      passwordLength: "Fjalëkalimi duhet të ketë të paktën 8 karaktere.",
+      passwordUpdated: "Fjalëkalimi u përditësua",
+      passwordError: "Nuk mundëm të përditësojmë fjalëkalimin",
+      notificationsUpdated: "Preferencat e njoftimeve u ruajtën",
+      settingsUpdated: "Preferencat e llogarisë u ruajtën",
+      avatarUpdated: "Fotoja e profilit u përditësua",
+      avatarError: "Nuk mundëm të ngarkojmë imazhin"
+    }
+  },
   common: {
     loading: "Duke ngarkuar...",
     error: "Ndodhi një gabim",
