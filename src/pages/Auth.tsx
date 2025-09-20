@@ -21,8 +21,9 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState("Teacher");
+  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     // Set up auth state listener FIRST to handle redirects/code exchange
@@ -60,14 +61,14 @@ const Auth = () => {
 
     if (error) {
       toast({
-        title: "Error",
+        title: t.auth.toast.errorTitle,
         description: error.message,
         variant: "destructive"
       });
     } else {
       toast({
-        title: "Success",
-        description: "Please check your email to verify your account",
+        title: t.auth.toast.successTitle,
+        description: t.auth.toast.successDescription,
       });
     }
     setLoading(false);
@@ -84,7 +85,7 @@ const Auth = () => {
 
     if (error) {
       toast({
-        title: "Error",
+        title: t.auth.toast.errorTitle,
         description: error.message,
         variant: "destructive"
       });
@@ -94,6 +95,7 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    setGoogleLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -103,130 +105,131 @@ const Auth = () => {
 
     if (error) {
       toast({
-        title: "Error",
+        title: t.auth.toast.errorTitle,
         description: error.message,
         variant: "destructive"
       });
     }
     setLoading(false);
+    setGoogleLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10 px-4">
       <SEO
-        title="Sign In / Sign Up"
-        description="Join SchoolTechHub to access exclusive educational content, participate in teacher debates, and receive monthly newsletters"
-        canonicalUrl="https://schooltechhub.com/auth"
+        title={t.auth.seo.title}
+        description={t.auth.seo.description}
+        canonicalUrl={t.auth.seo.canonical}
       />
-      
+
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome to SchoolTechHub</CardTitle>
-          <CardDescription>Sign in to access exclusive content and features</CardDescription>
+          <CardTitle className="text-2xl">{t.auth.card.title}</CardTitle>
+          <CardDescription>{t.auth.card.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t.auth.tabs.signIn}</TabsTrigger>
+              <TabsTrigger value="signup">{t.auth.tabs.signUp}</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">{t.auth.email}</Label>
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t.auth.emailPlaceholder}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password">{t.auth.password}</Label>
                   <Input
                     id="signin-password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder={t.auth.passwordPlaceholder}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loading ? t.auth.signingIn : t.auth.signIn}
                 </Button>
               </form>
             </TabsContent>
-            
+
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
+                  <Label htmlFor="signup-name">{t.auth.name}</Label>
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder={t.auth.namePlaceholder}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t.auth.email}</Label>
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder={t.auth.emailPlaceholder}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">{t.auth.password}</Label>
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder={t.auth.passwordCreatePlaceholder}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">{t.auth.role}</Label>
                   <Select value={role} onValueChange={setRole}>
                     <SelectTrigger id="role">
-                      <SelectValue />
+                      <SelectValue placeholder={t.auth.selectRole} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Teacher">Teacher</SelectItem>
-                      <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="Parent">Parent</SelectItem>
-                      <SelectItem value="Student">Student</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
+                      <SelectItem value="Teacher">{t.auth.roles.teacher}</SelectItem>
+                      <SelectItem value="Admin">{t.auth.roles.admin}</SelectItem>
+                      <SelectItem value="Parent">{t.auth.roles.parent}</SelectItem>
+                      <SelectItem value="Student">{t.auth.roles.student}</SelectItem>
+                      <SelectItem value="Other">{t.auth.roles.other}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Sign Up"}
+                  {loading ? t.auth.signingUp : t.auth.signUp}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
-          
+
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">{t.auth.orContinueWith}</span>
             </div>
           </div>
-          
+
           <Button
             variant="outline"
             className="w-full"
@@ -234,12 +237,12 @@ const Auth = () => {
             disabled={loading}
           >
             <Chrome className="mr-2 h-4 w-4" />
-            Sign in with Google
+            {googleLoading ? t.auth.googleSigningIn : t.auth.googleSignIn}
           </Button>
-          
+
           <div className="mt-4 text-center text-sm">
             <Link to={getLocalizedPath("/", language)} className="text-primary hover:underline">
-              Back to Home
+              {t.auth.backToHome}
             </Link>
           </div>
         </CardContent>
