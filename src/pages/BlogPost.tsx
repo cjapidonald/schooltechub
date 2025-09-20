@@ -36,18 +36,24 @@ export default function BlogPost() {
 
   // Fetch blog post
   const { data: post, isLoading } = useQuery({
-    queryKey: ["blog-post", slug],
+    queryKey: ["blog-post", slug, language],
+    enabled: !!slug,
     queryFn: async () => {
+      if (!slug) return null;
+
       const { data, error } = await supabase
         .from("content_master")
         .select("*")
         .eq("slug", slug)
-        .eq("page", "research_blog")
-        .eq("is_published", true)
-        .single();
+        .in("page", ["research_blog", "edutech", "teacher_diary"])
+        .eq("language", language)
+        .eq("is_published", true);
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        throw error;
+      }
+
+      return data?.[0] ?? null;
     }
   });
 
