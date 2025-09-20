@@ -719,17 +719,112 @@ export const sq = {
     }
   },
   edutech: {
-    title: "Burimet e Teknologjisë Arsimore",
-    subtitle: "Eksploroni koleksionin tonë gjithëpërfshirës të mjeteve dhe burimeve EdTech",
-    searchPlaceholder: "Kërko burime...",
-    filterByType: "Filtro sipas Tipit",
-    filterByCategory: "Filtro sipas Kategorisë",
-    filterByAudience: "Filtro sipas Audiencës",
-    filterByPayment: "Filtro sipas Pagesës",
-    filterByPlatform: "Filtro sipas Platformës",
-    free: "Falas",
-    visit: "Vizito",
-    learnMore: "Mëso Më Shumë"
+    title: "Qendra Edutech",
+    subtitle: "Mësoni teknologji të reja, teknika mësimdhënieje, aktivitete dhe planifikim mësimor me AI.",
+    searchPlaceholder: "Kërko tutoriale, teknika, aktivitete...",
+    categories: {
+      all: "Të gjitha",
+      lessonPlanning: "Planifikim mësimi",
+      lessonDelivery: "Realizim mësimi",
+      engagement: "Angazhim",
+      evaluation: "Vlerësim"
+    },
+    filters: {
+      title: "Filtrat",
+      groups: {
+        contentType: {
+          title: "Lloji i blogut",
+          options: {
+            tutorial: "Tutorial",
+            teachingTechnique: "Teknikë mësimdhënieje",
+            activity: "Aktivitet"
+          }
+        },
+        deliveryType: {
+          title: "Lloji i dorëzimit",
+          options: {
+            inClass: "Në klasë",
+            online: "Online",
+            hybrid: "Hibrid",
+            selfPaced: "Në ritmin vetjak",
+            distanceLearning: "Mësim në distancë",
+            live: "Drejtpërdrejt"
+          }
+        },
+        payment: {
+          title: "Pagesa",
+          options: {
+            free: "Falas",
+            freemium: "Freemium",
+            paid: "Me pagesë",
+            freeTrial: "Provë falas",
+            educationDiscount: "Zbritje për arsim"
+          }
+        },
+        stage: {
+          title: "Niveli",
+          options: {
+            earlyChildhood: "Fëmijëria e hershme",
+            preK: "Para-K",
+            kindergarten: "Kopshti",
+            lowerPrimary: "Cikli i ulët",
+            upperPrimary: "Cikli i lartë",
+            primary: "Fillore",
+            secondary: "Sekondare",
+            highSchool: "Shkollë e mesme",
+            k12: "K-12",
+            k5: "K-5"
+          }
+        },
+        subject: {
+          title: "Lënda",
+          options: {
+            phonics: "Fonetikë",
+            reading: "Lexim",
+            writing: "Shkrim",
+            grammar: "Gramatikë",
+            spelling: "Drejtshkrim",
+            vocabulary: "Fjalor",
+            englishEla: "Anglisht/ELA",
+            math: "Matematikë",
+            science: "Shkencë",
+            biology: "Biologji",
+            chemistry: "Kimi",
+            physics: "Fizikë",
+            earthScience: "Shkencat e Tokës",
+            ict: "TIK",
+            stem: "STEM",
+            steam: "STEAM"
+          }
+        },
+        instructionType: {
+          title: "Lloji i mësimdhënies",
+          options: {
+            directInstruction: "Mësim i drejtpërdrejtë",
+            differentiatedInstruction: "Mësim i diferencuar",
+            inquiryBasedLearning: "Mësim i bazuar në hulumtim",
+            projectBasedLearning: "Mësim i bazuar në projekte",
+            problemBasedLearning: "Mësim i bazuar në probleme",
+            playBasedLearning: "Mësim i bazuar në lojë",
+            gameBasedLearning: "Mësim i bazuar në lojëra",
+            gamification: "Gamifikim",
+            cooperativeLearning: "Mësim bashkëpunues",
+            experientialLearning: "Mësim përvojues",
+            designThinking: "Mendim projektues",
+            socraticSeminar: "Seminar sokratik",
+            stationRotation: "Rotacion stacionesh",
+            blendedLearning: "Mësim i kombinuar"
+          }
+        }
+      }
+    },
+    states: {
+      loading: "Duke ngarkuar përmbajtjen...",
+      empty: "Nuk u gjet përmbajtje që përputhet me kriteret tuaja."
+    },
+    cta: {
+      learnMore: "Kliko për të mësuar më shumë..."
+    }
   },
   teacherDiary: {
     title: "Ditari Dixhital i Mësuesit",

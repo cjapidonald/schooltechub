@@ -719,17 +719,112 @@ export const vi = {
     }
   },
   edutech: {
-    title: "Tài nguyên công nghệ giáo dục",
-    subtitle: "Khám phá bộ sưu tập toàn diện các công cụ và tài nguyên EdTech của chúng tôi",
-    searchPlaceholder: "Tìm kiếm tài nguyên...",
-    filterByType: "Lọc theo loại",
-    filterByCategory: "Lọc theo danh mục",
-    filterByAudience: "Lọc theo đối tượng",
-    filterByPayment: "Lọc theo thanh toán",
-    filterByPlatform: "Lọc theo nền tảng",
-    free: "Miễn phí",
-    visit: "Truy cập",
-    learnMore: "Tìm hiểu thêm"
+    title: "Trung tâm Edutech",
+    subtitle: "Học công nghệ mới, kỹ thuật giảng dạy, hoạt động và lập kế hoạch bài học bằng AI.",
+    searchPlaceholder: "Tìm kiếm hướng dẫn, kỹ thuật, hoạt động...",
+    categories: {
+      all: "Tất cả",
+      lessonPlanning: "Lập kế hoạch bài học",
+      lessonDelivery: "Triển khai bài học",
+      engagement: "Tương tác",
+      evaluation: "Đánh giá"
+    },
+    filters: {
+      title: "Bộ lọc",
+      groups: {
+        contentType: {
+          title: "Loại nội dung",
+          options: {
+            tutorial: "Hướng dẫn",
+            teachingTechnique: "Kỹ thuật giảng dạy",
+            activity: "Hoạt động"
+          }
+        },
+        deliveryType: {
+          title: "Hình thức triển khai",
+          options: {
+            inClass: "Tại lớp",
+            online: "Trực tuyến",
+            hybrid: "Kết hợp",
+            selfPaced: "Tự học theo tiến độ",
+            distanceLearning: "Học từ xa",
+            live: "Trực tiếp"
+          }
+        },
+        payment: {
+          title: "Thanh toán",
+          options: {
+            free: "Miễn phí",
+            freemium: "Freemium",
+            paid: "Trả phí",
+            freeTrial: "Dùng thử miễn phí",
+            educationDiscount: "Ưu đãi giáo dục"
+          }
+        },
+        stage: {
+          title: "Cấp học",
+          options: {
+            earlyChildhood: "Mầm non sớm",
+            preK: "Mẫu giáo lớn (Pre-K)",
+            kindergarten: "Mẫu giáo",
+            lowerPrimary: "Tiểu học đầu cấp",
+            upperPrimary: "Tiểu học cuối cấp",
+            primary: "Tiểu học",
+            secondary: "Trung học cơ sở",
+            highSchool: "Trung học phổ thông",
+            k12: "K-12",
+            k5: "K-5"
+          }
+        },
+        subject: {
+          title: "Môn học",
+          options: {
+            phonics: "Ngữ âm",
+            reading: "Đọc hiểu",
+            writing: "Viết",
+            grammar: "Ngữ pháp",
+            spelling: "Chính tả",
+            vocabulary: "Từ vựng",
+            englishEla: "Tiếng Anh/ELA",
+            math: "Toán",
+            science: "Khoa học",
+            biology: "Sinh học",
+            chemistry: "Hóa học",
+            physics: "Vật lý",
+            earthScience: "Khoa học Trái Đất",
+            ict: "CNTT",
+            stem: "STEM",
+            steam: "STEAM"
+          }
+        },
+        instructionType: {
+          title: "Phương pháp giảng dạy",
+          options: {
+            directInstruction: "Giảng dạy trực tiếp",
+            differentiatedInstruction: "Giảng dạy phân hóa",
+            inquiryBasedLearning: "Học tập dựa trên tìm tòi",
+            projectBasedLearning: "Học tập dựa trên dự án",
+            problemBasedLearning: "Học tập dựa trên vấn đề",
+            playBasedLearning: "Học qua trò chơi",
+            gameBasedLearning: "Học dựa trên trò chơi",
+            gamification: "Gamification",
+            cooperativeLearning: "Học tập hợp tác",
+            experientialLearning: "Học tập trải nghiệm",
+            designThinking: "Tư duy thiết kế",
+            socraticSeminar: "Thảo luận kiểu Socrates",
+            stationRotation: "Luân chuyển trạm",
+            blendedLearning: "Học tập kết hợp"
+          }
+        }
+      }
+    },
+    states: {
+      loading: "Đang tải nội dung...",
+      empty: "Không tìm thấy nội dung phù hợp với tiêu chí của bạn."
+    },
+    cta: {
+      learnMore: "Nhấp để tìm hiểu thêm..."
+    }
   },
   teacherDiary: {
     title: "Nhật ký số của giáo viên",

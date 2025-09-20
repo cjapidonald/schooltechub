@@ -715,17 +715,112 @@ export const en = {
     }
   },
   edutech: {
-    title: "Educational Technology Resources",
-    subtitle: "Explore our comprehensive collection of EdTech tools and resources",
-    searchPlaceholder: "Search resources...",
-    filterByType: "Filter by Type",
-    filterByCategory: "Filter by Category",
-    filterByAudience: "Filter by Audience",
-    filterByPayment: "Filter by Payment",
-    filterByPlatform: "Filter by Platform",
-    free: "Free",
-    visit: "Visit",
-    learnMore: "Learn More"
+    title: "Edutech Hub",
+    subtitle: "Learn new technologies, teaching techniques, activities, and AI lesson planning.",
+    searchPlaceholder: "Search tutorials, techniques, activities...",
+    categories: {
+      all: "All",
+      lessonPlanning: "Lesson Planning",
+      lessonDelivery: "Lesson Delivery",
+      engagement: "Engagement",
+      evaluation: "Evaluation"
+    },
+    filters: {
+      title: "Filters",
+      groups: {
+        contentType: {
+          title: "Blog Type",
+          options: {
+            tutorial: "Tutorial",
+            teachingTechnique: "Teaching Technique",
+            activity: "Activity"
+          }
+        },
+        deliveryType: {
+          title: "Delivery Type",
+          options: {
+            inClass: "In-class",
+            online: "Online",
+            hybrid: "Hybrid",
+            selfPaced: "Self-paced",
+            distanceLearning: "Distance Learning",
+            live: "Live"
+          }
+        },
+        payment: {
+          title: "Payment",
+          options: {
+            free: "Free",
+            freemium: "Freemium",
+            paid: "Paid",
+            freeTrial: "Free Trial",
+            educationDiscount: "Education Discount"
+          }
+        },
+        stage: {
+          title: "Stage",
+          options: {
+            earlyChildhood: "Early Childhood",
+            preK: "Pre-K",
+            kindergarten: "Kindergarten",
+            lowerPrimary: "Lower Primary",
+            upperPrimary: "Upper Primary",
+            primary: "Primary",
+            secondary: "Secondary",
+            highSchool: "High School",
+            k12: "K-12",
+            k5: "K-5"
+          }
+        },
+        subject: {
+          title: "Subject",
+          options: {
+            phonics: "Phonics",
+            reading: "Reading",
+            writing: "Writing",
+            grammar: "Grammar",
+            spelling: "Spelling",
+            vocabulary: "Vocabulary",
+            englishEla: "English/ELA",
+            math: "Math",
+            science: "Science",
+            biology: "Biology",
+            chemistry: "Chemistry",
+            physics: "Physics",
+            earthScience: "Earth Science",
+            ict: "ICT",
+            stem: "STEM",
+            steam: "STEAM"
+          }
+        },
+        instructionType: {
+          title: "Instruction Type",
+          options: {
+            directInstruction: "Direct Instruction",
+            differentiatedInstruction: "Differentiated Instruction",
+            inquiryBasedLearning: "Inquiry-Based Learning",
+            projectBasedLearning: "Project-Based Learning",
+            problemBasedLearning: "Problem-Based Learning",
+            playBasedLearning: "Play-Based Learning",
+            gameBasedLearning: "Game-Based Learning",
+            gamification: "Gamification",
+            cooperativeLearning: "Cooperative Learning",
+            experientialLearning: "Experiential Learning",
+            designThinking: "Design Thinking",
+            socraticSeminar: "Socratic Seminar",
+            stationRotation: "Station Rotation",
+            blendedLearning: "Blended Learning"
+          }
+        }
+      }
+    },
+    states: {
+      loading: "Loading content...",
+      empty: "No content found matching your criteria."
+    },
+    cta: {
+      learnMore: "Click to learn more..."
+    }
   },
   teacherDiary: {
     title: "Teacher's Digital Diary",
