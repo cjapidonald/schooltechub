@@ -50,25 +50,144 @@ export const vi = {
     }
   },
   about: {
-    title: "Về chúng tôi",
-    subtitle: "Dẫn đầu chuyển đổi số trong giáo dục",
-    mission: "Sứ mệnh của chúng tôi",
-    missionText: "Cách mạng hóa giáo dục thông qua các giải pháp công nghệ đổi mới giúp trao quyền cho các nhà giáo dục, thu hút học sinh và chuyển đổi kết quả học tập.",
-    vision: "Tầm nhìn của chúng tôi",
-    visionText: "Trở thành công ty hàng đầu toàn cầu về công nghệ giáo dục, tạo ra một thế giới nơi mọi học sinh đều có thể tiếp cận trải nghiệm học tập cá nhân hóa, hấp dẫn và hiệu quả.",
-    values: "Giá trị của chúng tôi",
-    innovation: "Đổi mới",
-    innovationText: "Liên tục vượt qua ranh giới với các giải pháp tiên tiến",
-    excellence: "Xuất sắc",
-    excellenceText: "Mang lại chất lượng đặc biệt trong mọi việc chúng tôi làm",
-    integrity: "Chính trực",
-    integrityText: "Xây dựng niềm tin thông qua minh bạch và thực hành đạo đức",
-    collaboration: "Hợp tác",
-    collaborationText: "Làm việc cùng nhau để đạt được kết quả phi thường",
-    teamTitle: "Gặp gỡ đội ngũ lãnh đạo của chúng tôi",
-    ceo: "Giám đốc điều hành",
-    cto: "Giám đốc công nghệ",
-    coo: "Giám đốc vận hành"
+    seo: {
+      title: "Về chúng tôi | SchoolTech Hub",
+      description:
+        "Tìm hiểu về sứ mệnh của SchoolTech Hub nhằm giúp công nghệ giáo dục trở nên dễ tiếp cận. Hơn 7 năm kinh nghiệm, hỗ trợ 100+ trường học, đội ngũ giáo viên được chứng nhận đồng hành cùng hành trình công nghệ của bạn.",
+      keywords:
+        "về SchoolTech Hub, công ty công nghệ giáo dục, tư vấn EdTech, chuyên gia đào tạo giáo viên, chuyên gia công nghệ lớp học",
+      canonical: "https://schooltechhub.com/about"
+    },
+    hero: {
+      title: "Về SchoolTech Hub",
+      subtitle: "Biến công nghệ giáo dục trở nên dễ tiếp cận và thực tiễn cho mọi giáo viên"
+    },
+    story: {
+      title: "Câu chuyện của chúng tôi",
+      paragraphs: [
+        "SchoolTech Hub được thành lập bởi các nhà giáo dục nhìn thấy khoảng cách giữa công nghệ tuyệt vời và những giáo viên đang quá tải. Chúng tôi thu hẹp khoảng cách đó bằng các giải pháp thực tế và đã được chứng minh."
+      ],
+      ceo: {
+        title: "Thông điệp từ CEO",
+        message:
+          "Công nghệ nên trao quyền cho giáo viên chứ không phải làm họ quá tải. Sứ mệnh của chúng tôi là giúp mọi nhà giáo tự tin với những công cụ có thể chuyển đổi lớp học của họ.",
+        signature: "- Donald Cjapi, CEO & Nhà sáng lập"
+      },
+      mission: {
+        title: "Sứ mệnh của chúng tôi",
+        description:
+          "Dân chủ hóa công nghệ giáo dục bằng cách cung cấp hỗ trợ dễ tiếp cận, phải chăng và khả thi cho giáo viên trên toàn thế giới."
+      }
+    },
+    values: {
+      title: "Giá trị cốt lõi",
+      items: [
+        {
+          title: "Thực tiễn là ưu tiên",
+          description: "Mọi chiến lược phải hoạt động trong lớp học thực tế chứ không chỉ trên lý thuyết."
+        },
+        {
+          title: "Lấy giáo viên làm trung tâm",
+          description: "Chúng tôi hiểu những thách thức hàng ngày và áp lực về thời gian mà bạn đối mặt."
+        },
+        {
+          title: "Học hỏi không ngừng",
+          description: "Công nghệ thay đổi và phương pháp cùng khuyến nghị của chúng tôi cũng vậy."
+        }
+      ]
+    },
+    stats: {
+      items: [
+        { number: "7+", label: "Năm kinh nghiệm" },
+        { number: "100+", label: "Trường học đã hỗ trợ" },
+        { number: "1,000+", label: "Giáo viên được đồng hành" },
+        { number: "50+", label: "Công cụ đã thử nghiệm" }
+      ]
+    },
+    credentials: {
+      title: "Chứng chỉ & Quan hệ hợp tác",
+      certifications: {
+        title: "Chứng chỉ",
+        items: [
+          "Google Certified Educator Level 2",
+          "Microsoft Innovative Educator",
+          "Apple Teacher",
+          "ISTE Certified Educator",
+          "Common Sense Digital Citizenship"
+        ]
+      },
+      featured: {
+        title: "Được giới thiệu trên",
+        items: ["EdTech Magazine", "Teaching Channel", "ASCD"]
+      },
+      partnerships: {
+        title: "Đối tác trường học",
+        description:
+          "Chúng tôi tự hào hợp tác với các trường học trên khắp cả nước để thử nghiệm phương pháp mới và thu thập phản hồi thực tế. Những trường đối tác giúp đảm bảo mọi chiến lược đều được kiểm chứng trong lớp học và được giáo viên tin tưởng.",
+        cta: "Hợp tác cùng chúng tôi"
+      }
+    },
+    cta: {
+      title: "Sẵn sàng thay đổi việc giảng dạy của bạn?",
+      description:
+        "Tham gia cùng hàng nghìn giáo viên đã nhận ra rằng công nghệ không nhất thiết phải gây choáng ngợp.",
+      primary: "Đặt lịch tư vấn",
+      secondary: "Xem tài nguyên miễn phí"
+    },
+    expertise: {
+      title: "Chứng chỉ & Chuyên môn",
+      items: [
+        "ClassDojo Mentorship",
+        "Wordwall Certified",
+        "Canvas Certification",
+        "Microsoft Educator",
+        "AI Education",
+        "Leadership Management"
+      ]
+    },
+    testimonials: {
+      title: "Giáo viên nói gì",
+      items: [
+        {
+          quote:
+            "Khóa đào tạo công cụ AI đã thay đổi cách tôi xây dựng giáo án. Tôi tiết kiệm được hàng giờ mỗi tuần!",
+          name: "Sarah M.",
+          role: "Giáo viên lớp 5"
+        },
+        {
+          quote:
+            "Cuối cùng cũng có người hiểu thực tế lớp học và không chỉ chạy theo xu hướng công nghệ mới nhất.",
+          name: "Mike T.",
+          role: "Giáo viên khoa học trung học"
+        },
+        {
+          quote:
+            "Dịch vụ thiết lập bảng điều khiển đã thay đổi hoàn toàn cách trường tôi quản lý dữ liệu. Rất đáng để thử!",
+          name: "Hiệu trưởng Johnson",
+          role: "Trường tiểu học"
+        }
+      ]
+    },
+    faq: {
+      title: "Câu hỏi thường gặp",
+      items: [
+        {
+          question: "Làm thế nào để bạn luôn cập nhật về EdTech?",
+          answer:
+            "Chúng tôi liên tục thử nghiệm công cụ mới, tham dự hội thảo và hợp tác với giáo viên trên toàn thế giới để đảm bảo khuyến nghị luôn hiện đại nhưng vẫn thực tiễn."
+        },
+        {
+          question: "Bạn có làm việc với các trường ngoài Việt Nam không?",
+          answer:
+            "Có! Dù đặt trụ sở tại Việt Nam, chúng tôi cung cấp dịch vụ tư vấn và đào tạo trực tuyến trên toàn cầu với kinh nghiệm ở nhiều hệ thống giáo dục khác nhau."
+        },
+        {
+          question: "Điều gì khiến phương pháp của bạn khác biệt?",
+          answer:
+            "Chúng tôi tập trung vào các giải pháp thiết thực, có thể triển khai ngay, phù hợp với những giới hạn thực tế trong lớp học chứ không chỉ là lý thuyết."
+        }
+      ]
+    }
   },
   services: {
     title: "Dịch vụ của chúng tôi",
