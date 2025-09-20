@@ -50,25 +50,140 @@ export const en = {
     }
   },
   about: {
-    title: "About Us",
-    subtitle: "Leading the Digital Transformation in Education",
-    mission: "Our Mission",
-    missionText: "To revolutionize education through innovative technology solutions that empower educators, engage students, and transform learning outcomes.",
-    vision: "Our Vision",
-    visionText: "To become the global leader in educational technology, creating a world where every student has access to personalized, engaging, and effective learning experiences.",
-    values: "Our Values",
-    innovation: "Innovation",
-    innovationText: "Constantly pushing boundaries with cutting-edge solutions",
-    excellence: "Excellence",
-    excellenceText: "Delivering exceptional quality in everything we do",
-    integrity: "Integrity",
-    integrityText: "Building trust through transparency and ethical practices",
-    collaboration: "Collaboration",
-    collaborationText: "Working together to achieve extraordinary results",
-    teamTitle: "Meet Our Leadership Team",
-    ceo: "Chief Executive Officer",
-    cto: "Chief Technology Officer",
-    coo: "Chief Operating Officer"
+    seo: {
+      title: "About Us | SchoolTech Hub",
+      description:
+        "Learn about SchoolTech Hub's mission to make educational technology accessible. 7+ years experience, 100+ schools helped, certified educators supporting your tech journey.",
+      keywords:
+        "about SchoolTech Hub, educational technology company, EdTech consultants, teacher training experts, classroom technology specialists",
+      canonical: "https://schooltechhub.com/about"
+    },
+    hero: {
+      title: "About SchoolTech Hub",
+      subtitle: "Making educational technology accessible and practical for every teacher"
+    },
+    story: {
+      title: "Our Story",
+      paragraphs: [
+        "SchoolTech Hub was founded by educators who saw the gap between amazing technology and overwhelmed teachers. We bridge that gap with practical, proven solutions."
+      ],
+      ceo: {
+        title: "CEO Message",
+        message:
+          "Technology should empower teachers, not overwhelm them. Our mission is to make every educator confident with the tools that can transform their classrooms.",
+        signature: "- Donald Cjapi, CEO & Founder"
+      },
+      mission: {
+        title: "Our Mission",
+        description:
+          "To democratize educational technology by providing accessible, affordable, and actionable support to educators worldwide."
+      }
+    },
+    values: {
+      title: "Our Values",
+      items: [
+        {
+          title: "Practical First",
+          description: "Every strategy must work in real classrooms, not just in theory."
+        },
+        {
+          title: "Teacher-Centered",
+          description: "We understand the daily challenges and time constraints you face."
+        },
+        {
+          title: "Continuous Learning",
+          description: "Technology evolves, and so do our methods and recommendations."
+        }
+      ]
+    },
+    stats: {
+      items: [
+        { number: "7+", label: "Years Experience" },
+        { number: "100+", label: "Schools Helped" },
+        { number: "1,000+", label: "Teachers Supported" },
+        { number: "50+", label: "Tools Tested" }
+      ]
+    },
+    credentials: {
+      title: "Credentials & Partnerships",
+      certifications: {
+        title: "Certifications",
+        items: [
+          "Google Certified Educator Level 2",
+          "Microsoft Innovative Educator",
+          "Apple Teacher",
+          "ISTE Certified Educator",
+          "Common Sense Digital Citizenship"
+        ]
+      },
+      featured: {
+        title: "Featured In",
+        items: ["EdTech Magazine", "Teaching Channel", "ASCD"]
+      },
+      partnerships: {
+        title: "School Partnerships",
+        description:
+          "We're proud to work with schools nationwide to pilot new approaches and gather real-world feedback. Our partner schools help us ensure every strategy is classroom-tested and teacher-approved.",
+        cta: "Partner With Us"
+      }
+    },
+    cta: {
+      title: "Ready to Transform Your Teaching?",
+      description: "Join thousands of teachers who've discovered that technology doesn't have to be overwhelming.",
+      primary: "Book a Consultation",
+      secondary: "Browse Free Resources"
+    },
+    expertise: {
+      title: "Certifications & Expertise",
+      items: [
+        "ClassDojo Mentorship",
+        "Wordwall Certified",
+        "Canvas Certification",
+        "Microsoft Educator",
+        "AI Education",
+        "Leadership Management"
+      ]
+    },
+    testimonials: {
+      title: "What Teachers Say",
+      items: [
+        {
+          quote: "The AI tools training transformed how I create lesson plans. I'm saving hours every week!",
+          name: "Sarah M.",
+          role: "5th Grade Teacher"
+        },
+        {
+          quote: "Finally, someone who understands classroom reality and doesn't just push the latest tech trends.",
+          name: "Mike T.",
+          role: "High School Science"
+        },
+        {
+          quote: "The dashboard setup service revolutionized our school's data management. Highly recommend!",
+          name: "Principal Johnson",
+          role: "Elementary School"
+        }
+      ]
+    },
+    faq: {
+      title: "Frequently Asked Questions",
+      items: [
+        {
+          question: "How do you stay current with EdTech?",
+          answer:
+            "We continuously test new tools, attend conferences, and collaborate with teachers worldwide to ensure our recommendations are cutting-edge yet practical."
+        },
+        {
+          question: "Do you work with schools outside Vietnam?",
+          answer:
+            "Yes! While based in Vietnam, we offer online consulting and training services globally, with experience across multiple education systems."
+        },
+        {
+          question: "What makes your approach different?",
+          answer:
+            "We focus on practical, immediately implementable solutions that work within real classroom constraints, not theoretical best practices."
+        }
+      ]
+    }
   },
   services: {
     title: "Our Services",

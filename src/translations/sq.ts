@@ -50,25 +50,144 @@ export const sq = {
     }
   },
   about: {
-    title: "Rreth Nesh",
-    subtitle: "Udhëheqës në Transformimin Dixhital në Arsim",
-    mission: "Misioni Ynë",
-    missionText: "Të revolucionarizojmë arsimin përmes zgjidhjeve inovative teknologjike që fuqizojnë edukatorët, angazhojnë studentët dhe transformojnë rezultatet e të mësuarit.",
-    vision: "Vizioni Ynë",
-    visionText: "Të bëhemi lider global në teknologjinë arsimore, duke krijuar një botë ku çdo student ka qasje në përvoja të personalizuara, angazhuese dhe efektive të të mësuarit.",
-    values: "Vlerat Tona",
-    innovation: "Inovacion",
-    innovationText: "Vazhdimisht duke shtyrë kufijtë me zgjidhje të avancuara",
-    excellence: "Përsosmëri",
-    excellenceText: "Duke ofruar cilësi të jashtëzakonshme në gjithçka që bëjmë",
-    integrity: "Integritet",
-    integrityText: "Ndërtimi i besimit përmes transparencës dhe praktikave etike",
-    collaboration: "Bashkëpunim",
-    collaborationText: "Duke punuar së bashku për të arritur rezultate të jashtëzakonshme",
-    teamTitle: "Takoni Ekipin Tonë Drejtues",
-    ceo: "Drejtor Ekzekutiv",
-    cto: "Drejtor i Teknologjisë",
-    coo: "Drejtor Operacional"
+    seo: {
+      title: "Rreth Nesh | SchoolTech Hub",
+      description:
+        "Njihuni me misionin e SchoolTech Hub për ta bërë teknologjinë arsimore të qasshme. 7+ vite përvojë, 100+ shkolla të ndihmuara, edukatorë të certifikuar që mbështesin udhëtimin tuaj teknologjik.",
+      keywords:
+        "rreth SchoolTech Hub, kompani teknologjie arsimore, konsulentë EdTech, ekspertë trajnimi mësuesish, specialistë të teknologjisë në klasë",
+      canonical: "https://schooltechhub.com/about"
+    },
+    hero: {
+      title: "Rreth SchoolTech Hub",
+      subtitle: "E bëjmë teknologjinë arsimore të qasshme dhe praktike për çdo mësues"
+    },
+    story: {
+      title: "Historia jonë",
+      paragraphs: [
+        "SchoolTech Hub u themelua nga edukatorë që panë hendekun mes teknologjisë së shkëlqyer dhe mësuesve të mbingarkuar. Ne e tejkalojmë atë hendek me zgjidhje praktike dhe të provuara."
+      ],
+      ceo: {
+        title: "Mesazhi i CEO-së",
+        message:
+          "Teknologjia duhet t'i fuqizojë mësuesit, jo t'i lodhë ata. Misioni ynë është ta bëjmë çdo edukator të ndihet i sigurt me mjetet që mund të transformojnë klasat e tyre.",
+        signature: "- Donald Cjapi, CEO & Themelues"
+      },
+      mission: {
+        title: "Misioni Ynë",
+        description:
+          "Të demokratizojmë teknologjinë arsimore duke ofruar mbështetje të qasshme, të përballueshme dhe të zbatueshme për edukatorët në mbarë botën."
+      }
+    },
+    values: {
+      title: "Vlerat Tona",
+      items: [
+        {
+          title: "Praktika mbi gjithçka",
+          description: "Çdo strategji duhet të funksionojë në klasa reale, jo vetëm në teori."
+        },
+        {
+          title: "E përqendruar te mësuesit",
+          description: "E kuptojmë sfidat e përditshme dhe mungesën e kohës me të cilat përballeni."
+        },
+        {
+          title: "Mësim i vazhdueshëm",
+          description: "Teknologjia evoluon dhe ashtu bëjnë edhe metodat dhe rekomandimet tona."
+        }
+      ]
+    },
+    stats: {
+      items: [
+        { number: "7+", label: "Vite përvojë" },
+        { number: "100+", label: "Shkolla të ndihmuara" },
+        { number: "1,000+", label: "Mësues të mbështetur" },
+        { number: "50+", label: "Mjete të testuara" }
+      ]
+    },
+    credentials: {
+      title: "Kredenciale & Partneritete",
+      certifications: {
+        title: "Certifikime",
+        items: [
+          "Google Certified Educator Level 2",
+          "Microsoft Innovative Educator",
+          "Apple Teacher",
+          "ISTE Certified Educator",
+          "Common Sense Digital Citizenship"
+        ]
+      },
+      featured: {
+        title: "Të prezantuar në",
+        items: ["EdTech Magazine", "Teaching Channel", "ASCD"]
+      },
+      partnerships: {
+        title: "Partneritete Shkollash",
+        description:
+          "Jemi krenarë që punojmë me shkolla në mbarë vendin për të pilotuar qasje të reja dhe për të mbledhur reagime reale. Shkollat partnere na ndihmojnë të sigurojmë që çdo strategji të jetë e provuar në klasë dhe e miratuar nga mësuesit.",
+        cta: "Bëhuni partner me ne"
+      }
+    },
+    cta: {
+      title: "Gati të transformoni mësimdhënien tuaj?",
+      description:
+        "Bashkohuni me mijëra mësues që kanë zbuluar se teknologjia nuk ka pse të jetë e mbingarkuar.",
+      primary: "Rezervo një konsultim",
+      secondary: "Shfleto burimet falas"
+    },
+    expertise: {
+      title: "Certifikime & Ekspertizë",
+      items: [
+        "ClassDojo Mentorship",
+        "Wordwall Certified",
+        "Canvas Certification",
+        "Microsoft Educator",
+        "AI Education",
+        "Leadership Management"
+      ]
+    },
+    testimonials: {
+      title: "Çfarë thonë mësuesit",
+      items: [
+        {
+          quote:
+            "Trajnimi për mjetet e AI-së transformoi mënyrën si krijoj plane mësimore. Po kursej orë çdo javë!",
+          name: "Sarah M.",
+          role: "Mësuese e klasës së 5-të"
+        },
+        {
+          quote:
+            "Më në fund dikush që kupton realitetin e klasës dhe nuk shtyn thjesht trendet më të fundit të teknologjisë.",
+          name: "Mike T.",
+          role: "Mësues i shkollës së mesme, shkencë"
+        },
+        {
+          quote:
+            "Shërbimi i konfigurimit të panelit revolucionarizoi menaxhimin e të dhënave në shkollën tonë. E rekomandoj shumë!",
+          name: "Drejtori Johnson",
+          role: "Shkollë fillore"
+        }
+      ]
+    },
+    faq: {
+      title: "Pyetje të shpeshta",
+      items: [
+        {
+          question: "Si qëndroni të përditësuar me EdTech?",
+          answer:
+            "Ne testojmë vazhdimisht mjete të reja, marrim pjesë në konferenca dhe bashkëpunojmë me mësues në mbarë botën për të siguruar që rekomandimet tona të jenë moderne dhe praktike."
+        },
+        {
+          question: "A punoni me shkolla jashtë Vietnamit?",
+          answer:
+            "Po! Edhe pse kemi bazën në Vietnam, ofrojmë konsulencë dhe trajnime online globalisht, me përvojë në sisteme të ndryshme arsimore."
+        },
+        {
+          question: "Çfarë e bën qasjen tuaj ndryshe?",
+          answer:
+            "Ne fokusohemi në zgjidhje praktike dhe të menjëhershme që funksionojnë brenda kufizimeve reale të klasës, jo në praktika teorike më të mira."
+        }
+      ]
+    }
   },
   services: {
     title: "Shërbimet Tona",
