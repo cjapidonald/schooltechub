@@ -156,6 +156,24 @@ export const vi = {
     newsletterText: "Đăng ký để nhận các cập nhật mới nhất",
     emailPlaceholder: "Email của bạn",
     subscribe: "Đăng ký",
+    subscribing: "Đang đăng ký...",
+    toast: {
+      successTitle: "Thành công!",
+      successMessage: "Bạn đã đăng ký nhận mẹo công nghệ hàng tháng của chúng tôi.",
+      errorTitle: "Lỗi",
+      errorMessage: "Không thể đăng ký. Vui lòng thử lại."
+    },
+    social: {
+      facebook: "Facebook",
+      instagram: "Instagram",
+      linkedin: "LinkedIn",
+      email: "Email"
+    },
+    contact: {
+      emailLabel: "Email",
+      phoneLabel: "Điện thoại",
+      availability: "Hỗ trợ trực tuyến trên toàn thế giới"
+    },
     allRights: "Tất cả các quyền được bảo lưu",
     privacy: "Chính sách bảo mật",
     terms: "Điều khoản dịch vụ"
@@ -226,6 +244,31 @@ export const vi = {
     viewAll: "Xem tất cả",
     classSchedule: "Lịch học",
     notes: "Ghi chú & Quan sát"
+  },
+  home: {
+    highlights: {
+      aiPowered: "Ứng dụng AI",
+      vrClassrooms: "Lớp học VR",
+      realTimeAnalytics: "Phân tích thời gian thực"
+    },
+    stats: {
+      aiLessons: "Bài học ứng dụng AI",
+      vrExperiences: "Trải nghiệm VR",
+      engagementRate: "Tỷ lệ tương tác",
+      supportAvailable: "Hỗ trợ sẵn sàng"
+    },
+    cta: {
+      title: "Sẵn sàng chuyển đổi trường học của bạn?",
+      description: "Tham gia cùng hàng nghìn nhà giáo dục đã sử dụng nền tảng của chúng tôi để tạo ra trải nghiệm học tập tốt hơn.",
+      primary: "Bắt đầu",
+      secondary: "Xem bảng giá",
+      social: {
+        facebook: "Facebook",
+        instagram: "Instagram",
+        linkedin: "LinkedIn",
+        email: "Email"
+      }
+    }
   },
   common: {
     loading: "Đang tải...",

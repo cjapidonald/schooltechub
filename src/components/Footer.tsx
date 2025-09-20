@@ -26,14 +26,14 @@ const Footer = () => {
       if (error) throw error;
 
       toast({
-        title: "Success!",
-        description: "You've been subscribed to our monthly tech tips.",
+        title: t.footer.toast.successTitle,
+        description: t.footer.toast.successMessage,
       });
       setEmail("");
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to subscribe. Please try again.",
+        title: t.footer.toast.errorTitle,
+        description: error.message || t.footer.toast.errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -58,21 +58,21 @@ const Footer = () => {
               {t.footer.tagline}
             </p>
             <div className="flex space-x-4">
-              <a href="https://www.facebook.com/share/g/1NukWcXVpp/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Facebook">
+              <a href="https://www.facebook.com/share/g/1NukWcXVpp/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label={t.footer.social.facebook}>
                 <Facebook className="h-5 w-5" />
-                <span className="sr-only">Facebook</span>
+                <span className="sr-only">{t.footer.social.facebook}</span>
               </a>
-              <a href="https://www.instagram.com/schooltechhub/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Instagram">
+              <a href="https://www.instagram.com/schooltechhub/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label={t.footer.social.instagram}>
                 <Instagram className="h-5 w-5" />
-                <span className="sr-only">Instagram</span>
+                <span className="sr-only">{t.footer.social.instagram}</span>
               </a>
-              <a href="https://www.linkedin.com/in/donald-cjapi-b7800a383/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="LinkedIn">
+              <a href="https://www.linkedin.com/in/donald-cjapi-b7800a383/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label={t.footer.social.linkedin}>
                 <Linkedin className="h-5 w-5" />
-                <span className="sr-only">LinkedIn</span>
+                <span className="sr-only">{t.footer.social.linkedin}</span>
               </a>
-              <a href="mailto:dcjapi@gmail.com" className="text-muted-foreground hover:text-primary transition-colors" aria-label="Email">
+              <a href="mailto:dcjapi@gmail.com" className="text-muted-foreground hover:text-primary transition-colors" aria-label={t.footer.social.email}>
                 <Mail className="h-5 w-5" />
-                <span className="sr-only">Email</span>
+                <span className="sr-only">{t.footer.social.email}</span>
               </a>
             </div>
           </div>
@@ -171,7 +171,7 @@ const Footer = () => {
                 className="text-sm"
               />
               <Button type="submit" className="w-full" disabled={isSubscribing}>
-                {isSubscribing ? "..." : t.footer.subscribe}
+                {isSubscribing ? t.footer.subscribing : t.footer.subscribe}
               </Button>
             </form>
           </div>
@@ -180,8 +180,8 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t text-center">
           <p className="text-sm text-muted-foreground mb-2">© 2024 SchoolTech Hub. {t.footer.allRights}.</p>
           <div className="text-xs text-muted-foreground space-y-1">
-            <p>Email: dcjapi@gmail.com | Phone: +84 0372725432</p>
-            <p>Available worldwide for online consultations</p>
+            <p>{t.footer.contact.emailLabel}: dcjapi@gmail.com | {t.footer.contact.phoneLabel}: +84 0372725432</p>
+            <p>{t.footer.contact.availability}</p>
           </div>
         </div>
       </div>

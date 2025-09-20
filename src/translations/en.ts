@@ -156,6 +156,24 @@ export const en = {
     newsletterText: "Subscribe to get the latest updates",
     emailPlaceholder: "Your email",
     subscribe: "Subscribe",
+    subscribing: "Subscribing...",
+    toast: {
+      successTitle: "Success!",
+      successMessage: "You've been subscribed to our monthly tech tips.",
+      errorTitle: "Error",
+      errorMessage: "Failed to subscribe. Please try again."
+    },
+    social: {
+      facebook: "Facebook",
+      instagram: "Instagram",
+      linkedin: "LinkedIn",
+      email: "Email"
+    },
+    contact: {
+      emailLabel: "Email",
+      phoneLabel: "Phone",
+      availability: "Available worldwide for online consultations"
+    },
     allRights: "All rights reserved",
     privacy: "Privacy Policy",
     terms: "Terms of Service"
@@ -226,6 +244,31 @@ export const en = {
     viewAll: "View All",
     classSchedule: "Class Schedule",
     notes: "Notes & Observations"
+  },
+  home: {
+    highlights: {
+      aiPowered: "AI-Powered",
+      vrClassrooms: "VR Classrooms",
+      realTimeAnalytics: "Real-Time Analytics"
+    },
+    stats: {
+      aiLessons: "AI-Powered Lessons",
+      vrExperiences: "VR Experiences",
+      engagementRate: "Engagement Rate",
+      supportAvailable: "Support Available"
+    },
+    cta: {
+      title: "Ready to Transform Your School?",
+      description: "Join thousands of educators who are already using our platform to create better learning experiences.",
+      primary: "Get Started",
+      secondary: "View Pricing",
+      social: {
+        facebook: "Facebook",
+        instagram: "Instagram",
+        linkedin: "LinkedIn",
+        email: "Email"
+      }
+    }
   },
   common: {
     loading: "Loading...",
