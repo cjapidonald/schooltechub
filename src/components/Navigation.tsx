@@ -140,10 +140,10 @@ const Navigation = () => {
               key={item.path}
               to={getLocalizedNavPath(item.path)}
               className={cn(
-                "text-base font-semibold transition-colors hover:text-primary whitespace-nowrap",
+                "text-base font-semibold whitespace-nowrap px-4 py-2 transition-colors rounded-full border border-transparent hover:text-primary hover:border-primary/40 hover:bg-primary/5",
                 location.pathname === getLocalizedNavPath(item.path) ||
                   (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
-                  ? "text-primary"
+                  ? "text-primary border-primary bg-primary/10"
                   : "text-muted-foreground"
               )}
             >
