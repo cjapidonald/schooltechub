@@ -7,10 +7,12 @@ import Services from '@/pages/Services';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import Events from '@/pages/Events';
+import EventDetail from '@/pages/EventDetail';
 import Contact from '@/pages/Contact';
 import FAQ from '@/pages/FAQ';
 import Edutech from '@/pages/Edutech';
 import TeacherDiary from '@/pages/TeacherDiary';
+import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
@@ -45,10 +47,12 @@ export const LocalizedRoutes = () => {
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
+      <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/edutech" element={<RouteWrapper><Edutech /></RouteWrapper>} />
       <Route path="/teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
+      <Route path="/teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       
@@ -60,10 +64,12 @@ export const LocalizedRoutes = () => {
         <Route path="blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
         <Route path="blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
+        <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
         <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
         <Route path="faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
         <Route path="edutech" element={<RouteWrapper><Edutech /></RouteWrapper>} />
         <Route path="teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
+        <Route path="teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
         <Route path="auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
         <Route path="sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       </Route>
