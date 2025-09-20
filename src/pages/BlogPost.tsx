@@ -13,11 +13,14 @@ import { ArrowLeft, Calendar, User, Clock, Tag, MessageCircle, ThumbsUp, Flag } 
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 export default function BlogPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { language, t } = useLanguage();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
@@ -283,7 +286,7 @@ export default function BlogPost() {
           {/* Back Button */}
           <Button
             variant="ghost"
-            onClick={() => navigate("/blog")}
+            onClick={() => navigate(getLocalizedPath("/blog", language))}
             className="mb-6"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -325,10 +328,27 @@ export default function BlogPost() {
             )}
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              {post.author && typeof post.author === 'object' && (
-                <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  <span>{(post.author as any).name || "Anonymous"}</span>
+              {(post.author || post.author_image || post.author_job_title) && (
+                <div className="flex items-center gap-2">
+                  {post.author_image ? (
+                    <img 
+                      src={post.author_image} 
+                      alt={typeof post.author === 'object' ? (post.author as any).name : "Author"} 
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                  )}
+                  <div>
+                    <span className="font-medium">
+                      {typeof post.author === 'object' ? (post.author as any).name : "SchoolTechHub Team"}
+                    </span>
+                    {post.author_job_title && (
+                      <span className="text-xs text-muted-foreground ml-2">• {post.author_job_title}</span>
+                    )}
+                  </div>
                 </div>
               )}
               {post.published_at && (

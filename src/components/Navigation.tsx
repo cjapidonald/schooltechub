@@ -179,11 +179,12 @@ const Navigation = () => {
               {navItems.map((item) => (
                 <Link
                   key={item.path}
-                  to={item.path}
+                  to={getLocalizedNavPath(item.path)}
                   onClick={() => setIsOpen(false)}
                   className={cn(
                     "text-lg font-medium transition-colors hover:text-primary py-2",
-                    location.pathname.startsWith(item.path === "/" ? "/home" : item.path)
+                    location.pathname === getLocalizedNavPath(item.path) ||
+                    (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
                       ? "text-primary"
                       : "text-muted-foreground"
                   )}
@@ -231,7 +232,7 @@ const Navigation = () => {
                   </Button>
                 </div>
               ) : (
-                <Link to="/auth" onClick={() => setIsOpen(false)} className="mt-4">
+                <Link to={getLocalizedNavPath("/auth")} onClick={() => setIsOpen(false)} className="mt-4">
                   <Button className="w-full">{t.nav.signUp} / {t.nav.signIn}</Button>
                 </Link>
               )}

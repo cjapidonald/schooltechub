@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Search, Calendar, Clock, GraduationCap, Lightbulb, MessageSquare, ChevronDown, BookOpen, Microscope, ShoppingBag } from "lucide-react";
+import { Search, Calendar, Clock, GraduationCap, Lightbulb, MessageSquare, ChevronDown, BookOpen, Microscope, ShoppingBag, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,8 +24,7 @@ const Blog = () => {
   const [newsletterJob, setNewsletterJob] = useState("");
   const [newsletterRole, setNewsletterRole] = useState("Teacher");
   const { toast } = useToast();
-  const langParam = searchParams.get("lang");
-  const lang: "en" | "sq" | "vi" = langParam === "sq" || langParam === "vi" ? langParam : "en";
+  const { language, t } = useLanguage();
   
   const [filters, setFilters] = useState({
     filterType: searchParams.getAll("filterType") || [],
@@ -64,7 +63,7 @@ const Blog = () => {
 
   useEffect(() => {
     fetchBlogPosts();
-  }, [searchTerm, filters, lang]);
+  }, [searchTerm, filters, language]);
 
   const fetchBlogPosts = async () => {
     try {
@@ -74,7 +73,7 @@ const Blog = () => {
         .select("*")
         .in("page", ["research_blog", "edutech", "teacher_diary"]) 
         .eq("is_published", true)
-        .eq("language", lang);
+        .eq("language", language);
 
       if (searchTerm) {
         query = query.or(`title.ilike.%${searchTerm}%,subtitle.ilike.%${searchTerm}%,excerpt.ilike.%${searchTerm}%`);
@@ -187,9 +186,8 @@ const Blog = () => {
         description="Explore EdTech ideas, research notes, teaching techniques, and case studies for K-12. Find practical strategies to integrate technology and improve engagement."
         canonicalUrl="https://schooltechhub.com/blog"
         type="website"
-        lang={lang}
+        lang={language}
       />
-      <Navigation />
       
       <main className="flex-1">
         <div className="container py-12">
@@ -403,7 +401,7 @@ const Blog = () => {
                             </div>
                             
                             <h3 className="text-xl font-semibold mb-2">
-                              <Link to={`/blog/${post.slug}`} className="hover:text-primary">
+                              <Link to={getLocalizedPath(`/blog/${post.slug}`, language)} className="hover:text-primary">
                                 {post.title}
                               </Link>
                             </h3>
@@ -412,10 +410,28 @@ const Blog = () => {
                               <p className="text-muted-foreground mb-4">{post.excerpt}</p>
                             )}
                             
-                            {post.author && (
-                              <p className="text-sm text-muted-foreground mb-3">
-                                By {post.author.name || "SchoolTechHub Team"}
-                              </p>
+                            {(post.author || post.author_image || post.author_job_title) && (
+                              <div className="flex items-center gap-3 mb-3">
+                                {post.author_image ? (
+                                  <img 
+                                    src={post.author_image} 
+                                    alt={typeof post.author === 'object' ? post.author.name : "Author"} 
+                                    className="w-10 h-10 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <User className="h-5 w-5 text-primary" />
+                                  </div>
+                                )}
+                                <div className="text-sm">
+                                  <p className="font-medium">
+                                    {typeof post.author === 'object' ? post.author.name : "SchoolTechHub Team"}
+                                  </p>
+                                  {post.author_job_title && (
+                                    <p className="text-muted-foreground">{post.author_job_title}</p>
+                                  )}
+                                </div>
+                              </div>
                             )}
                             
                             <div className="flex flex-wrap gap-2">
@@ -488,7 +504,7 @@ const Blog = () => {
         </div>
       </main>
 
-      <Footer />
+      
     </div>
   );
 };
