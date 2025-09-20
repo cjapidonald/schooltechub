@@ -179,12 +179,36 @@ export const en = {
     terms: "Terms of Service"
   },
   auth: {
+    seo: {
+      title: "Sign In / Sign Up",
+      description: "Join SchoolTechHub to access exclusive educational content, participate in teacher debates, and receive monthly newsletters",
+      canonical: "https://schooltechhub.com/auth"
+    },
+    card: {
+      title: "Welcome to SchoolTechHub",
+      description: "Sign in to access exclusive content and features"
+    },
+    tabs: {
+      signIn: "Sign In",
+      signUp: "Sign Up"
+    },
+    roles: {
+      teacher: "Teacher",
+      admin: "Admin",
+      parent: "Parent",
+      student: "Student",
+      other: "Other"
+    },
+    backToHome: "Back to Home",
+    googleSignIn: "Sign in with Google",
+    googleSigningIn: "Connecting to Google...",
     signIn: "Sign In",
     signUp: "Sign Up",
     email: "Email",
     emailPlaceholder: "your@email.com",
     password: "Password",
     passwordPlaceholder: "Enter your password",
+    passwordCreatePlaceholder: "Create a password",
     confirmPassword: "Confirm Password",
     confirmPasswordPlaceholder: "Confirm your password",
     name: "Full Name",
@@ -198,6 +222,11 @@ export const en = {
     signingIn: "Signing in...",
     signingUp: "Signing up...",
     signInWith: "Sign in with",
+    toast: {
+      errorTitle: "Error",
+      successTitle: "Success",
+      successDescription: "Please check your email to verify your account"
+    },
     welcomeBack: "Welcome back",
     createAccount: "Create an account",
     getStarted: "Get started with School Tech Hub Solutions",

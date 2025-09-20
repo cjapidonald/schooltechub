@@ -179,12 +179,36 @@ export const vi = {
     terms: "Điều khoản dịch vụ"
   },
   auth: {
+    seo: {
+      title: "Đăng nhập / Đăng ký",
+      description: "Tham gia SchoolTechHub để truy cập nội dung giáo dục độc quyền, tham gia thảo luận của giáo viên và nhận bản tin hàng tháng",
+      canonical: "https://schooltechhub.com/auth"
+    },
+    card: {
+      title: "Chào mừng đến với SchoolTechHub",
+      description: "Đăng nhập để truy cập nội dung và tính năng độc quyền"
+    },
+    tabs: {
+      signIn: "Đăng nhập",
+      signUp: "Đăng ký"
+    },
+    roles: {
+      teacher: "Giáo viên",
+      admin: "Quản trị viên",
+      parent: "Phụ huynh",
+      student: "Học sinh",
+      other: "Khác"
+    },
+    backToHome: "Quay lại Trang chủ",
+    googleSignIn: "Đăng nhập với Google",
+    googleSigningIn: "Đang kết nối với Google...",
     signIn: "Đăng nhập",
     signUp: "Đăng ký",
     email: "Email",
     emailPlaceholder: "email@example.com",
     password: "Mật khẩu",
     passwordPlaceholder: "Nhập mật khẩu của bạn",
+    passwordCreatePlaceholder: "Tạo mật khẩu",
     confirmPassword: "Xác nhận mật khẩu",
     confirmPasswordPlaceholder: "Xác nhận mật khẩu của bạn",
     name: "Họ và tên",
@@ -198,6 +222,11 @@ export const vi = {
     signingIn: "Đang đăng nhập...",
     signingUp: "Đang đăng ký...",
     signInWith: "Đăng nhập với",
+    toast: {
+      errorTitle: "Lỗi",
+      successTitle: "Thành công",
+      successDescription: "Vui lòng kiểm tra email để xác minh tài khoản của bạn"
+    },
     welcomeBack: "Chào mừng trở lại",
     createAccount: "Tạo tài khoản",
     getStarted: "Bắt đầu với School Tech Hub Solutions",

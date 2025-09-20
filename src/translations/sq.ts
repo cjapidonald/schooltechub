@@ -179,12 +179,36 @@ export const sq = {
     terms: "Kushtet e Shërbimit"
   },
   auth: {
+    seo: {
+      title: "Hyrje / Regjistrim",
+      description: "Bashkohuni me SchoolTechHub për të aksesuar përmbajtje ekskluzive edukative, të merrni pjesë në debate të mësuesve dhe të merrni buletine mujore",
+      canonical: "https://schooltechhub.com/auth"
+    },
+    card: {
+      title: "Mirësevini në SchoolTechHub",
+      description: "Hyni për të aksesuar përmbajtje dhe veçori ekskluzive"
+    },
+    tabs: {
+      signIn: "Hyr",
+      signUp: "Regjistrohu"
+    },
+    roles: {
+      teacher: "Mësues",
+      admin: "Administrator",
+      parent: "Prind",
+      student: "Student",
+      other: "Tjetër"
+    },
+    backToHome: "Kthehu te Ballina",
+    googleSignIn: "Hyni me Google",
+    googleSigningIn: "Duke u lidhur me Google...",
     signIn: "Hyr",
     signUp: "Regjistrohu",
     email: "Email",
     emailPlaceholder: "juaj@email.com",
     password: "Fjalëkalimi",
     passwordPlaceholder: "Vendosni fjalëkalimin tuaj",
+    passwordCreatePlaceholder: "Krijoni një fjalëkalim",
     confirmPassword: "Konfirmo Fjalëkalimin",
     confirmPasswordPlaceholder: "Konfirmoni fjalëkalimin tuaj",
     name: "Emri i Plotë",
@@ -198,6 +222,11 @@ export const sq = {
     signingIn: "Duke hyrë...",
     signingUp: "Duke u regjistruar...",
     signInWith: "Hyni me",
+    toast: {
+      errorTitle: "Gabim",
+      successTitle: "Sukses",
+      successDescription: "Ju lutemi kontrolloni emailin tuaj për të verifikuar llogarinë tuaj"
+    },
     welcomeBack: "Mirësevini përsëri",
     createAccount: "Krijoni një llogari",
     getStarted: "Filloni me School Tech Hub Solutions",
