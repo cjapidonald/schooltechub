@@ -118,6 +118,35 @@ export const en = {
       errorMessage: "Please try again later."
     }
   },
+  blogPost: {
+    backToBlog: "Back to Blog",
+    share: "Share",
+    comments: "Comments",
+    commentPlaceholder: "Share your thoughts...",
+    postComment: "Post Comment",
+    loginPrompt: "Please log in to leave a comment",
+    loginCta: "Log In to Comment",
+    reply: "Reply",
+    replyPlaceholder: "Write your reply...",
+    postReply: "Post Reply",
+    cancel: "Cancel",
+    emptyState: "No comments yet. Be the first to share your thoughts!",
+    notFound: {
+      title: "Blog Post Not Found",
+      description: "The blog post you're looking for doesn't exist."
+    },
+    toast: {
+      authRequiredTitle: "Authentication required",
+      authRequiredComment: "Please log in to comment",
+      authRequiredReply: "Please log in to reply",
+      errorTitle: "Error",
+      commentError: "Failed to post comment",
+      replyError: "Failed to post reply",
+      successTitle: "Success",
+      commentSuccess: "Comment posted successfully",
+      replySuccess: "Reply posted successfully"
+    }
+  },
   contact: {
     title: "Get in Touch",
     subtitle: "We're here to help transform your educational institution",
