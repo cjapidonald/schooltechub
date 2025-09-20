@@ -119,32 +119,111 @@ export const sq = {
     }
   },
   contact: {
-    title: "Na Kontaktoni",
-    subtitle: "Jemi këtu për të ndihmuar në transformimin e institucionit tuaj arsimor",
-    form: {
-      name: "Emri",
-      namePlaceholder: "Emri juaj",
-      email: "Email",
-      emailPlaceholder: "juaj@email.com",
-      school: "Shkolla/Organizata",
-      schoolPlaceholder: "Shkolla ose organizata juaj",
-      subject: "Subjekti",
-      subjectPlaceholder: "Si mund t'ju ndihmojmë?",
-      message: "Mesazhi",
-      messagePlaceholder: "Na tregoni për nevojat tuaja...",
-      submit: "Dërgo Mesazhin",
-      sending: "Duke dërguar...",
-      successTitle: "Mesazhi u dërgua me sukses!",
-      successMessage: "Do t'ju përgjigjemi sa më shpejt të jetë e mundur.",
-      errorTitle: "Dështoi dërgimi i mesazhit",
-      errorMessage: "Ju lutemi provoni përsëri më vonë."
+    seo: {
+      title: "Kontakt & Rezervo një Sesion",
+      description:
+        "Rezervoni konsultimin tuaj EdTech sot. Merrni trajnim të personalizuar 1:1 ose trajnime për gjithë shkollën. Kontaktoni School Tech Hub për mbështetje të specializuar në teknologjinë arsimore.",
+      keywords:
+        "rezervo konsultim, mbështetje EdTech, kontakto konsulent arsimi, planifiko trajnim, rezervim coaching mësuesish"
+    },
+    hero: {
+      title: "Lidhu me Ne",
+      subtitle: "Rezervoni një konsultim ose na pyesni për çdo gjë rreth teknologjisë arsimore"
     },
     info: {
-      title: "Informacioni i Kontaktit",
-      address: "123 Bulevardi i Arsimit, Qyteti Teknologjik, QT 12345",
-      phone: "+1 (555) 123-4567",
-      email: "info@schooltechhub.com",
-      hours: "E Hënë - E Premte: 9:00 - 18:00"
+      quickContact: {
+        title: "Kontakt i Shpejtë",
+        email: {
+          label: "Email",
+          value: "dcjapi@gmail.com"
+        },
+        phone: {
+          label: "Telefoni",
+          value: "+84 0372725432",
+          whatsapp: "WhatsApp: +84 0372725432"
+        },
+        location: {
+          label: "Vendndodhja",
+          description: "Në dispozicion globalisht për konsultime online"
+        }
+      },
+      officeHours: {
+        title: "Orari i Zyrës",
+        weekdays: "E hënë - E premte: 08:00 - 18:00 EST",
+        saturday: "E shtunë: 10:00 - 14:00 EST",
+        sunday: "E diel: Mbyllur"
+      },
+      responseTime: {
+        title: "Koha e Përgjigjes",
+        description:
+          "Përgjigjemi zakonisht brenda 24 orëve gjatë ditëve të punës. Kërkesat urgjente marrin përparësi."
+      }
+    },
+    form: {
+      title: "Rezervoni një Sesion",
+      fields: {
+        name: {
+          label: "Emri i Plotë *",
+          placeholder: "Arta Hoxha"
+        },
+        email: {
+          label: "Adresa e Emailit *",
+          placeholder: "arta@shkolla.edu"
+        },
+        phone: {
+          label: "Numri i Telefonit",
+          placeholder: "+355 69 123 4567"
+        },
+        school: {
+          label: "Shkolla/Organizata",
+          placeholder: "Shkolla \"Naim Frashëri\""
+        },
+        preferredDate: {
+          label: "Data e Preferuar",
+          placeholder: "Zgjidhni një datë"
+        },
+        preferredTime: {
+          label: "Ora e Preferuar",
+          placeholder: "Zgjidhni orarin e preferuar",
+          options: [
+            { value: "09:00", label: "09:00" },
+            { value: "10:00", label: "10:00" },
+            { value: "11:00", label: "11:00" },
+            { value: "12:00", label: "12:00" },
+            { value: "13:00", label: "13:00" },
+            { value: "14:00", label: "14:00" },
+            { value: "15:00", label: "15:00" },
+            { value: "16:00", label: "16:00" }
+          ]
+        },
+        topic: {
+          label: "Tema/Sfida për t'u Trajtuar",
+          placeholder: "p.sh., Zbatimi i mjeteve AI, konfigurimi i Google Classroom"
+        },
+        message: {
+          label: "Informacione Shtesë",
+          placeholder: "Na tregoni më shumë për qëllimet tuaja dhe çdo kërkesë specifike..."
+        }
+      },
+      serviceType: {
+        label: "Lloji i Shërbimit *",
+        options: {
+          consultation: "Konsultim 1:1 (30$)",
+          wholeSchool: "Konsultim për gjithë shkollën (60$)"
+        }
+      },
+      cta: {
+        idle: "Dërgo Kërkesën për Rezervim",
+        loading: "Duke dërguar..."
+      },
+      disclaimer:
+        "Duke dërguar këtë formular, ju pranoni kushtet e shërbimit dhe politikën e privatësisë. Nuk do ta ndajmë kurrë informacionin tuaj me palë të treta.",
+      toast: {
+        successTitle: "Kërkesa për rezervim u dërgua!",
+        successDescription: "Do t'ju kontaktojmë brenda 24 orëve për të konfirmuar sesionin.",
+        errorTitle: "Gabim",
+        errorDescription: "Dështoi dërgimi i kërkesës për rezervim. Ju lutemi provoni përsëri."
+      }
     }
   },
   footer: {
