@@ -18,6 +18,7 @@ const translations: Record<Language, Translations> = {
   sq,
   vi
 };
+const supportedLanguages = Object.keys(translations) as Language[];
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
@@ -45,16 +46,19 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     let currentPath = location.pathname;
     
     // Remove existing language prefix if present
-    const langPrefixRegex = /^\/(sq|vi)(\/|$)/;
+    const langPrefixRegex = new RegExp(`^/(${supportedLanguages.join('|')})(/|$)`);
     if (langPrefixRegex.test(currentPath)) {
       currentPath = currentPath.replace(langPrefixRegex, '/');
     }
-    
+
+    const searchAndHash = `${location.search}${location.hash}`;
+
     // Navigate to new language path
     if (newLang === 'en') {
-      navigate(currentPath);
+      navigate(`${currentPath}${searchAndHash}`);
     } else {
-      navigate(`/${newLang}${currentPath === '/' ? '' : currentPath}`);
+      const localizedPath = currentPath === '/' ? `/${newLang}` : `/${newLang}${currentPath}`;
+      navigate(`${localizedPath}${searchAndHash}`);
     }
   };
 
