@@ -156,6 +156,24 @@ export const sq = {
     newsletterText: "Abonohuni për të marrë përditësimet më të fundit",
     emailPlaceholder: "Emaili juaj",
     subscribe: "Abonohu",
+    subscribing: "Duke u abonuar...",
+    toast: {
+      successTitle: "Sukses!",
+      successMessage: "Ju u abonuat në këshillat tona mujore të teknologjisë.",
+      errorTitle: "Gabim",
+      errorMessage: "Abonimi dështoi. Ju lutemi provoni përsëri."
+    },
+    social: {
+      facebook: "Facebook",
+      instagram: "Instagram",
+      linkedin: "LinkedIn",
+      email: "Email"
+    },
+    contact: {
+      emailLabel: "Email",
+      phoneLabel: "Telefoni",
+      availability: "Në dispozicion globalisht për konsultime online"
+    },
     allRights: "Të gjitha të drejtat e rezervuara",
     privacy: "Politika e Privatësisë",
     terms: "Kushtet e Shërbimit"
@@ -226,6 +244,31 @@ export const sq = {
     viewAll: "Shiko të Gjitha",
     classSchedule: "Orari i Klasave",
     notes: "Shënime dhe Vëzhgime"
+  },
+  home: {
+    highlights: {
+      aiPowered: "Me fuqi AI",
+      vrClassrooms: "Klasa VR",
+      realTimeAnalytics: "Analitikë në kohë reale"
+    },
+    stats: {
+      aiLessons: "Mësime me fuqi AI",
+      vrExperiences: "Përvoja VR",
+      engagementRate: "Norma e angazhimit",
+      supportAvailable: "Mbështetje në dispozicion"
+    },
+    cta: {
+      title: "Gati të transformoni shkollën tuaj?",
+      description: "Bashkohuni me mijëra edukatorë që tashmë përdorin platformën tonë për të krijuar përvoja më të mira të të mësuarit.",
+      primary: "Fillo Tani",
+      secondary: "Shiko Çmimet",
+      social: {
+        facebook: "Facebook",
+        instagram: "Instagram",
+        linkedin: "LinkedIn",
+        email: "Email"
+      }
+    }
   },
   common: {
     loading: "Duke ngarkuar...",

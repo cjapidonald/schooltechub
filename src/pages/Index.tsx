@@ -80,6 +80,48 @@ const Index = () => {
 
     return () => observer.disconnect();
   }, [hasAnimated]);
+  const highlights = [
+    { icon: Brain, text: t.home.highlights.aiPowered, iconColor: "text-primary" },
+    { icon: Globe, text: t.home.highlights.vrClassrooms, iconColor: "text-accent" },
+    { icon: Zap, text: t.home.highlights.realTimeAnalytics, iconColor: "text-secondary" }
+  ];
+
+  const statsData = [
+    { value: `${counters.lessons.toLocaleString()}+`, label: t.home.stats.aiLessons, icon: Brain },
+    { value: `${counters.vr}+`, label: t.home.stats.vrExperiences, icon: Globe },
+    { value: `${counters.engagement}%`, label: t.home.stats.engagementRate, icon: Zap },
+    { value: "24/7", label: t.home.stats.supportAvailable, icon: Shield }
+  ];
+
+  const socialLinks = [
+    {
+      href: "https://www.facebook.com/share/g/1NukWcXVpp/",
+      label: t.home.cta.social.facebook,
+      Icon: Facebook,
+      ariaLabel: t.home.cta.social.facebook
+    },
+    {
+      href: "https://www.instagram.com/schooltechhub/",
+      label: t.home.cta.social.instagram,
+      Icon: Instagram,
+      ariaLabel: t.home.cta.social.instagram
+    },
+    {
+      href: "https://www.linkedin.com/in/donald-cjapi-b7800a383/",
+      label: t.home.cta.social.linkedin,
+      Icon: Linkedin,
+      ariaLabel: t.home.cta.social.linkedin
+    },
+    {
+      href: "mailto:dcjapi@gmail.com",
+      label: t.home.cta.social.email,
+      Icon: Mail,
+      ariaLabel: t.home.cta.social.email,
+      target: "_self",
+      rel: undefined
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <SEO 
@@ -141,18 +183,12 @@ const Index = () => {
             </p>
             
             <div className="mb-12 flex flex-wrap justify-center gap-6 text-sm font-space animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-              <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-primary animate-pulse-glow" />
-                <span className="text-foreground">AI-Powered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-accent animate-pulse-glow delay-150" />
-                <span className="text-foreground">VR Classrooms</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-secondary animate-pulse-glow delay-300" />
-                <span className="text-foreground">Real-Time Analytics</span>
-              </div>
+              {highlights.map((highlight, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <highlight.icon className={`h-5 w-5 ${highlight.iconColor} animate-pulse-glow`} />
+                  <span className="text-foreground">{highlight.text}</span>
+                </div>
+              ))}
             </div>
             
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
@@ -262,12 +298,7 @@ const Index = () => {
       <section className="relative py-20" ref={statsRef}>
         <div className="container">
           <div className="grid gap-8 md:grid-cols-4">
-            {[
-              { value: `${counters.lessons.toLocaleString()}+`, label: "AI-Powered Lessons", icon: Brain },
-              { value: `${counters.vr}+`, label: "VR Experiences", icon: Globe },
-              { value: `${counters.engagement}%`, label: "Engagement Rate", icon: Zap },
-              { value: "24/7", label: "Support Available", icon: Shield }
-            ].map((stat, index) => (
+            {statsData.map((stat, index) => (
               <div key={index} className="text-center group">
                 <stat.icon className="mx-auto mb-4 h-8 w-8 text-primary animate-pulse-glow" />
                 <div className="text-4xl font-orbitron font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -286,60 +317,39 @@ const Index = () => {
           <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-12 text-center">
             <div className="absolute inset-0 bg-cyber-grid bg-[size:30px_30px] opacity-10" />
             <div className="relative z-10">
-              <h2 className="text-4xl font-orbitron font-bold mb-4">Ready to Transform Your School?</h2>
+              <h2 className="text-4xl font-orbitron font-bold mb-4">{t.home.cta.title}</h2>
               <p className="text-xl text-muted-foreground font-space mb-8 max-w-2xl mx-auto">
-                Join thousands of educators who are already using our platform to create better learning experiences.
+                {t.home.cta.description}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link to={getLocalizedPath("/contact", language)}>
                   <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:shadow-[0_0_40px_hsl(var(--glow-primary)/0.5)]">
-                    Get Started
+                    {t.home.cta.primary}
                     <Rocket className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link to={getLocalizedPath("/services", language)}>
                   <Button size="lg" variant="outline" className="border-primary/30 hover:border-primary hover:bg-primary/10">
-                    View Pricing
+                    {t.home.cta.secondary}
                   </Button>
                 </Link>
               </div>
-              
+
               {/* Social Media Icons */}
               <div className="flex justify-center space-x-4">
-                <a 
-                  href="https://www.facebook.com/share/g/1NukWcXVpp/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-muted-foreground hover:text-primary transition-colors" 
-                  aria-label="Facebook"
-                >
-                  <Facebook className="h-6 w-6" />
-                </a>
-                <a 
-                  href="https://www.instagram.com/schooltechhub/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-muted-foreground hover:text-primary transition-colors" 
-                  aria-label="Instagram"
-                >
-                  <Instagram className="h-6 w-6" />
-                </a>
-                <a 
-                  href="https://www.linkedin.com/in/donald-cjapi-b7800a383/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-muted-foreground hover:text-primary transition-colors" 
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-6 w-6" />
-                </a>
-                <a 
-                  href="mailto:dcjapi@gmail.com" 
-                  className="text-muted-foreground hover:text-primary transition-colors" 
-                  aria-label="Email"
-                >
-                  <Mail className="h-6 w-6" />
-                </a>
+                {socialLinks.map(({ href, label, Icon, ariaLabel, target, rel }, index) => (
+                  <a
+                    key={index}
+                    href={href}
+                    target={target ?? "_blank"}
+                    rel={rel ?? (target === "_self" ? undefined : "noopener noreferrer")}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                    aria-label={ariaLabel}
+                  >
+                    <Icon className="h-6 w-6" />
+                    <span className="sr-only">{label}</span>
+                  </a>
+                ))}
               </div>
             </div>
           </Card>
