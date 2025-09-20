@@ -74,84 +74,86 @@ const Navigation = () => {
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-4">
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="text"
-              placeholder={t.common.search}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 w-48 lg:w-64"
-            />
-          </form>
+        <div className="hidden md:flex flex-1 items-center gap-6">
+          <div className="flex items-center gap-4 mr-auto">
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                type="text"
+                placeholder={t.common.search}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-3 w-48 lg:w-64"
+              />
+            </form>
 
-          {/* Auth Button */}
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem className="text-sm text-muted-foreground">
-                  {user.email}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {t.nav.signOut}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild>
-              <Link to={getLocalizedNavPath("/auth")}>{t.nav.signUp} / {t.nav.signIn}</Link>
-            </Button>
-          )}
-        </div>
+            {/* Auth Button */}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem className="text-sm text-muted-foreground">
+                    {user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {t.nav.signOut}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild>
+                <Link to={getLocalizedNavPath("/auth")}>{t.nav.signUp} / {t.nav.signIn}</Link>
+              </Button>
+            )}
+          </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex flex-1 items-center justify-center gap-8">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={getLocalizedNavPath(item.path)}
-              className={cn(
-                "text-lg font-semibold whitespace-nowrap px-4 py-2 transition-colors rounded-full border border-transparent hover:text-primary hover:border-primary/40 hover:bg-primary/5",
-                location.pathname === getLocalizedNavPath(item.path) ||
-                  (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
-                  ? "text-primary border-primary bg-primary/10"
-                  : "text-muted-foreground"
-              )}
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center justify-center gap-8 mx-auto">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={getLocalizedNavPath(item.path)}
+                className={cn(
+                  "text-lg font-semibold whitespace-nowrap px-4 py-2 transition-colors rounded-full border border-transparent hover:text-primary hover:border-primary/40 hover:bg-primary/5",
+                  location.pathname === getLocalizedNavPath(item.path) ||
+                    (item.path !== "/" && location.pathname.startsWith(getLocalizedNavPath(item.path)))
+                    ? "text-primary border-primary bg-primary/10"
+                    : "text-muted-foreground"
+                )}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4 ml-auto">
+            {/* Language Select */}
+            <Select
+              value={language}
+              onValueChange={(val) => {
+                setLanguage(val as "en" | "sq" | "vi");
+              }}
             >
-              {item.name}
-            </Link>
-          ))}
-        </div>
-
-        <div className="hidden md:flex items-center gap-4 ml-auto">
-          {/* Language Select */}
-          <Select
-            value={language}
-            onValueChange={(val) => {
-              setLanguage(val as "en" | "sq" | "vi");
-            }}
-          >
-            <SelectTrigger className="w-28">
-              <div className="flex items-center gap-1">
-                <Languages className="h-4 w-4" />
-                <SelectValue placeholder="Lang" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="sq">Shqip</SelectItem>
-              <SelectItem value="vi">Tiếng Việt</SelectItem>
-            </SelectContent>
-          </Select>
+              <SelectTrigger className="w-28">
+                <div className="flex items-center gap-1">
+                  <Languages className="h-4 w-4" />
+                  <SelectValue placeholder="Lang" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="sq">Shqip</SelectItem>
+                <SelectItem value="vi">Tiếng Việt</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
