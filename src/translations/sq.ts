@@ -578,6 +578,29 @@ export const sq = {
       }
     }
   },
+  sitemap: {
+    title: "Harta e faqes",
+    description: "Gjeni të gjitha faqet dhe burimet e disponueshme në School Tech Hub",
+    sections: {
+      englishPages: "Faqe në anglisht",
+      localizedPages: "Faqe në {{language}}",
+      freshContent: "Përmbajtje e re",
+      blogPosts: "Postimet e blogut",
+      events: "Evente",
+      teacherDiaryEntries: "Shënime të ditarit të mësuesit",
+      xmlTitle: "Harta XML",
+      xmlDescription: "Për motorët e kërkimit dhe mjetet automatike, aksesoni hartën tonë XML:"
+    },
+    links: {
+      authPortal: "Portali i autentikimit",
+      sitemap: "Harta e faqes"
+    },
+    languages: {
+      en: "Anglisht",
+      sq: "Shqip",
+      vi: "Vietnamisht"
+    }
+  },
   common: {
     loading: "Duke ngarkuar...",
     error: "Ndodhi një gabim",

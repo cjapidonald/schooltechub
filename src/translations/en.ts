@@ -574,6 +574,29 @@ export const en = {
       }
     }
   },
+  sitemap: {
+    title: "Sitemap",
+    description: "Find all pages and resources available on School Tech Hub",
+    sections: {
+      englishPages: "English Pages",
+      localizedPages: "{{language}} Pages",
+      freshContent: "Fresh content",
+      blogPosts: "Blog Posts",
+      events: "Events",
+      teacherDiaryEntries: "Teacher Diary Entries",
+      xmlTitle: "XML Sitemap",
+      xmlDescription: "For search engines and automated tools, access our XML sitemap:"
+    },
+    links: {
+      authPortal: "Auth Portal",
+      sitemap: "Sitemap"
+    },
+    languages: {
+      en: "English",
+      sq: "Albanian",
+      vi: "Vietnamese"
+    }
+  },
   common: {
     loading: "Loading...",
     error: "An error occurred",

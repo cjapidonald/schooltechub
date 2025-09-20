@@ -5,6 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { format } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { en } from "@/translations/en";
+import { sq } from "@/translations/sq";
+import { vi } from "@/translations/vi";
 
 type RouteLink = {
   title: string;
@@ -16,30 +20,27 @@ type DynamicLink = RouteLink & {
   language?: string | null;
 };
 
+type TranslationDictionary = typeof en;
+
 const supportedLanguages = [
-  { code: "en", label: "English" },
-  { code: "sq", label: "Albanian" },
-  { code: "vi", label: "Vietnamese" },
+  { code: "en", dictionary: en },
+  { code: "sq", dictionary: sq },
+  { code: "vi", dictionary: vi },
 ] as const;
 
-const englishRoutes: RouteLink[] = [
-  { title: "Home", url: "/" },
-  { title: "About", url: "/about" },
-  { title: "Services", url: "/services" },
-  { title: "Blog", url: "/blog" },
-  { title: "Events", url: "/events" },
-  { title: "Edutech Hub", url: "/edutech" },
-  { title: "Teacher Diary", url: "/teacher-diary" },
-  { title: "Contact", url: "/contact" },
-  { title: "FAQ", url: "/faq" },
-  { title: "Auth Portal", url: "/auth" },
-  { title: "Sitemap", url: "/sitemap" },
+const createStaticRoutes = (dictionary: TranslationDictionary): RouteLink[] => [
+  { title: dictionary.nav.home, url: "/" },
+  { title: dictionary.nav.about, url: "/about" },
+  { title: dictionary.nav.services, url: "/services" },
+  { title: dictionary.nav.blog, url: "/blog" },
+  { title: dictionary.nav.events, url: "/events" },
+  { title: dictionary.nav.edutech, url: "/edutech" },
+  { title: dictionary.nav.teacherDiary, url: "/teacher-diary" },
+  { title: dictionary.nav.contact, url: "/contact" },
+  { title: dictionary.nav.faq, url: "/faq" },
+  { title: dictionary.sitemap.links.authPortal, url: "/auth" },
+  { title: dictionary.sitemap.links.sitemap, url: "/sitemap" },
 ];
-
-const languageLabels = supportedLanguages.reduce<Record<string, string>>((acc, lang) => {
-  acc[lang.code] = lang.label;
-  return acc;
-}, {});
 
 const formatUpdatedAt = (value?: string | null) => {
   if (!value) return null;
@@ -52,6 +53,14 @@ const formatUpdatedAt = (value?: string | null) => {
 };
 
 const Sitemap = () => {
+  const { t } = useLanguage();
+
+  const languageLabels = supportedLanguages.reduce<Record<string, string>>((acc, lang) => {
+    const label = t.sitemap.languages?.[lang.code];
+    acc[lang.code] = label || lang.code.toUpperCase();
+    return acc;
+  }, {});
+
   const { data: blogPosts = [] } = useQuery({
     queryKey: ["sitemap-blog-posts"],
     queryFn: async () => {
@@ -97,25 +106,34 @@ const Sitemap = () => {
     }
   });
 
-  const staticSections = [
-    {
-      title: "English Pages",
-      links: englishRoutes
-    },
-    ...supportedLanguages
-      .filter((lang) => lang.code !== "en")
-      .map((lang) => ({
-        title: `${lang.label} Pages`,
-        links: englishRoutes.map((route) => ({
-          title: route.title,
-          url: route.url === "/" ? `/${lang.code}` : `/${lang.code}${route.url}`
-        }))
-      }))
-  ];
+  const staticSections = supportedLanguages.map((lang) => {
+    const links = createStaticRoutes(lang.dictionary).map((route) => ({
+      title: route.title,
+      url:
+        lang.code === "en"
+          ? route.url
+          : route.url === "/"
+            ? `/${lang.code}`
+            : `/${lang.code}${route.url}`
+    }));
+
+    const title =
+      lang.code === "en"
+        ? t.sitemap.sections.englishPages
+        : t.sitemap.sections.localizedPages.replace(
+            "{{language}}",
+            languageLabels[lang.code] || lang.code.toUpperCase()
+          );
+
+    return {
+      title,
+      links
+    };
+  });
 
   const dynamicSections: { title: string; links: DynamicLink[] }[] = [
     {
-      title: "Blog Posts",
+      title: t.sitemap.sections.blogPosts,
       links: blogPosts.map((post) => ({
         title: post.title || post.slug,
         url: getLocalizedPath(`/blog/${post.slug}`, post.language || "en"),
@@ -124,7 +142,7 @@ const Sitemap = () => {
       }))
     },
     {
-      title: "Events",
+      title: t.sitemap.sections.events,
       links: events.map((event) => ({
         title: event.title || event.slug,
         url: getLocalizedPath(`/events/${event.slug}`, event.language || "en"),
@@ -133,7 +151,7 @@ const Sitemap = () => {
       }))
     },
     {
-      title: "Teacher Diary Entries",
+      title: t.sitemap.sections.teacherDiaryEntries,
       links: diaryEntries.map((entry) => ({
         title: entry.title || entry.slug,
         url: getLocalizedPath(`/teacher-diary/${entry.slug}`, entry.language || "en"),
@@ -149,15 +167,15 @@ const Sitemap = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Sitemap - School Tech Hub"
-        description="Navigate through all pages and resources available on School Tech Hub"
+        title={`${t.sitemap.title} - School Tech Hub`}
+        description={t.sitemap.description}
         keywords="sitemap, navigation, school tech hub pages"
       />
       <main className="flex-1">
         <div className="container py-12">
-          <h1 className="text-4xl font-bold mb-2">Sitemap</h1>
+          <h1 className="text-4xl font-bold mb-2">{t.sitemap.title}</h1>
           <p className="text-muted-foreground mb-8">
-            Find all pages and resources available on School Tech Hub
+            {t.sitemap.description}
           </p>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -186,7 +204,7 @@ const Sitemap = () => {
 
           {dynamicSections.length > 0 && (
             <div className="mt-10 space-y-6">
-              <h2 className="text-2xl font-semibold">Fresh content</h2>
+              <h2 className="text-2xl font-semibold">{t.sitemap.sections.freshContent}</h2>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {dynamicSections.map((section) => (
                   <Card key={section.title}>
@@ -225,11 +243,11 @@ const Sitemap = () => {
 
           <Card className="mt-8">
             <CardHeader>
-              <CardTitle>XML Sitemap</CardTitle>
+              <CardTitle>{t.sitemap.sections.xmlTitle}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                For search engines and automated tools, access our XML sitemap:
+                {t.sitemap.sections.xmlDescription}
               </p>
               <a
                 href="/sitemap.xml"
