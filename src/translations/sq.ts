@@ -98,24 +98,124 @@ export const sq = {
     title: "Njohuritë dhe Përditësimet e Fundit",
     subtitle: "Qëndroni të informuar për trendet më të fundit në teknologjinë arsimore",
     searchPlaceholder: "Kërko postime...",
-    filters: "Filtrat",
-    categories: "Kategoritë",
     readMore: "Lexo Më Shumë",
     minRead: "min lexim",
     postedBy: "Postuar nga",
+    hero: {
+      title: "Blog & Burime",
+      subtitle: "Ide, kërkime, teknika mësimdhënieje dhe burime për edukatorët K-12."
+    },
+    seo: {
+      title: "Blog: Ide EdTech, Kërkime & Burime për Mësimdhënie",
+      description:
+        "Eksploroni ide EdTech, shënime kërkimi, teknika mësimdhënieje dhe studime rastesh për K-12. Gjeni strategji praktike për të integruar teknologjinë dhe për të rritur angazhimin."
+    },
+    states: {
+      loading: "Duke ngarkuar postimet e blogut...",
+      empty: "Asnjë postim blogu nuk u gjet që përputhet me kriteret tuaja."
+    },
+    badges: {
+      featured: "E veçuar"
+    },
+    readTime: {
+      minutes: "{minutes} min lexim"
+    },
+    filters: {
+      title: "Filtrat",
+      category: "Kategoria",
+      stage: "Niveli",
+      subject: "Lënda",
+      delivery: "Mënyra e dorëzimit",
+      payment: "Pagesa",
+      platform: "Platforma",
+      categories: {
+        eduTech: "Teknologji Edukative",
+        tutorials: "Udhëzime",
+        teachingTechniques: "Teknika Mësimdhënieje",
+        classActivity: "Aktivitet në Klasë",
+        teacherReflection: "Reflektim i Mësuesit",
+        tips: "Këshilla",
+        shop: "Dyqan",
+        caseStudy: "Studim Rasti",
+        research: "Kërkim",
+        teacherDebates: "Debate të Mësuesve"
+      },
+      stages: {
+        earlyChildhood: "Fëmijëria e Hershme",
+        preK: "Parashkolla",
+        kindergarten: "Kopshti",
+        primary: "Shkolla Fillore",
+        secondary: "Shkolla e Mesme",
+        highSchool: "Shkolla e Mesme e Lartë",
+        k12: "K-12",
+        k5: "K-5"
+      },
+      subjects: {
+        phonics: "Fonetika",
+        english: "Anglisht",
+        math: "Matematikë",
+        science: "Shkencë",
+        biology: "Biologji",
+        chemistry: "Kimi",
+        physics: "Fizikë",
+        earthScience: "Shkencat e Tokës",
+        history: "Histori",
+        geography: "Gjeografi",
+        music: "Muzikë",
+        arts: "Arte",
+        ict: "TIK",
+        pe: "Edukimi Fizik",
+        globalPerspective: "Perspektivë Globale",
+        circleTime: "Koha në Rreth",
+        breakTime: "Koha e Pushimit",
+        steam: "STEAM"
+      },
+      deliveries: {
+        inClass: "Në klasë",
+        online: "Online",
+        live: "Drejtpërdrejt",
+        homework: "Detyrë shtëpie"
+      },
+      payments: {
+        free: "Falas",
+        paid: "Me pagesë",
+        educationDiscount: "Zbritje për Edukim"
+      },
+      platforms: {
+        mobileApp: "Aplikacion celular",
+        webapp: "Aplikacion web",
+        smartphone: "Smartphone",
+        smartboard: "Smartboard",
+        mac: "Mac",
+        windows: "Windows"
+      }
+    },
+    author: {
+      default: "Ekipi i SchoolTechHub"
+    },
     newsletter: {
-      title: "Abonohuni në Buletinin Tonë",
-      subtitle: "Merrni përditësimet dhe njohuritë më të fundit dërguar në emailin tuaj",
-      namePlaceholder: "Emri juaj",
-      emailPlaceholder: "Emaili juaj",
-      jobPlaceholder: "Titulli i punës suaj",
-      selectRole: "Zgjidhni rolin tuaj",
-      subscribe: "Abonohu",
-      subscribing: "Duke u abonuar...",
-      successTitle: "Abonuar me sukses!",
-      successMessage: "Faleminderit që u abonuat në buletinin tonë.",
-      errorTitle: "Abonimi dështoi",
-      errorMessage: "Ju lutemi provoni përsëri më vonë."
+      title: "📩 Bashkohuni me Përditësimet për Mësuesit",
+      description: "Merrni burime dhe këshilla të përzgjedhura në emailin tuaj.",
+      emailPlaceholder: "Email (i detyrueshëm)",
+      namePlaceholder: "Emri i plotë",
+      jobPlaceholder: "Pozicioni i punës",
+      roleLabel: "Roli",
+      submit: "Abonohu në Buletinin",
+      roles: {
+        teacher: "Mësues",
+        admin: "Administrator",
+        parent: "Prind",
+        student: "Student",
+        other: "Tjetër"
+      },
+      toast: {
+        successTitle: "Sukses!",
+        successDescription: "U abonuat në përditësimet tona për mësuesit.",
+        duplicateTitle: "Tashmë i abonuar",
+        duplicateDescription: "Ky email është tashmë i abonuar në buletinin tonë.",
+        errorTitle: "Gabim",
+        errorDescription: "Abonimi dështoi. Ju lutemi provoni përsëri."
+      }
     }
   },
   contact: {

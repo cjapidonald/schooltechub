@@ -98,24 +98,124 @@ export const en = {
     title: "Latest Insights & Updates",
     subtitle: "Stay informed about the latest trends in educational technology",
     searchPlaceholder: "Search posts...",
-    filters: "Filters",
-    categories: "Categories",
     readMore: "Read More",
     minRead: "min read",
     postedBy: "Posted by",
+    hero: {
+      title: "Blog & Resources",
+      subtitle: "Ideas, research, teaching techniques, and resources for K-12 educators."
+    },
+    seo: {
+      title: "Blog: EdTech Ideas, Research & Teaching Resources",
+      description:
+        "Explore EdTech ideas, research notes, teaching techniques, and case studies for K-12. Find practical strategies to integrate technology and improve engagement."
+    },
+    states: {
+      loading: "Loading blog posts...",
+      empty: "No blog posts found matching your criteria."
+    },
+    badges: {
+      featured: "Featured"
+    },
+    readTime: {
+      minutes: "{minutes} min read"
+    },
+    filters: {
+      title: "Filters",
+      category: "Category",
+      stage: "Stage",
+      subject: "Subject",
+      delivery: "Delivery Type",
+      payment: "Payment",
+      platform: "Platform",
+      categories: {
+        eduTech: "Edu Tech",
+        tutorials: "Tutorials",
+        teachingTechniques: "Teaching Techniques",
+        classActivity: "Class Activity",
+        teacherReflection: "Teacher Reflection",
+        tips: "Tips",
+        shop: "Shop",
+        caseStudy: "Case Study",
+        research: "Research",
+        teacherDebates: "Teacher Debates"
+      },
+      stages: {
+        earlyChildhood: "Early Childhood",
+        preK: "Pre-K",
+        kindergarten: "Kindergarten",
+        primary: "Primary",
+        secondary: "Secondary",
+        highSchool: "High School",
+        k12: "K-12",
+        k5: "K-5"
+      },
+      subjects: {
+        phonics: "Phonics",
+        english: "English",
+        math: "Math",
+        science: "Science",
+        biology: "Biology",
+        chemistry: "Chemistry",
+        physics: "Physics",
+        earthScience: "Earth Science",
+        history: "History",
+        geography: "Geography",
+        music: "Music",
+        arts: "Arts",
+        ict: "ICT",
+        pe: "PE",
+        globalPerspective: "Global Perspective",
+        circleTime: "Circle Time",
+        breakTime: "Break Time",
+        steam: "STEAM"
+      },
+      deliveries: {
+        inClass: "In-class",
+        online: "Online",
+        live: "Live",
+        homework: "Homework"
+      },
+      payments: {
+        free: "Free",
+        paid: "Paid",
+        educationDiscount: "Education Discount"
+      },
+      platforms: {
+        mobileApp: "Mobile App",
+        webapp: "Webapp",
+        smartphone: "Smartphone",
+        smartboard: "Smartboard",
+        mac: "Mac",
+        windows: "Windows"
+      }
+    },
+    author: {
+      default: "SchoolTechHub Team"
+    },
     newsletter: {
-      title: "Subscribe to Our Newsletter",
-      subtitle: "Get the latest updates and insights delivered to your inbox",
-      namePlaceholder: "Your name",
-      emailPlaceholder: "Your email",
-      jobPlaceholder: "Your job title",
-      selectRole: "Select your role",
-      subscribe: "Subscribe",
-      subscribing: "Subscribing...",
-      successTitle: "Successfully subscribed!",
-      successMessage: "Thank you for subscribing to our newsletter.",
-      errorTitle: "Subscription failed",
-      errorMessage: "Please try again later."
+      title: "📩 Join our Teacher Updates",
+      description: "Get curated resources and tips delivered weekly.",
+      emailPlaceholder: "Email (required)",
+      namePlaceholder: "Full Name",
+      jobPlaceholder: "Job Position",
+      roleLabel: "Role",
+      submit: "Subscribe to Newsletter",
+      roles: {
+        teacher: "Teacher",
+        admin: "Admin",
+        parent: "Parent",
+        student: "Student",
+        other: "Other"
+      },
+      toast: {
+        successTitle: "Success!",
+        successDescription: "You've been subscribed to our Teacher Updates newsletter.",
+        duplicateTitle: "Already subscribed",
+        duplicateDescription: "This email is already subscribed to our newsletter.",
+        errorTitle: "Error",
+        errorDescription: "Failed to subscribe. Please try again."
+      }
     }
   },
   contact: {
