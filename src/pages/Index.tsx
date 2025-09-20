@@ -91,7 +91,7 @@ const Index = () => {
       <StructuredData type="Organization" data={{}} />
       <MouseGlowEffect />
       {/* Cyber Grid Background */}
-      <div className="fixed inset-0 bg-cyber-grid bg-[size:50px_50px] opacity-20" />
+      <div className="pointer-events-none fixed inset-0 bg-cyber-grid bg-[size:50px_50px] opacity-20" />
       
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
