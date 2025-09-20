@@ -915,6 +915,134 @@ export const vi = {
       vi: "Tiếng Việt"
     }
   },
+  account: {
+    seo: {
+      title: "Tài khoản của tôi | SchoolTech Hub",
+      description: "Quản lý hồ sơ, tùy chọn, thông báo và bảo mật của bạn tại SchoolTech Hub.",
+      canonical: "https://schooltechhub.com/account"
+    },
+    heading: {
+      title: "Tài khoản của tôi",
+      subtitle: "Cập nhật thông tin cá nhân và theo dõi hoạt động của bạn."
+    },
+    image: {
+      title: "Sẵn sàng tải lên",
+      description: "Tải ảnh vuông dưới 2MB. Chúng tôi sẽ tối ưu cho toàn bộ nền tảng.",
+      changeButton: "Thay đổi ảnh",
+      uploadButton: "Lưu ảnh đại diện"
+    },
+    actions: {
+      backToHome: "Quay về trang chủ"
+    },
+    tabs: {
+      overview: "Tổng quan",
+      security: "Bảo mật",
+      activity: "Hoạt động"
+    },
+    profile: {
+      title: "Thông tin hồ sơ",
+      description: "Các cộng sự của bạn có thể nhìn thấy những thông tin này.",
+      fullNameLabel: "Họ và tên",
+      fullNamePlaceholder: "Tên bạn muốn hiển thị",
+      roleLabel: "Vai trò",
+      rolePlaceholder: "Chọn vai trò",
+      roles: {
+        Teacher: "Giáo viên",
+        Admin: "Quản trị",
+        Parent: "Phụ huynh",
+        Student: "Học sinh",
+        Other: "Khác"
+      },
+      bioLabel: "Giới thiệu",
+      bioPlaceholder: "Chia sẻ vài dòng về bản thân (tùy chọn)"
+    },
+    settings: {
+      title: "Tùy chọn tài khoản",
+      description: "Tùy chỉnh trải nghiệm của bạn trên SchoolTech Hub.",
+      timezone: "Múi giờ",
+      timezonePlaceholder: "vd. GMT+7, Hà Nội",
+      language: "Ngôn ngữ nội dung",
+      languagePlaceholder: "Chọn ngôn ngữ",
+      theme: "Giao diện",
+      themePlaceholder: "Chọn giao diện",
+      themeOptions: {
+        system: "Theo hệ thống",
+        light: "Sáng",
+        dark: "Tối"
+      }
+    },
+    notifications: {
+      title: "Thông báo",
+      description: "Chọn thời điểm bạn muốn nhận thông tin từ chúng tôi.",
+      updates: "Cập nhật sản phẩm và bản tin",
+      updatesDescription: "Thông báo quan trọng và tài nguyên nổi bật.",
+      commentReplies: "Phản hồi bình luận",
+      commentRepliesDescription: "Nhận email khi có người trả lời bình luận của bạn.",
+      productAnnouncements: "Thông báo dịch vụ",
+      productAnnouncementsDescription: "Thông tin về bảo trì hoặc gián đoạn hệ thống.",
+      blogMentions: "Bài viết của tôi",
+      blogMentionsDescription: "Báo khi bài viết của bạn được xuất bản hoặc giới thiệu."
+    },
+    activity: {
+      title: "Tổng quan hoạt động",
+      description: "Theo dõi nhanh mức độ tương tác của bạn.",
+      comments: "Bình luận",
+      posts: "Bài viết",
+      lastLogin: "Lần đăng nhập gần nhất",
+      neverLoggedIn: "Chưa có lần đăng nhập nào"
+    },
+    support: {
+      title: "Cần hỗ trợ?",
+      description: "Chúng tôi luôn sẵn sàng giúp bạn thay đổi cài đặt tài khoản.",
+      contact: "Liên hệ nếu bạn cần hỗ trợ cập nhật thông tin hoặc quyền truy cập.",
+      response: "Thông thường chúng tôi phản hồi trong vòng một ngày làm việc.",
+      cta: "Liên hệ hỗ trợ"
+    },
+    password: {
+      title: "Đặt lại mật khẩu",
+      description: "Hãy chọn một mật khẩu mạnh và duy nhất.",
+      newPassword: "Mật khẩu mới",
+      newPasswordPlaceholder: "Nhập mật khẩu mới",
+      confirmPassword: "Xác nhận mật khẩu",
+      confirmPasswordPlaceholder: "Nhập lại mật khẩu mới",
+      updateButton: "Cập nhật mật khẩu"
+    },
+    securityTips: {
+      title: "Gợi ý bảo mật",
+      description: "Các bước tốt nhất để bảo vệ tài khoản.",
+      tips: [
+        "Bật xác thực nhiều lớp khi tính năng sẵn sàng.",
+        "Sử dụng trình quản lý mật khẩu để tạo mật khẩu duy nhất.",
+        "Kiểm tra hoạt động tài khoản thường xuyên để phát hiện bất thường.",
+        "Đăng xuất khỏi thiết bị dùng chung sau khi sử dụng."
+      ]
+    },
+    comments: {
+      title: "Bình luận của tôi",
+      description: "Quay lại các cuộc trao đổi bạn đã tham gia.",
+      empty: "Bạn chưa có bình luận nào.",
+      viewPost: "Xem bài viết"
+    },
+    blogs: {
+      title: "Bài viết của tôi",
+      description: "Theo dõi trạng thái các bài viết bạn tham gia.",
+      empty: "Chưa có bài viết nào được liên kết với tài khoản của bạn.",
+      statusPublished: "Đã xuất bản",
+      statusDraft: "Bản nháp",
+      readPost: "Mở bài viết"
+    },
+    toast: {
+      profileUpdated: "Đã cập nhật hồ sơ",
+      passwordMismatch: "Mật khẩu nhập lại chưa khớp",
+      passwordLength: "Mật khẩu cần ít nhất 8 ký tự.",
+      passwordUpdated: "Đã cập nhật mật khẩu",
+      passwordError: "Không thể cập nhật mật khẩu",
+      notificationsUpdated: "Đã lưu tùy chọn thông báo",
+      settingsUpdated: "Đã lưu tùy chọn tài khoản",
+      avatarUpdated: "Đã cập nhật ảnh đại diện",
+      avatarError: "Không thể tải ảnh lên"
+    }
+  },
   common: {
     loading: "Đang tải...",
     error: "Đã xảy ra lỗi",

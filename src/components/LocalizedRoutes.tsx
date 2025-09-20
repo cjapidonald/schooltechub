@@ -14,6 +14,7 @@ import Edutech from '@/pages/Edutech';
 import TeacherDiary from '@/pages/TeacherDiary';
 import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
 import Auth from '@/pages/Auth';
+import Account from '@/pages/Account';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
@@ -54,6 +55,7 @@ export const LocalizedRoutes = () => {
       <Route path="/teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
       <Route path="/teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
+      <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       
       {/* Localized routes for Albanian and Vietnamese */}
@@ -71,6 +73,7 @@ export const LocalizedRoutes = () => {
         <Route path="teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
         <Route path="teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
         <Route path="auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
+        <Route path="account" element={<RouteWrapper><Account /></RouteWrapper>} />
         <Route path="sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       </Route>
       
