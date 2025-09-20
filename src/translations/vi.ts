@@ -527,32 +527,111 @@ export const vi = {
     }
   },
   contact: {
-    title: "Liên hệ",
-    subtitle: "Chúng tôi ở đây để giúp chuyển đổi tổ chức giáo dục của bạn",
-    form: {
-      name: "Tên",
-      namePlaceholder: "Tên của bạn",
-      email: "Email",
-      emailPlaceholder: "email@example.com",
-      school: "Trường/Tổ chức",
-      schoolPlaceholder: "Trường hoặc tổ chức của bạn",
-      subject: "Chủ đề",
-      subjectPlaceholder: "Chúng tôi có thể giúp gì cho bạn?",
-      message: "Tin nhắn",
-      messagePlaceholder: "Cho chúng tôi biết về nhu cầu của bạn...",
-      submit: "Gửi tin nhắn",
-      sending: "Đang gửi...",
-      successTitle: "Tin nhắn đã được gửi thành công!",
-      successMessage: "Chúng tôi sẽ liên hệ lại với bạn sớm nhất có thể.",
-      errorTitle: "Không thể gửi tin nhắn",
-      errorMessage: "Vui lòng thử lại sau."
+    seo: {
+      title: "Liên hệ & Đặt lịch tư vấn",
+      description:
+        "Đặt lịch tư vấn EdTech ngay hôm nay. Nhận coaching 1:1 cá nhân hóa hoặc đào tạo toàn trường. Liên hệ School Tech Hub để được hỗ trợ công nghệ giáo dục chuyên sâu.",
+      keywords:
+        "đặt lịch tư vấn, hỗ trợ EdTech, liên hệ chuyên gia giáo dục, lên lịch đào tạo, đặt lịch huấn luyện giáo viên"
+    },
+    hero: {
+      title: "Kết nối với chúng tôi",
+      subtitle: "Đặt lịch tư vấn hoặc hỏi bất cứ điều gì về công nghệ giáo dục"
     },
     info: {
-      title: "Thông tin liên hệ",
-      address: "123 Đại lộ Giáo dục, Thành phố Công nghệ, TC 12345",
-      phone: "+1 (555) 123-4567",
-      email: "info@schooltechhub.com",
-      hours: "Thứ Hai - Thứ Sáu: 9:00 - 18:00"
+      quickContact: {
+        title: "Liên hệ nhanh",
+        email: {
+          label: "Email",
+          value: "dcjapi@gmail.com"
+        },
+        phone: {
+          label: "Điện thoại",
+          value: "+84 0372725432",
+          whatsapp: "WhatsApp: +84 0372725432"
+        },
+        location: {
+          label: "Địa điểm",
+          description: "Hỗ trợ tư vấn trực tuyến trên toàn thế giới"
+        }
+      },
+      officeHours: {
+        title: "Giờ làm việc",
+        weekdays: "Thứ Hai - Thứ Sáu: 8:00 - 18:00 (EST)",
+        saturday: "Thứ Bảy: 10:00 - 14:00 (EST)",
+        sunday: "Chủ Nhật: Nghỉ"
+      },
+      responseTime: {
+        title: "Thời gian phản hồi",
+        description:
+          "Chúng tôi thường phản hồi trong vòng 24 giờ vào ngày làm việc. Yêu cầu khẩn cấp sẽ được ưu tiên."
+      }
+    },
+    form: {
+      title: "Đặt lịch hẹn",
+      fields: {
+        name: {
+          label: "Họ và tên *",
+          placeholder: "Nguyễn Thị Lan"
+        },
+        email: {
+          label: "Địa chỉ email *",
+          placeholder: "lan@truong.edu"
+        },
+        phone: {
+          label: "Số điện thoại",
+          placeholder: "0901 234 567"
+        },
+        school: {
+          label: "Trường/Tổ chức",
+          placeholder: "Trường Tiểu học Bình Minh"
+        },
+        preferredDate: {
+          label: "Ngày mong muốn",
+          placeholder: "Chọn ngày"
+        },
+        preferredTime: {
+          label: "Giờ mong muốn",
+          placeholder: "Chọn khung giờ mong muốn",
+          options: [
+            { value: "09:00", label: "09:00 sáng" },
+            { value: "10:00", label: "10:00 sáng" },
+            { value: "11:00", label: "11:00 sáng" },
+            { value: "12:00", label: "12:00 trưa" },
+            { value: "13:00", label: "13:00 chiều" },
+            { value: "14:00", label: "14:00 chiều" },
+            { value: "15:00", label: "15:00 chiều" },
+            { value: "16:00", label: "16:00 chiều" }
+          ]
+        },
+        topic: {
+          label: "Chủ đề/thách thức cần trao đổi",
+          placeholder: "vd: Ứng dụng công cụ AI, thiết lập Google Classroom"
+        },
+        message: {
+          label: "Thông tin bổ sung",
+          placeholder: "Hãy cho chúng tôi biết mục tiêu và yêu cầu cụ thể của bạn..."
+        }
+      },
+      serviceType: {
+        label: "Loại dịch vụ *",
+        options: {
+          consultation: "Tư vấn 1:1 (30$)",
+          wholeSchool: "Tư vấn toàn trường (60$)"
+        }
+      },
+      cta: {
+        idle: "Gửi yêu cầu đặt lịch",
+        loading: "Đang gửi..."
+      },
+      disclaimer:
+        "Khi gửi biểu mẫu này, bạn đồng ý với điều khoản dịch vụ và chính sách bảo mật của chúng tôi. Chúng tôi sẽ không bao giờ chia sẻ thông tin của bạn với bên thứ ba.",
+      toast: {
+        successTitle: "Đã gửi yêu cầu đặt lịch!",
+        successDescription: "Chúng tôi sẽ phản hồi trong vòng 24 giờ để xác nhận buổi làm việc.",
+        errorTitle: "Lỗi",
+        errorDescription: "Gửi yêu cầu thất bại. Vui lòng thử lại."
+      }
     }
   },
   footer: {

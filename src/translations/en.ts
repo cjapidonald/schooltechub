@@ -523,32 +523,111 @@ export const en = {
     }
   },
   contact: {
-    title: "Get in Touch",
-    subtitle: "We're here to help transform your educational institution",
-    form: {
-      name: "Name",
-      namePlaceholder: "Your name",
-      email: "Email",
-      emailPlaceholder: "your@email.com",
-      school: "School/Organization",
-      schoolPlaceholder: "Your school or organization",
-      subject: "Subject",
-      subjectPlaceholder: "How can we help?",
-      message: "Message",
-      messagePlaceholder: "Tell us about your needs...",
-      submit: "Send Message",
-      sending: "Sending...",
-      successTitle: "Message sent successfully!",
-      successMessage: "We'll get back to you as soon as possible.",
-      errorTitle: "Failed to send message",
-      errorMessage: "Please try again later."
+    seo: {
+      title: "Contact & Book a Session",
+      description:
+        "Book your EdTech consultation today. Get personalized 1:1 coaching or whole-school training. Contact School Tech Hub for expert educational technology support.",
+      keywords:
+        "book consultation, EdTech support, contact education consultant, schedule training, teacher coaching booking"
+    },
+    hero: {
+      title: "Get In Touch",
+      subtitle: "Book a consultation or ask us anything about educational technology"
     },
     info: {
-      title: "Contact Information",
-      address: "123 Education Boulevard, Tech City, TC 12345",
-      phone: "+1 (555) 123-4567",
-      email: "info@schooltechhub.com",
-      hours: "Monday - Friday: 9:00 AM - 6:00 PM"
+      quickContact: {
+        title: "Quick Contact",
+        email: {
+          label: "Email",
+          value: "dcjapi@gmail.com"
+        },
+        phone: {
+          label: "Phone",
+          value: "+84 0372725432",
+          whatsapp: "WhatsApp: +84 0372725432"
+        },
+        location: {
+          label: "Location",
+          description: "Available worldwide for online consultations"
+        }
+      },
+      officeHours: {
+        title: "Office Hours",
+        weekdays: "Monday - Friday: 8am - 6pm EST",
+        saturday: "Saturday: 10am - 2pm EST",
+        sunday: "Sunday: Closed"
+      },
+      responseTime: {
+        title: "Response Time",
+        description:
+          "We typically respond within 24 hours during business days. Urgent requests are prioritized."
+      }
+    },
+    form: {
+      title: "Book a Session",
+      fields: {
+        name: {
+          label: "Full Name *",
+          placeholder: "Jane Smith"
+        },
+        email: {
+          label: "Email Address *",
+          placeholder: "jane@school.edu"
+        },
+        phone: {
+          label: "Phone Number",
+          placeholder: "(555) 123-4567"
+        },
+        school: {
+          label: "School/Organization",
+          placeholder: "Lincoln Elementary"
+        },
+        preferredDate: {
+          label: "Preferred Date",
+          placeholder: "Pick a date"
+        },
+        preferredTime: {
+          label: "Preferred Time",
+          placeholder: "Select preferred time",
+          options: [
+            { value: "09:00", label: "9:00 AM" },
+            { value: "10:00", label: "10:00 AM" },
+            { value: "11:00", label: "11:00 AM" },
+            { value: "12:00", label: "12:00 PM" },
+            { value: "13:00", label: "1:00 PM" },
+            { value: "14:00", label: "2:00 PM" },
+            { value: "15:00", label: "3:00 PM" },
+            { value: "16:00", label: "4:00 PM" }
+          ]
+        },
+        topic: {
+          label: "Topic/Challenge to Address",
+          placeholder: "e.g., Implementing AI tools, Google Classroom setup"
+        },
+        message: {
+          label: "Additional Information",
+          placeholder: "Tell us more about your goals and any specific requirements..."
+        }
+      },
+      serviceType: {
+        label: "Service Type *",
+        options: {
+          consultation: "1:1 Consulting ($30)",
+          wholeSchool: "Whole School Consulting ($60)"
+        }
+      },
+      cta: {
+        idle: "Send Booking Request",
+        loading: "Sending..."
+      },
+      disclaimer:
+        "By submitting this form, you agree to our terms of service and privacy policy. We'll never share your information with third parties.",
+      toast: {
+        successTitle: "Booking request sent!",
+        successDescription: "We'll get back to you within 24 hours to confirm your session.",
+        errorTitle: "Error",
+        errorDescription: "Failed to send booking request. Please try again."
+      }
     }
   },
   footer: {
