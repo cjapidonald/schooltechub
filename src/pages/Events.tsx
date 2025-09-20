@@ -11,8 +11,11 @@ import { Search, Calendar, Clock, MapPin, Users, Video, Award, CalendarClock } f
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format, differenceInMilliseconds } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const Events = () => {
+  const { language } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const [selectedType, setSelectedType] = useState(searchParams.get("type") || "all");
@@ -298,7 +301,10 @@ const Events = () => {
                           </div>
                           
                           <h3 className="text-xl font-semibold mb-2">
-                            <Link to={`/events/${event.slug}`} className="hover:text-primary">
+                            <Link
+                              to={getLocalizedPath(`/events/${event.slug}`, language)}
+                              className="hover:text-primary"
+                            >
                               {event.title}
                             </Link>
                           </h3>
@@ -352,7 +358,7 @@ const Events = () => {
                               </Button>
                             )}
                             <Button variant="outline" asChild>
-                              <Link to={`/events/${event.slug}`}>View Details</Link>
+                              <Link to={getLocalizedPath(`/events/${event.slug}`, language)}>View Details</Link>
                             </Button>
                           </div>
                         </CardContent>

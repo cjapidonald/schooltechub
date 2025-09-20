@@ -10,8 +10,11 @@ import { Search, Calendar, PenLine, HelpCircle, Lightbulb, MessageSquare } from 
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const TeacherDiary = () => {
+  const { language } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "all");
@@ -256,7 +259,10 @@ const TeacherDiary = () => {
                         </div>
                         
                         <h3 className="text-xl font-semibold mb-2">
-                          <Link to={`/diary/${entry.slug}`} className="hover:text-primary">
+                          <Link
+                            to={getLocalizedPath(`/teacher-diary/${entry.slug}`, language)}
+                            className="hover:text-primary"
+                          >
                             {entry.title}
                           </Link>
                         </h3>
