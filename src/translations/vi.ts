@@ -92,6 +92,166 @@ export const vi = {
       title: "Phần mềm quản lý trường học",
       description: "Giải pháp hành chính hoàn chỉnh",
       features: ["Hệ thống thông tin học sinh", "Theo dõi điểm danh", "Quản lý học phí", "Cổng thông tin phụ huynh"]
+    },
+    page: {
+      seo: {
+        title: "Dịch vụ & Bảng giá",
+        description:
+          "Dịch vụ tư vấn EdTech chuyên nghiệp. Huấn luyện 1:1 ($30), chương trình PD cho toàn bộ giáo viên ($60) và thiết lập bảng điều khiển tùy chỉnh. Biến đổi lớp học của bạn với sự hỗ trợ chuyên gia.",
+        keywords:
+          "tư vấn EdTech, huấn luyện giáo viên, phát triển chuyên môn, đào tạo công nghệ trường học, bảng điều khiển giáo dục, hỗ trợ công nghệ lớp học"
+      },
+      header: {
+        title: "Dịch vụ & Bảng giá",
+        subtitle: "Nhận sự hỗ trợ bạn cần để chuyển đổi lớp học"
+      },
+      badge: "Phổ biến nhất",
+      bookNow: "Đặt lịch ngay",
+      idealLabel: "Phù hợp cho:",
+      structuredData: {
+        serviceType: "Tư vấn công nghệ giáo dục"
+      }
+    },
+    packages: [
+      {
+        id: "consultation",
+        title: "Huấn luyện 1:1",
+        price: "$30/buổi",
+        duration: "60 phút",
+        description: "Nhận hỗ trợ cá nhân hóa cho những thách thức công nghệ trong lớp học của bạn",
+        features: [
+          "Tùy chỉnh chính xác theo nhu cầu của bạn",
+          "Chia sẻ màn hình để hỗ trợ trực tiếp",
+          "Kế hoạch hành động có thể áp dụng ngay ngày mai",
+          "Bao gồm tài nguyên theo dõi",
+          "Có bản ghi để xem lại"
+        ],
+        ideal: "Giáo viên cần các giải pháp nhanh chóng và tập trung",
+        highlight: true
+      },
+      {
+        id: "whole-staff-pd",
+        title: "Chương trình PD cho toàn bộ giáo viên",
+        price: "$60",
+        duration: "mỗi buổi",
+        description:
+          "Tối đa 30 nhân viên (nhóm lớn hơn cần thỏa thuận trước). Trường lựa chọn chủ đề edtech phù hợp nhất với nhu cầu.",
+        features: [
+          "60-90 phút phát triển chuyên môn trực tiếp, hấp dẫn",
+          "Hoạt động thực hành và minh họa",
+          "Phân hóa theo trình độ kinh nghiệm của giáo viên (mới đến nâng cao)",
+          "Trường nhận trung tâm tài nguyên số (hướng dẫn, mẫu, liên kết)",
+          "Phiên hỏi đáp sau 30 ngày (trực tuyến) để tiếp tục hỗ trợ"
+        ],
+        ideal: "Các trường muốn đào tạo thực tế, chi phí hợp lý để xây dựng sự tự tin về công nghệ"
+      },
+      {
+        id: "custom-dashboard",
+        title: "Thiết lập bảng điều khiển & bộ theo dõi tùy chỉnh cho trường",
+        price: "$300",
+        duration: "trọn gói",
+        description: "Thiết kế và triển khai bảng điều khiển số tùy chỉnh phù hợp với nhu cầu của trường bạn",
+        features: [
+          "Tư vấn 60 phút để xác định ưu tiên và công cụ hiện có",
+          "Xây dựng bảng điều khiển tập trung (Google Sheets, Airtable, Notion hoặc Supabase)",
+          "Bộ theo dõi hiệu suất học sinh (điểm số, chuyên cần, hành vi, SEL)",
+          "Bảng điều khiển quy trình công việc cho giáo viên & ban lãnh đạo",
+          "Mẫu sẵn sàng sử dụng và đào tạo cho nhân viên",
+          "Hỗ trợ triển khai trong 30 ngày (email hoặc video)"
+        ],
+        ideal: "Các trường muốn cải thiện tổ chức, giao tiếp và ra quyết định dựa trên dữ liệu"
+      }
+    ],
+    guarantee: {
+      title: "Cam kết của chúng tôi",
+      description:
+        "Nếu bạn không học được ít nhất 3 chiến lược có thể áp dụng trong buổi đầu tiên, chúng tôi sẽ hoàn tiền - không hỏi gì thêm."
+    },
+    steps: {
+      title: "Quy trình diễn ra",
+      tabs: [
+        {
+          value: "before",
+          label: "Trước buổi học",
+          title: "Chuẩn bị trước",
+          items: [
+            {
+              icon: "target",
+              title: "Thách thức lớn nhất của bạn",
+              description: "Điều quan trọng nhất bạn muốn giải quyết là gì?"
+            },
+            {
+              icon: "users",
+              title: "Bối cảnh lớp học",
+              description: "Khối lớp, môn học, sĩ số"
+            },
+            {
+              icon: "fileText",
+              title: "Công nghệ hiện có",
+              description: "Bạn có những thiết bị và công cụ nào"
+            }
+          ]
+        },
+        {
+          value: "during",
+          label: "Trong buổi học",
+          title: "Buổi làm việc của bạn",
+          items: [
+            { icon: "check", text: "Đánh giá nhanh thiết lập hiện tại" },
+            { icon: "check", text: "Trình diễn trực tiếp các giải pháp" },
+            { icon: "check", text: "Thực hành với phản hồi ngay lập tức" },
+            { icon: "check", text: "Hỏi đáp cho tình huống cụ thể của bạn" }
+          ]
+        },
+        {
+          value: "after",
+          label: "Sau buổi học",
+          title: "Hỗ trợ sau buổi học",
+          items: [
+            { icon: "check", text: "Tóm tắt bằng văn bản các chiến lược đã thảo luận" },
+            { icon: "check", text: "Liên kết tới tất cả tài nguyên đã đề cập" },
+            { icon: "check", text: "Bản ghi có sẵn trong 30 ngày (nếu áp dụng)" },
+            { icon: "check", text: "Hỗ trợ qua email để làm rõ" }
+          ]
+        }
+      ]
+    },
+    faq: {
+      title: "Câu hỏi thường gặp",
+      items: [
+        {
+          question: "Tôi cần thiết bị gì?",
+          answer:
+            "Bất kỳ thiết bị nào có kết nối internet đều được! Chúng tôi sẽ thích ứng với mọi thứ bạn có - Chromebook, iPad, máy tính xách tay hoặc thậm chí điện thoại thông minh."
+        },
+        {
+          question: "Còn bộ lọc và hạn chế của trường thì sao?",
+          answer: "Chúng tôi chuyên làm việc trong các giới hạn của trường. Chúng tôi sẽ tìm giải pháp hoạt động với cài đặt bảo mật hiện tại của bạn."
+        },
+        {
+          question: "Bạn xử lý quyền riêng tư của học sinh như thế nào?",
+          answer:
+            "Tất cả khuyến nghị đều tuân thủ COPPA và FERPA. Chúng tôi ưu tiên các công cụ có chính sách bảo mật mạnh và thu thập dữ liệu tối thiểu."
+        },
+        {
+          question: "Bạn có hỗ trợ tích hợp LMS không?",
+          answer: "Có! Chúng tôi làm việc với Google Classroom, Canvas, Schoology và hầu hết các hệ thống quản lý học tập phổ biến."
+        },
+        {
+          question: "Bạn có cung cấp hóa đơn để hoàn tiền không?",
+          answer: "Chắc chắn. Bạn sẽ nhận được hóa đơn chi tiết phù hợp cho hoàn tiền của trường hoặc quỹ phát triển chuyên môn."
+        },
+        {
+          question: "Tôi có thể mong đợi gì sau một buổi?",
+          answer:
+            "Bạn sẽ có ít nhất 3 chiến lược có thể áp dụng, tài nguyên phù hợp và tự tin thử điều gì đó mới ngay lập tức."
+        }
+      ],
+      cta: {
+        button: "Đặt buổi làm việc ngay hôm nay",
+        note: "Có câu hỏi? Gửi email tới",
+        email: "dcjapi@gmail.com"
+      }
     }
   },
   blog: {
