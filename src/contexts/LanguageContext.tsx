@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { en } from '../translations/en';
 import { sq } from '../translations/sq';
 import { vi } from '../translations/vi';
@@ -23,25 +23,32 @@ const supportedLanguages = Object.keys(translations) as Language[];
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { lang } = useParams<{ lang?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // Determine initial language from URL param or default to 'en'
-  const initialLang: Language = (lang === 'sq' || lang === 'vi') ? lang : 'en';
-  const [language, setLanguageState] = useState<Language>(initialLang);
+
+  const getLanguageFromPath = (pathname: string): Language => {
+    const [, maybeLang] = pathname.split('/');
+    return supportedLanguages.includes(maybeLang as Language)
+      ? (maybeLang as Language)
+      : 'en';
+  };
+
+  const [language, setLanguageState] = useState<Language>(() => getLanguageFromPath(location.pathname));
 
   useEffect(() => {
-    // Update language state when URL param changes
-    const urlLang: Language = (lang === 'sq' || lang === 'vi') ? lang : 'en';
-    if (urlLang !== language) {
-      setLanguageState(urlLang);
-    }
-  }, [lang]);
+    setLanguageState((current) => {
+      const urlLang = getLanguageFromPath(location.pathname);
+      return current === urlLang ? current : urlLang;
+    });
+  }, [location.pathname]);
 
   const setLanguage = (newLang: Language) => {
+    if (newLang === language) {
+      return;
+    }
+
     setLanguageState(newLang);
-    
+
     // Get current path without language prefix
     let currentPath = location.pathname;
     
