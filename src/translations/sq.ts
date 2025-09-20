@@ -211,6 +211,166 @@ export const sq = {
       title: "Softueri i Menaxhimit të Shkollës",
       description: "Zgjidhje administrative të plota",
       features: ["Sistemet e informacionit të studentëve", "Ndjekja e pranisë", "Menaxhimi i tarifave", "Portalet e komunikimit me prindërit"]
+    },
+    page: {
+      seo: {
+        title: "Shërbimet & Çmimet",
+        description:
+          "Shërbime profesionale këshillimi EdTech. Trajnim individual ($30), programe PD për gjithë stafin ($60) dhe konfigurim i paneleve të personalizuara. Transformoni klasën tuaj me mbështetje eksperte.",
+        keywords:
+          "këshillim EdTech, trajnim mësuesish, zhvillim profesional, trajnim teknologjie shkollore, panel edukativ, mbështetje teknologjie në klasë"
+      },
+      header: {
+        title: "Shërbimet & Çmimet",
+        subtitle: "Merrni mbështetjen që ju nevojitet për të transformuar klasën tuaj"
+      },
+      badge: "Më i Kërkuari",
+      bookNow: "Rezervo Tani",
+      idealLabel: "Ideale për:",
+      structuredData: {
+        serviceType: "Këshillim në Teknologjinë Arsimore"
+      }
+    },
+    packages: [
+      {
+        id: "consultation",
+        title: "Këshillim 1:1",
+        price: "$30/seancë",
+        duration: "60 minuta",
+        description: "Merrni mbështetje të personalizuar për sfidat tuaja teknologjike në klasë",
+        features: [
+          "E përshtatur sipas nevojave tuaja të sakta",
+          "Ndarje ekrani për ndihmë praktike",
+          "Plan veprimi që mund ta përdorni nesër",
+          "Burime vijimësie të përfshira",
+          "Regjistrim i disponueshëm për rishikim"
+        ],
+        ideal: "Mësues që kanë nevojë për zgjidhje të shpejta dhe të fokusuara",
+        highlight: true
+      },
+      {
+        id: "whole-staff-pd",
+        title: "Programi PD për Gjithë Stafin",
+        price: "$60",
+        duration: "për seancë",
+        description:
+          "Deri në 30 anëtarë stafi (grupe më të mëdha me marrëveshje paraprake). Shkollat zgjedhin çdo temë edtech më të rëndësishme për ta.",
+        features: [
+          "60-90 minuta zhvillim profesional të drejtpërdrejtë dhe angazhues",
+          "Aktivitete praktike dhe demonstrime",
+          "Diferencuar sipas eksperiencës së stafit (fillestarë deri të avancuar)",
+          "Shkolla merr një qendër burimesh digjitale (udhëzues, shabllone, lidhje)",
+          "Seancë ndjekjeje Q&A 30-ditore (online) për mbështetje të vazhdueshme"
+        ],
+        ideal: "Shkolla që duan trajnim praktik dhe të përballueshëm për të rritur besimin në teknologji"
+      },
+      {
+        id: "custom-dashboard",
+        title: "Konfigurim Panelesh & Gjurmues të Personalizuara",
+        price: "$300",
+        duration: "tarifë fikse",
+        description: "Projektim dhe zbatim i paneleve digjitale të përshtatura për nevojat e shkollës suaj",
+        features: [
+          "Konsultim 60-minutësh për të identifikuar prioritetet dhe mjetet ekzistuese",
+          "Ndërtim i paneleve të centralizuara (Google Sheets, Airtable, Notion ose Supabase)",
+          "Gjurmues të performancës së nxënësve (nota, frekuentim, sjellje, SEL)",
+          "Panele të flukseve të punës për mësuesit & drejtuesit",
+          "Shabllone gati për përdorim dhe trajnim për stafin",
+          "Mbështetje zbatimi 30-ditore (email ose video)"
+        ],
+        ideal: "Shkolla që duan të përmirësojnë organizimin, komunikimin dhe vendimmarrjen e bazuar në të dhëna"
+      }
+    ],
+    guarantee: {
+      title: "Garancia Jonë",
+      description:
+        "Nëse nuk mësoni të paktën 3 strategji të zbatueshme në seancën e parë, ju rimbursojmë pagesën - pa pyetje."
+    },
+    steps: {
+      title: "Si Funksionon",
+      tabs: [
+        {
+          value: "before",
+          label: "Para",
+          title: "Çfarë të Përgatisni",
+          items: [
+            {
+              icon: "target",
+              title: "Sfida juaj më e madhe",
+              description: "Cila është gjëja #1 që dëshironi të zgjidhni?"
+            },
+            {
+              icon: "users",
+              title: "Konteksti i klasës suaj",
+              description: "Nivel klase, lënda, madhësia e klasës"
+            },
+            {
+              icon: "fileText",
+              title: "Teknologjia e disponueshme",
+              description: "Çfarë pajisjesh dhe mjetesh keni në dispozicion"
+            }
+          ]
+        },
+        {
+          value: "during",
+          label: "Gjatë",
+          title: "Seanca Juaj",
+          items: [
+            { icon: "check", text: "Vlerësim i shpejtë i konfigurimit aktual" },
+            { icon: "check", text: "Demonstrim praktik i zgjidhjeve" },
+            { icon: "check", text: "Praktikë me feedback të menjëhershëm" },
+            { icon: "check", text: "Pyetje & përgjigje për situatën tuaj specifike" }
+          ]
+        },
+        {
+          value: "after",
+          label: "Pas",
+          title: "Mbështetje Pas Seancës",
+          items: [
+            { icon: "check", text: "Përmbledhje me shkrim e strategjive të diskutuara" },
+            { icon: "check", text: "Lidhje për të gjitha burimet e përmendura" },
+            { icon: "check", text: "Regjistrim i disponueshëm për 30 ditë (nëse aplikohet)" },
+            { icon: "check", text: "Mbështetje me email për sqarime" }
+          ]
+        }
+      ]
+    },
+    faq: {
+      title: "Pyetje të Shpeshta",
+      items: [
+        {
+          question: "Çfarë pajisjesh më duhen?",
+          answer:
+            "Çdo pajisje me akses në internet funksionon! Ne përshtatemi me çfarëdo që keni - Chromebook, iPad, laptop apo edhe smartphone."
+        },
+        {
+          question: "Po filtrat dhe kufizimet e shkollës?",
+          answer: "Ne jemi të specializuar për të punuar brenda kufizimeve të shkollës. Gjejmë zgjidhje që funksionojnë me cilësimet tuaja të sigurisë."
+        },
+        {
+          question: "Si e trajtoni privatësinë e nxënësve?",
+          answer:
+            "Të gjitha rekomandimet janë në përputhje me COPPA dhe FERPA. Prioritet kemi mjetet me politika të forta privatësie dhe mbledhje minimale të të dhënave."
+        },
+        {
+          question: "A mund të ndihmoni me integrimin e LMS?",
+          answer: "Po! Punojmë me Google Classroom, Canvas, Schoology dhe shumicën e sistemeve kryesore të menaxhimit të të mësuarit."
+        },
+        {
+          question: "A siguroni fatura për rimbursim?",
+          answer: "Patjetër. Do të merrni fatura të detajuara të përshtatshme për rimbursim shkollor ose fonde zhvillimi profesional."
+        },
+        {
+          question: "Çfarë mund të pres pas një seance?",
+          answer:
+            "Do të largoheni me të paktën 3 strategji të zbatueshme, burime relevante dhe besim për të provuar diçka të re menjëherë."
+        }
+      ],
+      cta: {
+        button: "Rezervoni Seancën Tuaj Sot",
+        note: "Pyetje? Na shkruani në",
+        email: "dcjapi@gmail.com"
+      }
     }
   },
   blog: {

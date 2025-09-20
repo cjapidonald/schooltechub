@@ -207,6 +207,166 @@ export const en = {
       title: "School Management Software",
       description: "Complete administrative solutions",
       features: ["Student information systems", "Attendance tracking", "Fee management", "Parent communication portals"]
+    },
+    page: {
+      seo: {
+        title: "Services & Pricing",
+        description:
+          "Professional EdTech consulting services. 1:1 coaching ($30), whole-school PD programs ($60), and custom dashboard setup. Transform your classroom with expert guidance.",
+        keywords:
+          "EdTech consulting, teacher coaching, professional development, school technology training, educational dashboard, classroom technology support"
+      },
+      header: {
+        title: "Services & Pricing",
+        subtitle: "Get the support you need to transform your classroom"
+      },
+      badge: "Most Popular",
+      bookNow: "Book Now",
+      idealLabel: "Ideal for:",
+      structuredData: {
+        serviceType: "Educational Technology Consulting"
+      }
+    },
+    packages: [
+      {
+        id: "consultation",
+        title: "1:1 Coaching",
+        price: "$30/session",
+        duration: "60 minutes",
+        description: "Get personalized support for your specific classroom tech challenges",
+        features: [
+          "Customized to your exact needs",
+          "Screen sharing for hands-on help",
+          "Action plan you can use tomorrow",
+          "Follow-up resources included",
+          "Recording available for review"
+        ],
+        ideal: "Teachers who need quick, targeted solutions",
+        highlight: true
+      },
+      {
+        id: "whole-staff-pd",
+        title: "Whole-Staff PD Program",
+        price: "$60",
+        duration: "per session",
+        description:
+          "Up to 30 staff members (larger groups possible with prior arrangement). Schools can choose any edtech topic most relevant to their needs.",
+        features: [
+          "60-90 minutes of live, engaging professional development",
+          "Hands-on activities and demonstrations",
+          "Differentiated by staff experience level (beginners to advanced)",
+          "School receives a digital resource hub (guides, templates, links)",
+          "30-day follow-up Q&A session (online) for continued support"
+        ],
+        ideal: "Schools wanting affordable, practical training to build staff confidence in technology"
+      },
+      {
+        id: "custom-dashboard",
+        title: "Custom School Dashboard & Tracker Setup",
+        price: "$300",
+        duration: "flat rate",
+        description: "Design and implement custom digital dashboards tailored to your school's needs",
+        features: [
+          "60-minute consultation to identify your priorities and current tools",
+          "Build centralized dashboards (Google Sheets, Airtable, Notion, or Supabase)",
+          "Student performance trackers (grades, attendance, behavior, SEL)",
+          "Teacher workflow dashboards & leadership dashboards",
+          "Ready-to-use templates and staff training",
+          "30-day implementation support (email or video check-ins)"
+        ],
+        ideal: "Schools that want to improve organization, communication, and data-driven decision making"
+      }
+    ],
+    guarantee: {
+      title: "Our Guarantee",
+      description:
+        "If you don't learn at least 3 implementable strategies in your first session, we'll refund your payment - no questions asked."
+    },
+    steps: {
+      title: "How It Works",
+      tabs: [
+        {
+          value: "before",
+          label: "Before",
+          title: "What to Prepare",
+          items: [
+            {
+              icon: "target",
+              title: "Your biggest challenge",
+              description: "What's the #1 thing you want to solve?"
+            },
+            {
+              icon: "users",
+              title: "Your classroom context",
+              description: "Grade level, subject, class size"
+            },
+            {
+              icon: "fileText",
+              title: "Available technology",
+              description: "What devices and tools you can access"
+            }
+          ]
+        },
+        {
+          value: "during",
+          label: "During",
+          title: "Your Session",
+          items: [
+            { icon: "check", text: "Quick assessment of your current setup" },
+            { icon: "check", text: "Hands-on demonstration of solutions" },
+            { icon: "check", text: "Practice with immediate feedback" },
+            { icon: "check", text: "Q&A for your specific situation" }
+          ]
+        },
+        {
+          value: "after",
+          label: "After",
+          title: "Follow-Up Support",
+          items: [
+            { icon: "check", text: "Written summary of strategies discussed" },
+            { icon: "check", text: "Links to all resources mentioned" },
+            { icon: "check", text: "Recording available for 30 days (if applicable)" },
+            { icon: "check", text: "Email support for clarifications" }
+          ]
+        }
+      ]
+    },
+    faq: {
+      title: "Frequently Asked Questions",
+      items: [
+        {
+          question: "What devices do I need?",
+          answer:
+            "Any device with internet access works! We'll adapt to whatever you have - Chromebooks, iPads, laptops, or even smartphones."
+        },
+        {
+          question: "What about school filters and restrictions?",
+          answer: "We specialize in working within school constraints. We'll find solutions that work with your existing security settings."
+        },
+        {
+          question: "How do you handle student privacy?",
+          answer:
+            "All recommendations are COPPA and FERPA compliant. We prioritize tools with strong privacy policies and minimal data collection."
+        },
+        {
+          question: "Can you help with LMS integration?",
+          answer: "Yes! We work with Google Classroom, Canvas, Schoology, and most major learning management systems."
+        },
+        {
+          question: "Do you provide receipts for reimbursement?",
+          answer: "Absolutely. You'll receive detailed invoices suitable for school reimbursement or professional development funds."
+        },
+        {
+          question: "What can I expect after one session?",
+          answer:
+            "You'll leave with at least 3 implementable strategies, relevant resources, and confidence to try something new immediately."
+        }
+      ],
+      cta: {
+        button: "Book Your Session Today",
+        note: "Questions? Email us at",
+        email: "dcjapi@gmail.com"
+      }
     }
   },
   blog: {
