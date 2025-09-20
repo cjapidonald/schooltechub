@@ -16,6 +16,44 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
+const extractTags = (tags: string[] | string | null | undefined) => {
+  if (Array.isArray(tags)) {
+    return tags;
+  }
+
+  if (typeof tags === "string") {
+    return tags
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const getReadTimeLabel = (
+  readTime?: number | string | null,
+  timeRequired?: string | null
+) => {
+  if (readTime !== null && readTime !== undefined && readTime !== "") {
+    const parsed = typeof readTime === "number" ? readTime : parseInt(readTime, 10);
+
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return `${parsed} min read`;
+    }
+  }
+
+  if (timeRequired) {
+    const normalized = String(timeRequired).trim();
+
+    if (normalized.length > 0) {
+      return normalized.toLowerCase().includes("read") ? normalized : `${normalized} read`;
+    }
+  }
+
+  return null;
+};
+
 export default function BlogPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -206,6 +244,9 @@ export default function BlogPost() {
     );
   }
 
+  const tags = extractTags(post.tags);
+  const readTimeLabel = getReadTimeLabel(post.read_time, post.time_required);
+
   const renderComment = (comment: any, depth = 0) => {
     const replies = comments.filter(c => c.parent_id === comment.id);
     
@@ -315,13 +356,13 @@ export default function BlogPost() {
             <div className="flex flex-wrap gap-2 mb-4">
               {post.category && (
                 <Badge variant="default">
-                  {post.category.replace("_", " ").charAt(0).toUpperCase() + 
+                  {post.category.replace("_", " ").charAt(0).toUpperCase() +
                    post.category.slice(1).replace("_", " ")}
                 </Badge>
               )}
-              {post.tags?.map((tag: string) => (
-                <Badge key={tag} variant="secondary">
-                  <Tag className="h-3 w-3 mr-1" />
+              {tags.map(tag => (
+                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                  <Tag className="h-3 w-3" />
                   {tag}
                 </Badge>
               ))}
@@ -363,10 +404,10 @@ export default function BlogPost() {
                   <span>{format(new Date(post.published_at), "MMMM d, yyyy")}</span>
                 </div>
               )}
-              {post.read_time && (
+              {readTimeLabel && (
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
-                  <span>{post.read_time} min read</span>
+                  <span>{readTimeLabel}</span>
                 </div>
               )}
             </div>
