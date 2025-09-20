@@ -377,24 +377,124 @@ export const vi = {
     title: "Thông tin chi tiết & Cập nhật mới nhất",
     subtitle: "Luôn cập nhật về các xu hướng mới nhất trong công nghệ giáo dục",
     searchPlaceholder: "Tìm kiếm bài viết...",
-    filters: "Bộ lọc",
-    categories: "Danh mục",
     readMore: "Đọc thêm",
     minRead: "phút đọc",
     postedBy: "Đăng bởi",
+    hero: {
+      title: "Blog & Tài nguyên",
+      subtitle: "Ý tưởng, nghiên cứu, kỹ thuật giảng dạy và tài nguyên cho giáo viên K-12."
+    },
+    seo: {
+      title: "Blog: Ý tưởng EdTech, Nghiên cứu & Tài nguyên giảng dạy",
+      description:
+        "Khám phá ý tưởng EdTech, ghi chú nghiên cứu, kỹ thuật giảng dạy và nghiên cứu tình huống cho K-12. Tìm chiến lược thực tiễn để tích hợp công nghệ và nâng cao sự tham gia."
+    },
+    states: {
+      loading: "Đang tải các bài viết...",
+      empty: "Không tìm thấy bài viết phù hợp với tiêu chí của bạn."
+    },
+    badges: {
+      featured: "Nổi bật"
+    },
+    readTime: {
+      minutes: "{minutes} phút đọc"
+    },
+    filters: {
+      title: "Bộ lọc",
+      category: "Danh mục",
+      stage: "Cấp học",
+      subject: "Môn học",
+      delivery: "Hình thức",
+      payment: "Thanh toán",
+      platform: "Nền tảng",
+      categories: {
+        eduTech: "Công nghệ giáo dục",
+        tutorials: "Hướng dẫn",
+        teachingTechniques: "Kỹ thuật giảng dạy",
+        classActivity: "Hoạt động trên lớp",
+        teacherReflection: "Suy ngẫm của giáo viên",
+        tips: "Mẹo",
+        shop: "Cửa hàng",
+        caseStudy: "Nghiên cứu tình huống",
+        research: "Nghiên cứu",
+        teacherDebates: "Tranh luận giáo viên"
+      },
+      stages: {
+        earlyChildhood: "Mầm non sớm",
+        preK: "Tiền mẫu giáo",
+        kindergarten: "Mẫu giáo",
+        primary: "Tiểu học",
+        secondary: "Trung học cơ sở",
+        highSchool: "Trung học phổ thông",
+        k12: "K-12",
+        k5: "K-5"
+      },
+      subjects: {
+        phonics: "Ngữ âm",
+        english: "Tiếng Anh",
+        math: "Toán",
+        science: "Khoa học",
+        biology: "Sinh học",
+        chemistry: "Hóa học",
+        physics: "Vật lý",
+        earthScience: "Khoa học Trái Đất",
+        history: "Lịch sử",
+        geography: "Địa lý",
+        music: "Âm nhạc",
+        arts: "Nghệ thuật",
+        ict: "CNTT",
+        pe: "Thể dục",
+        globalPerspective: "Góc nhìn toàn cầu",
+        circleTime: "Giờ vòng tròn",
+        breakTime: "Giờ giải lao",
+        steam: "STEAM"
+      },
+      deliveries: {
+        inClass: "Trực tiếp tại lớp",
+        online: "Trực tuyến",
+        live: "Trực tiếp",
+        homework: "Bài tập về nhà"
+      },
+      payments: {
+        free: "Miễn phí",
+        paid: "Trả phí",
+        educationDiscount: "Ưu đãi giáo dục"
+      },
+      platforms: {
+        mobileApp: "Ứng dụng di động",
+        webapp: "Ứng dụng web",
+        smartphone: "Điện thoại thông minh",
+        smartboard: "Bảng thông minh",
+        mac: "Mac",
+        windows: "Windows"
+      }
+    },
+    author: {
+      default: "Nhóm SchoolTechHub"
+    },
     newsletter: {
-      title: "Đăng ký nhận bản tin",
-      subtitle: "Nhận các cập nhật và thông tin chi tiết mới nhất gửi đến hộp thư của bạn",
-      namePlaceholder: "Tên của bạn",
-      emailPlaceholder: "Email của bạn",
-      jobPlaceholder: "Chức danh công việc của bạn",
-      selectRole: "Chọn vai trò của bạn",
-      subscribe: "Đăng ký",
-      subscribing: "Đang đăng ký...",
-      successTitle: "Đăng ký thành công!",
-      successMessage: "Cảm ơn bạn đã đăng ký nhận bản tin của chúng tôi.",
-      errorTitle: "Đăng ký thất bại",
-      errorMessage: "Vui lòng thử lại sau."
+      title: "📩 Tham gia bản tin cập nhật cho giáo viên",
+      description: "Nhận tài nguyên và mẹo được tuyển chọn gửi tới hộp thư của bạn.",
+      emailPlaceholder: "Email (bắt buộc)",
+      namePlaceholder: "Họ và tên",
+      jobPlaceholder: "Chức danh công việc",
+      roleLabel: "Vai trò",
+      submit: "Đăng ký nhận bản tin",
+      roles: {
+        teacher: "Giáo viên",
+        admin: "Quản trị viên",
+        parent: "Phụ huynh",
+        student: "Học sinh",
+        other: "Khác"
+      },
+      toast: {
+        successTitle: "Thành công!",
+        successDescription: "Bạn đã đăng ký nhận bản tin Teacher Updates.",
+        duplicateTitle: "Đã đăng ký",
+        duplicateDescription: "Email này đã đăng ký bản tin của chúng tôi.",
+        errorTitle: "Lỗi",
+        errorDescription: "Đăng ký không thành công. Vui lòng thử lại."
+      }
     }
   },
   blogPost: {

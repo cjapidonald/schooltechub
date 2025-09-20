@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Search, Calendar, Clock, GraduationCap, Lightbulb, MessageSquare, ChevronDown, BookOpen, Microscope, ShoppingBag, Tag, User } from "lucide-react";
+import { Calendar, Clock, GraduationCap, Lightbulb, MessageSquare, ChevronDown, BookOpen, Microscope, ShoppingBag, Tag, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
@@ -28,28 +28,7 @@ const extractTags = (tags: string[] | string | null | undefined) => {
   return [];
 };
 
-const getReadTimeLabel = (
-  readTime?: number | string | null,
-  timeRequired?: string | null
-) => {
-  if (readTime !== null && readTime !== undefined && readTime !== "") {
-    const parsed = typeof readTime === "number" ? readTime : parseInt(readTime, 10);
-
-    if (!Number.isNaN(parsed) && parsed > 0) {
-      return `${parsed} min read`;
-    }
-  }
-
-  if (timeRequired) {
-    const normalized = String(timeRequired).trim();
-
-    if (normalized.length > 0) {
-      return normalized.toLowerCase().includes("read") ? normalized : `${normalized} read`;
-    }
-  }
-
-  return null;
-};
+type NewsletterRole = "Teacher" | "Admin" | "Parent" | "Student" | "Other";
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,7 +39,7 @@ const Blog = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterName, setNewsletterName] = useState("");
   const [newsletterJob, setNewsletterJob] = useState("");
-  const [newsletterRole, setNewsletterRole] = useState("Teacher");
+  const [newsletterRole, setNewsletterRole] = useState<NewsletterRole>("Teacher");
   const { toast } = useToast();
   const { language, t } = useLanguage();
   
@@ -78,26 +57,112 @@ const Blog = () => {
     setSearchTerm(searchParams.get("search") || "");
   }, [searchParams]);
 
-  const filterCategories = [
-    { value: "Edu Tech", label: "Edu Tech", icon: <BookOpen className="h-4 w-4" /> },
-    { value: "Tutorials", label: "Tutorials", icon: <GraduationCap className="h-4 w-4" /> },
-    { value: "Teaching Techniques", label: "Teaching Techniques", icon: <Lightbulb className="h-4 w-4" /> },
-    { value: "Class Activity", label: "Class Activity", icon: <GraduationCap className="h-4 w-4" /> },
-    { value: "Teacher Reflection", label: "Teacher Reflection", icon: <MessageSquare className="h-4 w-4" /> },
-    { value: "Tips", label: "Tips", icon: <Lightbulb className="h-4 w-4" /> },
-    { value: "Shop", label: "Shop", icon: <ShoppingBag className="h-4 w-4" /> },
-    { value: "Case Study", label: "Case Study", icon: <BookOpen className="h-4 w-4" /> },
-    { value: "Research", label: "Research", icon: <Microscope className="h-4 w-4" /> },
-    { value: "Teacher Debates", label: "Teacher Debates", icon: <MessageSquare className="h-4 w-4" /> }
-  ];
+  const filterCategories = useMemo(
+    () => [
+      { value: "Edu Tech", label: t.blog.filters.categories.eduTech, icon: <BookOpen className="h-4 w-4" /> },
+      { value: "Tutorials", label: t.blog.filters.categories.tutorials, icon: <GraduationCap className="h-4 w-4" /> },
+      { value: "Teaching Techniques", label: t.blog.filters.categories.teachingTechniques, icon: <Lightbulb className="h-4 w-4" /> },
+      { value: "Class Activity", label: t.blog.filters.categories.classActivity, icon: <GraduationCap className="h-4 w-4" /> },
+      { value: "Teacher Reflection", label: t.blog.filters.categories.teacherReflection, icon: <MessageSquare className="h-4 w-4" /> },
+      { value: "Tips", label: t.blog.filters.categories.tips, icon: <Lightbulb className="h-4 w-4" /> },
+      { value: "Shop", label: t.blog.filters.categories.shop, icon: <ShoppingBag className="h-4 w-4" /> },
+      { value: "Case Study", label: t.blog.filters.categories.caseStudy, icon: <BookOpen className="h-4 w-4" /> },
+      { value: "Research", label: t.blog.filters.categories.research, icon: <Microscope className="h-4 w-4" /> },
+      { value: "Teacher Debates", label: t.blog.filters.categories.teacherDebates, icon: <MessageSquare className="h-4 w-4" /> }
+    ],
+    [t]
+  );
 
-  const filterOptions = {
-    stage: ["Early Childhood", "Pre-K", "Kindergarten", "Primary", "Secondary", "High School", "K-12", "K-5"],
-    subject: ["Phonics", "English", "Math", "Science", "Biology", "Chemistry", "Physics", "Earth Science", "History", "Geography", "Music", "Arts", "ICT", "PE", "Global Perspective", "Circle Time", "Break Time", "STEAM"],
-    delivery: ["In-class", "Online", "Live", "Homework"],
-    payment: ["Free", "Paid", "Education Discount"],
-    platform: ["Mobile App", "Webapp", "Smartphone", "Smartboard", "Mac", "Windows"]
-  };
+  const stageOptions = useMemo(
+    () => [
+      { value: "Early Childhood", label: t.blog.filters.stages.earlyChildhood },
+      { value: "Pre-K", label: t.blog.filters.stages.preK },
+      { value: "Kindergarten", label: t.blog.filters.stages.kindergarten },
+      { value: "Primary", label: t.blog.filters.stages.primary },
+      { value: "Secondary", label: t.blog.filters.stages.secondary },
+      { value: "High School", label: t.blog.filters.stages.highSchool },
+      { value: "K-12", label: t.blog.filters.stages.k12 },
+      { value: "K-5", label: t.blog.filters.stages.k5 }
+    ],
+    [t]
+  );
+
+  const subjectOptions = useMemo(
+    () => [
+      { value: "Phonics", label: t.blog.filters.subjects.phonics },
+      { value: "English", label: t.blog.filters.subjects.english },
+      { value: "Math", label: t.blog.filters.subjects.math },
+      { value: "Science", label: t.blog.filters.subjects.science },
+      { value: "Biology", label: t.blog.filters.subjects.biology },
+      { value: "Chemistry", label: t.blog.filters.subjects.chemistry },
+      { value: "Physics", label: t.blog.filters.subjects.physics },
+      { value: "Earth Science", label: t.blog.filters.subjects.earthScience },
+      { value: "History", label: t.blog.filters.subjects.history },
+      { value: "Geography", label: t.blog.filters.subjects.geography },
+      { value: "Music", label: t.blog.filters.subjects.music },
+      { value: "Arts", label: t.blog.filters.subjects.arts },
+      { value: "ICT", label: t.blog.filters.subjects.ict },
+      { value: "PE", label: t.blog.filters.subjects.pe },
+      { value: "Global Perspective", label: t.blog.filters.subjects.globalPerspective },
+      { value: "Circle Time", label: t.blog.filters.subjects.circleTime },
+      { value: "Break Time", label: t.blog.filters.subjects.breakTime },
+      { value: "STEAM", label: t.blog.filters.subjects.steam }
+    ],
+    [t]
+  );
+
+  const deliveryOptions = useMemo(
+    () => [
+      { value: "In-class", label: t.blog.filters.deliveries.inClass },
+      { value: "Online", label: t.blog.filters.deliveries.online },
+      { value: "Live", label: t.blog.filters.deliveries.live },
+      { value: "Homework", label: t.blog.filters.deliveries.homework }
+    ],
+    [t]
+  );
+
+  const paymentOptions = useMemo(
+    () => [
+      { value: "Free", label: t.blog.filters.payments.free },
+      { value: "Paid", label: t.blog.filters.payments.paid },
+      { value: "Education Discount", label: t.blog.filters.payments.educationDiscount }
+    ],
+    [t]
+  );
+
+  const platformOptions = useMemo(
+    () => [
+      { value: "Mobile App", label: t.blog.filters.platforms.mobileApp },
+      { value: "Webapp", label: t.blog.filters.platforms.webapp },
+      { value: "Smartphone", label: t.blog.filters.platforms.smartphone },
+      { value: "Smartboard", label: t.blog.filters.platforms.smartboard },
+      { value: "Mac", label: t.blog.filters.platforms.mac },
+      { value: "Windows", label: t.blog.filters.platforms.windows }
+    ],
+    [t]
+  );
+
+  const newsletterRoles = useMemo(
+    () => [
+      { value: "Teacher" as NewsletterRole, label: t.blog.newsletter.roles.teacher },
+      { value: "Admin" as NewsletterRole, label: t.blog.newsletter.roles.admin },
+      { value: "Parent" as NewsletterRole, label: t.blog.newsletter.roles.parent },
+      { value: "Student" as NewsletterRole, label: t.blog.newsletter.roles.student },
+      { value: "Other" as NewsletterRole, label: t.blog.newsletter.roles.other }
+    ],
+    [t]
+  );
+
+  const filterOptions = useMemo(
+    () => ({
+      stage: stageOptions,
+      subject: subjectOptions,
+      delivery: deliveryOptions,
+      payment: paymentOptions,
+      platform: platformOptions
+    }),
+    [stageOptions, subjectOptions, deliveryOptions, paymentOptions, platformOptions]
+  );
 
   useEffect(() => {
     fetchBlogPosts();
@@ -183,28 +248,28 @@ const Blog = () => {
         email: newsletterEmail,
         full_name: newsletterName,
         job_position: newsletterJob,
-        role: newsletterRole as "Teacher" | "Admin" | "Parent" | "Student" | "Other" | undefined,
+        role: newsletterRole,
         segments: ["teacher_updates"]
       });
 
     if (error) {
       if (error.code === "23505") {
         toast({
-          title: "Already subscribed",
-          description: "This email is already subscribed to our newsletter.",
+          title: t.blog.newsletter.toast.duplicateTitle,
+          description: t.blog.newsletter.toast.duplicateDescription,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to subscribe. Please try again.",
+          title: t.blog.newsletter.toast.errorTitle,
+          description: t.blog.newsletter.toast.errorDescription,
           variant: "destructive"
         });
       }
     } else {
       toast({
-        title: "Success!",
-        description: "You've been subscribed to our Teacher Updates newsletter.",
+        title: t.blog.newsletter.toast.successTitle,
+        description: t.blog.newsletter.toast.successDescription
       });
       setNewsletterEmail("");
       setNewsletterName("");
@@ -217,14 +282,47 @@ const Blog = () => {
     return category?.icon || <BookOpen className="h-4 w-4" />;
   };
 
+  const getCategoryLabel = (filterType: string | null | undefined) => {
+    if (!filterType) return null;
+    return filterCategories.find(cat => cat.value === filterType)?.label || filterType;
+  };
+
+  const getOptionLabel = (options: { value: string; label: string }[], value?: string | null) => {
+    if (!value) return null;
+    return options.find(option => option.value === value)?.label || value;
+  };
+
+  const getReadTimeLabel = (
+    readTime?: number | string | null,
+    timeRequired?: string | null
+  ) => {
+    if (readTime !== null && readTime !== undefined && readTime !== "") {
+      const parsed = typeof readTime === "number" ? readTime : parseInt(readTime, 10);
+
+      if (!Number.isNaN(parsed) && parsed > 0) {
+        return t.blog.readTime.minutes.replace("{minutes}", String(parsed));
+      }
+    }
+
+    if (timeRequired) {
+      const normalized = String(timeRequired).trim();
+
+      if (normalized.length > 0) {
+        return normalized;
+      }
+    }
+
+    return null;
+  };
+
   const featuredTags = extractTags(featuredPost?.tags);
   const featuredReadTime = getReadTimeLabel(featuredPost?.read_time, featuredPost?.time_required);
 
   return (
     <div className="min-h-screen flex flex-col">
       <SEO
-        title="Blog: EdTech Ideas, Research & Teaching Resources"
-        description="Explore EdTech ideas, research notes, teaching techniques, and case studies for K-12. Find practical strategies to integrate technology and improve engagement."
+        title={t.blog.seo.title}
+        description={t.blog.seo.description}
         canonicalUrl="https://schooltechhub.com/blog"
         type="website"
         lang={language}
@@ -233,10 +331,8 @@ const Blog = () => {
       <main className="flex-1">
         <div className="container py-12">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Blog & Resources</h1>
-            <p className="text-muted-foreground">
-              Ideas, research, teaching techniques, and resources for K-12 educators.
-            </p>
+            <h1 className="text-4xl font-bold mb-2">{t.blog.hero.title}</h1>
+            <p className="text-muted-foreground">{t.blog.hero.subtitle}</p>
           </div>
 
           <div className="grid lg:grid-cols-4 gap-8">
@@ -244,13 +340,13 @@ const Blog = () => {
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
-                  <CardTitle>Filters</CardTitle>
+                  <CardTitle>{t.blog.filters.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Category Filter */}
                   <Collapsible defaultOpen>
                     <CollapsibleTrigger className="flex items-center justify-between w-full">
-                      <h4 className="font-medium">Category</h4>
+                      <h4 className="font-medium">{t.blog.filters.category}</h4>
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="mt-3 space-y-2">
@@ -274,19 +370,19 @@ const Blog = () => {
                   {/* Stage Filter */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full">
-                      <h4 className="font-medium">Stage</h4>
+                      <h4 className="font-medium">{t.blog.filters.stage}</h4>
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="mt-3 space-y-2">
                       {filterOptions.stage.map((stage) => (
-                        <label key={stage} className="flex items-center space-x-2">
+                        <label key={stage.value} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={filters.stage.includes(stage)}
-                            onChange={() => toggleFilter("stage", stage)}
+                            checked={filters.stage.includes(stage.value)}
+                            onChange={() => toggleFilter("stage", stage.value)}
                             className="rounded border-gray-300"
                           />
-                          <span className="text-sm">{stage}</span>
+                          <span className="text-sm">{stage.label}</span>
                         </label>
                       ))}
                     </CollapsibleContent>
@@ -295,19 +391,19 @@ const Blog = () => {
                   {/* Subject Filter */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full">
-                      <h4 className="font-medium">Subject</h4>
+                      <h4 className="font-medium">{t.blog.filters.subject}</h4>
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="mt-3 space-y-2">
                       {filterOptions.subject.map((subject) => (
-                        <label key={subject} className="flex items-center space-x-2">
+                        <label key={subject.value} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={filters.subject.includes(subject)}
-                            onChange={() => toggleFilter("subject", subject)}
+                            checked={filters.subject.includes(subject.value)}
+                            onChange={() => toggleFilter("subject", subject.value)}
                             className="rounded border-gray-300"
                           />
-                          <span className="text-sm">{subject}</span>
+                          <span className="text-sm">{subject.label}</span>
                         </label>
                       ))}
                     </CollapsibleContent>
@@ -316,19 +412,19 @@ const Blog = () => {
                   {/* Delivery Type Filter */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full">
-                      <h4 className="font-medium">Delivery Type</h4>
+                      <h4 className="font-medium">{t.blog.filters.delivery}</h4>
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="mt-3 space-y-2">
                       {filterOptions.delivery.map((type) => (
-                        <label key={type} className="flex items-center space-x-2">
+                        <label key={type.value} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={filters.delivery.includes(type)}
-                            onChange={() => toggleFilter("delivery", type)}
+                            checked={filters.delivery.includes(type.value)}
+                            onChange={() => toggleFilter("delivery", type.value)}
                             className="rounded border-gray-300"
                           />
-                          <span className="text-sm">{type}</span>
+                          <span className="text-sm">{type.label}</span>
                         </label>
                       ))}
                     </CollapsibleContent>
@@ -337,19 +433,19 @@ const Blog = () => {
                   {/* Payment Filter */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full">
-                      <h4 className="font-medium">Payment</h4>
+                      <h4 className="font-medium">{t.blog.filters.payment}</h4>
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="mt-3 space-y-2">
                       {filterOptions.payment.map((type) => (
-                        <label key={type} className="flex items-center space-x-2">
+                        <label key={type.value} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={filters.payment.includes(type)}
-                            onChange={() => toggleFilter("payment", type)}
+                            checked={filters.payment.includes(type.value)}
+                            onChange={() => toggleFilter("payment", type.value)}
                             className="rounded border-gray-300"
                           />
-                          <span className="text-sm">{type}</span>
+                          <span className="text-sm">{type.label}</span>
                         </label>
                       ))}
                     </CollapsibleContent>
@@ -358,19 +454,19 @@ const Blog = () => {
                   {/* Platform Filter */}
                   <Collapsible>
                     <CollapsibleTrigger className="flex items-center justify-between w-full">
-                      <h4 className="font-medium">Platform</h4>
+                      <h4 className="font-medium">{t.blog.filters.platform}</h4>
                       <ChevronDown className="h-4 w-4" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="mt-3 space-y-2">
                       {filterOptions.platform.map((platform) => (
-                        <label key={platform} className="flex items-center space-x-2">
+                        <label key={platform.value} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={filters.platform.includes(platform)}
-                            onChange={() => toggleFilter("platform", platform)}
+                            checked={filters.platform.includes(platform.value)}
+                            onChange={() => toggleFilter("platform", platform.value)}
                             className="rounded border-gray-300"
                           />
-                          <span className="text-sm">{platform}</span>
+                          <span className="text-sm">{platform.label}</span>
                         </label>
                       ))}
                     </CollapsibleContent>
@@ -383,7 +479,7 @@ const Blog = () => {
             <div className="lg:col-span-3 space-y-8">
               {loading ? (
                 <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">Loading blog posts...</p>
+                  <p className="text-muted-foreground">{t.blog.states.loading}</p>
                 </div>
               ) : (
                 <>
@@ -405,11 +501,11 @@ const Blog = () => {
                               {featuredPost.filter_type && (
                                 <Badge variant="secondary" className="flex items-center gap-1">
                                   {getCategoryIcon(featuredPost.filter_type)}
-                                  {featuredPost.filter_type}
+                                  {getCategoryLabel(featuredPost.filter_type)}
                                 </Badge>
                               )}
                               {!featuredPost.filter_type && (
-                                <Badge variant="secondary">Featured</Badge>
+                                <Badge variant="secondary">{t.blog.badges.featured}</Badge>
                               )}
                               {featuredTags.map(tag => (
                                 <Badge key={tag} variant="outline" className="flex items-center gap-1">
@@ -452,7 +548,7 @@ const Blog = () => {
                   {/* Blog Posts Grid */}
                   {blogPosts.length === 0 && !featuredPost ? (
                     <div className="text-center py-12">
-                      <p className="text-muted-foreground">No blog posts found matching your criteria.</p>
+                      <p className="text-muted-foreground">{t.blog.states.empty}</p>
                     </div>
                   ) : (
                     <div className="grid gap-6">
@@ -468,7 +564,7 @@ const Blog = () => {
                                   {post.filter_type && (
                                     <Badge variant="secondary" className="flex items-center gap-1">
                                       {getCategoryIcon(post.filter_type)}
-                                      {post.filter_type}
+                                      {getCategoryLabel(post.filter_type)}
                                     </Badge>
                                   )}
                                 </div>
@@ -515,7 +611,7 @@ const Blog = () => {
                                   {post.author_image ? (
                                     <img
                                       src={post.author_image}
-                                      alt={typeof post.author === 'object' ? post.author.name : "Author"}
+                                      alt={typeof post.author === 'object' ? post.author.name : t.blog.author.default}
                                       className="w-10 h-10 rounded-full object-cover"
                                     />
                                   ) : (
@@ -525,7 +621,7 @@ const Blog = () => {
                                   )}
                                   <div className="text-sm">
                                     <p className="font-medium">
-                                      {typeof post.author === 'object' ? post.author.name : "SchoolTechHub Team"}
+                                      {typeof post.author === 'object' ? post.author.name : t.blog.author.default}
                                     </p>
                                     {post.author_job_title && (
                                       <p className="text-muted-foreground">{post.author_job_title}</p>
@@ -535,8 +631,12 @@ const Blog = () => {
                               )}
 
                               <div className="flex flex-wrap gap-2">
-                                {post.stage && <Badge variant="outline">{post.stage}</Badge>}
-                                {post.subject && <Badge variant="outline">{post.subject}</Badge>}
+                                {getOptionLabel(filterOptions.stage, post.stage) && (
+                                  <Badge variant="outline">{getOptionLabel(filterOptions.stage, post.stage)}</Badge>
+                                )}
+                                {getOptionLabel(filterOptions.subject, post.subject) && (
+                                  <Badge variant="outline">{getOptionLabel(filterOptions.subject, post.subject)}</Badge>
+                                )}
                               </div>
                             </CardContent>
                           </Card>
@@ -548,21 +648,26 @@ const Blog = () => {
                   {/* Newsletter Signup */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>📩 Join our Teacher Updates</CardTitle>
+                      <CardTitle>{t.blog.newsletter.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
+                      {t.blog.newsletter.description && (
+                        <p className="text-sm text-muted-foreground mb-4">
+                          {t.blog.newsletter.description}
+                        </p>
+                      )}
                       <form onSubmit={handleNewsletterSubmit} className="space-y-4">
                         <div className="grid sm:grid-cols-2 gap-4">
                           <Input
                             type="email"
-                            placeholder="Email (required)"
+                            placeholder={t.blog.newsletter.emailPlaceholder}
                             value={newsletterEmail}
                             onChange={(e) => setNewsletterEmail(e.target.value)}
                             required
                           />
                           <Input
                             type="text"
-                            placeholder="Full Name"
+                            placeholder={t.blog.newsletter.namePlaceholder}
                             value={newsletterName}
                             onChange={(e) => setNewsletterName(e.target.value)}
                           />
@@ -570,24 +675,25 @@ const Blog = () => {
                         <div className="grid sm:grid-cols-2 gap-4">
                           <Input
                             type="text"
-                            placeholder="Job Position"
+                            placeholder={t.blog.newsletter.jobPlaceholder}
                             value={newsletterJob}
                             onChange={(e) => setNewsletterJob(e.target.value)}
                           />
                           <select
                             value={newsletterRole}
-                            onChange={(e) => setNewsletterRole(e.target.value)}
+                            onChange={(e) => setNewsletterRole(e.target.value as NewsletterRole)}
+                            aria-label={t.blog.newsletter.roleLabel}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            <option value="Teacher">Teacher</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Parent">Parent</option>
-                            <option value="Student">Student</option>
-                            <option value="Other">Other</option>
+                            {newsletterRoles.map(role => (
+                              <option key={role.value} value={role.value}>
+                                {role.label}
+                              </option>
+                            ))}
                           </select>
                         </div>
                         <Button type="submit" className="w-full">
-                          Subscribe to Newsletter
+                          {t.blog.newsletter.submit}
                         </Button>
                       </form>
                     </CardContent>
