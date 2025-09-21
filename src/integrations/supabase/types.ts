@@ -495,6 +495,63 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_plans: {
+        Row: {
+          activities: Json
+          created_at: string
+          duration_minutes: number | null
+          grade_levels: string[]
+          id: string
+          materials: string[]
+          objectives: string[]
+          search_vector: unknown
+          slug: string
+          standards: string[]
+          status: string
+          subject: string | null
+          summary: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activities?: Json
+          created_at?: string
+          duration_minutes?: number | null
+          grade_levels?: string[]
+          id?: string
+          materials?: string[]
+          objectives?: string[]
+          search_vector?: unknown
+          slug: string
+          standards?: string[]
+          status?: string
+          subject?: string | null
+          summary?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activities?: Json
+          created_at?: string
+          duration_minutes?: number | null
+          grade_levels?: string[]
+          id?: string
+          materials?: string[]
+          objectives?: string[]
+          search_vector?: unknown
+          slug?: string
+          standards?: string[]
+          status?: string
+          subject?: string | null
+          summary?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           audience: string | null
