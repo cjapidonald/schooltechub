@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+            import { useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -41,11 +41,3 @@ export function FilterSection({
             )}
             aria-hidden="true"
           />
-        </button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className={cn("mt-3", contentClassName ?? "space-y-2")}>
-        {children}
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}

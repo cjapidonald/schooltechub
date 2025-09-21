@@ -136,7 +136,7 @@ export function WorksheetFilters({
           <span className="text-muted-foreground">{option.description}</span>
         ) : null}
         {option.hint ? (
-          <span className="text-xs text-muted-foreground">{option.hint}</span>
+<span className="text-xs text-muted-foreground">{option.hint}</span>
         ) : null}
       </span>
     </label>
@@ -217,6 +217,31 @@ export function WorksheetFilters({
 
       <FilterSection title={copy.formatLabel} defaultOpen={value.formats.length > 0}>
         {formatOptions.map((option) =>
+          renderCheckboxOption(option, value.formats.includes(option.value), (checked) =>
+            updateFilters({
+              formats: toggleListValue(value.formats, option.value, checked),
+            }),
+          ),
+        )}
+      </FilterSection>
+
+      <div className="space-y-4 rounded-xl border border-dashed p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold">{copy.techOnlyLabel}</p>
+            <p className="text-xs text-muted-foreground">
+              {copy.techOnlyDescription}
+            </p>
+          </div>
+          <Switch
+            checked={value.techIntegratedOnly}
+            onCheckedChange={(checked) =>
+              updateFilters({ techIntegratedOnly: checked === true })
+            }
+            aria-label={copy.techOnlyLabel}
+          />
+        </div>
+
           renderCheckboxOption(option, value.formats.includes(option.value), (checked) =>
             updateFilters({
               formats: toggleListValue(value.formats, option.value, checked),
