@@ -11,6 +11,20 @@ The Supabase client is already configured with the following credentials:
 - **URL**: `https://ruybexkjupmannggnstn.supabase.co`
 - **Anon Key**: Already configured in `src/integrations/supabase/client.ts`
 
+Serverless API routes (e.g. `netlify/functions/lesson-plans.ts` and
+`netlify/functions/lesson-plan-pdf.ts`) require a **Service Role Key** to bypass
+row-level security when running outside of the browser. Add the following to
+your deployment or local `.env` file when invoking the functions directly:
+
+```
+SUPABASE_URL=https://ruybexkjupmannggnstn.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<service role key from Supabase project settings>
+LESSON_PLAN_PDF_BUCKET=lesson-plan-pdfs # optional, defaults to this value
+```
+
+> ℹ️ The automated tests use mocked Supabase clients so no additional variables
+> are required to run `npm run test` locally.
+
 ### Database Schema
 
 #### Tables Created
