@@ -19,6 +19,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui/toggle-group";
 import type { DeliveryMode, Stage } from "@/types/lesson-plans";
+import { FilterSection } from "@/components/filters/FilterSection";
 
 type FilterValue = string;
 
@@ -176,28 +177,15 @@ export function LessonFilters({
         />
       </div>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{stageLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {stages.map(renderStageOption)}
-        </div>
-      </div>
+      <FilterSection title={stageLabel}>
+        {stages.map(renderStageOption)}
+      </FilterSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{deliveryLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {deliveryModes.map(renderDeliveryOption)}
-        </div>
-      </div>
+      <FilterSection title={deliveryLabel}>
+        {deliveryModes.map(renderDeliveryOption)}
+      </FilterSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{technologyLabel}</span>
-        </div>
+      <FilterSection title={technologyLabel}>
         <ToggleGroup
           type="multiple"
           value={selectedTechnologies}
@@ -216,7 +204,7 @@ export function LessonFilters({
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-      </div>
+      </FilterSection>
 
       <div className="flex items-center justify-between">
         <Button
