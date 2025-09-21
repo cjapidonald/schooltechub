@@ -4,6 +4,7 @@ export const sq = {
     about: "Rreth Nesh",
     services: "Shërbimet",
     blog: "Blog",
+    lessonPlans: "Planet e mësimit",
     events: "Evente",
     contact: "Kontakt",
     edutech: "Teknologji Edukative",
@@ -496,6 +497,121 @@ export const sq = {
         errorDescription: "Abonimi dështoi. Ju lutemi provoni përsëri."
       }
     }
+  },
+  lessonPlans: {
+    seo: {
+      title: "Biblioteka e planeve mësimore",
+      description:
+        "Shfleto plane mësimore gati për zbatim sipas nivelit, mënyrës së dorëzimit dhe teknologjisë në klasë.",
+    },
+    hero: {
+      title: "Planet e mësimit",
+      subtitle: "Gjej plane praktike dhe të gatshme për çdo klasë.",
+    },
+    filters: {
+      title: "Filtra",
+      searchPlaceholder: "Kërko plane mësimore",
+      stageLabel: "Nivel",
+      deliveryLabel: "Mënyra e dorëzimit",
+      technologyLabel: "Fokusi teknologjik",
+      clear: "Fshi filtrat",
+      stages: {
+        earlyChildhood: {
+          label: "Fëmijëria e hershme",
+          description: "Bazat përmes lojës",
+          gradeRange: "Kopsht-1",
+        },
+        elementary: {
+          label: "Cikli fillor",
+          description: "Zhvillimi i aftësive bazë",
+          gradeRange: "Klasat 2-5",
+        },
+        middleSchool: {
+          label: "Cikli i mesëm",
+          description: "Eksplorim dhe hetim",
+          gradeRange: "Klasat 6-8",
+        },
+        highSchool: {
+          label: "Shkolla e mesme",
+          description: "Gati për universitet dhe karrierë",
+          gradeRange: "Klasat 9-12",
+        },
+        adultLearners: {
+          label: "Nxënës të rritur",
+          description: "Arsim profesional dhe i lartë",
+          gradeRange: "Pas-parauniversitar",
+        },
+      },
+      deliveries: {
+        inPerson: {
+          label: "Në klasë",
+          description: "Mësim ballë për ballë",
+        },
+        blended: {
+          label: "I kombinuar",
+          description: "Kombinim online dhe në klasë",
+        },
+        online: {
+          label: "Online",
+          description: "Mësim i drejtpërdrejtë ose i pavarur",
+        },
+        projectBased: {
+          label: "Bazuar në projekt",
+          description: "Projektet e udhëhequra nga nxënësit",
+        },
+        flipped: {
+          label: "Klasa e përmbysur",
+          description: "Mëso në shtëpi, zbato në klasë",
+        },
+      },
+      technologyOptions: {
+        ai: "Inteligjenca artificiale",
+        robotics: "Robotikë",
+        coding: "Programim",
+        vr: "Realitet virtual",
+        steam: "STEAM",
+      },
+    },
+    states: {
+      loading: "Duke ngarkuar planet e mësimit...",
+      emptyTitle: "Nuk u gjetën plane",
+      emptyDescription: "Provo të ndryshosh filtrat ose fjalët e kërkimit.",
+      resetFilters: "Rivendos filtrat",
+      error: "Nuk mundëm të ngarkojmë planet e mësimit. Provo përsëri.",
+      loadMore: "Shfaq më shumë plane",
+    },
+    card: {
+      openLabel: "Shiko planin",
+      durationLabel: "{minutes} minuta",
+    },
+    modal: {
+      stage: "Nivel",
+      subjects: "Lëndë",
+      delivery: "Dorëzim",
+      technology: "Teknologji",
+      duration: "Kohëzgjatja",
+      summary: "Përmbledhje",
+      overview: "Përmbledhje e mësimit",
+      objectives: "Objektivat",
+      materials: "Materialet",
+      assessment: "Vlerësimi",
+      technologyOverview: "Mjetet teknologjike",
+      deliveryOverview: "Mënyrat e dorëzimit",
+      durationOverview: "Kohëzgjatja e sugjeruar",
+      structure: "Struktura e mësimit",
+      resources: "Burimet",
+      resourceLink: "Hap burimin",
+      empty: "Detajet e planit do të shtohen së shpejti.",
+      download: "Shkarko PDF",
+      openFull: "Hap faqen e plotë",
+      close: "Mbyll",
+    },
+    detail: {
+      backToList: "Kthehu te planet",
+      errorDescription: "Nuk mundëm të ngarkojmë këtë plan. Kthehu në listë dhe provo përsëri.",
+      notFoundTitle: "Plani nuk u gjet",
+      notFoundDescription: "Ky plan mund të jetë hequr ose i pa publikuar më.",
+    },
   },
   blogPost: {
     backToBlog: "Kthehu te Blogu",

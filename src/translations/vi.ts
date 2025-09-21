@@ -4,6 +4,7 @@ export const vi = {
     about: "Về chúng tôi",
     services: "Dịch vụ",
     blog: "Blog",
+    lessonPlans: "Kế hoạch bài học",
     events: "Sự kiện",
     contact: "Liên hệ",
     edutech: "Công nghệ giáo dục",
@@ -496,6 +497,121 @@ export const vi = {
         errorDescription: "Đăng ký không thành công. Vui lòng thử lại."
       }
     }
+  },
+  lessonPlans: {
+    seo: {
+      title: "Thư viện kế hoạch bài học",
+      description:
+        "Duyệt các kế hoạch bài học sẵn sàng áp dụng theo cấp lớp, hình thức triển khai và công nghệ lớp học.",
+    },
+    hero: {
+      title: "Kế hoạch bài học",
+      subtitle: "Tìm những bài học thực tế, sẵn sàng cho mọi lớp học.",
+    },
+    filters: {
+      title: "Bộ lọc",
+      searchPlaceholder: "Tìm kiếm kế hoạch bài học",
+      stageLabel: "Cấp học",
+      deliveryLabel: "Hình thức triển khai",
+      technologyLabel: "Trọng tâm công nghệ",
+      clear: "Xóa bộ lọc",
+      stages: {
+        earlyChildhood: {
+          label: "Mầm non",
+          description: "Nền tảng qua vui chơi",
+          gradeRange: "Mẫu giáo-1",
+        },
+        elementary: {
+          label: "Tiểu học",
+          description: "Phát triển kỹ năng nền tảng",
+          gradeRange: "Lớp 2-5",
+        },
+        middleSchool: {
+          label: "THCS",
+          description: "Khám phá và tìm hiểu",
+          gradeRange: "Lớp 6-8",
+        },
+        highSchool: {
+          label: "THPT",
+          description: "Sẵn sàng cho đại học và nghề nghiệp",
+          gradeRange: "Lớp 9-12",
+        },
+        adultLearners: {
+          label: "Học viên trưởng thành",
+          description: "Giáo dục nghề nghiệp và cao hơn",
+          gradeRange: "Sau trung học",
+        },
+      },
+      deliveries: {
+        inPerson: {
+          label: "Trực tiếp",
+          description: "Giảng dạy tại lớp",
+        },
+        blended: {
+          label: "Kết hợp",
+          description: "Kết hợp online và tại lớp",
+        },
+        online: {
+          label: "Trực tuyến",
+          description: "Học đồng bộ hoặc không đồng bộ",
+        },
+        projectBased: {
+          label: "Dựa trên dự án",
+          description: "Dự án do học sinh dẫn dắt",
+        },
+        flipped: {
+          label: "Lớp học đảo ngược",
+          description: "Học ở nhà, thực hành tại lớp",
+        },
+      },
+      technologyOptions: {
+        ai: "Trí tuệ nhân tạo",
+        robotics: "Người máy",
+        coding: "Lập trình",
+        vr: "Thực tế ảo",
+        steam: "STEAM",
+      },
+    },
+    states: {
+      loading: "Đang tải kế hoạch bài học...",
+      emptyTitle: "Không tìm thấy kế hoạch phù hợp",
+      emptyDescription: "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm.",
+      resetFilters: "Đặt lại bộ lọc",
+      error: "Không thể tải kế hoạch bài học. Vui lòng thử lại.",
+      loadMore: "Xem thêm kế hoạch",
+    },
+    card: {
+      openLabel: "Xem kế hoạch",
+      durationLabel: "{minutes} phút",
+    },
+    modal: {
+      stage: "Cấp học",
+      subjects: "Môn học",
+      delivery: "Hình thức",
+      technology: "Công nghệ",
+      duration: "Thời lượng",
+      summary: "Tóm tắt",
+      overview: "Tổng quan bài học",
+      objectives: "Mục tiêu",
+      materials: "Tài liệu",
+      assessment: "Đánh giá",
+      technologyOverview: "Công cụ công nghệ",
+      deliveryOverview: "Hình thức triển khai",
+      durationOverview: "Thời lượng gợi ý",
+      structure: "Cấu trúc bài học",
+      resources: "Tài nguyên",
+      resourceLink: "Mở tài nguyên",
+      empty: "Chi tiết bài học sẽ được cập nhật sớm.",
+      download: "Tải PDF",
+      openFull: "Mở trang đầy đủ",
+      close: "Đóng",
+    },
+    detail: {
+      backToList: "Quay lại danh sách",
+      errorDescription: "Không thể tải kế hoạch này. Hãy quay lại thư viện và thử lại.",
+      notFoundTitle: "Không tìm thấy kế hoạch",
+      notFoundDescription: "Kế hoạch này có thể đã bị gỡ xuống hoặc chưa công bố.",
+    },
   },
   blogPost: {
     backToBlog: "Quay lại Blog",
