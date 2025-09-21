@@ -15,6 +15,8 @@ import TeacherDiary from '@/pages/TeacherDiary';
 import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
 import LessonPlans from '@/pages/LessonPlans';
 import LessonPlan from '@/pages/LessonPlan';
+import Worksheets from '@/pages/Worksheets';
+import Worksheet from '@/pages/Worksheet';
 import Auth from '@/pages/Auth';
 import Account from '@/pages/Account';
 import NotFound from '@/pages/NotFound';
@@ -51,6 +53,8 @@ export const LocalizedRoutes = () => {
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/lesson-plans" element={<RouteWrapper><LessonPlans /></RouteWrapper>} />
       <Route path="/lesson-plans/:slug" element={<RouteWrapper><LessonPlan /></RouteWrapper>} />
+      <Route path="/worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
+      <Route path="/worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
@@ -71,6 +75,8 @@ export const LocalizedRoutes = () => {
         <Route path="blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
         <Route path="lesson-plans" element={<RouteWrapper><LessonPlans /></RouteWrapper>} />
         <Route path="lesson-plans/:slug" element={<RouteWrapper><LessonPlan /></RouteWrapper>} />
+        <Route path="worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
+        <Route path="worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
         <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
         <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
