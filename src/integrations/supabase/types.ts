@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      classes: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          current_enrollment: number | null
+          description: string | null
+          duration_hours: number | null
+          end_date: string | null
+          id: string
+          image_url: string | null
+          instructor_id: string | null
+          instructor_name: string | null
+          level: string | null
+          max_capacity: number | null
+          meeting_link: string | null
+          meeting_schedule: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["class_status"] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          current_enrollment?: number | null
+          description?: string | null
+          duration_hours?: number | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          instructor_id?: string | null
+          instructor_name?: string | null
+          level?: string | null
+          max_capacity?: number | null
+          meeting_link?: string | null
+          meeting_schedule?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["class_status"] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          current_enrollment?: number | null
+          description?: string | null
+          duration_hours?: number | null
+          end_date?: string | null
+          id?: string
+          image_url?: string | null
+          instructor_id?: string | null
+          instructor_name?: string | null
+          level?: string | null
+          max_capacity?: number | null
+          meeting_link?: string | null
+          meeting_schedule?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["class_status"] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -349,6 +412,53 @@ export type Database = {
           },
         ]
       }
+      enrollments: {
+        Row: {
+          class_id: string
+          created_at: string | null
+          enrolled_at: string | null
+          id: string
+          last_accessed: string | null
+          notes: string | null
+          progress: number | null
+          status: Database["public"]["Enums"]["enrollment_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string | null
+          enrolled_at?: string | null
+          id?: string
+          last_accessed?: string | null
+          notes?: string | null
+          progress?: number | null
+          status?: Database["public"]["Enums"]["enrollment_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string | null
+          enrolled_at?: string | null
+          id?: string
+          last_accessed?: string | null
+          notes?: string | null
+          progress?: number | null
+          status?: Database["public"]["Enums"]["enrollment_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faq: {
         Row: {
           answer: string
@@ -544,6 +654,7 @@ export type Database = {
         | "Evaluate"
         | "Create"
       category_enum: "Lesson Planning" | "Engagement" | "Assessment"
+      class_status: "active" | "completed" | "upcoming" | "archived"
       content_type_enum:
         | "blog"
         | "case_study"
@@ -557,6 +668,7 @@ export type Database = {
         | "service"
         | "about"
       delivery_type_enum: "In-class" | "Online" | "Live" | "Homework"
+      enrollment_status: "enrolled" | "completed" | "dropped" | "pending"
       event_mode_enum: "Online" | "In-person" | "Hybrid" | "Live"
       event_price_type_enum: "Free" | "Paid"
       event_status_enum:
@@ -812,6 +924,7 @@ export const Constants = {
         "Create",
       ],
       category_enum: ["Lesson Planning", "Engagement", "Assessment"],
+      class_status: ["active", "completed", "upcoming", "archived"],
       content_type_enum: [
         "blog",
         "case_study",
@@ -826,6 +939,7 @@ export const Constants = {
         "about",
       ],
       delivery_type_enum: ["In-class", "Online", "Live", "Homework"],
+      enrollment_status: ["enrolled", "completed", "dropped", "pending"],
       event_mode_enum: ["Online", "In-person", "Hybrid", "Live"],
       event_price_type_enum: ["Free", "Paid"],
       event_status_enum: ["Upcoming", "Before", "During", "After", "Follow-Up"],

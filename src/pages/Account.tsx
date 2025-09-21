@@ -38,8 +38,10 @@ import {
   Sparkles,
   BellRing,
   Globe,
+  GraduationCap,
 } from "lucide-react";
 import type { Database, Json } from "@/integrations/supabase/types";
+import { EnrolledClasses } from "@/components/EnrolledClasses";
 
 const userRoleOptions: Database["public"]["Enums"]["user_role_enum"][] = [
   "Teacher",
@@ -581,6 +583,10 @@ const Account = () => {
               <Sparkles className="h-4 w-4" />
               {t.account.tabs.overview}
             </TabsTrigger>
+            <TabsTrigger value="classes" className="gap-2">
+              <GraduationCap className="h-4 w-4" />
+              Classes
+            </TabsTrigger>
             <TabsTrigger value="security" className="gap-2">
               <Lock className="h-4 w-4" />
               {t.account.tabs.security}
@@ -835,6 +841,10 @@ const Account = () => {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="classes">
+            <EnrolledClasses userId={user?.id} language={language} />
           </TabsContent>
 
           <TabsContent value="security">

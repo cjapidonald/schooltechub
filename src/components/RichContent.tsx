@@ -73,7 +73,7 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
           case "paragraph": {
             const children = textToChildren((data as { text?: string }).text);
             if (!children) return null;
-            return { type: "paragraph", children };
+            return { type: "paragraph" as const, children };
           }
           case "header":
           case "heading": {
@@ -87,7 +87,7 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
                   ? parseInt(headingData.level, 10)
                   : undefined;
             return {
-              type: "heading",
+              type: "heading" as const,
               level: Number.isNaN(normalizedLevel) ? undefined : normalizedLevel,
               children,
             };
@@ -102,7 +102,7 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
             const src = imageData.file?.url || imageData.url;
             if (!src) return null;
             return {
-              type: "image",
+              type: "image" as const,
               src,
               alt: imageData.alt || imageData.caption,
               caption: imageData.caption,
@@ -112,7 +112,7 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
             return null;
         }
       })
-      .filter((block): block is ContentBlock => block !== null);
+      .filter((block): block is ContentBlock => !!block);
   };
 
   let contentArray: ContentBlock[];
