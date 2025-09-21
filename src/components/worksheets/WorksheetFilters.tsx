@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import type { WorksheetFiltersState } from "@/types/worksheets";
+import { FilterSection } from "@/components/filters/FilterSection";
 
 const MOBILE_BREAKPOINT = 1024;
 
@@ -160,99 +161,69 @@ export function WorksheetFilters({
         />
       </div>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{copy.stageLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {stageOptions.map((option) =>
-            renderCheckboxOption(option, value.stages.includes(option.value), (checked) =>
-              updateFilters({
-                stages: toggleListValue(value.stages, option.value, checked),
-              }),
-            ),
-          )}
-        </div>
-      </div>
+      <FilterSection title={copy.stageLabel}>
+        {stageOptions.map((option) =>
+          renderCheckboxOption(option, value.stages.includes(option.value), (checked) =>
+            updateFilters({
+              stages: toggleListValue(value.stages, option.value, checked),
+            }),
+          ),
+        )}
+      </FilterSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{copy.subjectLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {subjectOptions.map((option) =>
-            renderCheckboxOption(option, value.subjects.includes(option.value), (checked) =>
-              updateFilters({
-                subjects: toggleListValue(value.subjects, option.value, checked),
-              }),
-            ),
-          )}
-        </div>
-      </div>
+      <FilterSection title={copy.subjectLabel}>
+        {subjectOptions.map((option) =>
+          renderCheckboxOption(option, value.subjects.includes(option.value), (checked) =>
+            updateFilters({
+              subjects: toggleListValue(value.subjects, option.value, checked),
+            }),
+          ),
+        )}
+      </FilterSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{copy.skillLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {skillOptions.map((option) =>
-            renderCheckboxOption(option, value.skills.includes(option.value), (checked) =>
-              updateFilters({
-                skills: toggleListValue(value.skills, option.value, checked),
-              }),
-            ),
-          )}
-        </div>
-      </div>
+      <FilterSection title={copy.skillLabel}>
+        {skillOptions.map((option) =>
+          renderCheckboxOption(option, value.skills.includes(option.value), (checked) =>
+            updateFilters({
+              skills: toggleListValue(value.skills, option.value, checked),
+            }),
+          ),
+        )}
+      </FilterSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{copy.typeLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {typeOptions.map((option) =>
-            renderCheckboxOption(option, value.worksheetTypes.includes(option.value), (checked) =>
-              updateFilters({
-                worksheetTypes: toggleListValue(
-                  value.worksheetTypes,
-                  option.value,
-                  checked,
-                ),
-              }),
-            ),
-          )}
-        </div>
-      </div>
+      <FilterSection title={copy.typeLabel}>
+        {typeOptions.map((option) =>
+          renderCheckboxOption(option, value.worksheetTypes.includes(option.value), (checked) =>
+            updateFilters({
+              worksheetTypes: toggleListValue(
+                value.worksheetTypes,
+                option.value,
+                checked,
+              ),
+            }),
+          ),
+        )}
+      </FilterSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{copy.difficultyLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {difficultyOptions.map((option) =>
-            renderCheckboxOption(option, value.difficulties.includes(option.value), (checked) =>
-              updateFilters({
-                difficulties: toggleListValue(value.difficulties, option.value, checked),
-              }),
-            ),
-          )}
-        </div>
-      </div>
+      <FilterSection title={copy.difficultyLabel}>
+        {difficultyOptions.map((option) =>
+          renderCheckboxOption(option, value.difficulties.includes(option.value), (checked) =>
+            updateFilters({
+              difficulties: toggleListValue(value.difficulties, option.value, checked),
+            }),
+          ),
+        )}
+      </FilterSection>
 
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-sm font-semibold">{copy.formatLabel}</span>
-        </div>
-        <div className="space-y-2">
-          {formatOptions.map((option) =>
-            renderCheckboxOption(option, value.formats.includes(option.value), (checked) =>
-              updateFilters({
-                formats: toggleListValue(value.formats, option.value, checked),
-              }),
-            ),
-          )}
-        </div>
-      </div>
+      <FilterSection title={copy.formatLabel}>
+        {formatOptions.map((option) =>
+          renderCheckboxOption(option, value.formats.includes(option.value), (checked) =>
+            updateFilters({
+              formats: toggleListValue(value.formats, option.value, checked),
+            }),
+          ),
+        )}
+      </FilterSection>
 
       <div className="space-y-4 rounded-xl border border-dashed p-4">
         <div className="flex items-center justify-between">
