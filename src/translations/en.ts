@@ -4,6 +4,7 @@ export const en = {
     about: "About",
     services: "Services",
     blog: "Blog",
+    lessonPlans: "Lesson Plans",
     events: "Events",
     contact: "Contact",
     edutech: "Edu Tech",
@@ -492,6 +493,121 @@ export const en = {
         errorDescription: "Failed to subscribe. Please try again."
       }
     }
+  },
+  lessonPlans: {
+    seo: {
+      title: "Lesson Plans Library",
+      description:
+        "Browse ready-to-teach lesson plans filtered by grade level, delivery style, and classroom technology.",
+    },
+    hero: {
+      title: "Lesson Plans",
+      subtitle: "Find practical, tech-ready lessons for every classroom stage.",
+    },
+    filters: {
+      title: "Filters",
+      searchPlaceholder: "Search lesson plans",
+      stageLabel: "Stage",
+      deliveryLabel: "Delivery mode",
+      technologyLabel: "Technology focus",
+      clear: "Clear filters",
+      stages: {
+        earlyChildhood: {
+          label: "Early Childhood",
+          description: "Play-based foundations",
+          gradeRange: "PreK-1",
+        },
+        elementary: {
+          label: "Elementary",
+          description: "Building core skills",
+          gradeRange: "Grades 2-5",
+        },
+        middleSchool: {
+          label: "Middle School",
+          description: "Exploration and inquiry",
+          gradeRange: "Grades 6-8",
+        },
+        highSchool: {
+          label: "High School",
+          description: "College and career ready",
+          gradeRange: "Grades 9-12",
+        },
+        adultLearners: {
+          label: "Adult Learners",
+          description: "Professional and higher ed",
+          gradeRange: "Post-secondary",
+        },
+      },
+      deliveries: {
+        inPerson: {
+          label: "In-person",
+          description: "Face-to-face classroom",
+        },
+        blended: {
+          label: "Blended",
+          description: "Mix of online and in-class",
+        },
+        online: {
+          label: "Online",
+          description: "Live or asynchronous remote",
+        },
+        projectBased: {
+          label: "Project-based",
+          description: "Student-led projects",
+        },
+        flipped: {
+          label: "Flipped",
+          description: "Learn at home, apply in class",
+        },
+      },
+      technologyOptions: {
+        ai: "AI & automation",
+        robotics: "Robotics",
+        coding: "Coding",
+        vr: "Virtual reality",
+        steam: "STEAM",
+      },
+    },
+    states: {
+      loading: "Loading lesson plans...",
+      emptyTitle: "No lesson plans found",
+      emptyDescription: "Try adjusting your filters or search keywords.",
+      resetFilters: "Reset filters",
+      error: "We couldn't load lesson plans right now. Please try again soon.",
+      loadMore: "Load more plans",
+    },
+    card: {
+      openLabel: "View lesson plan",
+      durationLabel: "{minutes} minutes",
+    },
+    modal: {
+      stage: "Stage",
+      subjects: "Subjects",
+      delivery: "Delivery",
+      technology: "Technology",
+      duration: "Duration",
+      summary: "Summary",
+      overview: "Lesson overview",
+      objectives: "Objectives",
+      materials: "Materials",
+      assessment: "Assessment",
+      technologyOverview: "Technology tools",
+      deliveryOverview: "Delivery modes",
+      durationOverview: "Suggested duration",
+      structure: "Lesson structure",
+      resources: "Resources",
+      resourceLink: "Open resource",
+      empty: "Lesson details will be added soon.",
+      download: "Download PDF",
+      openFull: "Open full page",
+      close: "Close",
+    },
+    detail: {
+      backToList: "Back to lesson plans",
+      errorDescription: "We couldn't load this lesson plan. Please return to the library and try again.",
+      notFoundTitle: "Lesson plan not found",
+      notFoundDescription: "This lesson plan may have been unpublished or removed.",
+    },
   },
   blogPost: {
     backToBlog: "Back to Blog",
