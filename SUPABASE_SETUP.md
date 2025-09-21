@@ -11,6 +11,8 @@ The Supabase client is already configured with the following credentials:
 - **URL**: `https://ruybexkjupmannggnstn.supabase.co`
 - **Anon Key**: Already configured in `src/integrations/supabase/client.ts`
 
+> **Service role access:** Administrative scripts that seed or moderate lesson plans should run with the Supabase service role key. Store it as `SUPABASE_SERVICE_ROLE_KEY` in server-side environments only.
+
 ### Database Schema
 
 #### Tables Created
@@ -27,10 +29,16 @@ The Supabase client is already configured with the following credentials:
    - Tracks progress, status, and notes
    - Statuses: enrolled, completed, dropped, pending
 
+4. **lesson_plans** - Curriculum-ready lesson outlines for discovery
+   - Fields: title, summary, subject, grade levels, objectives, materials, activities, standards, status
+   - Search: generated `search_vector` column backed by GIN indexes for fast keyword lookups
+   - Access: defaults to `draft`; only `status = 'published'` rows are exposed through public RLS policies
+
 #### Row Level Security (RLS)
 - All tables have RLS enabled
 - Users can only view/modify their own data
 - Classes are publicly viewable but only instructors can modify
+- Lesson plans are publicly readable only when `status = 'published'`; use a service role key for inserts, updates, or moderation tasks.
 
 ## Features Implemented
 
