@@ -6,6 +6,15 @@ import pdfHandler from "../lesson-plans/[id]-pdf";
 import type { LessonPlanRecord } from "../../types/lesson-plans";
 import { decodeCursor } from "../_lib/lesson-plan-helpers";
 
+vi.mock("@react-pdf/renderer", () => ({
+  Document: ({ children }: { children: unknown }) => children,
+  Page: ({ children }: { children: unknown }) => children,
+  Text: ({ children }: { children: unknown }) => children,
+  View: ({ children }: { children: unknown }) => children,
+  StyleSheet: { create: () => ({}) },
+  renderToBuffer: async () => new Uint8Array([1]),
+}));
+
 interface SupabaseResponse {
   data: unknown;
   error?: { message: string } | null;

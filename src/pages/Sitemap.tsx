@@ -33,6 +33,7 @@ const createStaticRoutes = (dictionary: TranslationDictionary): RouteLink[] => [
   { title: dictionary.nav.about, url: "/about" },
   { title: dictionary.nav.services, url: "/services" },
   { title: dictionary.nav.blog, url: "/blog" },
+  { title: dictionary.nav.worksheets ?? "Worksheets", url: "/worksheets" },
   { title: dictionary.nav.events, url: "/events" },
   { title: dictionary.nav.edutech, url: "/edutech" },
   { title: dictionary.nav.teacherDiary, url: "/teacher-diary" },

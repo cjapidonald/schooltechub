@@ -18,5 +18,8 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
+    alias: {
+      "@react-pdf/renderer": path.resolve(__dirname, "./test/__mocks__/react-pdf-renderer.ts"),
+    },
   },
 }));
