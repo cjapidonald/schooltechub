@@ -12,6 +12,8 @@ export interface LessonPlanListItem {
   technologyTags: string[];
   durationMinutes: number | null;
   pdfUrl: string | null;
+  schoolLogoUrl: string | null;
+  lessonDate: string | null;
   status: LessonPlanStatus;
   createdAt: string | null;
   updatedAt: string | null;
@@ -114,4 +116,6 @@ export interface LessonPlanRecord {
   updated_at?: string | null;
   published_at?: string | null;
   metadata?: unknown;
+  school_logo_url?: string | null;
+  lesson_date?: string | null;
 }
