@@ -32,10 +32,11 @@ interface StepPayload {
 }
 
 interface UpdatePayload {
-  userId?: string;
   plan?: Record<string, unknown> | null;
   steps?: StepPayload[] | null;
 }
+
+type SupabaseClientLike = ReturnType<typeof getSupabaseClient>;
 
 export default async function handler(request: Request): Promise<Response> {
   const method = normalizeMethod(request.method);
@@ -45,19 +46,36 @@ export default async function handler(request: Request): Promise<Response> {
     return errorResponse(400, "A lesson plan id is required");
   }
 
+  const accessToken = extractAccessToken(request);
+  if (!accessToken) {
+    return errorResponse(401, "Authentication required");
+  }
+
+  const supabase = getSupabaseClient();
+  const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+
+  if (authError || !authData?.user?.id) {
+    return errorResponse(401, "Authentication required");
+  }
+
+  const userId = authData.user.id;
+
   if (method === "GET") {
-    return handleGet(id);
+    return handleGet(supabase, id, userId);
   }
 
   if (method === "PATCH" || method === "PUT") {
-    return handleUpdate(request, id);
+    return handleUpdate(request, supabase, id, userId);
   }
 
   return methodNotAllowed(["GET", "PATCH", "PUT"]);
 }
 
-async function handleGet(id: string): Promise<Response> {
-  const supabase = getSupabaseClient();
+async function handleGet(
+  supabase: SupabaseClientLike,
+  id: string,
+  userId: string
+): Promise<Response> {
   const planResult = await supabase
     .from(LESSON_PLAN_TABLE)
     .select("*")
@@ -72,6 +90,14 @@ async function handleGet(id: string): Promise<Response> {
     return errorResponse(404, "Lesson plan not found");
   }
 
+  const plan = planResult.data;
+  const shareAccess = plan.share_access ?? "owner";
+  const isOwner = plan.owner_id === userId;
+
+  if (!canViewPlan(shareAccess, isOwner)) {
+    return errorResponse(403, "You do not have permission to view this plan");
+  }
+
   const stepsResult = await supabase
     .from(LESSON_PLAN_STEPS_TABLE)
     .select("*")
@@ -82,22 +108,25 @@ async function handleGet(id: string): Promise<Response> {
     return errorResponse(500, "Failed to load lesson plan steps");
   }
 
-  const plan = mapPlan(planResult.data);
   const steps = Array.isArray(stepsResult.data) ? stepsResult.data : [];
 
   return jsonResponse({
-    plan,
+    plan: mapPlan(plan, userId),
     steps,
   });
 }
 
-async function handleUpdate(request: Request, id: string): Promise<Response> {
+async function handleUpdate(
+  request: Request,
+  supabase: SupabaseClientLike,
+  id: string,
+  userId: string
+): Promise<Response> {
   const payload = (await parseJsonBody<UpdatePayload>(request)) ?? {};
-  const supabase = getSupabaseClient();
 
   const planResult = await supabase
     .from(LESSON_PLAN_TABLE)
-    .select("id, share_access")
+    .select("id, owner_id, share_access")
     .eq("id", id)
     .maybeSingle();
 
@@ -110,7 +139,8 @@ async function handleUpdate(request: Request, id: string): Promise<Response> {
   }
 
   const shareAccess = planResult.data.share_access ?? "owner";
-  if (!canEdit(shareAccess)) {
+  const isOwner = planResult.data.owner_id === userId;
+  if (!canEditPlan(shareAccess, isOwner)) {
     return errorResponse(403, "You do not have permission to update this plan");
   }
 
@@ -172,7 +202,7 @@ async function handleUpdate(request: Request, id: string): Promise<Response> {
   }
 
   return jsonResponse({
-    plan: mapPlan(refreshedPlan.data),
+    plan: mapPlan(refreshedPlan.data, userId),
     steps: Array.isArray(refreshedSteps.data) ? refreshedSteps.data : [],
   });
 }
@@ -188,17 +218,28 @@ function extractIdFromRequest(request: Request): string | null {
   }
 }
 
-function mapPlan(plan: Record<string, any>): Record<string, unknown> {
+function mapPlan(plan: Record<string, any>, userId: string): Record<string, unknown> {
   const shareAccess = plan.share_access ?? "owner";
+  const isOwner = plan.owner_id === userId;
   return {
     ...plan,
     shareAccess,
-    readOnly: !canEdit(shareAccess),
+    readOnly: !canEditPlan(shareAccess, isOwner),
   };
 }
 
-function canEdit(shareAccess: string | null | undefined): boolean {
-  return shareAccess === "owner" || shareAccess === "editor";
+function canViewPlan(shareAccess: string | null | undefined, isOwner: boolean): boolean {
+  if (isOwner) {
+    return true;
+  }
+  return shareAccess === "viewer" || shareAccess === "editor";
+}
+
+function canEditPlan(shareAccess: string | null | undefined, isOwner: boolean): boolean {
+  if (isOwner) {
+    return true;
+  }
+  return shareAccess === "editor";
 }
 
 function mapStepPayload(
@@ -266,4 +307,27 @@ function sanitizeEmbed(embed: string | null): string | null {
     return null;
   }
   return cleaned.trim();
+}
+
+function extractAccessToken(request: Request): string | null {
+  const header = request.headers.get("authorization") ?? request.headers.get("Authorization");
+  if (header) {
+    const match = header.match(/^Bearer\s+(.+)$/i);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+
+  const cookieHeader = request.headers.get("cookie") ?? request.headers.get("Cookie");
+  if (cookieHeader) {
+    const cookies = cookieHeader.split(";");
+    for (const rawCookie of cookies) {
+      const [name, ...rest] = rawCookie.trim().split("=");
+      if (name === "sb-access-token") {
+        return decodeURIComponent(rest.join("="));
+      }
+    }
+  }
+
+  return null;
 }

@@ -4,6 +4,11 @@ export interface SupabaseResponse {
   count?: number | null;
 }
 
+export interface AuthResponse {
+  data: { user: { id: string } | null } | null;
+  error?: { message: string } | null;
+}
+
 export interface StorageResponse {
   data?: { signedUrl?: string | null } | null;
   error?: { message: string } | null;
@@ -134,6 +139,13 @@ export class SupabaseStub {
   private storageResponses: StorageResponse[] = [];
   private storageUploadResponses: StorageUploadResponse[] = [];
   private storagePublicResponses: StoragePublicResponse[] = [];
+  private authResponses: AuthResponse[] = [];
+  private defaultAuthResponse: AuthResponse = {
+    data: { user: { id: "user-1" } },
+    error: null,
+  };
+
+  public lastAuthToken: string | null = null;
 
   from(table: string): QueryBuilder {
     const response = this.responses.shift() ?? { data: null, error: null };
@@ -175,6 +187,13 @@ export class SupabaseStub {
     }));
   }
 
+  setAuthResponses(responses: AuthResponse[]): void {
+    this.authResponses = responses.map((response) => ({
+      data: response.data ?? null,
+      error: response.error ?? null,
+    }));
+  }
+
   reset(): void {
     this.calls = [];
     this.storageCalls = [];
@@ -182,6 +201,12 @@ export class SupabaseStub {
     this.storageResponses = [];
     this.storageUploadResponses = [];
     this.storagePublicResponses = [];
+    this.authResponses = [];
+    this.defaultAuthResponse = {
+      data: { user: { id: "user-1" } },
+      error: null,
+    };
+    this.lastAuthToken = null;
   }
 
   storage = {
@@ -215,5 +240,16 @@ export class SupabaseStub {
         };
       },
     }),
+  };
+
+  auth = {
+    getUser: async (token: string) => {
+      this.lastAuthToken = token;
+      const response = this.authResponses.shift() ?? this.defaultAuthResponse;
+      return {
+        data: response.data ?? null,
+        error: response.error ?? null,
+      };
+    },
   };
 }

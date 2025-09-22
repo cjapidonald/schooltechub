@@ -11,7 +11,6 @@ const LESSON_PLAN_TABLE = "lesson_plan_builder_plans";
 const LESSON_PLAN_STEPS_TABLE = "lesson_plan_steps";
 
 interface DuplicatePayload {
-  userId?: string;
   title?: string;
 }
 
@@ -27,16 +26,28 @@ export default async function handler(request: Request): Promise<Response> {
     return methodNotAllowed(["POST"]);
   }
 
-  return handleDuplicate(request, id);
-}
-
-async function handleDuplicate(request: Request, id: string): Promise<Response> {
-  const payload = (await parseJsonBody<DuplicatePayload>(request)) ?? {};
-  if (!payload.userId) {
-    return errorResponse(400, "A userId is required to duplicate a lesson plan");
+  const accessToken = extractAccessToken(request);
+  if (!accessToken) {
+    return errorResponse(401, "Authentication required");
   }
 
   const supabase = getSupabaseClient();
+  const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+
+  if (authError || !authData?.user?.id) {
+    return errorResponse(401, "Authentication required");
+  }
+
+  return handleDuplicate(request, supabase, id, authData.user.id);
+}
+
+async function handleDuplicate(
+  request: Request,
+  supabase: ReturnType<typeof getSupabaseClient>,
+  id: string,
+  userId: string
+): Promise<Response> {
+  const payload = (await parseJsonBody<DuplicatePayload>(request)) ?? {};
   const planResult = await supabase
     .from(LESSON_PLAN_TABLE)
     .select("*")
@@ -52,7 +63,9 @@ async function handleDuplicate(request: Request, id: string): Promise<Response> 
     return errorResponse(404, "Lesson plan not found");
   }
 
-  if (!canDuplicate(sourcePlan.share_access)) {
+  const shareAccess = sourcePlan.share_access ?? "owner";
+  const isOwner = sourcePlan.owner_id === userId;
+  if (!canDuplicate(shareAccess, isOwner)) {
     return errorResponse(403, "You do not have permission to duplicate this plan");
   }
 
@@ -75,7 +88,7 @@ async function handleDuplicate(request: Request, id: string): Promise<Response> 
       subject: sourcePlan.subject ?? null,
       stage: sourcePlan.stage ?? null,
       duration_minutes: sourcePlan.duration_minutes ?? null,
-      owner_id: payload.userId,
+      owner_id: userId,
       share_access: "owner",
       metadata: sourcePlan.metadata ?? null,
       created_at: now,
@@ -132,6 +145,32 @@ function extractIdFromRequest(request: Request): string | null {
   }
 }
 
-function canDuplicate(shareAccess: string | null | undefined): boolean {
-  return shareAccess === "owner" || shareAccess === "editor";
+function canDuplicate(shareAccess: string | null | undefined, isOwner: boolean): boolean {
+  if (isOwner) {
+    return true;
+  }
+  return shareAccess === "editor";
+}
+
+function extractAccessToken(request: Request): string | null {
+  const header = request.headers.get("authorization") ?? request.headers.get("Authorization");
+  if (header) {
+    const match = header.match(/^Bearer\s+(.+)$/i);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+
+  const cookieHeader = request.headers.get("cookie") ?? request.headers.get("Cookie");
+  if (cookieHeader) {
+    const cookies = cookieHeader.split(";");
+    for (const rawCookie of cookies) {
+      const [name, ...rest] = rawCookie.trim().split("=");
+      if (name === "sb-access-token") {
+        return decodeURIComponent(rest.join("="));
+      }
+    }
+  }
+
+  return null;
 }
