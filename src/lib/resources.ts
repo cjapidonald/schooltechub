@@ -194,6 +194,31 @@ export async function getResourceById(id: string): Promise<Resource | null> {
 }
 
 /**
+ * Retrieves a set of resources in a single request, preserving input order.
+ */
+export async function getResourcesByIds(ids: string[]): Promise<Resource[]> {
+  const uniqueIds = Array.from(new Set(ids.map(id => id.trim()).filter(Boolean)));
+
+  if (uniqueIds.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("resources")
+    .select<Resource>(RESOURCE_SELECT)
+    .in("id", uniqueIds);
+
+  if (error) {
+    throw new ResourceDataError("Unable to load the requested resources.", { cause: error });
+  }
+
+  const lookup = new Map((data ?? []).map(resource => [resource.id, resource] as const));
+  return uniqueIds
+    .map(id => lookup.get(id))
+    .filter((resource): resource is Resource => Boolean(resource));
+}
+
+/**
  * Creates a new resource owned by the authenticated user.
  */
 export async function createResource(data: ResourceCreateInput): Promise<Resource> {
