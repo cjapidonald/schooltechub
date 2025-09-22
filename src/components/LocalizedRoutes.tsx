@@ -25,6 +25,8 @@ import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Builder from '@/pages/Builder';
+import AdminLayout from '@/pages/admin/AdminLayout';
+import AdminPage from '@/pages/admin/AdminPage';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { lang } = useParams<{ lang?: string }>();
@@ -82,7 +84,13 @@ export const LocalizedRoutes = () => {
       <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
       <Route path="/account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
-      
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminPage />} />
+        <Route path=":segment" element={<AdminPage />} />
+        <Route path=":segment/:subSegment" element={<AdminPage />} />
+        <Route path=":segment/:subSegment/:child" element={<AdminPage />} />
+      </Route>
+
       {/* Localized routes for Albanian and Vietnamese */}
       <Route path="/:lang">
         <Route index element={<RouteWrapper><Index /></RouteWrapper>} />
