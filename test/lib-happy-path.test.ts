@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { listMyClasses, getClass, createClass, updateClass, deleteClass, linkPlanToClass, unlinkPlanFromClass } from "@/lib/classes";
 import { saveDraft, getMyPlans, getPlanWithSteps, exportPlanToDocx, exportPlanToPDF } from "@/lib/lessonPlans";
-import { getMyNotifications, markRead, getPrefs, updatePrefs } from "@/lib/notifications";
+import { getMyNotifications, markRead, markAllRead, getPrefs, updatePrefs } from "@/lib/notifications";
 import {
   listProjects,
   getProject,
@@ -403,6 +403,10 @@ describe("notification helpers", () => {
 
   it("marks notifications read", async () => {
     await expect(markRead("notif-1", client)).resolves.toBeUndefined();
+  });
+
+  it("marks all notifications read", async () => {
+    await expect(markAllRead(client)).resolves.toBeUndefined();
   });
 
   it("gets and updates prefs", async () => {

@@ -1281,6 +1281,7 @@ export const en = {
     },
     tabs: {
       overview: "Overview",
+      notifications: "Notifications",
       security: "Security",
       activity: "Activity"
     },
@@ -1317,16 +1318,63 @@ export const en = {
       }
     },
     notifications: {
-      title: "Notifications",
-      description: "Decide when you'd like to hear from us.",
-      updates: "Product and newsletter updates",
-      updatesDescription: "Occasional product announcements and curated resources.",
-      commentReplies: "Comment replies",
-      commentRepliesDescription: "Email me when someone responds to my comments.",
-      productAnnouncements: "Service announcements",
-      productAnnouncementsDescription: "Important information about maintenance or downtime.",
-      blogMentions: "Blog mentions",
-      blogMentionsDescription: "Alerts when one of my articles is published or featured."
+      tab: {
+        title: "Notifications",
+        description: "Stay on top of resource approvals, blog posts, and research updates.",
+        markAll: "Mark all read",
+        empty: "You're all caught up!",
+        unread: "New",
+        loading: "Loading notifications..."
+      },
+      preferences: {
+        title: "Email preferences",
+        description: "Choose which email updates you'd like to receive.",
+        emailEnabled: {
+          label: "Email notifications",
+          description: "Send me email updates as well as in-app alerts."
+        },
+        resourceApproved: {
+          label: "Resource approvals",
+          description: "Email me when one of my resources is approved."
+        },
+        blogpostApproved: {
+          label: "Blog posts",
+          description: "Email me when my blog posts are approved."
+        },
+        researchApplicationApproved: {
+          label: "Research participation",
+          description: "Notify me when my research applications are approved."
+        },
+        commentReply: {
+          label: "Comment replies",
+          description: "Email me when someone replies to my comments."
+        }
+      },
+      feed: {
+        resourceApproved: {
+          title: "Resource approved",
+          body: "“{title}” was approved and is now live on SchoolTech Hub.",
+          fallbackTitle: "your resource"
+        },
+        blogpostApproved: {
+          title: "Blog post approved",
+          body: "“{title}” is approved and will be published soon.",
+          fallbackTitle: "your blog post"
+        },
+        researchApplicationApproved: {
+          title: "Research application approved",
+          body: "You're now part of “{title}”. Resources are ready for you to explore.",
+          fallbackTitle: "your project"
+        },
+        commentReply: {
+          title: "New comment reply",
+          body: "Someone replied to your comment."
+        },
+        fallback: {
+          title: "New notification",
+          body: "Visit the notifications tab for more details."
+        }
+      }
     },
     activity: {
       title: "Activity summary",

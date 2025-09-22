@@ -1281,6 +1281,7 @@ export const sq = {
     },
     tabs: {
       overview: "Përmbledhje",
+      notifications: "Njoftimet",
       security: "Siguria",
       activity: "Aktiviteti"
     },
@@ -1317,16 +1318,63 @@ export const sq = {
       }
     },
     notifications: {
-      title: "Njoftimet",
-      description: "Zgjidh kur dëshiron të të kontaktojmë.",
-      updates: "Përditësime dhe newsletter",
-      updatesDescription: "Njoftime të rralla rreth risive dhe burimeve kryesore.",
-      commentReplies: "Përgjigjet e komenteve",
-      commentRepliesDescription: "Merr email kur dikush përgjigjet në komentet e tua.",
-      productAnnouncements: "Njoftime shërbimi",
-      productAnnouncementsDescription: "Informacione të rëndësishme për mirëmbajtje ose ndërprerje.",
-      blogMentions: "Përmendje në blog",
-      blogMentionsDescription: "Sinjalizime kur artikujt e tu publikohen ose veçohen."
+      tab: {
+        title: "Njoftimet",
+        description: "Qëndroni të përditësuar me miratimet e burimeve, postimet dhe kërkimet.",
+        markAll: "Shënoji të gjitha si të lexuara",
+        empty: "Jeni në rregull për momentin!",
+        unread: "E re",
+        loading: "Duke ngarkuar njoftimet..."
+      },
+      preferences: {
+        title: "Preferencat e emailit",
+        description: "Zgjidhni cilat përditësime me email dëshironi të merrni.",
+        emailEnabled: {
+          label: "Njoftime me email",
+          description: "Më dërgoni përditësime me email dhe njoftime në aplikacion."
+        },
+        resourceApproved: {
+          label: "Miratimet e burimeve",
+          description: "Më dërgoni email kur një nga burimet e mia miratohet."
+        },
+        blogpostApproved: {
+          label: "Postime blogu",
+          description: "Më njoftoni kur postimet e mia në blog miratohen."
+        },
+        researchApplicationApproved: {
+          label: "Pjesëmarrja në kërkim",
+          description: "Më njoftoni kur aplikimet e mia kërkimore miratohen."
+        },
+        commentReply: {
+          label: "Përgjigje komentesh",
+          description: "Më dërgoni email kur dikush i përgjigjet komenteve të mia."
+        }
+      },
+      feed: {
+        resourceApproved: {
+          title: "Burimi u miratua",
+          body: "“{title}” u miratua dhe tani është aktiv në SchoolTech Hub.",
+          fallbackTitle: "burimi juaj"
+        },
+        blogpostApproved: {
+          title: "Postimi në blog u miratua",
+          body: "“{title}” u miratua dhe së shpejti do të publikohet.",
+          fallbackTitle: "postimi juaj në blog"
+        },
+        researchApplicationApproved: {
+          title: "Aplikimi kërkimor u miratua",
+          body: "Tani jeni pjesë e “{title}”. Burimet janë gati për t'u eksploruar.",
+          fallbackTitle: "projekti juaj"
+        },
+        commentReply: {
+          title: "Përgjigje e re në koment",
+          body: "Dikush i është përgjigjur komentit tuaj."
+        },
+        fallback: {
+          title: "Njoftim i ri",
+          body: "Vizitoni skedën e njoftimeve për më shumë detaje."
+        }
+      }
     },
     activity: {
       title: "Përmbledhja e aktivitetit",

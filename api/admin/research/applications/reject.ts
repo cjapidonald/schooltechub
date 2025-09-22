@@ -18,6 +18,7 @@ interface ResearchApplicationRecord {
   applicant_id: string;
   project_id: string;
   status: string;
+  project?: { id: string; title?: string | null } | null;
 }
 
 export default async function handler(request: Request): Promise<Response> {
@@ -40,7 +41,7 @@ export default async function handler(request: Request): Promise<Response> {
   const { supabase, user } = context;
   const existingResult = await supabase
     .from<ResearchApplicationRecord>("research_applications")
-    .select("id, applicant_id, project_id, status")
+    .select("id, applicant_id, project_id, status, project:research_projects ( id, title )")
     .eq("id", applicationId)
     .maybeSingle();
 
@@ -68,16 +69,31 @@ export default async function handler(request: Request): Promise<Response> {
     return errorResponse(500, "Failed to reject research application");
   }
 
-  await createNotification(supabase, {
-    userId: updateResult.data.applicant_id,
-    type: "research_application_approved",
-    payload: {
+  let projectTitle = existingResult.data.project?.title ?? null;
+  if (!projectTitle) {
+    const projectResult = await supabase
+      .from<{ title?: string | null }>("research_projects")
+      .select("title")
+      .eq("id", updateResult.data.project_id)
+      .maybeSingle();
+
+    if (!projectResult.error) {
+      projectTitle = projectResult.data?.title ?? null;
+    }
+  }
+
+  await createNotification(
+    updateResult.data.applicant_id,
+    "research_application_approved",
+    {
       applicationId,
       projectId: updateResult.data.project_id,
+      projectTitle,
       status: "rejected",
       previousStatus: existingResult.data.status,
     },
-  });
+    { sendEmail: false }
+  );
 
   await recordAuditLog(supabase, {
     action: "admin.research.applications.reject",

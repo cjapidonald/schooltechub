@@ -105,6 +105,24 @@ export async function markRead(
   }
 }
 
+export async function markAllRead(
+  client: Client = supabase,
+): Promise<void> {
+  const userId = await requireUserId(client, "update notifications");
+
+  const { error } = await client
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", userId)
+    .eq("is_read", false);
+
+  if (error) {
+    throw new NotificationDataError("Failed to mark notifications as read.", {
+      cause: error,
+    });
+  }
+}
+
 export async function getPrefs(
   client: Client = supabase,
 ): Promise<NotificationPrefs> {

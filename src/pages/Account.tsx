@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
@@ -42,6 +42,15 @@ import {
 } from "lucide-react";
 import type { Database, Json } from "@/integrations/supabase/types";
 import { EnrolledClasses } from "@/components/EnrolledClasses";
+import {
+  getMyNotifications,
+  getPrefs,
+  markAllRead,
+  updatePrefs,
+  type NotificationPrefsPatch,
+} from "@/lib/notifications";
+import type { Notification, NotificationPrefs } from "@/types/platform";
+import { cn } from "@/lib/utils";
 
 const userRoleOptions: Database["public"]["Enums"]["user_role_enum"][] = [
   "Teacher",
@@ -51,24 +60,10 @@ const userRoleOptions: Database["public"]["Enums"]["user_role_enum"][] = [
   "Other",
 ];
 
-type NotificationPreferences = {
-  updates: boolean;
-  commentReplies: boolean;
-  productAnnouncements: boolean;
-  blogMentions: boolean;
-};
-
 type AccountSettings = {
   timezone: string;
   language: string;
   theme: "system" | "light" | "dark";
-};
-
-const defaultNotificationPreferences: NotificationPreferences = {
-  updates: true,
-  commentReplies: true,
-  productAnnouncements: false,
-  blogMentions: true,
 };
 
 const defaultAccountSettings: AccountSettings = {
@@ -95,12 +90,15 @@ const Account = () => {
   const { toast } = useToast();
   const { language, t } = useLanguage();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") ?? "overview";
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [notificationPrefsDraft, setNotificationPrefsDraft] = useState<NotificationPrefs | null>(null);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
-  const [notificationPreferences, setNotificationPreferences] = useState<NotificationPreferences>(defaultNotificationPreferences);
   const [accountSettings, setAccountSettings] = useState<AccountSettings>(defaultAccountSettings);
   const [profileForm, setProfileForm] = useState({
     fullName: "",
@@ -116,11 +114,6 @@ const Account = () => {
         navigate(getLocalizedPath("/auth", language));
       } else {
         setUser(user);
-        const metadataPrefs = (user.user_metadata?.notification_preferences ?? defaultNotificationPreferences) as NotificationPreferences;
-        setNotificationPreferences({
-          ...defaultNotificationPreferences,
-          ...metadataPrefs,
-        });
         const metadataSettings = (user.user_metadata?.account_settings ?? defaultAccountSettings) as AccountSettings;
         setAccountSettings({
           ...defaultAccountSettings,
@@ -148,6 +141,12 @@ const Account = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, language]);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const nextValue = tabParam ?? "overview";
+    setActiveTab(nextValue);
+  }, [searchParams]);
 
   const profileQuery = useQuery({
     queryKey: ["profile", user?.id],
@@ -253,6 +252,149 @@ const Account = () => {
     },
   });
 
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications"],
+    enabled: !checkingSession,
+    queryFn: () => getMyNotifications(),
+  });
+
+  const notificationPrefsQuery = useQuery({
+    queryKey: ["notification-prefs"],
+    enabled: !checkingSession,
+    queryFn: () => getPrefs(),
+  });
+
+  useEffect(() => {
+    if (notificationPrefsQuery.data) {
+      setNotificationPrefsDraft(notificationPrefsQuery.data);
+    }
+  }, [notificationPrefsQuery.data]);
+
+  const notifications = notificationsQuery.data ?? [];
+  const unreadCount = notifications.filter(notification => !notification.isRead).length;
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (value === "overview") {
+      nextParams.delete("tab");
+    } else {
+      nextParams.set("tab", value);
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const getNotificationCopy = (notification: Notification): { title: string; body: string } => {
+    const payload = notification.payload ?? {};
+
+    if (notification.type === "resource_approved") {
+      const title =
+        typeof payload.title === "string" && payload.title.trim().length > 0
+          ? payload.title
+          : t.account.notifications.feed.resourceApproved.fallbackTitle;
+      return {
+        title: t.account.notifications.feed.resourceApproved.title,
+        body: t.account.notifications.feed.resourceApproved.body.replace("{title}", title),
+      };
+    }
+
+    if (notification.type === "blogpost_approved") {
+      const title =
+        typeof payload.title === "string" && payload.title.trim().length > 0
+          ? payload.title
+          : t.account.notifications.feed.blogpostApproved.fallbackTitle;
+      return {
+        title: t.account.notifications.feed.blogpostApproved.title,
+        body: t.account.notifications.feed.blogpostApproved.body.replace("{title}", title),
+      };
+    }
+
+    if (notification.type === "research_application_approved") {
+      const title =
+        typeof payload.projectTitle === "string" && payload.projectTitle.trim().length > 0
+          ? payload.projectTitle
+          : t.account.notifications.feed.researchApplicationApproved.fallbackTitle;
+      return {
+        title: t.account.notifications.feed.researchApplicationApproved.title,
+        body: t.account.notifications.feed.researchApplicationApproved.body.replace("{title}", title),
+      };
+    }
+
+    if (notification.type === "comment_reply") {
+      return {
+        title: t.account.notifications.feed.commentReply.title,
+        body: t.account.notifications.feed.commentReply.body,
+      };
+    }
+
+    return {
+      title: t.account.notifications.feed.fallback.title,
+      body: t.account.notifications.feed.fallback.body,
+    };
+  };
+
+  const updatePrefDraft = (key: keyof NotificationPrefsPatch, value: boolean) => {
+    setNotificationPrefsDraft(prev => {
+      if (!prev) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [key]: value,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+  };
+
+  const handleSavePrefs = () => {
+    if (!notificationPrefsDraft) {
+      return;
+    }
+
+    const patch: NotificationPrefsPatch = {
+      emailEnabled: notificationPrefsDraft.emailEnabled,
+      resourceApproved: notificationPrefsDraft.resourceApproved,
+      blogpostApproved: notificationPrefsDraft.blogpostApproved,
+      researchApplicationApproved: notificationPrefsDraft.researchApplicationApproved,
+      commentReply: notificationPrefsDraft.commentReply,
+    };
+
+    updateNotificationPrefsMutation.mutate(patch);
+  };
+
+  const markAllReadMutation = useMutation({
+    mutationFn: () => markAllRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: t.common.error,
+        description: error instanceof Error ? error.message : undefined,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateNotificationPrefsMutation = useMutation({
+    mutationFn: (patch: NotificationPrefsPatch) => updatePrefs(patch),
+    onSuccess: (data) => {
+      setNotificationPrefsDraft(data);
+      queryClient.setQueryData(["notification-prefs"], data);
+      toast({
+        title: t.account.toast.notificationsUpdated,
+        variant: "default",
+      });
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: t.common.error,
+        description: error instanceof Error ? error.message : undefined,
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
       if (!user) return;
@@ -327,34 +469,6 @@ const Account = () => {
     onError: (error) => {
       toast({
         title: t.account.toast.passwordError,
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const updateNotificationsMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) return;
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          notification_preferences: notificationPreferences,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      toast({
-        title: t.account.toast.notificationsUpdated,
-        variant: "default",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: t.common.error,
         description: error.message,
         variant: "destructive",
       });
@@ -582,7 +696,7 @@ const Account = () => {
           </Card>
         )}
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="overview" className="gap-2">
               <Sparkles className="h-4 w-4" />
@@ -591,6 +705,15 @@ const Account = () => {
             <TabsTrigger value="classes" className="gap-2">
               <GraduationCap className="h-4 w-4" />
               Classes
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="gap-2">
+              <BellRing className="h-4 w-4" />
+              {t.account.tabs.notifications}
+              {unreadCount > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {unreadCount}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="security" className="gap-2">
               <Lock className="h-4 w-4" />
@@ -735,62 +858,6 @@ const Account = () => {
                   </CardFooter>
                 </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BellRing className="h-5 w-5 text-primary" />
-                      {t.account.notifications.title}
-                    </CardTitle>
-                    <CardDescription>{t.account.notifications.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                      <div>
-                        <p className="font-medium">{t.account.notifications.updates}</p>
-                        <p className="text-sm text-muted-foreground">{t.account.notifications.updatesDescription}</p>
-                      </div>
-                      <Switch
-                        checked={notificationPreferences.updates}
-                        onCheckedChange={(checked) => setNotificationPreferences(prev => ({ ...prev, updates: checked }))}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                      <div>
-                        <p className="font-medium">{t.account.notifications.commentReplies}</p>
-                        <p className="text-sm text-muted-foreground">{t.account.notifications.commentRepliesDescription}</p>
-                      </div>
-                      <Switch
-                        checked={notificationPreferences.commentReplies}
-                        onCheckedChange={(checked) => setNotificationPreferences(prev => ({ ...prev, commentReplies: checked }))}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                      <div>
-                        <p className="font-medium">{t.account.notifications.productAnnouncements}</p>
-                        <p className="text-sm text-muted-foreground">{t.account.notifications.productAnnouncementsDescription}</p>
-                      </div>
-                      <Switch
-                        checked={notificationPreferences.productAnnouncements}
-                        onCheckedChange={(checked) => setNotificationPreferences(prev => ({ ...prev, productAnnouncements: checked }))}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                      <div>
-                        <p className="font-medium">{t.account.notifications.blogMentions}</p>
-                        <p className="text-sm text-muted-foreground">{t.account.notifications.blogMentionsDescription}</p>
-                      </div>
-                      <Switch
-                        checked={notificationPreferences.blogMentions}
-                        onCheckedChange={(checked) => setNotificationPreferences(prev => ({ ...prev, blogMentions: checked }))}
-                      />
-                    </div>
-                  </CardContent>
-                  <CardFooter className="justify-end">
-                    <Button onClick={() => updateNotificationsMutation.mutate()} disabled={updateNotificationsMutation.isPending}>
-                      {updateNotificationsMutation.isPending ? t.common.loading : t.common.save}
-                    </Button>
-                  </CardFooter>
-                </Card>
               </div>
 
               <div className="space-y-6">
@@ -845,6 +912,174 @@ const Account = () => {
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+              <Card>
+                <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <BellRing className="h-5 w-5 text-primary" />
+                      {t.account.notifications.tab.title}
+                    </CardTitle>
+                    <CardDescription>{t.account.notifications.tab.description}</CardDescription>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => markAllReadMutation.mutate()}
+                    disabled={unreadCount === 0 || markAllReadMutation.isPending || notificationsQuery.isLoading}
+                  >
+                    {markAllReadMutation.isPending ? t.common.loading : t.account.notifications.tab.markAll}
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {notificationsQuery.isLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 w-full" />
+                      <Skeleton className="h-16 w-full" />
+                    </div>
+                  ) : notificationsQuery.isError ? (
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                      {t.common.error}
+                    </div>
+                  ) : notifications.length === 0 ? (
+                    <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                      {t.account.notifications.tab.empty}
+                    </div>
+                  ) : (
+                    notifications.map(notification => {
+                      const copy = getNotificationCopy(notification);
+                      const createdAt = notification.createdAt ? new Date(notification.createdAt) : null;
+                      const timeAgo = createdAt && !Number.isNaN(createdAt.getTime())
+                        ? formatDistanceToNow(createdAt, { addSuffix: true })
+                        : null;
+                      const isUnread = !notification.isRead;
+
+                      return (
+                        <div
+                          key={notification.id}
+                          className={cn(
+                            "rounded-lg border p-4 transition",
+                            isUnread ? "bg-primary/5" : "bg-background"
+                          )}
+                        >
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{copy.title}</span>
+                                {isUnread && <Badge variant="outline">{t.account.notifications.tab.unread}</Badge>}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{copy.body}</p>
+                            </div>
+                            {timeAgo && (
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">{timeAgo}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t.account.notifications.preferences.title}</CardTitle>
+                  <CardDescription>{t.account.notifications.preferences.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {notificationPrefsQuery.isLoading && !notificationPrefsDraft ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  ) : notificationPrefsQuery.isError ? (
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
+                      {t.common.error}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div>
+                          <p className="font-medium">{t.account.notifications.preferences.emailEnabled.label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t.account.notifications.preferences.emailEnabled.description}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={notificationPrefsDraft?.emailEnabled ?? true}
+                          onCheckedChange={checked => updatePrefDraft("emailEnabled", checked)}
+                          disabled={!notificationPrefsDraft}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div>
+                          <p className="font-medium">{t.account.notifications.preferences.resourceApproved.label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t.account.notifications.preferences.resourceApproved.description}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={notificationPrefsDraft?.resourceApproved ?? true}
+                          onCheckedChange={checked => updatePrefDraft("resourceApproved", checked)}
+                          disabled={!notificationPrefsDraft}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div>
+                          <p className="font-medium">{t.account.notifications.preferences.blogpostApproved.label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t.account.notifications.preferences.blogpostApproved.description}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={notificationPrefsDraft?.blogpostApproved ?? true}
+                          onCheckedChange={checked => updatePrefDraft("blogpostApproved", checked)}
+                          disabled={!notificationPrefsDraft}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div>
+                          <p className="font-medium">{t.account.notifications.preferences.researchApplicationApproved.label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t.account.notifications.preferences.researchApplicationApproved.description}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={notificationPrefsDraft?.researchApplicationApproved ?? true}
+                          onCheckedChange={checked => updatePrefDraft("researchApplicationApproved", checked)}
+                          disabled={!notificationPrefsDraft}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div>
+                          <p className="font-medium">{t.account.notifications.preferences.commentReply.label}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t.account.notifications.preferences.commentReply.description}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={notificationPrefsDraft?.commentReply ?? true}
+                          onCheckedChange={checked => updatePrefDraft("commentReply", checked)}
+                          disabled={!notificationPrefsDraft}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+                <CardFooter className="justify-end">
+                  <Button
+                    onClick={handleSavePrefs}
+                    disabled={!notificationPrefsDraft || updateNotificationPrefsMutation.isPending}
+                  >
+                    {updateNotificationPrefsMutation.isPending ? t.common.loading : t.common.save}
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
           </TabsContent>
 

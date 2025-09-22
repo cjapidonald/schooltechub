@@ -18,6 +18,7 @@ interface BlogPostRecord {
   status?: string | null;
   author_id?: string | null;
   created_by?: string | null;
+  title?: string | null;
 }
 
 function resolveAuthorId(record: BlogPostRecord): string | null {
@@ -44,14 +45,14 @@ export default async function handler(request: Request): Promise<Response> {
   const { supabase, user } = context;
   let existingResult = await supabase
     .from<BlogPostRecord>("blog_posts")
-    .select("id, status, author_id, created_by")
+    .select("id, status, author_id, created_by, title")
     .eq("id", postId)
     .maybeSingle();
 
   if (existingResult.error) {
     existingResult = await supabase
       .from<BlogPostRecord>("blog_posts")
-      .select("id, status")
+      .select("id, status, title")
       .eq("id", postId)
       .maybeSingle();
   }
@@ -82,15 +83,17 @@ export default async function handler(request: Request): Promise<Response> {
 
   const authorId = resolveAuthorId(existingResult.data);
   if (authorId) {
-    await createNotification(supabase, {
-      userId: authorId,
-      type: "blogpost_approved",
-      payload: {
+    await createNotification(
+      authorId,
+      "blogpost_approved",
+      {
         postId,
+        title: existingResult.data.title ?? null,
         status: "rejected",
         previousStatus: existingResult.data.status ?? null,
       },
-    });
+      { sendEmail: false }
+    );
   }
 
   await recordAuditLog(supabase, {

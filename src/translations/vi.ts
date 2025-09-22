@@ -1281,6 +1281,7 @@ export const vi = {
     },
     tabs: {
       overview: "Tổng quan",
+      notifications: "Thông báo",
       security: "Bảo mật",
       activity: "Hoạt động"
     },
@@ -1317,16 +1318,63 @@ export const vi = {
       }
     },
     notifications: {
-      title: "Thông báo",
-      description: "Chọn thời điểm bạn muốn nhận thông tin từ chúng tôi.",
-      updates: "Cập nhật sản phẩm và bản tin",
-      updatesDescription: "Thông báo quan trọng và tài nguyên nổi bật.",
-      commentReplies: "Phản hồi bình luận",
-      commentRepliesDescription: "Nhận email khi có người trả lời bình luận của bạn.",
-      productAnnouncements: "Thông báo dịch vụ",
-      productAnnouncementsDescription: "Thông tin về bảo trì hoặc gián đoạn hệ thống.",
-      blogMentions: "Bài viết của tôi",
-      blogMentionsDescription: "Báo khi bài viết của bạn được xuất bản hoặc giới thiệu."
+      tab: {
+        title: "Thông báo",
+        description: "Theo dõi các lần phê duyệt tài nguyên, bài viết và nghiên cứu.",
+        markAll: "Đánh dấu đã đọc tất cả",
+        empty: "Bạn đã đọc hết rồi!",
+        unread: "Mới",
+        loading: "Đang tải thông báo..."
+      },
+      preferences: {
+        title: "Tùy chọn email",
+        description: "Chọn những thông báo qua email mà bạn muốn nhận.",
+        emailEnabled: {
+          label: "Thông báo qua email",
+          description: "Gửi cho tôi cả email và thông báo trong ứng dụng."
+        },
+        resourceApproved: {
+          label: "Phê duyệt tài nguyên",
+          description: "Thông báo cho tôi khi tài nguyên của tôi được phê duyệt."
+        },
+        blogpostApproved: {
+          label: "Bài viết blog",
+          description: "Gửi email khi bài viết blog của tôi được phê duyệt."
+        },
+        researchApplicationApproved: {
+          label: "Tham gia nghiên cứu",
+          description: "Thông báo khi đơn đăng ký nghiên cứu của tôi được chấp nhận."
+        },
+        commentReply: {
+          label: "Phản hồi bình luận",
+          description: "Gửi email khi có người trả lời bình luận của tôi."
+        }
+      },
+      feed: {
+        resourceApproved: {
+          title: "Tài nguyên đã được duyệt",
+          body: "“{title}” đã được duyệt và hiển thị trên SchoolTech Hub.",
+          fallbackTitle: "tài nguyên của bạn"
+        },
+        blogpostApproved: {
+          title: "Bài viết blog đã được duyệt",
+          body: "“{title}” đã được duyệt và sẽ sớm xuất bản.",
+          fallbackTitle: "bài viết blog của bạn"
+        },
+        researchApplicationApproved: {
+          title: "Đơn tham gia nghiên cứu đã được duyệt",
+          body: "Bạn đã trở thành thành viên của “{title}”. Hãy khám phá tài nguyên ngay hôm nay.",
+          fallbackTitle: "dự án của bạn"
+        },
+        commentReply: {
+          title: "Phản hồi mới",
+          body: "Có người vừa trả lời bình luận của bạn."
+        },
+        fallback: {
+          title: "Thông báo mới",
+          body: "Truy cập tab thông báo để xem chi tiết."
+        }
+      }
     },
     activity: {
       title: "Tổng quan hoạt động",

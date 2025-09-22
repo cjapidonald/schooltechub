@@ -18,6 +18,7 @@ interface ResourceRecord {
   created_by: string | null;
   status: string;
   is_active: boolean | null;
+  title?: string | null;
 }
 
 export default async function handler(request: Request): Promise<Response> {
@@ -40,7 +41,7 @@ export default async function handler(request: Request): Promise<Response> {
   const { supabase, user } = context;
   const existingResult = await supabase
     .from<ResourceRecord>("resources")
-    .select("id, created_by, status, is_active")
+    .select("id, created_by, status, is_active, title")
     .eq("id", resourceId)
     .maybeSingle();
 
@@ -70,14 +71,9 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   if (existingResult.data.created_by) {
-    await createNotification(supabase, {
-      userId: existingResult.data.created_by,
-      type: "resource_approved",
-      payload: {
-        resourceId,
-        status: "approved",
-        previousStatus: existingResult.data.status,
-      },
+    await createNotification(existingResult.data.created_by, "resource_approved", {
+      resourceId,
+      title: existingResult.data.title ?? null,
     });
   }
 
