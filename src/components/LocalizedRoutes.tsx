@@ -1,6 +1,5 @@
 import React from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
-import { LanguageProvider } from '@/contexts/LanguageContext';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
@@ -13,8 +12,6 @@ import FAQ from '@/pages/FAQ';
 import Edutech from '@/pages/Edutech';
 import TeacherDiary from '@/pages/TeacherDiary';
 import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
-import LessonPlans from '@/pages/LessonPlans';
-import LessonPlan from '@/pages/LessonPlan';
 import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
@@ -65,8 +62,6 @@ export const LocalizedRoutes = () => {
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-      <Route path="/lesson-plans" element={<RouteWrapper><LessonPlans /></RouteWrapper>} />
-      <Route path="/lesson-plans/:slug" element={<RouteWrapper><LessonPlan /></RouteWrapper>} />
       <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
       <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
@@ -93,8 +88,6 @@ export const LocalizedRoutes = () => {
         <Route path="services" element={<RouteWrapper><Services /></RouteWrapper>} />
         <Route path="blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
         <Route path="blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-        <Route path="lesson-plans" element={<RouteWrapper><LessonPlans /></RouteWrapper>} />
-        <Route path="lesson-plans/:slug" element={<RouteWrapper><LessonPlan /></RouteWrapper>} />
         <Route path="builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
         <Route path="builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
         <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
