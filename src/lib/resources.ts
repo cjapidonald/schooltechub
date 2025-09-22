@@ -156,8 +156,8 @@ export async function searchResources(options: ResourceSearchOptions = {}): Prom
 
       const tagValue = searchTerm.replace(/[{}]/g, "").trim();
       if (tagValue) {
-        const escapedTag = escapeForOr(tagValue.replace(/"/g, "\\\""));
-        orFilters.push(`tags.ov.{\"${escapedTag}\"}`);
+        const escapedTag = escapeForOr(tagValue.replace(/"/g, '\\"'));
+        orFilters.push(`tags.ov.{"${escapedTag}"}`);
       }
 
       query = query.or(orFilters.join(","));

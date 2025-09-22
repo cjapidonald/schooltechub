@@ -3,16 +3,7 @@ import { useCallback, useState } from "react";
 import { SEO } from "@/components/SEO";
 import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import { StepEditor } from "@/components/lesson-draft/StepEditor";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
 
 const BuilderPage = () => {
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
@@ -54,23 +45,11 @@ const BuilderPage = () => {
         </div>
       </main>
 
-      <Dialog open={isResourceSearchOpen} onOpenChange={handleResourceDialogChange}>
-        <DialogContent id="lesson-draft-resource-search">
-          <DialogHeader>
-            <DialogTitle>Search resources</DialogTitle>
-            <DialogDescription>
-              Resource search is coming soon. You&apos;ll be able to browse and attach classroom materials in the next update.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Close
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ResourceSearchModal
+        open={isResourceSearchOpen}
+        onOpenChange={handleResourceDialogChange}
+        activeStepId={resourceSearchStepId}
+      />
     </div>
   );
 };
