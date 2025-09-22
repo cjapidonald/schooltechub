@@ -1160,6 +1160,68 @@ export const en = {
       vi: "Vietnamese"
     }
   },
+  lessonBuilder: {
+    states: {
+      creating: "Preparing your new lesson plan...",
+      creatingDescription: "Setting up a fresh workspace for your ideas.",
+      error: "We couldn't open the builder",
+      errorDescription: "Please retry or refresh the page.",
+      retry: "Try again",
+      loading: "Loading lesson plan...",
+    },
+    toolbar: {
+      draftStatus: "Draft",
+      publishedStatus: "Published",
+      previewLabel: "Preview",
+      savingLabel: "Saving...",
+      historyLabel: "Version history",
+      lastSavedPrefix: "Last saved",
+      noHistory: "No versions yet",
+    },
+    parts: {
+      title: "Plan structure",
+      empty: "Add parts to organise your plan.",
+    },
+    history: {
+      title: "Recent versions",
+      empty: "No saved versions yet.",
+    },
+    meta: {
+      titleLabel: "Lesson title",
+      summaryLabel: "Lesson summary",
+      stageLabel: "Stage",
+      subjectsLabel: "Subjects",
+      durationLabel: "Duration",
+      technologyLabel: "Technology",
+    },
+    canvas: {
+      title: "Learning sequence",
+      addStep: "Add step",
+      empty: "Start by adding your first learning step.",
+      stepCopy: {
+        titlePlaceholder: "Name this learning step",
+        descriptionPlaceholder: "Describe what happens during this step...",
+        notesPlaceholder: "Add facilitator notes or differentiation ideas",
+        activitiesTitle: "Linked activities",
+        removeActivity: "Remove",
+      },
+    },
+    activities: {
+      title: "Find activities",
+      placeholder: "Search by topic, tool, or outcome",
+      helper: "Type at least {min} characters to search our activity library.",
+      addLabel: "Add to step",
+      empty: "No activities match your search yet.",
+    },
+    standards: {
+      title: "Standards & objectives",
+      empty: "No standards available yet.",
+      selectedLabel: "General objective",
+    },
+    preview: {
+      title: "Lesson preview",
+    },
+  },
   account: {
     seo: {
       title: "My Account | SchoolTech Hub",

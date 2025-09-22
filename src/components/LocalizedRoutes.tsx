@@ -17,6 +17,8 @@ import LessonPlans from '@/pages/LessonPlans';
 import LessonPlan from '@/pages/LessonPlan';
 import Worksheets from '@/pages/Worksheets';
 import Worksheet from '@/pages/Worksheet';
+import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
+import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
 import Account from '@/pages/Account';
 import NotFound from '@/pages/NotFound';
@@ -42,6 +44,16 @@ const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   );
 };
 
+const LegacyBuilderRedirect: React.FC<{ includeLanguage?: boolean }> = ({ includeLanguage = false }) => {
+  const params = useParams<{ lang?: string; id?: string }>();
+  const langPrefix = includeLanguage && params.lang ? `/${params.lang}` : '';
+  const destination = params.id
+    ? `${langPrefix}/builder/lesson-plans/${params.id}`
+    : `${langPrefix}/builder/lesson-plans`;
+
+  return <Navigate to={destination} replace />;
+};
+
 export const LocalizedRoutes = () => {
   return (
     <Routes>
@@ -53,6 +65,10 @@ export const LocalizedRoutes = () => {
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/lesson-plans" element={<RouteWrapper><LessonPlans /></RouteWrapper>} />
       <Route path="/lesson-plans/:slug" element={<RouteWrapper><LessonPlan /></RouteWrapper>} />
+      <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
+      <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
+      <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
+      <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
       <Route path="/worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
@@ -75,6 +91,10 @@ export const LocalizedRoutes = () => {
         <Route path="blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
         <Route path="lesson-plans" element={<RouteWrapper><LessonPlans /></RouteWrapper>} />
         <Route path="lesson-plans/:slug" element={<RouteWrapper><LessonPlan /></RouteWrapper>} />
+        <Route path="builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
+        <Route path="builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
+        <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
+        <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
         <Route path="worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />

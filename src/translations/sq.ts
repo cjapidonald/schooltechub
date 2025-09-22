@@ -1160,6 +1160,68 @@ export const sq = {
       vi: "Vietnamisht"
     }
   },
+  lessonBuilder: {
+    states: {
+      creating: "Po përgatisim planin tuaj të ri...",
+      creatingDescription: "Po krijojmë një hapësirë të re për idetë tuaja.",
+      error: "Nuk mundëm të hapim ndërtuesin",
+      errorDescription: "Ju lutemi provoni përsëri ose rifreskoni faqen.",
+      retry: "Provo përsëri",
+      loading: "Duke ngarkuar planin e mësimit...",
+    },
+    toolbar: {
+      draftStatus: "Draft",
+      publishedStatus: "I publikuar",
+      previewLabel: "Pamje paraprake",
+      savingLabel: "Duke ruajtur...",
+      historyLabel: "Historiku i versioneve",
+      lastSavedPrefix: "Ruajtur së fundmi",
+      noHistory: "Ende nuk ka versione",
+    },
+    parts: {
+      title: "Struktura e planit",
+      empty: "Shto pjesë për të organizuar planin.",
+    },
+    history: {
+      title: "Versionet e fundit",
+      empty: "Ende nuk ka versione të ruajtura.",
+    },
+    meta: {
+      titleLabel: "Titulli i mësimit",
+      summaryLabel: "Përmbledhja e mësimit",
+      stageLabel: "Niveli",
+      subjectsLabel: "Lëndët",
+      durationLabel: "Kohëzgjatja",
+      technologyLabel: "Teknologjia",
+    },
+    canvas: {
+      title: "Rrjedha e të nxënit",
+      addStep: "Shto hap",
+      empty: "Filloni duke shtuar hapin e parë të mësimit.",
+      stepCopy: {
+        titlePlaceholder: "Emërto këtë hap të të nxënit",
+        descriptionPlaceholder: "Përshkruani çfarë ndodh gjatë këtij hapi...",
+        notesPlaceholder: "Shto shënime ose ide diferencimi",
+        activitiesTitle: "Aktivitete të lidhura",
+        removeActivity: "Hiq",
+      },
+    },
+    activities: {
+      title: "Gjej aktivitete",
+      placeholder: "Kërko sipas temës, mjetit ose rezultatit",
+      helper: "Shkruani të paktën {min} karaktere për të kërkuar në bibliotekën e aktiviteteve.",
+      addLabel: "Shto te hapi",
+      empty: "Asnjë aktivitet nuk përputhet me kërkimin tuaj.",
+    },
+    standards: {
+      title: "Standardet & objektivat",
+      empty: "Ende nuk ka standarde.",
+      selectedLabel: "Objektiv i përgjithshëm",
+    },
+    preview: {
+      title: "Pamje paraprake e planit",
+    },
+  },
   account: {
     seo: {
       title: "Llogaria Ime | SchoolTech Hub",

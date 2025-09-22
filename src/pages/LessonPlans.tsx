@@ -18,6 +18,8 @@ import type {
   LessonPlanListResponse,
   Stage,
 } from "@/types/lesson-plans";
+import { builderPlanToLessonPlan } from "@/types/lesson-builder";
+import type { LessonBuilderPlanResponse } from "@/types/lesson-builder";
 
 const LESSON_PARAM = "lesson";
 
@@ -86,11 +88,12 @@ async function fetchLessonPlans(
 }
 
 async function fetchLessonPlanDetail(slug: string): Promise<LessonPlan> {
-  const response = await fetch(`/api/lesson-plans/${slug}`);
+  const response = await fetch(`/api/builder/lesson-plans/${slug}?lookup=slug`);
   if (!response.ok) {
     throw new Error("Failed to load lesson plan");
   }
-  return response.json() as Promise<LessonPlan>;
+  const payload = (await response.json()) as LessonBuilderPlanResponse;
+  return builderPlanToLessonPlan(payload.plan);
 }
 
 const stageConfigs = [
