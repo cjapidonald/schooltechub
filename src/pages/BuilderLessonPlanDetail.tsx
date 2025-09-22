@@ -25,9 +25,9 @@ import {
 import type {
   LessonBuilderPlan,
   LessonBuilderVersionEntry,
-  LessonBuilderResourceSearchResult,
 } from "@/types/lesson-builder";
 import { mergeResourceValues, mergeStepValues } from "@/types/lesson-builder";
+import type { Resource } from "@/types/resources";
 
 const AUTOSAVE_DELAY = 1500;
 
@@ -308,7 +308,7 @@ const BuilderLessonPlanDetail = () => {
     return `${existing.trim()}\n\n${trimmedAddition}`;
   };
 
-  const handleResourceSelect = (resource: LessonBuilderResourceSearchResult) => {
+  const handleResourceSelect = (resource: Resource) => {
     const stepId = resourceSearchStepId ?? selectedStepId;
     if (!stepId) {
       return;
@@ -317,11 +317,12 @@ const BuilderLessonPlanDetail = () => {
     const snapshot = mergeResourceValues({
       id: resource.id,
       label: resource.title,
-      url: resource.url,
-      type: resource.type ?? resource.mediaType ?? null,
-      thumbnail: resource.thumbnail ?? null,
-      domain: resource.domain ?? null,
-      notes: resource.instructionalNote ?? null,
+      title: resource.title,
+      url: resource.url ?? undefined,
+      type: resource.type ?? null,
+      thumbnail: resource.thumbnail_url ?? null,
+      domain: null,
+      notes: resource.description ?? null,
     });
 
     let previousResource: LessonBuilderPlan["steps"][number]["resources"][number] | null = null;
@@ -339,7 +340,7 @@ const BuilderLessonPlanDetail = () => {
       return {
         ...step,
         resources: [snapshot, ...filtered],
-        notes: mergeInstructionalNotes(step.notes ?? null, resource.instructionalNote ?? null),
+        notes: mergeInstructionalNotes(step.notes ?? null, resource.description ?? null),
       };
     });
 
@@ -508,7 +509,6 @@ const BuilderLessonPlanDetail = () => {
         </div>
       </div>
       <ResourceSearchModal
-        planId={plan.id}
         open={isResourceSearchOpen}
         onOpenChange={(open) => {
           setIsResourceSearchOpen(open);

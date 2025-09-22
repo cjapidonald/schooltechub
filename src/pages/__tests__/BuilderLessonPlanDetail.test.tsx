@@ -11,7 +11,10 @@ const builderApiMocks = vi.hoisted(() => ({
   fetchPlan: vi.fn(),
   fetchHistory: vi.fn(),
   autosave: vi.fn(),
-  searchResources: vi.fn(),
+}));
+
+const resourcesMocks = vi.hoisted(() => ({
+  search: vi.fn(),
 }));
 
 vi.mock("react-router-dom", async () => {
@@ -30,11 +33,15 @@ vi.mock("@/lib/builder-api", () => ({
   fetchLessonBuilderPlan: builderApiMocks.fetchPlan,
   fetchLessonBuilderHistory: builderApiMocks.fetchHistory,
   autosaveLessonBuilderPlan: builderApiMocks.autosave,
-  searchLessonBuilderResources: builderApiMocks.searchResources,
+}));
+
+vi.mock("@/lib/resources", () => ({
+  searchResources: resourcesMocks.search,
 }));
 
 describe("BuilderLessonPlanDetail", () => {
-  const { fetchPlan, fetchHistory, autosave, searchResources } = builderApiMocks;
+  const { fetchPlan, fetchHistory, autosave } = builderApiMocks;
+  const { search: searchResources } = resourcesMocks;
   const basePlan = {
     id: "plan-1",
     slug: "plan-1",
@@ -79,22 +86,25 @@ describe("BuilderLessonPlanDetail", () => {
     title: "Great Resource",
     description: "A helpful resource",
     url: "https://example.com/resource",
+    storage_path: null,
     type: "Video",
-    thumbnail: null,
-    domain: "example.com",
-    duration: "10 min",
-    mediaType: "Video",
+    subject: "Science",
     stage: "Middle School",
-    subjects: ["Science"],
-    favicon: null,
-    instructionalNote: "Discuss afterwards.",
+    tags: ["engagement"],
+    thumbnail_url: "https://example.com/thumbnail.jpg",
+    created_by: "user-1",
+    created_at: new Date().toISOString(),
+    status: "approved" as const,
+    approved_by: null,
+    approved_at: null,
+    is_active: true,
   };
 
   beforeEach(() => {
     fetchPlan.mockResolvedValue(JSON.parse(JSON.stringify(basePlan)));
     fetchHistory.mockResolvedValue([]);
     autosave.mockImplementation(async (_id: string, updatedPlan) => updatedPlan);
-    searchResources.mockResolvedValue([resource]);
+    searchResources.mockResolvedValue({ items: [resource], total: 1 });
   });
 
   afterEach(() => {
@@ -120,9 +130,8 @@ describe("BuilderLessonPlanDetail", () => {
     await new Promise((resolve) => setTimeout(resolve, 400));
 
     await waitFor(() => expect(searchResources).toHaveBeenCalled());
-    const [calledPlanId, params] = searchResources.mock.calls.at(-1) ?? [];
-    expect(calledPlanId).toBe("plan-1");
-    expect(params?.query).toBe("video");
+    const [filters] = searchResources.mock.calls.at(-1) ?? [];
+    expect(filters?.q).toBe("video");
 
     const addButton = await screen.findByRole("button", { name: /add/i });
     fireEvent.click(addButton);
@@ -132,7 +141,7 @@ describe("BuilderLessonPlanDetail", () => {
     );
 
     const notesField = screen.getByLabelText(/instructional notes/i) as HTMLTextAreaElement;
-    expect(notesField.value).toContain(resource.instructionalNote);
+    expect(notesField.value).toContain(resource.description);
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     await waitFor(() => expect(autosave).toHaveBeenCalled());
