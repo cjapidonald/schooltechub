@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Loader2, RefreshCw } from "lucide-react";
+
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,13 +54,10 @@ const BuilderLessonPlanDetail = () => {
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
-
-  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const latestPlan = useRef<LessonBuilderPlan | null>(null);
-
-  useEffect(() => {
-    if (planQuery.data) {
-      setPlan(planQuery.data);
+  const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [profileLogoUrl, setProfileLogoUrl] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestPlan = useRef<LessonBuilderPlan | null>(null);
@@ -134,10 +132,12 @@ const BuilderLessonPlanDetail = () => {
     };
   }, []);
 
-  useEffect(() => () => {
-    if (autosaveTimer.current) {
-      clearTimeout(autosaveTimer.current);
-    }
+  useEffect(() => {
+    return () => {
+      if (autosaveTimer.current) {
+        clearTimeout(autosaveTimer.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -202,6 +202,7 @@ const BuilderLessonPlanDetail = () => {
           return current;
         }
         const next = updater(current);
+        latestPlan.current = next;
         scheduleAutosave(next);
         return next;
       });
@@ -274,7 +275,10 @@ const BuilderLessonPlanDetail = () => {
     });
   };
 
-  const handleStepChange = (stepId: string, updater: (step: LessonBuilderPlan["steps"][number]) => LessonBuilderPlan["steps"][number]) => {
+  const handleStepChange = (
+    stepId: string,
+    updater: (step: LessonBuilderPlan["steps"][number]) => LessonBuilderPlan["steps"][number]
+  ) => {
     updatePlan((current) => ({
       ...current,
       steps: current.steps.map((step) => (step.id === stepId ? updater(step) : step)),
@@ -387,39 +391,48 @@ const BuilderLessonPlanDetail = () => {
 
   const history = historyQuery.data ?? plan?.history ?? [];
 
-  const lessonCopy = useMemo<LessonDetailCopy>(() => ({
-    stageLabel: t.lessonPlans.modal.stage,
-    subjectsLabel: t.lessonPlans.modal.subjects,
-    deliveryLabel: t.lessonPlans.modal.delivery,
-    technologyLabel: t.lessonPlans.modal.technology,
-    durationLabel: t.lessonPlans.modal.duration,
-    summaryLabel: t.lessonPlans.modal.summary,
-    overviewTitle: t.lessonPlans.modal.overview,
-    objectivesLabel: t.lessonPlans.modal.objectives,
-    materialsLabel: t.lessonPlans.modal.materials,
-    assessmentLabel: t.lessonPlans.modal.assessment,
-    technologyOverviewLabel: t.lessonPlans.modal.technologyOverview,
-    deliveryOverviewLabel: t.lessonPlans.modal.deliveryOverview,
-    durationOverviewLabel: t.lessonPlans.modal.durationOverview,
-    structureTitle: t.lessonPlans.modal.structure,
-    resourcesTitle: t.lessonPlans.modal.resources,
-    resourceLinkLabel: t.lessonPlans.modal.resourceLink,
-    noResourcesLabel: t.lessonPlans.modal.empty,
-    errorLabel: t.lessonPlans.states.error,
-    downloadLabel: t.lessonPlans.modal.download,
-    openFullLabel: t.lessonPlans.modal.openFull,
-    closeLabel: t.lessonPlans.modal.close,
-    loadingLabel: t.lessonPlans.states.loading,
-    minutesFormatter: (minutes: number) =>
-      t.lessonPlans.card.durationLabel.replace("{minutes}", String(minutes)),
-  }), [t]);
+  const lessonCopy = useMemo<LessonDetailCopy>(
+    () => ({
+      stageLabel: t.lessonPlans.modal.stage,
+      subjectsLabel: t.lessonPlans.modal.subjects,
+      deliveryLabel: t.lessonPlans.modal.delivery,
+      technologyLabel: t.lessonPlans.modal.technology,
+      durationLabel: t.lessonPlans.modal.duration,
+      summaryLabel: t.lessonPlans.modal.summary,
+      overviewTitle: t.lessonPlans.modal.overview,
+      objectivesLabel: t.lessonPlans.modal.objectives,
+      materialsLabel: t.lessonPlans.modal.materials,
+      assessmentLabel: t.lessonPlans.modal.assessment,
+      technologyOverviewLabel: t.lessonPlans.modal.technologyOverview,
+      deliveryOverviewLabel: t.lessonPlans.modal.deliveryOverview,
+      durationOverviewLabel: t.lessonPlans.modal.durationOverview,
+      structureTitle: t.lessonPlans.modal.structure,
+      resourcesTitle: t.lessonPlans.modal.resources,
+      resourceLinkLabel: t.lessonPlans.modal.resourceLink,
+      noResourcesLabel: t.lessonPlans.modal.empty,
+      errorLabel: t.lessonPlans.states.error,
+      downloadLabel: t.lessonPlans.modal.download,
+      openFullLabel: t.lessonPlans.modal.openFull,
+      closeLabel: t.lessonPlans.modal.close,
+      loadingLabel: t.lessonPlans.states.loading,
+      minutesFormatter: (minutes: number) =>
+        t.lessonPlans.card.durationLabel.replace("{minutes}", String(minutes)),
+    }),
+    [t]
+  );
 
   const resourceSearchCopy = t.lessonBuilder.resourceSearch;
 
   if (planQuery.isLoading) {
     return (
       <div className="space-y-6 p-6">
-        <Toolbar plan={plan ?? null} history={history} isSaving={false} onPreview={() => undefined} copy={t.lessonBuilder.toolbar} />
+        <Toolbar
+          plan={plan ?? null}
+          history={history}
+          isSaving={false}
+          onPreview={() => undefined}
+          copy={t.lessonBuilder.toolbar}
+        />
         <Card>
           <CardContent className="flex items-center gap-3 p-6 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
