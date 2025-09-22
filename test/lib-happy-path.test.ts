@@ -419,6 +419,7 @@ describe("notification helpers", () => {
     resource_approved: true,
     blogpost_approved: true,
     research_application_approved: true,
+    research_submission_reviewed: true,
     comment_reply: true,
     updated_at: "2024-01-11T00:00:00Z",
   };
@@ -498,6 +499,7 @@ describe("research helpers", () => {
     status: "submitted",
     reviewed_by: null,
     reviewed_at: null,
+    review_note: null,
     submitted_at: "2024-02-04T00:00:00Z",
   };
 

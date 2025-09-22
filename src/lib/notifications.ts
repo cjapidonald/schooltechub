@@ -63,6 +63,7 @@ function mapPrefs(record: Record<string, any>, userId: string): NotificationPref
     resourceApproved: record.resource_approved ?? true,
     blogpostApproved: record.blogpost_approved ?? true,
     researchApplicationApproved: record.research_application_approved ?? true,
+    researchSubmissionReviewed: record.research_submission_reviewed ?? true,
     commentReply: record.comment_reply ?? true,
     updatedAt: record.updated_at ?? new Date().toISOString(),
   } satisfies NotificationPrefs;
@@ -134,6 +135,7 @@ export interface NotificationPrefsPatch {
   resourceApproved?: boolean;
   blogpostApproved?: boolean;
   researchApplicationApproved?: boolean;
+  researchSubmissionReviewed?: boolean;
   commentReply?: boolean;
 }
 
@@ -159,6 +161,9 @@ export async function updatePrefs(
   }
   if (patch.researchApplicationApproved !== undefined) {
     payload.research_application_approved = patch.researchApplicationApproved;
+  }
+  if (patch.researchSubmissionReviewed !== undefined) {
+    payload.research_submission_reviewed = patch.researchSubmissionReviewed;
   }
   if (patch.commentReply !== undefined) {
     payload.comment_reply = patch.commentReply;
