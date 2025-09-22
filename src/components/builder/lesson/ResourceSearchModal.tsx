@@ -1,29 +1,83 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import type { CheckedState } from "@radix-ui/react-checkbox";
+import { Loader2, Search, X } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+import { ResourceCard } from "@/components/lesson-draft/ResourceCard";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { searchResources } from "@/lib/resources";
+import type { Resource } from "@/types/resources";
 
-import { searchLessonBuilderResources } from "@/lib/builder-api";
-import type { LessonBuilderResourceSearchResult } from "@/types/lesson-builder";
+const TYPE_OPTIONS = [
+  "Worksheet",
+  "Video",
+  "Interactive",
+  "Presentation",
+  "Assessment",
+  "Article",
+  "Audio",
+  "Game",
+  "Template",
+  "Other",
+];
+
+const SUBJECT_OPTIONS = [
+  "Math",
+  "Science",
+  "English",
+  "Social Studies",
+  "STEM",
+  "ICT",
+  "Arts",
+  "Languages",
+];
+
+const STAGE_OPTIONS = [
+  "Early Childhood",
+  "Primary",
+  "Lower Secondary",
+  "Upper Secondary",
+  "Higher Education",
+];
+
+type FilterState = {
+  searchValue: string;
+  types: string[];
+  subjects: string[];
+  stages: string[];
+  tags: string[];
+};
+
+const DEFAULT_FILTER_STATE: FilterState = {
+  searchValue: "",
+  types: [],
+  subjects: [],
+  stages: [],
+  tags: [],
+};
+
+const cloneFilterState = (state: FilterState): FilterState => ({
+  searchValue: state.searchValue,
+  types: [...state.types],
+  subjects: [...state.subjects],
+  stages: [...state.stages],
+  tags: [...state.tags],
+});
+
+let LAST_FILTER_STATE: FilterState = cloneFilterState(DEFAULT_FILTER_STATE);
 
 interface ResourceSearchCopy {
   title: string;
@@ -31,315 +85,365 @@ interface ResourceSearchCopy {
   mediaLabel: string;
   stageLabel: string;
   subjectLabel: string;
-  durationLabel: string;
-  domainLabel: string;
-  notesToggle: string;
-  mineToggle: string;
   clearFilters: string;
   empty: string;
   addLabel: string;
   loading: string;
+  tagsLabel?: string;
+  loadMoreLabel?: string;
+  errorTitle?: string;
+  errorDescription?: string;
+  retryLabel?: string;
 }
 
 interface ResourceSearchModalProps {
-  planId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (resource: LessonBuilderResourceSearchResult) => void;
+  onSelect: (resource: Resource) => void;
   copy: ResourceSearchCopy;
 }
 
-const MEDIA_TYPES = ["Article", "Video", "Interactive", "Template", "Assessment", "Tool"];
-const STAGE_OPTIONS = ["Early Childhood", "Elementary", "Middle School", "High School"];
-const SUBJECT_OPTIONS = ["Math", "Science", "ELA", "Social Studies", "Arts", "Technology"];
-const DURATION_FILTERS = ["< 15 min", "15-30 min", "30-45 min", "45+ min"];
+type MultiSelectFilterProps = {
+  label: string;
+  options: string[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+};
 
-export const ResourceSearchModal = ({
-  planId,
-  open,
-  onOpenChange,
-  onSelect,
-  copy,
-}: ResourceSearchModalProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedTerm, setDebouncedTerm] = useState("");
-  const [mediaTypes, setMediaTypes] = useState<string[]>([]);
-  const [stage, setStage] = useState<string | null>(null);
-  const [subject, setSubject] = useState<string | null>(null);
-  const [duration, setDuration] = useState<string | null>(null);
-  const [domain, setDomain] = useState("");
-  const [withNotes, setWithNotes] = useState(false);
-  const [mineOnly, setMineOnly] = useState(false);
+const useDebouncedValue = <T,>(value: T, delay = 300) => {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debounced;
+};
+
+const MultiSelectFilter = ({ label, options, selected, onChange }: MultiSelectFilterProps) => {
+  const [open, setOpen] = useState(false);
+
+  const toggleValue = (value: string, checked: CheckedState) => {
+    if (checked === true) {
+      if (selected.includes(value)) {
+        return;
+      }
+      onChange([...selected, value]);
+      return;
+    }
+    onChange(selected.filter(item => item !== value));
+  };
+
+  const clearSelection = () => {
+    onChange([]);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-9 gap-2 rounded-full border-dashed"
+        >
+          <span>{label}</span>
+          {selected.length > 0 ? (
+            <Badge variant="secondary" className="rounded-full px-2 text-xs">
+              {selected.length}
+            </Badge>
+          ) : null}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-56 p-0">
+        <div className="flex items-center justify-between px-3 py-2">
+          <p className="text-sm font-medium">{label}</p>
+          <Button type="button" variant="ghost" size="sm" onClick={clearSelection} disabled={selected.length === 0}>
+            Clear
+          </Button>
+        </div>
+        <Separator />
+        <div className="max-h-64 overflow-y-auto p-2">
+          {options.map(option => {
+            const checked = selected.includes(option);
+            return (
+              <label
+                key={option}
+                className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-sm hover:bg-muted"
+              >
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={next => toggleValue(option, next)}
+                  aria-label={`Toggle ${option}`}
+                />
+                <span className="flex-1 text-sm">{option}</span>
+              </label>
+            );
+          })}
+          {options.length === 0 ? (
+            <p className="px-2 py-4 text-sm text-muted-foreground">No options available.</p>
+          ) : null}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+export const ResourceSearchModal = ({ open, onOpenChange, onSelect, copy }: ResourceSearchModalProps) => {
+  const [filters, setFilters] = useState<FilterState>(() => cloneFilterState(DEFAULT_FILTER_STATE));
+  const [tagInput, setTagInput] = useState("");
+
+  const debouncedSearch = useDebouncedValue(filters.searchValue, 300);
+
+  useEffect(() => {
+    if (open) {
+      setFilters(cloneFilterState(LAST_FILTER_STATE));
+      setTagInput("");
+    } else {
+      setTagInput("");
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
-      setDebouncedTerm("");
       return;
     }
-    const timer = setTimeout(() => {
-      setDebouncedTerm(searchTerm.trim());
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchTerm, open]);
+    LAST_FILTER_STATE = cloneFilterState(filters);
+  }, [filters, open]);
 
-  const hasFilters = useMemo(
-    () =>
-      mediaTypes.length > 0 ||
-      Boolean(stage) ||
-      Boolean(subject) ||
-      Boolean(duration) ||
-      domain.trim().length > 0 ||
-      withNotes ||
-      mineOnly,
-    [mediaTypes, stage, subject, duration, domain, withNotes, mineOnly]
+  const sanitizedFilters = useMemo(
+    () => ({
+      q: debouncedSearch.trim() || undefined,
+      types: filters.types,
+      subjects: filters.subjects,
+      stages: filters.stages,
+      tags: filters.tags,
+    }),
+    [debouncedSearch, filters.tags, filters.types, filters.subjects, filters.stages],
   );
 
   const queryKey = useMemo(
     () => [
       "builder-resource-search",
-      planId,
-      debouncedTerm,
-      mediaTypes.join("|"),
-      stage,
-      subject,
-      duration,
-      domain.trim(),
-      withNotes,
-      mineOnly,
+      sanitizedFilters.q ?? "",
+      [...sanitizedFilters.types].sort().join("|"),
+      [...sanitizedFilters.subjects].sort().join("|"),
+      [...sanitizedFilters.stages].sort().join("|"),
+      [...sanitizedFilters.tags].sort().join("|"),
     ],
-    [planId, debouncedTerm, mediaTypes, stage, subject, duration, domain, withNotes, mineOnly]
+    [sanitizedFilters],
   );
 
-  const query = useQuery({
+  const resourceQuery = useInfiniteQuery({
     queryKey,
-    enabled: open && (debouncedTerm.length > 0 || hasFilters),
-    queryFn: () =>
-      searchLessonBuilderResources(planId, {
-        query: debouncedTerm,
-        mediaTypes,
-        stage,
-        subject,
-        duration,
-        domain: domain.trim() || null,
-        withNotes,
-        mineOnly,
-      }),
+    enabled: open,
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      const page = typeof pageParam === "number" ? pageParam : 1;
+      const response = await searchResources({
+        ...sanitizedFilters,
+        page,
+      });
+      return {
+        items: response.items,
+        total: response.total,
+        page,
+      };
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, page) => sum + page.items.length, 0);
+      if (loaded >= lastPage.total) {
+        return undefined;
+      }
+      return lastPage.page + 1;
+    },
   });
 
-  const results = query.data ?? [];
-  const showEmptyState = !query.isFetching && (debouncedTerm.length > 0 || hasFilters) && results.length === 0;
+  const { data, fetchNextPage, hasNextPage, isError, isFetchingNextPage, isPending, refetch } = resourceQuery;
 
-  const toggleMediaType = (value: string) => {
-    setMediaTypes((current) =>
-      current.includes(value) ? current.filter((item) => item !== value) : [...current, value]
-    );
-  };
+  const resources = useMemo(() => data?.pages.flatMap(page => page.items) ?? [], [data?.pages]);
 
-  const clearFilters = () => {
-    setMediaTypes([]);
-    setStage(null);
-    setSubject(null);
-    setDuration(null);
-    setDomain("");
-    setWithNotes(false);
-    setMineOnly(false);
-  };
-
-  const handleSelect = (resource: LessonBuilderResourceSearchResult) => {
+  const handleAddResource = (resource: Resource) => {
     onSelect(resource);
     onOpenChange(false);
   };
 
+  const handleTagInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      const value = tagInput.trim();
+      if (!value) {
+        return;
+      }
+      if (filters.tags.includes(value)) {
+        setTagInput("");
+        return;
+      }
+      setFilters(current => ({ ...current, tags: [...current.tags, value] }));
+      setTagInput("");
+    }
+    if (event.key === "Backspace" && tagInput.length === 0 && filters.tags.length > 0) {
+      event.preventDefault();
+      setFilters(current => ({ ...current, tags: current.tags.slice(0, -1) }));
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setFilters(current => ({ ...current, tags: current.tags.filter(item => item !== tag) }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters(cloneFilterState(DEFAULT_FILTER_STATE));
+    setTagInput("");
+  };
+
+  const isInitialLoading = isPending;
+  const hasActiveFilters =
+    filters.searchValue.trim().length > 0 ||
+    filters.types.length > 0 ||
+    filters.subjects.length > 0 ||
+    filters.stages.length > 0 ||
+    filters.tags.length > 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent
+        className="max-w-5xl"
+        onOpenAutoFocus={event => {
+          event.preventDefault();
+          const input = document.getElementById("builder-resource-search-input") as HTMLInputElement | null;
+          input?.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{copy.title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {copy.placeholder}
           </DialogDescription>
         </DialogHeader>
+
         <div className="space-y-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                onKeyDown={(event) => {
+                id="builder-resource-search-input"
+                value={filters.searchValue}
+                onChange={event => setFilters(current => ({ ...current, searchValue: event.target.value }))}
+                onKeyDown={event => {
                   if (event.key === "Enter") {
                     event.preventDefault();
-                    setDebouncedTerm(event.currentTarget.value.trim());
+                    setFilters(current => ({ ...current, searchValue: event.currentTarget.value }));
                   }
                 }}
                 placeholder={copy.placeholder}
                 className="pl-9"
               />
             </div>
-            <Button variant="ghost" onClick={clearFilters} disabled={!hasFilters}>
+            <Button variant="ghost" onClick={clearAllFilters} disabled={!hasActiveFilters}>
               {copy.clearFilters}
             </Button>
           </div>
-          <div className="grid gap-4 lg:grid-cols-[1fr,1fr]">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">{copy.mediaLabel}</p>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <MultiSelectFilter
+              label={copy.mediaLabel}
+              options={TYPE_OPTIONS}
+              selected={filters.types}
+              onChange={next => setFilters(current => ({ ...current, types: next }))}
+            />
+            <MultiSelectFilter
+              label={copy.stageLabel}
+              options={STAGE_OPTIONS}
+              selected={filters.stages}
+              onChange={next => setFilters(current => ({ ...current, stages: next }))}
+            />
+            <MultiSelectFilter
+              label={copy.subjectLabel}
+              options={SUBJECT_OPTIONS}
+              selected={filters.subjects}
+              onChange={next => setFilters(current => ({ ...current, subjects: next }))}
+            />
+            <div className="flex flex-1 items-center gap-2">
+              <Input
+                value={tagInput}
+                onChange={event => setTagInput(event.target.value)}
+                onKeyDown={handleTagInputKeyDown}
+                placeholder={copy.tagsLabel ?? "Add tags"}
+              />
+              {filters.tags.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {MEDIA_TYPES.map((type) => {
-                    const active = mediaTypes.includes(type);
-                    return (
-                      <Button
-                        key={type}
+                  {filters.tags.map(tag => (
+                    <Badge key={tag} variant="secondary" className="flex items-center gap-1 rounded-full px-2 text-xs">
+                      <span>#{tag}</span>
+                      <button
                         type="button"
-                        size="sm"
-                        variant={active ? "default" : "outline"}
-                        onClick={() => toggleMediaType(type)}
+                        className="flex h-4 w-4 items-center justify-center rounded-full bg-muted text-muted-foreground"
+                        onClick={() => removeTag(tag)}
+                        aria-label={`Remove tag ${tag}`}
                       >
-                        {type}
-                      </Button>
-                    );
-                  })}
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
                 </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="resource-stage">{copy.stageLabel}</Label>
-                  <Select value={stage ?? undefined} onValueChange={(value) => setStage(value)}>
-                    <SelectTrigger id="resource-stage">
-                      <SelectValue placeholder={copy.stageLabel} />
-                    </SelectTrigger>
-                    <SelectContent align="start">
-                      {STAGE_OPTIONS.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="resource-subject">{copy.subjectLabel}</Label>
-                  <Select value={subject ?? undefined} onValueChange={(value) => setSubject(value)}>
-                    <SelectTrigger id="resource-subject">
-                      <SelectValue placeholder={copy.subjectLabel} />
-                    </SelectTrigger>
-                    <SelectContent align="start">
-                      {SUBJECT_OPTIONS.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="resource-duration">{copy.durationLabel}</Label>
-                <Select value={duration ?? undefined} onValueChange={(value) => setDuration(value)}>
-                  <SelectTrigger id="resource-duration">
-                    <SelectValue placeholder={copy.durationLabel} />
-                  </SelectTrigger>
-                  <SelectContent align="start">
-                    {DURATION_FILTERS.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="resource-domain">{copy.domainLabel}</Label>
-                <Input
-                  id="resource-domain"
-                  value={domain}
-                  onChange={(event) => setDomain(event.target.value)}
-                  placeholder="example.com"
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch id="resource-notes" checked={withNotes} onCheckedChange={setWithNotes} />
-                <Label htmlFor="resource-notes" className="text-sm font-medium">
-                  {copy.notesToggle}
-                </Label>
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch id="resource-mine" checked={mineOnly} onCheckedChange={setMineOnly} />
-                <Label htmlFor="resource-mine" className="text-sm font-medium">
-                  {copy.mineToggle}
-                </Label>
-              </div>
+              ) : null}
             </div>
           </div>
 
-          <ScrollArea className="max-h-[50vh] pr-4">
-            {query.isFetching ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {copy.loading}
-              </div>
-            ) : showEmptyState ? (
-              <p className="text-sm text-muted-foreground">{copy.empty}</p>
-            ) : results.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {copy.placeholder}
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {results.map((resource) => (
-                  <div
-                    key={resource.id}
-                    className="flex items-start justify-between gap-4 rounded-lg border border-border/70 p-4"
-                  >
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-start gap-3">
-                        {resource.favicon ? (
-                          <img
-                            src={resource.favicon}
-                            alt=""
-                            className="mt-0.5 h-5 w-5 rounded"
-                          />
-                        ) : null}
-                        <div>
-                          <p className="font-medium text-foreground">{resource.title}</p>
-                          {resource.description ? (
-                            <p className="text-sm text-muted-foreground">{resource.description}</p>
-                          ) : null}
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {resource.mediaType ? (
-                          <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
-                            {resource.mediaType}
-                          </Badge>
-                        ) : null}
-                        {resource.duration ? (
-                          <Badge variant="outline" className="text-[10px]">
-                            {resource.duration}
-                          </Badge>
-                        ) : null}
-                        {resource.stage ? (
-                          <Badge variant="outline" className="text-[10px]">
-                            {resource.stage}
-                          </Badge>
-                        ) : null}
-                        {resource.subjects?.map((subjectTag) => (
-                          <Badge key={subjectTag} variant="outline" className="text-[10px]">
-                            {subjectTag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <Button onClick={() => handleSelect(resource)}>{copy.addLabel}</Button>
-                  </div>
+          <div className="space-y-4">
+            {isInitialLoading ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <Skeleton key={index} className="h-60 w-full rounded-lg" />
                 ))}
               </div>
+            ) : isError ? (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border/60 bg-background/60 p-10 text-center">
+                <p className="text-sm font-medium text-foreground">{copy.errorTitle ?? "We couldn't load resources right now."}</p>
+                <p className="text-sm text-muted-foreground">{copy.errorDescription ?? "Please try again in a moment."}</p>
+                <Button type="button" onClick={() => refetch()}>
+                  {copy.retryLabel ?? "Try again"}
+                </Button>
+              </div>
+            ) : resources.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border/60 bg-background/60 p-10 text-center">
+                <p className="text-sm text-muted-foreground">{copy.empty}</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {resources.map(resource => (
+                    <ResourceCard
+                      key={resource.id}
+                      resource={resource}
+                      layout="vertical"
+                      onAdd={() => handleAddResource(resource)}
+                      addButtonLabel={copy.addLabel}
+                    />
+                  ))}
+                </div>
+                {hasNextPage ? (
+                  <div className="flex justify-center pt-2">
+                    <Button type="button" variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
+                      {isFetchingNextPage ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" /> {copy.loading}
+                        </span>
+                      ) : (
+                        copy.loadMoreLabel ?? "Load more"
+                      )}
+                    </Button>
+                  </div>
+                ) : null}
+              </>
             )}
-          </ScrollArea>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+export default ResourceSearchModal;
