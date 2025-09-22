@@ -17,7 +17,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ResourceCard as LessonDraftResourceCard } from "@/components/lesson-draft/ResourceCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
-import { searchResources } from "@/lib/resources";
+import { getSignedDownloadUrl, ResourceDataError, searchResources } from "@/lib/resources";
 import {
   attachResourceToActiveStep,
   getActiveLessonDraftId,
@@ -179,13 +179,62 @@ const MultiSelectFilter = ({ label, options, selected, onChange }: MultiSelectFi
 
 const ResourceCardView = ({ resource, view, onAdd }: ResourceCardViewProps) => {
   const layout = view === "grid" ? "vertical" : "horizontal";
+  const { toast } = useToast();
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const hasExternalLink = typeof resource.url === "string" && resource.url.trim().length > 0;
+  const canDownload = !hasExternalLink && Boolean(resource.storage_path);
+
+  const handleDownload = async () => {
+    if (!canDownload) {
+      return;
+    }
+
+    try {
+      setIsDownloading(true);
+      const signedUrl = await getSignedDownloadUrl(resource.id);
+
+      if (typeof window !== "undefined") {
+        window.open(signedUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (downloadError) {
+      const message =
+        downloadError instanceof ResourceDataError
+          ? downloadError.message
+          : "We couldn't open this resource.";
+      toast({ title: "Download failed", description: message, variant: "destructive" });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const actions = (
     <div className="flex flex-wrap items-center gap-2 pt-1">
-      <Button asChild variant="outline" size="sm">
-        <a href={resource.url} target="_blank" rel="noreferrer">
-          View resource
-        </a>
-      </Button>
+      {hasExternalLink ? (
+        <Button asChild variant="outline" size="sm">
+          <a href={resource.url ?? undefined} target="_blank" rel="noreferrer">
+            View resource
+          </a>
+        </Button>
+      ) : null}
+      {canDownload ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleDownload}
+          disabled={isDownloading}
+        >
+          {isDownloading ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              Preparing download
+            </span>
+          ) : (
+            "Download resource"
+          )}
+        </Button>
+      ) : null}
       {resource.created_at ? (
         <span className="text-xs text-muted-foreground">
           Added {new Date(resource.created_at).toLocaleDateString()}

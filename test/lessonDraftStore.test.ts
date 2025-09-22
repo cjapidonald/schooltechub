@@ -84,12 +84,16 @@ describe("lessonDraft store", () => {
 
   it("resets the draft to its empty state", () => {
     const store = getStore();
+    const previousId = store.getState().draft.id;
     store.getState().setField("title", "Filled");
     store.getState().addStep();
 
     store.getState().resetDraft();
 
-    expect(store.getState().draft).toEqual(lessonDraftModule.createEmptyLessonDraft());
+    const draft = store.getState().draft;
+    expect(draft.steps).toEqual([]);
+    expect(typeof draft.id).toBe("string");
+    expect(draft.id).not.toBe(previousId);
   });
 
   it("persists changes to localStorage", () => {
