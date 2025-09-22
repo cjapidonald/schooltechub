@@ -1,4 +1,9 @@
 /**
+ * Shared representation of a learning resource stored in the public catalog.
+ */
+export type ResourceStatus = "pending" | "approved" | "rejected";
+
+/**
  * Shared representation of a resource stored within the Supabase `public.resources` table.
  */
 export interface Resource {
@@ -8,8 +13,10 @@ export interface Resource {
   title: string;
   /** Optional longer-form description of the resource contents. */
   description: string | null;
-  /** Absolute or storage-backed URL pointing to the resource asset. */
-  url: string;
+  /** External URL for the resource when supplied by the creator. */
+  url: string | null;
+  /** Relative storage path if the asset is stored in Supabase. */
+  storage_path: string | null;
   /** Resource classification (e.g. worksheet, video, ppt, offline). */
   type: string;
   /** Subject association such as Math, Science, or Social Studies. */
@@ -24,36 +31,12 @@ export interface Resource {
   created_by: string | null;
   /** Timestamp when the record was created (ISO 8601). */
   created_at: string;
+  /** Moderation status of the resource within the catalog. */
+  status: ResourceStatus;
+  /** Identifier of the admin who approved the resource, if applicable. */
+  approved_by: string | null;
+  /** Timestamp when the resource was approved, if applicable. */
+  approved_at: string | null;
   /** Indicates whether the resource is currently visible to users. */
   is_active: boolean;
-}
-
-/**
- * Attributes accepted when creating a new resource entry.
- */
-export interface ResourceCreateInput {
-  title: string;
-  description?: string | null;
-  url: string;
-  type: string;
-  subject?: string | null;
-  stage?: string | null;
-  tags?: string[];
-  thumbnail_url?: string | null;
-  is_active?: boolean;
-}
-
-/**
- * Attributes that may be updated on an existing resource entry.
- */
-export interface ResourceUpdateInput {
-  title?: string;
-  description?: string | null;
-  url?: string;
-  type?: string;
-  subject?: string | null;
-  stage?: string | null;
-  tags?: string[];
-  thumbnail_url?: string | null;
-  is_active?: boolean;
 }

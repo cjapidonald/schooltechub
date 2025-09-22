@@ -1,28 +1,44 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HelmetProvider } from "react-helmet-async";
 
 import BuilderPage from "../Builder";
 import { createEmptyLessonDraft, useLessonDraftStore } from "@/stores/lessonDraft";
-import { HelmetProvider } from "react-helmet-async";
 
 describe("Lesson draft builder", () => {
+  let queryClient: QueryClient;
+
   beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
     useLessonDraftStore.setState({ draft: createEmptyLessonDraft() });
     window.localStorage.clear();
   });
 
   afterEach(() => {
     cleanup();
+    queryClient.clear();
   });
+
+  const renderBuilder = () =>
+    render(
+      <HelmetProvider>
+        <QueryClientProvider client={queryClient}>
+          <BuilderPage />
+        </QueryClientProvider>
+      </HelmetProvider>,
+    );
 
   it("creates steps and mirrors them in the preview", async () => {
     const user = userEvent.setup();
-    render(
-      <HelmetProvider>
-        <BuilderPage />
-      </HelmetProvider>,
-    );
+    renderBuilder();
 
     const addButton = screen.getByRole("button", { name: /add step/i });
     await user.click(addButton);
@@ -44,11 +60,7 @@ describe("Lesson draft builder", () => {
 
   it("restores default title when left blank", async () => {
     const user = userEvent.setup();
-    render(
-      <HelmetProvider>
-        <BuilderPage />
-      </HelmetProvider>,
-    );
+    renderBuilder();
 
     await user.click(screen.getByRole("button", { name: /add step/i }));
 
@@ -66,11 +78,7 @@ describe("Lesson draft builder", () => {
 
   it("removes a step after confirmation", async () => {
     const user = userEvent.setup();
-    render(
-      <HelmetProvider>
-        <BuilderPage />
-      </HelmetProvider>,
-    );
+    renderBuilder();
 
     await user.click(screen.getByRole("button", { name: /add step/i }));
 
@@ -82,16 +90,14 @@ describe("Lesson draft builder", () => {
     await user.click(confirmButton);
 
     expect(screen.queryByTestId("lesson-draft-step-1")).not.toBeInTheDocument();
-    expect(screen.getByText(/no steps yet/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/No steps yet\. Use the “Add step” button to start outlining your lesson\./i),
+    ).toBeInTheDocument();
   });
 
   it("opens the resource search modal when focusing the input", async () => {
     const user = userEvent.setup();
-    render(
-      <HelmetProvider>
-        <BuilderPage />
-      </HelmetProvider>,
-    );
+    renderBuilder();
 
     await user.click(screen.getByRole("button", { name: /add step/i }));
 

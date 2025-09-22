@@ -9,6 +9,7 @@ const baseResources: Resource[] = [
     title: "Math Morning Worksheet",
     description: "Daily numeracy warm-up worksheet for early learners.",
     url: "storage://resources/math-morning-worksheet.pdf",
+    storage_path: null,
     type: "worksheet",
     subject: "Math",
     stage: "Stage 1",
@@ -16,6 +17,9 @@ const baseResources: Resource[] = [
     thumbnail_url: "https://cdn.example.com/thumbnails/math-morning.png",
     created_by: null,
     created_at: "2024-01-01T00:00:00.000Z",
+    status: "approved",
+    approved_by: "admin-1",
+    approved_at: "2024-01-05T00:00:00.000Z",
     is_active: true,
   },
   {
@@ -23,6 +27,7 @@ const baseResources: Resource[] = [
     title: "Phonics Song Video",
     description: "Animated video introducing consonant blends.",
     url: "https://videos.example.com/phonics-song",
+    storage_path: null,
     type: "video",
     subject: "Phonics",
     stage: "Stage 2",
@@ -30,6 +35,9 @@ const baseResources: Resource[] = [
     thumbnail_url: "https://cdn.example.com/thumbnails/phonics-song.png",
     created_by: null,
     created_at: "2024-01-02T00:00:00.000Z",
+    status: "approved",
+    approved_by: "admin-1",
+    approved_at: "2024-01-06T00:00:00.000Z",
     is_active: true,
   },
   {
@@ -37,6 +45,7 @@ const baseResources: Resource[] = [
     title: "Science Lab Picture Cards",
     description: "Printable picture cards for lab safety equipment.",
     url: "storage://resources/science-lab-cards.zip",
+    storage_path: null,
     type: "picture",
     subject: "Science",
     stage: "Stage 3",
@@ -44,6 +53,9 @@ const baseResources: Resource[] = [
     thumbnail_url: "https://cdn.example.com/thumbnails/science-lab.png",
     created_by: null,
     created_at: "2024-01-03T00:00:00.000Z",
+    status: "approved",
+    approved_by: "admin-2",
+    approved_at: "2024-01-07T00:00:00.000Z",
     is_active: true,
   },
   {
@@ -51,6 +63,7 @@ const baseResources: Resource[] = [
     title: "History Presentation Deck",
     description: "Slides covering early explorers with discussion prompts.",
     url: "https://cdn.example.com/presentations/history-explorers.pptx",
+    storage_path: null,
     type: "ppt",
     subject: "Social Studies",
     stage: "Stage 4",
@@ -58,6 +71,9 @@ const baseResources: Resource[] = [
     thumbnail_url: "https://cdn.example.com/thumbnails/history-explorers.png",
     created_by: null,
     created_at: "2024-01-04T00:00:00.000Z",
+    status: "approved",
+    approved_by: "admin-2",
+    approved_at: "2024-01-08T00:00:00.000Z",
     is_active: true,
   },
 ];
@@ -70,6 +86,7 @@ type QueryFilters = {
   searchTerm: string | null;
   range: { from: number; to: number };
   onlyActive: boolean;
+  status: string | null;
 };
 
 function applyFilters(filters: QueryFilters, data: Resource[]): Resource[] {
@@ -78,6 +95,7 @@ function applyFilters(filters: QueryFilters, data: Resource[]): Resource[] {
 
   return data.filter(resource => {
     if (filters.onlyActive && !resource.is_active) return false;
+    if (filters.status && resource.status !== filters.status) return false;
     if (types && !types.includes(resource.type)) return false;
     if (subjects && (!resource.subject || !subjects.includes(resource.subject))) return false;
     if (stages && (!resource.stage || !stages.includes(resource.stage))) return false;
@@ -127,6 +145,7 @@ vi.mock("@/integrations/supabase/client", () => {
       range: { from: 0, to: dataset.length - 1 },
       onlyActive: false,
       includeCount: false,
+      status: null,
     };
 
     const builder = {
@@ -144,6 +163,9 @@ vi.mock("@/integrations/supabase/client", () => {
       eq(column: string, value: unknown) {
         if (column === "is_active") {
           state.onlyActive = Boolean(value);
+        }
+        if (column === "status" && typeof value === "string") {
+          state.status = value;
         }
         return builder;
       },
@@ -251,5 +273,20 @@ describe("resources data access", () => {
 
     expect(result.items).toHaveLength(1);
     expect(result.items[0]?.title).toBe("History Presentation Deck");
+  });
+
+  it("excludes resources that are not approved", async () => {
+    const copy = JSON.parse(JSON.stringify(baseResources)) as Resource[];
+    copy.push({
+      ...copy[0],
+      id: "55555555-5555-4555-8555-555555555555",
+      title: "Pending Literacy Worksheet",
+      status: "pending",
+    });
+    supabase.__setData(copy);
+
+    const result = await searchResources();
+
+    expect(result.items.every(resource => resource.status === "approved")).toBe(true);
   });
 });

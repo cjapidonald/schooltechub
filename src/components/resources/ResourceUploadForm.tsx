@@ -1,7 +1,6 @@
 import { useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { Loader2, X } from "lucide-react";
 
-import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,23 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
-interface PendingResource {
-  id: string;
-  title: string;
-  description: string | null;
-  url: string | null;
-  storage_path: string | null;
-  type: string;
-  subject: string | null;
-  stage: string | null;
-  tags: string[];
-  thumbnail_url: string | null;
-  created_by: string | null;
-  created_at: string;
-  status: string;
-  is_active: boolean;
-}
+import { createUpload, ResourceDataError } from "@/lib/resources";
+import type { Resource } from "@/types/resources";
 
 const RESOURCE_TYPE_OPTIONS = [
   { label: "Worksheet", value: "worksheet" },
@@ -70,7 +54,7 @@ export function ResourceUploadForm() {
   const [tagInput, setTagInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pendingResource, setPendingResource] = useState<PendingResource | null>(null);
+  const [pendingResource, setPendingResource] = useState<Resource | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addTag = (value: string) => {
@@ -128,16 +112,6 @@ export function ResourceUploadForm() {
     setIsSubmitting(true);
 
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) {
-        throw new Error("Unable to verify authentication");
-      }
-
-      const accessToken = sessionData.session?.access_token;
-      if (!accessToken) {
-        throw new Error("You must be signed in to upload a resource.");
-      }
-
       if (!resourceType) {
         throw new Error("Please choose a resource type.");
       }
@@ -160,31 +134,15 @@ export function ResourceUploadForm() {
         formData.append("file", file);
       }
 
-      const response = await fetch("/api/resources/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: formData,
-      });
-
-      const payload = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        const message = (payload && typeof payload.error === "string" && payload.error) || "Failed to upload resource.";
-        throw new Error(message);
-      }
-
-      if (payload?.resource) {
-        setPendingResource(payload.resource as PendingResource);
-      } else {
-        setPendingResource(null);
-      }
+      const created = await createUpload(formData);
+      setPendingResource(created);
 
       resetForm();
     } catch (submitError) {
       setPendingResource(null);
-      if (submitError instanceof Error) {
+      if (submitError instanceof ResourceDataError) {
+        setError(submitError.message);
+      } else if (submitError instanceof Error) {
         setError(submitError.message);
       } else {
         setError("Something went wrong while submitting your resource.");

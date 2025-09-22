@@ -1,8 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Resource, ResourceCreateInput, ResourceUpdateInput } from "@/types/resources";
+import type { Resource } from "@/types/resources";
 
 const RESOURCE_SELECT =
-  "id,title,description,url,type,subject,stage,tags,thumbnail_url,created_by,created_at,is_active";
+  "id,title,description,url,storage_path,type,subject,stage,tags,thumbnail_url,created_by,status,approved_by,approved_at,is_active,created_at";
 const DEFAULT_PAGE_SIZE = 20;
 
 /**
@@ -25,6 +25,8 @@ export class ResourceDataError extends Error {
   }
 }
 
+export type ResourceSearchSort = "newest" | "title" | "most-tagged";
+
 /**
  * Search filters supported by {@link searchResources}.
  */
@@ -39,6 +41,8 @@ export interface ResourceSearchOptions {
   stages?: string[];
   /** Filter by matching tags (overlap). */
   tags?: string[];
+  /** Sort order for the result set. */
+  sort?: ResourceSearchSort;
   /** Page number to request, defaults to `1`. */
   page?: number;
   /** Page size to request, defaults to `20`. */
@@ -55,18 +59,6 @@ function sanitizeFilterValues(values?: string[]): string[] {
 
   const trimmed = values.map(value => value.trim()).filter(Boolean);
   return Array.from(new Set(trimmed));
-}
-
-/**
- * Normalises tags before persistence by trimming whitespace and removing duplicates.
- */
-function sanitizeTagsForPersistence(tags: string[] | null | undefined): string[] | undefined {
-  if (tags === undefined) {
-    return undefined;
-  }
-
-  const cleaned = (tags ?? []).map(tag => tag.trim()).filter(Boolean);
-  return Array.from(new Set(cleaned));
 }
 
 /** Escapes wildcard characters for an ILIKE clause. */
@@ -87,22 +79,43 @@ function normaliseWebsearchTerm(value: string): string {
 }
 
 /**
- * Ensures the current request is authenticated and returns the active user id.
+ * Ensures the current request is authenticated and returns the active access token.
  */
-async function requireUserId(action: string): Promise<string> {
+async function requireAccessToken(action: string): Promise<string> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError) {
     throw new ResourceDataError("Unable to verify authentication state.", { cause: sessionError });
   }
 
-  const userId = sessionData.session?.user.id;
+  const accessToken = sessionData.session?.access_token;
 
-  if (!userId) {
+  if (!accessToken) {
     throw new ResourceDataError(`You must be signed in to ${action}.`);
   }
 
-  return userId;
+  return accessToken;
+}
+
+function mapResource(record: Partial<Resource>): Resource {
+  return {
+    id: record.id ?? "",
+    title: record.title ?? "Untitled resource",
+    description: record.description ?? null,
+    url: record.url ?? null,
+    storage_path: record.storage_path ?? null,
+    type: record.type ?? "unknown",
+    subject: record.subject ?? null,
+    stage: record.stage ?? null,
+    tags: Array.isArray(record.tags) ? (record.tags as string[]) : [],
+    thumbnail_url: record.thumbnail_url ?? null,
+    created_by: record.created_by ?? null,
+    created_at: record.created_at ?? new Date().toISOString(),
+    status: (record.status as Resource["status"]) ?? "pending",
+    approved_by: record.approved_by ?? null,
+    approved_at: record.approved_at ?? null,
+    is_active: record.is_active ?? false,
+  } satisfies Resource;
 }
 
 /**
@@ -111,19 +124,29 @@ async function requireUserId(action: string): Promise<string> {
  * The search term performs a web-style full-text search against titles, an `ILIKE` match against
  * descriptions, and ensures that at least one tag overlaps with the query.
  */
-export async function searchResources(options: ResourceSearchOptions = {}): Promise<{ items: Resource[]; total: number }> {
+export async function searchResources(
+  options: ResourceSearchOptions = {},
+): Promise<{ items: Resource[]; total: number }> {
   const pageSize = Math.max(1, options.pageSize ?? DEFAULT_PAGE_SIZE);
   const page = Math.max(1, options.page ?? 1);
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  const sort = options.sort ?? "newest";
+
   let query = supabase
     .from("resources")
     .select<Resource>(RESOURCE_SELECT, { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(from, to);
+    .eq("is_active", true)
+    .eq("status", "approved");
 
-  query = query.eq("is_active", true);
+  if (sort === "title") {
+    query = query.order("title", { ascending: true, nullsLast: true });
+  } else {
+    query = query.order("created_at", { ascending: false, nullsLast: true });
+  }
+
+  query = query.range(from, to);
 
   const types = sanitizeFilterValues(options.types);
   if (types.length) {
@@ -170,9 +193,21 @@ export async function searchResources(options: ResourceSearchOptions = {}): Prom
     throw new ResourceDataError("Unable to search resources.", { cause: error });
   }
 
+  const items = (data ?? []).map(mapResource);
+
+  if (sort === "most-tagged") {
+    items.sort((a, b) => {
+      const diff = (b.tags?.length ?? 0) - (a.tags?.length ?? 0);
+      if (diff !== 0) {
+        return diff;
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }
+
   return {
-    items: data ?? [],
-    total: count ?? (data?.length ?? 0),
+    items,
+    total: count ?? items.length,
   };
 }
 
@@ -184,13 +219,15 @@ export async function getResourceById(id: string): Promise<Resource | null> {
     .from("resources")
     .select<Resource>(RESOURCE_SELECT)
     .eq("id", id)
+    .eq("is_active", true)
+    .eq("status", "approved")
     .maybeSingle();
 
   if (error) {
     throw new ResourceDataError("Unable to load the requested resource.", { cause: error });
   }
 
-  return data ?? null;
+  return data ? mapResource(data) : null;
 }
 
 /**
@@ -206,88 +243,101 @@ export async function getResourcesByIds(ids: string[]): Promise<Resource[]> {
   const { data, error } = await supabase
     .from("resources")
     .select<Resource>(RESOURCE_SELECT)
-    .in("id", uniqueIds);
+    .in("id", uniqueIds)
+    .eq("is_active", true)
+    .eq("status", "approved");
 
   if (error) {
     throw new ResourceDataError("Unable to load the requested resources.", { cause: error });
   }
 
-  const lookup = new Map((data ?? []).map(resource => [resource.id, resource] as const));
+  const lookup = new Map((data ?? []).map(resource => [resource.id, mapResource(resource)] as const));
   return uniqueIds
     .map(id => lookup.get(id))
     .filter((resource): resource is Resource => Boolean(resource));
 }
 
 /**
- * Creates a new resource owned by the authenticated user.
+ * Submits a new resource upload request via the API endpoint.
  */
-export async function createResource(data: ResourceCreateInput): Promise<Resource> {
-  const userId = await requireUserId("create a resource");
+export async function createUpload(formData: FormData): Promise<Resource> {
+  const accessToken = await requireAccessToken("upload a resource");
 
-  const tags = sanitizeTagsForPersistence(data.tags);
-
-  const insertPayload: Record<string, unknown> = {
-    title: data.title,
-    description: data.description ?? null,
-    url: data.url,
-    type: data.type,
-    subject: data.subject ?? null,
-    stage: data.stage ?? null,
-    thumbnail_url: data.thumbnail_url ?? null,
-    created_by: userId,
-    is_active: data.is_active ?? true,
-  };
-
-  if (tags !== undefined) {
-    insertPayload.tags = tags;
+  let response: Response;
+  try {
+    response = await fetch("/api/resources/upload", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: formData,
+    });
+  } catch (error) {
+    throw new ResourceDataError("Failed to submit resource upload.", { cause: error });
   }
 
-  const { data: created, error } = await supabase
-    .from("resources")
-    .insert(insertPayload)
-    .select<Resource>(RESOURCE_SELECT)
-    .single();
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+  const payload = isJson ? await response.json().catch(() => null) : null;
 
-  if (error || !created) {
-    throw new ResourceDataError("Unable to create resource.", { cause: error });
+  if (!response.ok) {
+    const message =
+      (payload && typeof payload.error === "string" && payload.error.trim()) || "Failed to upload resource.";
+    throw new ResourceDataError(message);
   }
 
-  return created;
+  if (!payload || typeof payload !== "object" || payload === null || !("resource" in payload)) {
+    throw new ResourceDataError("Upload succeeded but no resource was returned.");
+  }
+
+  return mapResource((payload as { resource: Partial<Resource> }).resource);
 }
 
 /**
- * Updates a resource owned by the authenticated user.
+ * Retrieves a signed download URL for the specified resource.
  */
-export async function updateResource(id: string, data: ResourceUpdateInput): Promise<Resource> {
-  const userId = await requireUserId("update a resource");
+export async function getSignedDownloadUrl(id: string): Promise<string> {
+  const accessToken = await requireAccessToken("download this resource");
 
-  const updatePayload: Record<string, unknown> = {};
-
-  if (data.title !== undefined) updatePayload.title = data.title;
-  if (data.url !== undefined) updatePayload.url = data.url;
-  if (data.description !== undefined) updatePayload.description = data.description ?? null;
-  if (data.type !== undefined) updatePayload.type = data.type;
-  if (data.subject !== undefined) updatePayload.subject = data.subject ?? null;
-  if (data.stage !== undefined) updatePayload.stage = data.stage ?? null;
-  if (data.thumbnail_url !== undefined) updatePayload.thumbnail_url = data.thumbnail_url ?? null;
-  if (data.is_active !== undefined) updatePayload.is_active = data.is_active;
-
-  if (data.tags !== undefined) {
-    const tags = sanitizeTagsForPersistence(data.tags);
-    updatePayload.tags = tags;
+  let response: Response;
+  try {
+    response = await fetch(`/api/resources/${encodeURIComponent(id)}/download`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      redirect: "follow",
+    });
+  } catch (error) {
+    throw new ResourceDataError("Failed to request download URL.", { cause: error });
   }
 
-  const { data: updated, error } = await supabase
-    .from("resources")
-    .update(updatePayload)
-    .eq("id", id)
-    .eq("created_by", userId)
-    .select<Resource>(RESOURCE_SELECT)
-    .single();
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
 
-  if (error || !updated) {
-    throw new ResourceDataError("Unable to update resource.", { cause: error });
+  if (!response.ok) {
+    let message = "Unable to download resource.";
+    if (isJson) {
+      const payload = await response.json().catch(() => null);
+      if (payload && typeof payload.error === "string" && payload.error.trim()) {
+        message = payload.error;
+      }
+    }
+    throw new ResourceDataError(message);
   }
 
-  return updated;
+  if (isJson) {
+    const payload = await response.json().catch(() => null);
+    const url = payload && typeof payload.url === "string" ? payload.url : null;
+    if (url) {
+      return url;
+    }
+    throw new ResourceDataError("Download URL was not provided by the server.");
+  }
+
+  if (!response.url) {
+    throw new ResourceDataError("Unable to determine download URL.");
+  }
+
+  return response.url;
 }
