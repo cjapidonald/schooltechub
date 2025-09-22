@@ -136,7 +136,7 @@ export function WorksheetFilters({
           <span className="text-muted-foreground">{option.description}</span>
         ) : null}
         {option.hint ? (
-          <span className="text-xs text-muted-foreground">{option.hint}</span>
+<span className="text-xs text-muted-foreground">{option.hint}</span>
         ) : null}
       </span>
     </label>
@@ -161,7 +161,7 @@ export function WorksheetFilters({
         />
       </div>
 
-      <FilterSection title={copy.stageLabel}>
+      <FilterSection title={copy.stageLabel} defaultOpen={value.stages.length > 0}>
         {stageOptions.map((option) =>
           renderCheckboxOption(option, value.stages.includes(option.value), (checked) =>
             updateFilters({
@@ -171,7 +171,7 @@ export function WorksheetFilters({
         )}
       </FilterSection>
 
-      <FilterSection title={copy.subjectLabel}>
+      <FilterSection title={copy.subjectLabel} defaultOpen={value.subjects.length > 0}>
         {subjectOptions.map((option) =>
           renderCheckboxOption(option, value.subjects.includes(option.value), (checked) =>
             updateFilters({
@@ -181,7 +181,7 @@ export function WorksheetFilters({
         )}
       </FilterSection>
 
-      <FilterSection title={copy.skillLabel}>
+      <FilterSection title={copy.skillLabel} defaultOpen={value.skills.length > 0}>
         {skillOptions.map((option) =>
           renderCheckboxOption(option, value.skills.includes(option.value), (checked) =>
             updateFilters({
@@ -191,7 +191,7 @@ export function WorksheetFilters({
         )}
       </FilterSection>
 
-      <FilterSection title={copy.typeLabel}>
+      <FilterSection title={copy.typeLabel} defaultOpen={value.worksheetTypes.length > 0}>
         {typeOptions.map((option) =>
           renderCheckboxOption(option, value.worksheetTypes.includes(option.value), (checked) =>
             updateFilters({
@@ -205,7 +205,7 @@ export function WorksheetFilters({
         )}
       </FilterSection>
 
-      <FilterSection title={copy.difficultyLabel}>
+      <FilterSection title={copy.difficultyLabel} defaultOpen={value.difficulties.length > 0}>
         {difficultyOptions.map((option) =>
           renderCheckboxOption(option, value.difficulties.includes(option.value), (checked) =>
             updateFilters({
@@ -215,8 +215,33 @@ export function WorksheetFilters({
         )}
       </FilterSection>
 
-      <FilterSection title={copy.formatLabel}>
+      <FilterSection title={copy.formatLabel} defaultOpen={value.formats.length > 0}>
         {formatOptions.map((option) =>
+          renderCheckboxOption(option, value.formats.includes(option.value), (checked) =>
+            updateFilters({
+              formats: toggleListValue(value.formats, option.value, checked),
+            }),
+          ),
+        )}
+      </FilterSection>
+
+      <div className="space-y-4 rounded-xl border border-dashed p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold">{copy.techOnlyLabel}</p>
+            <p className="text-xs text-muted-foreground">
+              {copy.techOnlyDescription}
+            </p>
+          </div>
+          <Switch
+            checked={value.techIntegratedOnly}
+            onCheckedChange={(checked) =>
+              updateFilters({ techIntegratedOnly: checked === true })
+            }
+            aria-label={copy.techOnlyLabel}
+          />
+        </div>
+
           renderCheckboxOption(option, value.formats.includes(option.value), (checked) =>
             updateFilters({
               formats: toggleListValue(value.formats, option.value, checked),

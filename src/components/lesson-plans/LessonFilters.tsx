@@ -152,7 +152,7 @@ export function LessonFilters({
         ) : null}
         {delivery.durationHint ? (
           <span className="text-xs text-muted-foreground">{delivery.durationHint}</span>
-        ) : null}
+       ) : null}
       </span>
     </label>
   );
@@ -177,15 +177,15 @@ export function LessonFilters({
         />
       </div>
 
-      <FilterSection title={stageLabel}>
+      <FilterSection title={stageLabel} defaultOpen={selectedStages.length > 0}>
         {stages.map(renderStageOption)}
       </FilterSection>
 
-      <FilterSection title={deliveryLabel}>
+      <FilterSection title={deliveryLabel} defaultOpen={selectedDeliveryModes.length > 0}>
         {deliveryModes.map(renderDeliveryOption)}
       </FilterSection>
 
-      <FilterSection title={technologyLabel}>
+      <FilterSection title={technologyLabel} defaultOpen={selectedTechnologies.length > 0}>
         <ToggleGroup
           type="multiple"
           value={selectedTechnologies}
@@ -199,6 +199,19 @@ export function LessonFilters({
               value={option.value}
               className="rounded-full border px-4 py-2 text-sm font-medium"
               aria-pressed={selectedTechnologies.includes(option.value)}
+            >
+              {option.label}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+      </FilterSection>
+
+      <div className="flex items-center justify-between">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => {
+
             >
               {option.label}
             </ToggleGroupItem>
