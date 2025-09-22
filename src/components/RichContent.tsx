@@ -112,7 +112,7 @@ const RichContent: React.FC<RichContentProps> = ({ content, className = "" }) =>
             return null;
         }
       })
-      .filter((block): block is ContentBlock => !!block);
+      .filter((block): block is NonNullable<typeof block> => !!block);
   };
 
   let contentArray: ContentBlock[];

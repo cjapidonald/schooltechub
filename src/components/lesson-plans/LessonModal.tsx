@@ -84,19 +84,20 @@ function useLockBodyScroll(isLocked: boolean) {
 function renderBlock(block: LessonPlanContentBlock, index: number) {
   switch (block.type) {
     case "heading": {
-      const level = Math.min(Math.max(block.level ?? 3, 2), 5);
+      const level = Math.min(Math.max((block.level as number) ?? 3, 2), 5);
       const Tag = `h${level}` as keyof JSX.IntrinsicElements;
       return (
         <Tag key={index} className="text-lg font-semibold">
-          {block.text}
+          {block.text as React.ReactNode}
         </Tag>
       );
     }
     case "list": {
       const ListComponent = block.ordered ? "ol" : "ul";
+      const items = Array.isArray(block.items) ? block.items : [];
       return (
         <ListComponent key={index} className="ml-6 list-disc space-y-1 text-sm text-muted-foreground">
-          {block.items.map((item, itemIndex) => (
+          {items.map((item, itemIndex) => (
             <li key={itemIndex}>{item}</li>
           ))}
         </ListComponent>
@@ -108,8 +109,8 @@ function renderBlock(block: LessonPlanContentBlock, index: number) {
           key={index}
           className="border-l-4 border-primary/40 pl-4 italic text-muted-foreground"
         >
-          {block.text}
-          {block.attribution ? <footer className="mt-2 text-xs">— {block.attribution}</footer> : null}
+          {block.text as React.ReactNode}
+          {block.attribution ? <footer className="mt-2 text-xs">— {block.attribution as React.ReactNode}</footer> : null}
         </blockquote>
       );
     }
@@ -117,7 +118,7 @@ function renderBlock(block: LessonPlanContentBlock, index: number) {
     default:
       return (
         <p key={index} className="text-sm leading-relaxed text-muted-foreground">
-          {"text" in block ? block.text : null}
+          {"text" in block ? (block.text as React.ReactNode) : null}
         </p>
       );
   }
