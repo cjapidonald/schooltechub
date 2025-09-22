@@ -14,265 +14,29 @@ export type Database = {
   }
   public: {
     Tables: {
-      audit_logs: {
+      admin_roles: {
         Row: {
-          action: string
-          actor_id: string | null
-          created_at: string
-          details: Json
-          id: number
-          ip: string | null
-          target_id: string
-          target_type: string
-          user_agent: string | null
-        }
-        Insert: {
-          action: string
-          actor_id?: string | null
-          created_at?: string
-          details?: Json
-          id?: number
-          ip?: string | null
-          target_id: string
-          target_type: string
-          user_agent?: string | null
-        }
-        Update: {
-          action?: string
-          actor_id?: string | null
-          created_at?: string
-          details?: Json
-          id?: number
-          ip?: string | null
-          target_id?: string
-          target_type?: string
-          user_agent?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "audit_logs_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      builder_activity_favorites: {
-        Row: {
-          activity_slug: string
-          anon_user_id: string
-          created_at: string
+          granted_at: string | null
+          granted_by: string | null
           id: string
+          role: string
+          user_id: string
         }
         Insert: {
-          activity_slug: string
-          anon_user_id: string
-          created_at?: string
+          granted_at?: string | null
+          granted_by?: string | null
           id?: string
+          role?: string
+          user_id: string
         }
         Update: {
-          activity_slug?: string
-          anon_user_id?: string
-          created_at?: string
+          granted_at?: string | null
+          granted_by?: string | null
           id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "builder_activity_favorites_activity_slug_fkey"
-            columns: ["activity_slug"]
-            isOneToOne: false
-            referencedRelation: "tools_activities"
-            referencedColumns: ["slug"]
-          },
-        ]
-      }
-      builder_activity_recents: {
-        Row: {
-          activity_slug: string
-          anon_user_id: string
-          id: string
-          last_viewed: string
-          metadata: Json | null
-        }
-        Insert: {
-          activity_slug: string
-          anon_user_id: string
-          id?: string
-          last_viewed?: string
-          metadata?: Json | null
-        }
-        Update: {
-          activity_slug?: string
-          anon_user_id?: string
-          id?: string
-          last_viewed?: string
-          metadata?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "builder_activity_recents_activity_slug_fkey"
-            columns: ["activity_slug"]
-            isOneToOne: false
-            referencedRelation: "tools_activities"
-            referencedColumns: ["slug"]
-          },
-        ]
-      }
-      builder_collections: {
-        Row: {
-          anon_user_id: string
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-        }
-        Insert: {
-          anon_user_id: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-        }
-        Update: {
-          anon_user_id?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
+          role?: string
+          user_id?: string
         }
         Relationships: []
-      }
-      builder_collection_items: {
-        Row: {
-          activity_slug: string
-          collection_id: string
-          created_at: string
-          id: string
-        }
-        Insert: {
-          activity_slug: string
-          collection_id: string
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          activity_slug?: string
-          collection_id?: string
-          created_at?: string
-          id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "builder_collection_items_activity_slug_fkey"
-            columns: ["activity_slug"]
-            isOneToOne: false
-            referencedRelation: "tools_activities"
-            referencedColumns: ["slug"]
-          },
-          {
-            foreignKeyName: "builder_collection_items_collection_id_fkey"
-            columns: ["collection_id"]
-            isOneToOne: false
-            referencedRelation: "builder_collections"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      builder_drafts: {
-        Row: {
-          anon_user_id: string
-          data: Json
-          id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          anon_user_id: string
-          data?: Json
-          id?: string
-          title?: string
-          updated_at?: string
-        }
-        Update: {
-          anon_user_id?: string
-          data?: Json
-          id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      builder_link_health_reports: {
-        Row: {
-          failure_count: number
-          id: string
-          is_healthy: boolean
-          last_checked: string
-          last_error: string | null
-          status_code: number | null
-          status_text: string | null
-          url: string
-        }
-        Insert: {
-          failure_count?: number
-          id?: string
-          is_healthy?: boolean
-          last_checked?: string
-          last_error?: string | null
-          status_code?: number | null
-          status_text?: string | null
-          url: string
-        }
-        Update: {
-          failure_count?: number
-          id?: string
-          is_healthy?: boolean
-          last_checked?: string
-          last_error?: string | null
-          status_code?: number | null
-          status_text?: string | null
-          url?: string
-        }
-        Relationships: []
-      }
-      builder_resource_links: {
-        Row: {
-          draft_id: string
-          id: string
-          label: string
-          last_synced: string
-          resource_id: string | null
-          step_id: string
-          url: string
-        }
-        Insert: {
-          draft_id: string
-          id?: string
-          label: string
-          last_synced?: string
-          resource_id?: string | null
-          step_id: string
-          url: string
-        }
-        Update: {
-          draft_id?: string
-          id?: string
-          label?: string
-          last_synced?: string
-          resource_id?: string | null
-          step_id?: string
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "builder_resource_links_draft_id_fkey"
-            columns: ["draft_id"]
-            isOneToOne: false
-            referencedRelation: "builder_drafts"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       classes: {
         Row: {
@@ -672,93 +436,6 @@ export type Database = {
           },
         ]
       }
-      tools_activities: {
-        Row: {
-          accessibility_notes: string | null
-          activity_types: string[] | null
-          best_for: string | null
-          classroom_flow: string | null
-          cost: string
-          created_at: string
-          description: string | null
-          devices: string[] | null
-          external_link: string | null
-          featured_image_url: string | null
-          free_tier_limits: string | null
-          group_sizes: string[] | null
-          id: string
-          is_featured: boolean | null
-          is_published: boolean | null
-          lesson_idea: string | null
-          name: string
-          offline_option: boolean | null
-          privacy_security_notes: string | null
-          quick_start_steps: Json | null
-          school_stages: string[] | null
-          setup_time: string | null
-          slug: string
-          subjects: string[] | null
-          updated_at: string
-          video_url?: never
-        }
-        Insert: {
-          accessibility_notes?: string | null
-          activity_types?: string[] | null
-          best_for?: string | null
-          classroom_flow?: string | null
-          cost?: string
-          created_at?: string
-          description?: string | null
-          devices?: string[] | null
-          external_link?: string | null
-          featured_image_url?: string | null
-          free_tier_limits?: string | null
-          group_sizes?: string[] | null
-          id?: string
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          lesson_idea?: string | null
-          name: string
-          offline_option?: boolean | null
-          privacy_security_notes?: string | null
-          quick_start_steps?: Json | null
-          school_stages?: string[] | null
-          setup_time?: string | null
-          slug: string
-          subjects?: string[] | null
-          updated_at?: string
-          video_url?: never
-        }
-        Update: {
-          accessibility_notes?: string | null
-          activity_types?: string[] | null
-          best_for?: string | null
-          classroom_flow?: string | null
-          cost?: string
-          created_at?: string
-          description?: string | null
-          devices?: string[] | null
-          external_link?: string | null
-          featured_image_url?: string | null
-          free_tier_limits?: string | null
-          group_sizes?: string[] | null
-          id?: string
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          lesson_idea?: string | null
-          name?: string
-          offline_option?: boolean | null
-          privacy_security_notes?: string | null
-          quick_start_steps?: Json | null
-          school_stages?: string[] | null
-          setup_time?: string | null
-          slug?: string
-          subjects?: string[] | null
-          updated_at?: string
-          video_url?: never
-        }
-        Relationships: []
-      }
       enrollments: {
         Row: {
           class_id: string
@@ -842,178 +519,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lesson_plans: {
-        Row: {
-          activities: Json
-          created_at: string
-          duration_minutes: number | null
-          grade_levels: string[]
-          id: string
-          lesson_date: string | null
-          materials: string[]
-          objectives: string[]
-          owner_id: string | null
-          search_vector: unknown
-          school_logo_url: string | null
-          slug: string
-          standards: string[]
-          status: string
-          subject: string | null
-          summary: string | null
-          tags: string[]
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          activities?: Json
-          created_at?: string
-          duration_minutes?: number | null
-          grade_levels?: string[]
-          id?: string
-          lesson_date?: string | null
-          materials?: string[]
-          objectives?: string[]
-          owner_id?: string | null
-          search_vector?: unknown
-          school_logo_url?: string | null
-          slug: string
-          standards?: string[]
-          status?: string
-          subject?: string | null
-          summary?: string | null
-          tags?: string[]
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          activities?: Json
-          created_at?: string
-          duration_minutes?: number | null
-          grade_levels?: string[]
-          id?: string
-          lesson_date?: string | null
-          materials?: string[]
-          objectives?: string[]
-          owner_id?: string | null
-          search_vector?: unknown
-          school_logo_url?: string | null
-          slug?: string
-          standards?: string[]
-          status?: string
-          subject?: string | null
-          summary?: string | null
-          tags?: string[]
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      lesson_plan_steps: {
-        Row: {
-          created_at: string
-          delivery_mode: "offline" | "blended" | "online" | null
-          duration_minutes: number | null
-          id: string
-          learning_goals: string | null
-          lesson_plan_id: string
-          notes: string | null
-          position: number | null
-          resources: Json | null
-          title: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          delivery_mode?: "offline" | "blended" | "online" | null
-          duration_minutes?: number | null
-          id?: string
-          learning_goals?: string | null
-          lesson_plan_id: string
-          notes?: string | null
-          position?: number | null
-          resources?: Json | null
-          title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          delivery_mode?: "offline" | "blended" | "online" | null
-          duration_minutes?: number | null
-          id?: string
-          learning_goals?: string | null
-          lesson_plan_id?: string
-          notes?: string | null
-          position?: number | null
-          resources?: Json | null
-          title?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_plan_steps_lesson_plan_id_fkey"
-            columns: ["lesson_plan_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      resources: {
-        Row: {
-          created_at: string
-          creator_id: string | null
-          description: string | null
-          format: string | null
-          grade_level: string | null
-          id: string
-          instructional_notes: string | null
-          resource_type: string | null
-          subject: string | null
-          tags: string[] | null
-          title: string
-          updated_at: string
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          creator_id?: string | null
-          description?: string | null
-          format?: string | null
-          grade_level?: string | null
-          id?: string
-          instructional_notes?: string | null
-          resource_type?: string | null
-          subject?: string | null
-          tags?: string[] | null
-          title: string
-          updated_at?: string
-          url: string
-        }
-        Update: {
-          created_at?: string
-          creator_id?: string | null
-          description?: string | null
-          format?: string | null
-          grade_level?: string | null
-          id?: string
-          instructional_notes?: string | null
-          resource_type?: string | null
-          subject?: string | null
-          tags?: string[] | null
-          title?: string
-          updated_at?: string
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "resources_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       newsletter_subscribers: {
         Row: {
           audience: string | null
@@ -1065,9 +570,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
-          school_logo_url: string | null
           role: Database["public"]["Enums"]["user_role_enum"] | null
-          school_logo_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1075,9 +578,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
-          school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
-          school_logo_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1085,31 +586,83 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
-          school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
-          school_logo_url?: string | null
           updated_at?: string | null
         }
         Relationships: []
       }
-      saved_posts: {
+      resources: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          creator_id: string | null
+          description: string | null
+          format: string | null
+          grade_level: string | null
           id: string
-          post_id: string
-          saved_at: string
-          user_id: string
+          instructional_notes: string | null
+          is_active: boolean | null
+          resource_type: string | null
+          stage: string | null
+          status: string | null
+          storage_path: string | null
+          subject: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          type: string | null
+          updated_at: string | null
+          url: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          creator_id?: string | null
+          description?: string | null
+          format?: string | null
+          grade_level?: string | null
           id?: string
-          post_id: string
-          saved_at?: string
-          user_id: string
+          instructional_notes?: string | null
+          is_active?: boolean | null
+          resource_type?: string | null
+          stage?: string | null
+          status?: string | null
+          storage_path?: string | null
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          type?: string | null
+          updated_at?: string | null
+          url?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          creator_id?: string | null
+          description?: string | null
+          format?: string | null
+          grade_level?: string | null
           id?: string
-          post_id?: string
-          saved_at?: string
-          user_id?: string
+          instructional_notes?: string | null
+          is_active?: boolean | null
+          resource_type?: string | null
+          stage?: string | null
+          status?: string | null
+          storage_path?: string | null
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          type?: string | null
+          updated_at?: string | null
+          url?: string | null
         }
         Relationships: []
       }
@@ -1177,6 +730,10 @@ export type Database = {
       get_newsletter_subscriber_count: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      is_admin: {
+        Args: { check_user_id?: string }
+        Returns: boolean
       }
       is_email_subscribed: {
         Args: { check_email: string }

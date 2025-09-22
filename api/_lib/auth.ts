@@ -78,7 +78,7 @@ function extractAccessToken(request: Request): string | null {
 
 async function isAdmin(supabase: SupabaseClient, userId: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase.rpc<boolean>("is_admin", { user_id: userId });
+    const { data, error } = await supabase.rpc<boolean>("is_admin", { check_user_id: userId });
     if (!error && typeof data === "boolean") {
       return data;
     }
@@ -97,7 +97,7 @@ async function isAdmin(supabase: SupabaseClient, userId: string): Promise<boolea
 
   try {
     const { data, error } = await supabase
-      .from<{ user_id: string }>("app_admins")
+      .from<{ user_id: string }>("admin_roles")
       .select("user_id")
       .eq("user_id", userId)
       .maybeSingle();
