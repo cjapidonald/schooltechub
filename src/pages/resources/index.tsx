@@ -30,9 +30,16 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { getSignedDownloadUrl, ResourceDataError, searchResources } from "@/lib/resources";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  ACTIVE_DRAFT_FLAG_STORAGE_KEY,
+  ACTIVE_DRAFT_ID_STORAGE_KEY,
+  ACTIVE_STEP_STORAGE_PREFIX,
+  GLOBAL_ACTIVE_STEP_STORAGE_KEY,
   attachResourceToActiveStep,
   getActiveLessonDraftId,
+  getGlobalActiveStepId,
+  getStoredActiveDraftId,
   getStoredActiveStepId,
+  hasActiveLessonDraft,
   subscribeToActiveStepChanges,
   subscribeToLessonDraftContext,
 } from "@/lib/lesson-draft-bridge";
@@ -108,6 +115,8 @@ type ResourceCardViewProps = {
   onAdd: () => void;
   isAuthenticated: boolean;
   onRequireLogin: () => void;
+  canAttachToDraft: boolean;
+  addButtonTooltip?: string;
 };
 
 const useDebouncedValue = <T,>(value: T, delay = 300) => {
@@ -190,7 +199,15 @@ const MultiSelectFilter = ({ label, options, selected, onChange }: MultiSelectFi
   );
 };
 
-const ResourceCardView = ({ resource, view, onAdd, isAuthenticated, onRequireLogin }: ResourceCardViewProps) => {
+const ResourceCardView = ({
+  resource,
+  view,
+  onAdd,
+  isAuthenticated,
+  onRequireLogin,
+  canAttachToDraft,
+  addButtonTooltip,
+}: ResourceCardViewProps) => {
   const layout = view === "grid" ? "vertical" : "horizontal";
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -275,6 +292,8 @@ const ResourceCardView = ({ resource, view, onAdd, isAuthenticated, onRequireLog
           layout={layout}
           onAdd={onAdd}
           addButtonLabel="Add to plan"
+          addButtonDisabled={!canAttachToDraft}
+          addButtonTooltip={addButtonTooltip}
         />
         {actions}
       </CardContent>
@@ -299,6 +318,7 @@ const ResourcesPage = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sort, setSort] = useState<SortOption>("newest");
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
+  const [hasActiveDraft, setHasActiveDraft] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [loginReason, setLoginReason] = useState<"download" | "upload" | null>(null);
@@ -311,19 +331,30 @@ const ResourcesPage = () => {
     }
 
     const syncContext = () => {
-      const draftId = getActiveLessonDraftId();
-      setActiveStepId(draftId ? getStoredActiveStepId(draftId) : null);
+      const draftId = getActiveLessonDraftId() ?? getStoredActiveDraftId();
+      setHasActiveDraft(hasActiveLessonDraft() || Boolean(draftId));
+      if (draftId) {
+        setActiveStepId(getStoredActiveStepId(draftId) ?? getGlobalActiveStepId());
+        return;
+      }
+      setActiveStepId(getGlobalActiveStepId());
     };
 
     syncContext();
 
     const unsubscribeContext = subscribeToLessonDraftContext(({ draftId }) => {
-      setActiveStepId(draftId ? getStoredActiveStepId(draftId) : null);
+      const resolvedDraftId = draftId ?? getStoredActiveDraftId();
+      setHasActiveDraft(hasActiveLessonDraft() || Boolean(resolvedDraftId));
+      if (resolvedDraftId) {
+        setActiveStepId(getStoredActiveStepId(resolvedDraftId) ?? getGlobalActiveStepId());
+        return;
+      }
+      setActiveStepId(getGlobalActiveStepId());
     });
 
     const unsubscribeStep = subscribeToActiveStepChanges(({ draftId, stepId }) => {
-      const currentDraftId = getActiveLessonDraftId();
-      if (currentDraftId && currentDraftId === draftId) {
+      const activeDraftId = getActiveLessonDraftId() ?? getStoredActiveDraftId();
+      if (activeDraftId && activeDraftId === draftId) {
         setActiveStepId(stepId);
       }
     });
@@ -332,12 +363,26 @@ const ResourcesPage = () => {
       syncContext();
     };
 
+    const handleStorage = (event: StorageEvent) => {
+      if (
+        !event.key ||
+        event.key === ACTIVE_DRAFT_FLAG_STORAGE_KEY ||
+        event.key === ACTIVE_DRAFT_ID_STORAGE_KEY ||
+        event.key === GLOBAL_ACTIVE_STEP_STORAGE_KEY ||
+        event.key.startsWith(ACTIVE_STEP_STORAGE_PREFIX)
+      ) {
+        syncContext();
+      }
+    };
+
     window.addEventListener("focus", handleFocus);
+    window.addEventListener("storage", handleStorage);
 
     return () => {
       unsubscribeContext();
       unsubscribeStep();
       window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
@@ -372,6 +417,12 @@ const ResourcesPage = () => {
   }, [currentUser, loginDialogOpen]);
 
   const isAuthenticated = Boolean(currentUser);
+  const canAttachToDraft = hasActiveDraft && Boolean(activeStepId);
+  const addToPlanTooltip = hasActiveDraft
+    ? activeStepId
+      ? undefined
+      : "Add a step in Lesson Builder to attach."
+    : "Open Lesson Builder to attach.";
 
   const sanitizedFilters = useMemo(
     () => ({
@@ -447,18 +498,18 @@ const ResourcesPage = () => {
   }, [resources, sort]);
 
   const handleAttachResource = (resource: Resource) => {
-    if (!activeStepId) {
-      toast({ description: "Open a lesson draft to attach resources." });
+    if (!canAttachToDraft || !activeStepId) {
+      toast({ description: "Open Lesson Builder to attach resources." });
       return;
     }
 
     const attached = attachResourceToActiveStep(resource.id);
     if (attached) {
-      toast({ description: `Added "${resource.title}" to your lesson draft.` });
+      toast({ description: "Added to current step." });
       return;
     }
 
-    toast({ description: "Open a lesson draft to attach resources." });
+    toast({ description: "Open Lesson Builder to attach resources." });
   };
 
   const handleTagInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -735,6 +786,8 @@ const ResourcesPage = () => {
                     onAdd={() => handleAttachResource(resource)}
                     isAuthenticated={isAuthenticated}
                     onRequireLogin={() => openLoginDialog("download")}
+                    canAttachToDraft={canAttachToDraft}
+                    addButtonTooltip={addToPlanTooltip}
                   />
                 ))}
               </div>
