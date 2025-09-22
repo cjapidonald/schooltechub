@@ -802,9 +802,12 @@ export type Database = {
           duration_minutes: number | null
           grade_levels: string[]
           id: string
+          lesson_date: string | null
           materials: string[]
           objectives: string[]
+          owner_id: string | null
           search_vector: unknown
+          school_logo_url: string | null
           slug: string
           standards: string[]
           status: string
@@ -820,9 +823,12 @@ export type Database = {
           duration_minutes?: number | null
           grade_levels?: string[]
           id?: string
+          lesson_date?: string | null
           materials?: string[]
           objectives?: string[]
+          owner_id?: string | null
           search_vector?: unknown
+          school_logo_url?: string | null
           slug: string
           standards?: string[]
           status?: string
@@ -838,9 +844,12 @@ export type Database = {
           duration_minutes?: number | null
           grade_levels?: string[]
           id?: string
+          lesson_date?: string | null
           materials?: string[]
           objectives?: string[]
+          owner_id?: string | null
           search_vector?: unknown
+          school_logo_url?: string | null
           slug?: string
           standards?: string[]
           status?: string
@@ -904,6 +913,7 @@ export type Database = {
           full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -912,6 +922,7 @@ export type Database = {
           full_name?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -920,6 +931,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
           updated_at?: string | null
         }
         Relationships: []

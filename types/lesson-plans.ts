@@ -84,6 +84,7 @@ export interface LessonPlanRecord {
   slug: string;
   title: string;
   status: LessonPlanStatus;
+  owner_id?: string | null;
   summary?: string | null;
   excerpt?: string | null;
   description?: string | null;
@@ -110,6 +111,8 @@ export interface LessonPlanRecord {
   resources?: unknown;
   content?: unknown;
   body?: unknown;
+  school_logo_url?: string | null;
+  lesson_date?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
   published_at?: string | null;

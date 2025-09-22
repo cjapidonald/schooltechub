@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Loader2, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,9 +53,13 @@ const BuilderLessonPlanDetail = () => {
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
   const [activityQuery, setActivityQuery] = useState("");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [profileLogoUrl, setProfileLogoUrl] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestPlan = useRef<LessonBuilderPlan | null>(null);
+  const defaultsApplied = useRef(false);
 
   useEffect(() => {
     if (planQuery.data) {
@@ -68,6 +73,62 @@ const BuilderLessonPlanDetail = () => {
       }
     }
   }, [planQuery.data, selectedPart, selectedStepId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      setProfileLoaded(true);
+      return;
+    }
+
+    let active = true;
+
+    const loadProfile = async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (!active) {
+          return;
+        }
+
+        const user = data?.user ?? null;
+        if (!user) {
+          setProfileId(null);
+          setProfileLogoUrl(null);
+          setProfileLoaded(true);
+          return;
+        }
+
+        setProfileId(user.id);
+
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("school_logo_url")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (!active) {
+          return;
+        }
+
+        const logo =
+          profileData && "school_logo_url" in profileData
+            ? ((profileData as { school_logo_url: string | null }).school_logo_url ?? null)
+            : null;
+        setProfileLogoUrl(logo);
+      } catch (error) {
+        console.error("Failed to load profile", error);
+      } finally {
+        if (active) {
+          setProfileLoaded(true);
+        }
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => () => {
     if (autosaveTimer.current) {
@@ -115,6 +176,46 @@ const BuilderLessonPlanDetail = () => {
     },
     [scheduleAutosave]
   );
+
+  useEffect(() => {
+    if (!plan || !profileLoaded || defaultsApplied.current) {
+      return;
+    }
+
+    const todayIso = (() => {
+      try {
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        return new Intl.DateTimeFormat("en-CA", { timeZone }).format(new Date());
+      } catch {
+        return new Intl.DateTimeFormat("en-CA").format(new Date());
+      }
+    })();
+
+    let applied = false;
+
+    updatePlan((current) => {
+      const patch: Partial<LessonBuilderPlan> = {};
+      if (!current.schoolLogoUrl && profileLogoUrl) {
+        patch.schoolLogoUrl = profileLogoUrl;
+      }
+      if (!current.lessonDate) {
+        patch.lessonDate = todayIso;
+      }
+
+      if (Object.keys(patch).length === 0) {
+        return current;
+      }
+
+      applied = true;
+      return { ...current, ...patch } as LessonBuilderPlan;
+    });
+
+    if (!applied && plan.schoolLogoUrl && plan.lessonDate) {
+      defaultsApplied.current = true;
+    } else if (applied) {
+      defaultsApplied.current = true;
+    }
+  }, [plan, profileLoaded, profileLogoUrl, updatePlan]);
 
   const handleAddStep = () => {
     const newStep = mergeStepValues({ title: "" });
@@ -271,7 +372,12 @@ const BuilderLessonPlanDetail = () => {
           />
         </div>
         <div className="space-y-6">
-          <MetaBar plan={plan} copy={t.lessonBuilder.meta} onUpdate={updatePlan} />
+          <MetaBar
+            plan={plan}
+            copy={t.lessonBuilder.meta}
+            onUpdate={updatePlan}
+            profileId={profileId}
+          />
           <PlanCanvas
             steps={plan.steps}
             selectedStepId={selectedStepId}

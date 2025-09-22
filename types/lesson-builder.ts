@@ -73,6 +73,9 @@ export interface LessonBuilderPlan {
   version: number;
   parts: LessonBuilderPart[];
   history: LessonBuilderVersionEntry[];
+  schoolLogoUrl: string | null;
+  lessonDate: string | null;
+  ownerId?: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 }
