@@ -13,6 +13,8 @@ import FAQ from '@/pages/FAQ';
 import Edutech from '@/pages/Edutech';
 import TeacherDiary from '@/pages/TeacherDiary';
 import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
+import ResearchIndexPage from '@/pages/research';
+import ResearchProjectPage from '@/pages/research/[slug]';
 import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
@@ -71,6 +73,8 @@ export const LocalizedRoutes = () => {
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
       <Route path="/resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
+      <Route path="/research" element={<RouteWrapper><ResearchIndexPage /></RouteWrapper>} />
+      <Route path="/research/:slug" element={<RouteWrapper><ResearchProjectPage /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
@@ -104,6 +108,8 @@ export const LocalizedRoutes = () => {
         <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
         <Route path="resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
+        <Route path="research" element={<RouteWrapper><ResearchIndexPage /></RouteWrapper>} />
+        <Route path="research/:slug" element={<RouteWrapper><ResearchProjectPage /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
         <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
         <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />

@@ -231,7 +231,9 @@ export async function listParticipantDocs(
     throw new ResearchDataError("Failed to load project documents.", { cause: error });
   }
 
-  return Array.isArray(data) ? data.map(mapDocument) : [];
+  const documents = Array.isArray(data) ? data.map(mapDocument) : [];
+
+  return documents.filter(document => document.status === "participant" || document.status === "public");
 }
 
 export interface SubmissionMeta {
@@ -300,7 +302,7 @@ export async function uploadSubmission(
   const filename = inferFilename(file, meta);
   const extensionMatch = filename.match(/\.([^.]+)$/);
   const extension = extensionMatch ? extensionMatch[1] : "dat";
-  const storagePath = `${projectId}/${userId}/${crypto.randomUUID()}.${extension}`;
+  const storagePath = `research/${projectId}/submissions/${userId}/${crypto.randomUUID()}.${extension}`;
 
   const contentType = inferContentType(file, meta);
 
@@ -356,3 +358,110 @@ export async function listMySubmissions(
 
   return Array.isArray(data) ? data.map(mapSubmission) : [];
 }
+
+export async function getDocumentDownloadUrl(
+  documentId: string,
+  client: Client = supabase,
+): Promise<string> {
+  const accessToken = await requireAccessToken(client, "download project documents");
+
+  let response: Response;
+  try {
+    response = await fetch(`/api/research/documents/${encodeURIComponent(documentId)}/download`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      redirect: "follow",
+    });
+  } catch (error) {
+    throw new ResearchDataError("Failed to request document download URL.", { cause: error });
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+
+  if (!response.ok) {
+    let message = "Unable to download document.";
+    if (isJson) {
+      const payload = await response.json().catch(() => null);
+      if (payload && typeof payload.error === "string" && payload.error.trim()) {
+        message = payload.error;
+      }
+    }
+    throw new ResearchDataError(message);
+  }
+
+  if (isJson) {
+    const payload = await response.json().catch(() => null);
+    const url = payload && typeof (payload as { url?: unknown }).url === "string" ? payload.url : null;
+    if (url) {
+      return url;
+    }
+    throw new ResearchDataError("Document download URL was not provided by the server.");
+  }
+
+  if (response.url) {
+    return response.url;
+  }
+
+  throw new ResearchDataError("Unable to determine document download URL.");
+}
+
+export async function getMyApplicationForProject(
+  projectId: string,
+  client: Client = supabase,
+): Promise<ResearchApplication | null> {
+  const userId = await requireUserId(client, "view your application status");
+
+  const { data, error } = await client
+    .from("research_applications")
+    .select(APPLICATION_SELECT)
+    .eq("project_id", projectId)
+    .eq("applicant_id", userId)
+    .order("submitted_at", { ascending: false, nullsLast: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new ResearchDataError("Failed to load your application status.", { cause: error });
+  }
+
+  return data ? mapApplication(data) : null;
+}
+
+export async function isProjectParticipant(
+  projectId: string,
+  client: Client = supabase,
+): Promise<boolean> {
+  const userId = await requireUserId(client, "verify project access");
+
+  const { data, error } = await client
+    .from("research_participants")
+    .select(PARTICIPANT_SELECT)
+    .eq("project_id", projectId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new ResearchDataError("Failed to verify project participation.", { cause: error });
+  }
+
+  return Boolean(data);
+}
+async function requireAccessToken(client: Client, action: string): Promise<string> {
+  const { data, error } = await client.auth.getSession();
+
+  if (error) {
+    throw new ResearchDataError("Unable to verify authentication state.", { cause: error });
+  }
+
+  const accessToken = data.session?.access_token;
+
+  if (!accessToken) {
+    throw new ResearchDataError(`You must be signed in to ${action}.`);
+  }
+
+  return accessToken;
+}
+
