@@ -613,6 +613,30 @@ export const sq = {
       notFoundTitle: "Plani nuk u gjet",
       notFoundDescription: "Ky plan mund të jetë hequr ose i pa publikuar më.",
     },
+    toolbar: {
+      shareLabel: "Ndaj",
+      shareOptions: {
+        private: "Private",
+        link: "Kush ka lidhjen",
+        org: "Organizata",
+        public: "Publike",
+      },
+      readOnly: "Vetëm për lexim",
+      exportLabel: "Eksporto",
+      exporting: "Duke gjeneruar skedarin...",
+      exportReady: "Shkarkimi do të fillojë automatikisht.",
+      exportError: "Nuk mundëm të gjenerojmë eksportin. Provo përsëri.",
+      exportFormats: {
+        pdf: "PDF (mësues)",
+        docx: "DOCX (mësues)",
+        handoutPdf: "Material për nxënës (PDF)",
+        handoutDocx: "Material për nxënës (DOCX + kode QR)",
+      },
+      versionHistory: "Historia e versioneve",
+      versionEmpty: "Ende nuk ka versione të ruajtura.",
+      versionRestore: "Rikthe",
+      versionRestored: "Versioni u rikthye",
+    },
   },
   worksheets: {
     seo: {

@@ -1,11 +1,3 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  renderToBuffer,
-} from "@react-pdf/renderer";
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
@@ -248,6 +240,13 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
   const pdfUrl =
     nullableString(record.pdf_url) ?? nullableString(record.pdf) ?? null;
 
+  const shareAccess = normalizeShareAccess(record.share_access);
+  const viewerRole = normalizeViewerRole(record.viewer_role);
+  const canEdit =
+    typeof record.viewer_can_edit === "boolean"
+      ? record.viewer_can_edit
+      : viewerRole !== "viewer";
+
   return {
     id: record.id,
     slug: record.slug,
@@ -263,6 +262,9 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
     status: record.status ?? ("draft" as LessonPlanStatus),
     createdAt: nullableString(record.created_at),
     updatedAt: nullableString(record.updated_at),
+    shareAccess,
+    viewerRole,
+    canEdit,
   };
 }
 
@@ -297,165 +299,6 @@ export function buildListResponse(
   };
 }
 
-export async function renderLessonPlanToPdf(
-  lesson: LessonPlanDetail
-): Promise<Uint8Array> {
-  const styles = StyleSheet.create({
-    page: {
-      padding: 48,
-      fontSize: 12,
-      fontFamily: "Helvetica",
-      lineHeight: 1.4,
-    },
-    title: {
-      fontSize: 22,
-      marginBottom: 16,
-      fontWeight: 700,
-    },
-    summary: {
-      marginBottom: 16,
-    },
-    metaGroup: {
-      marginBottom: 12,
-    },
-    metaLabel: {
-      fontWeight: 600,
-    },
-    section: {
-      marginTop: 16,
-    },
-    sectionTitle: {
-      fontSize: 16,
-      marginBottom: 8,
-      fontWeight: 600,
-    },
-    paragraph: {
-      marginBottom: 8,
-    },
-    listItem: {
-      marginLeft: 12,
-      marginBottom: 4,
-    },
-  });
-
-  const doc = (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>{lesson.title}</Text>
-        {lesson.summary ? (
-          <Text style={styles.summary}>{lesson.summary}</Text>
-        ) : null}
-        <View style={styles.metaGroup}>
-          {renderMetaLine("Stage", lesson.stage, styles)}
-          {renderMetaLine(
-            "Subjects",
-            lesson.subjects.join(", ") || null,
-            styles
-          )}
-          {renderMetaLine(
-            "Delivery",
-            lesson.deliveryMethods.join(", ") || null,
-            styles
-          )}
-          {renderMetaLine(
-            "Technology",
-            lesson.technologyTags.join(", ") || null,
-            styles
-          )}
-          {renderMetaLine(
-            "Duration",
-            lesson.durationMinutes != null
-              ? `${lesson.durationMinutes} minutes`
-              : null,
-            styles
-          )}
-        </View>
-        {lesson.content.length === 0 ? (
-          <Text style={styles.paragraph}>Lesson content coming soon.</Text>
-        ) : (
-          lesson.content.map((section, index) => (
-            <View key={section.id ?? index} style={styles.section}>
-              {section.title ? (
-                <Text style={styles.sectionTitle}>{section.title}</Text>
-              ) : null}
-              {section.description ? (
-                <Text style={styles.paragraph}>{section.description}</Text>
-              ) : null}
-              {section.blocks.map((block, blockIndex) =>
-                renderBlock(block, blockIndex, styles)
-              )}
-            </View>
-          ))
-        )}
-      </Page>
-    </Document>
-  );
-
-  const buffer = await renderToBuffer(doc);
-  return buffer as Uint8Array;
-}
-
-function renderMetaLine(
-  label: string,
-  value: string | null,
-  styles: ReturnType<typeof StyleSheet.create>
-): JSX.Element | null {
-  if (!value) {
-    return null;
-  }
-  return (
-    <Text style={styles.paragraph}>
-      <Text style={styles.metaLabel}>{`${label}: `}</Text>
-      {value}
-    </Text>
-  );
-}
-
-function renderBlock(
-  block: LessonPlanContentBlock,
-  index: number,
-  styles: ReturnType<typeof StyleSheet.create>
-): JSX.Element {
-  switch (block.type) {
-    case "paragraph":
-      return (
-        <Text key={index} style={styles.paragraph}>
-          {block.text}
-        </Text>
-      );
-    case "heading":
-      return (
-        <Text key={index} style={styles.sectionTitle}>
-          {block.text}
-        </Text>
-      );
-    case "list":
-      return (
-        <View key={index} style={styles.paragraph}>
-          {block.items.map((item, itemIndex) => (
-            <Text key={itemIndex} style={styles.listItem}>
-              {block.ordered ? `${itemIndex + 1}. ` : "• "}
-              {item}
-            </Text>
-          ))}
-        </View>
-      );
-    case "quote":
-      return (
-        <View key={index} style={styles.paragraph}>
-          <Text>“{block.text}”</Text>
-          {block.attribution ? <Text>- {block.attribution}</Text> : null}
-        </View>
-      );
-    default:
-      return (
-        <Text key={index} style={styles.paragraph}>
-          {JSON.stringify(block)}
-        </Text>
-      );
-  }
-}
-
 function ensureStringArray(value: unknown): string[] {
   if (!value) {
     return [];
@@ -486,6 +329,37 @@ function ensureStringArray(value: unknown): string[] {
     }
   }
   return [];
+}
+
+function normalizeShareAccess(
+  value: unknown
+): LessonPlanListItem["shareAccess"] {
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "public") {
+      return "public";
+    }
+    if (normalized === "org" || normalized === "organization") {
+      return "org";
+    }
+    if (normalized === "link" || normalized === "shared") {
+      return "link";
+    }
+  }
+  return "private";
+}
+
+function normalizeViewerRole(value: unknown): LessonPlanListItem["viewerRole"] {
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "owner") {
+      return "owner";
+    }
+    if (normalized === "editor" || normalized === "collaborator") {
+      return "editor";
+    }
+  }
+  return "viewer";
 }
 
 function uniqStrings(values: string[]): string[] {

@@ -1,5 +1,13 @@
 export type LessonPlanStatus = "draft" | "published" | "archived";
 
+export type LessonPlanShareAccess =
+  | "private"
+  | "link"
+  | "org"
+  | "public";
+
+export type LessonPlanViewerRole = "owner" | "editor" | "viewer";
+
 export interface LessonPlanListItem {
   id: string;
   slug: string;
@@ -15,6 +23,9 @@ export interface LessonPlanListItem {
   status: LessonPlanStatus;
   createdAt: string | null;
   updatedAt: string | null;
+  shareAccess: LessonPlanShareAccess;
+  viewerRole: LessonPlanViewerRole;
+  canEdit: boolean;
 }
 
 export interface LessonPlanOverview {
@@ -74,6 +85,14 @@ export interface LessonPlanDetail extends LessonPlanListItem {
   resources: LessonPlanResource[];
 }
 
+export interface LessonPlanVersion {
+  id: string;
+  planId: string;
+  snapshot: unknown;
+  createdAt: string;
+  createdBy: string | null;
+}
+
 export interface LessonPlanListResponse {
   items: LessonPlanListItem[];
   nextCursor: string | null;
@@ -114,4 +133,8 @@ export interface LessonPlanRecord {
   updated_at?: string | null;
   published_at?: string | null;
   metadata?: unknown;
+  share_access?: string | null;
+  viewer_role?: string | null;
+  viewer_can_edit?: boolean | null;
+  owner_id?: string | null;
 }

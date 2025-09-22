@@ -613,6 +613,30 @@ export const vi = {
       notFoundTitle: "Không tìm thấy kế hoạch",
       notFoundDescription: "Kế hoạch này có thể đã bị gỡ xuống hoặc chưa công bố.",
     },
+    toolbar: {
+      shareLabel: "Chia sẻ",
+      shareOptions: {
+        private: "Riêng tư",
+        link: "Bất kỳ ai có liên kết",
+        org: "Tổ chức",
+        public: "Công khai",
+      },
+      readOnly: "Chế độ chỉ xem",
+      exportLabel: "Xuất tệp",
+      exporting: "Đang tạo tệp xuất...",
+      exportReady: "Tệp sẽ tự động được tải xuống.",
+      exportError: "Không thể tạo tệp xuất. Vui lòng thử lại.",
+      exportFormats: {
+        pdf: "PDF (giáo viên)",
+        docx: "DOCX (giáo viên)",
+        handoutPdf: "Tài liệu học sinh (PDF)",
+        handoutDocx: "Tài liệu học sinh (DOCX + mã QR)",
+      },
+      versionHistory: "Lịch sử phiên bản",
+      versionEmpty: "Chưa có phiên bản nào được lưu.",
+      versionRestore: "Khôi phục",
+      versionRestored: "Đã khôi phục phiên bản",
+    },
   },
   worksheets: {
     seo: {

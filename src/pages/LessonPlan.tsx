@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { SEO } from "@/components/SEO";
 import { LessonDetailContent, LessonDetailCopy } from "@/components/lesson-plans/LessonModal";
+import { LessonPlanToolbar } from "@/components/lesson-plans/LessonPlanToolbar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -93,13 +94,6 @@ const LessonPlanPage = () => {
     navigate(getLocalizedPath("/lesson-plans", language));
   };
 
-  const handleDownload = () => {
-    if (!lesson) {
-      return;
-    }
-    window.open(`/api/lesson-plans/${lesson.id}/pdf`, "_blank", "noopener,noreferrer");
-  };
-
   const canonicalUrl = lesson
     ? `https://schooltechhub.com${getLocalizedPath(`/lesson-plans/${lesson.slug}`, language)}`
     : `https://schooltechhub.com${getLocalizedPath("/lesson-plans", language)}`;
@@ -123,17 +117,7 @@ const LessonPlanPage = () => {
             </Button>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <Button
-              type="button"
-              onClick={handleDownload}
-              disabled={!lesson}
-              className="inline-flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              {t.lessonPlans.modal.download}
-            </Button>
-          </div>
+          <LessonPlanToolbar lesson={lesson} slug={slug ?? null} />
         </div>
 
         {lessonQuery.isLoading ? (

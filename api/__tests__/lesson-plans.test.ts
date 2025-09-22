@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import listHandler from "../lesson-plans";
 import slugHandler from "../lesson-plans/[slug]";
-import pdfHandler from "../lesson-plans/[id]-pdf";
+import exportHandler from "../lesson-plans/[id]/export";
 import type { LessonPlanRecord } from "../../types/lesson-plans";
 import { decodeCursor } from "../_lib/lesson-plan-helpers";
 
@@ -13,6 +13,28 @@ vi.mock("@react-pdf/renderer", () => ({
   View: ({ children }: { children: unknown }) => children,
   StyleSheet: { create: () => ({}) },
   renderToBuffer: async () => new Uint8Array([1]),
+}));
+
+vi.mock("docx", () => ({
+  Document: class {},
+  Packer: { toBuffer: async () => new Uint8Array([1]) },
+  Paragraph: class {},
+  TextRun: class {},
+  HeadingLevel: {
+    TITLE: "TITLE",
+    HEADING_2: "HEADING_2",
+    HEADING_3: "HEADING_3",
+  },
+  SectionType: {
+    CONTINUOUS: "CONTINUOUS",
+  },
+  ExternalHyperlink: class {},
+  ImageRun: class {},
+}));
+
+vi.mock("qrcode", () => ({
+  toDataURL: async () => "data:image/png;base64,AA==",
+  toBuffer: async () => new Uint8Array([1]),
 }));
 
 interface SupabaseResponse {
@@ -107,6 +129,7 @@ const { SupabaseStub, createStub } = vi.hoisted(() => {
 
   class SupabaseStub {
     public builders: StubQueryBuilder[] = [];
+    public storageCalls: Array<{ bucket: string; method: string; args: unknown[] }> = [];
     private responses: SupabaseResponse[] = [];
 
     from() {
@@ -117,12 +140,32 @@ const { SupabaseStub, createStub } = vi.hoisted(() => {
       return builder;
     }
 
+    storage = {
+      from: (bucket: string) => {
+        this.storageCalls.push({ bucket, method: "from", args: [] });
+        return {
+          upload: async (...args: unknown[]) => {
+            this.storageCalls.push({ bucket, method: "upload", args });
+            return { data: { path: "exports/sample.pdf" }, error: null };
+          },
+          createSignedUrl: async (...args: unknown[]) => {
+            this.storageCalls.push({ bucket, method: "createSignedUrl", args });
+            return {
+              data: { signedUrl: "https://storage.example/exports/sample.pdf" },
+              error: null,
+            };
+          },
+        };
+      },
+    };
+
     setResponses(responses: SupabaseResponse[]) {
       this.responses = responses.map((response) => ({
         data: response.data,
         error: response.error ?? null,
       }));
       this.builders = [];
+      this.storageCalls = [];
     }
   }
 
@@ -299,13 +342,13 @@ describe("lesson plan detail handler", () => {
   });
 });
 
-describe("lesson plan pdf handler", () => {
+describe("lesson plan export handler", () => {
   it("redirects to hosted pdf when available", async () => {
     const record = createRecord({ pdf_url: "https://example.com/plan.pdf" });
     setResponses([{ data: record }]);
 
-    const response = await pdfHandler(
-      new Request("http://localhost/api/lesson-plans/plan-1/pdf")
+    const response = await exportHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1/export?format=pdf")
     );
     expect(response.status).toBe(302);
     expect(response.headers.get("Location")).toBe("https://example.com/plan.pdf");
@@ -315,12 +358,36 @@ describe("lesson plan pdf handler", () => {
     const record = createRecord({ pdf_url: null });
     setResponses([{ data: record }]);
 
-    const response = await pdfHandler(
-      new Request("http://localhost/api/lesson-plans/plan-1/pdf")
+    const response = await exportHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1/export?format=pdf")
     );
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toBe("application/pdf");
     const buffer = await response.arrayBuffer();
     expect(buffer.byteLength).toBeGreaterThan(0);
+  });
+
+  it("uploads to storage when store flag is provided", async () => {
+    const record = createRecord({ pdf_url: null });
+    setResponses([{ data: record }]);
+
+    const response = await exportHandler(
+      new Request(
+        "http://localhost/api/lesson-plans/plan-1/export?format=pdf&store=1"
+      )
+    );
+    expect(response.status).toBe(200);
+    const payload = (await response.json()) as {
+      url: string;
+      path: string;
+    };
+    expect(payload.url).toContain("https://storage.example/");
+    const stub = getStub();
+    expect(
+      stub.storageCalls.find((call) => call.method === "upload")
+    ).toBeTruthy();
+    expect(
+      stub.storageCalls.find((call) => call.method === "createSignedUrl")
+    ).toBeTruthy();
   });
 });
