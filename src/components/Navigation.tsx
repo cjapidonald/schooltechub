@@ -42,7 +42,6 @@ const Navigation = () => {
     { name: t.nav.blog, path: "/blog" },
     { name: t.nav.lessonPlans, path: "/lesson-plans" },
     { name: t.nav.builder, path: "/builder" },
-    { name: t.nav.worksheets, path: "/worksheets" },
     { name: t.nav.events, path: "/events" },
     { name: t.nav.services, path: "/services" },
     { name: t.nav.about, path: "/about" },
