@@ -747,6 +747,8 @@ export const en = {
   blogPost: {
     backToBlog: "Back to Blog",
     share: "Share",
+    save: "Save post",
+    saved: "Saved",
     comments: "Comments",
     commentPlaceholder: "Share your thoughts...",
     postComment: "Post Comment",
@@ -765,12 +767,17 @@ export const en = {
       authRequiredTitle: "Authentication required",
       authRequiredComment: "Please log in to comment",
       authRequiredReply: "Please log in to reply",
+      authRequiredSave: "Please log in to save posts",
       errorTitle: "Error",
       commentError: "Failed to post comment",
       replyError: "Failed to post reply",
+      saveError: "Failed to save post",
+      removeError: "Failed to remove saved post",
       successTitle: "Success",
       commentSuccess: "Comment posted successfully",
-      replySuccess: "Reply posted successfully"
+      replySuccess: "Reply posted successfully",
+      saveSuccess: "Post saved to your list",
+      removeSuccess: "Removed from saved posts"
     }
   },
   contact: {
@@ -1281,6 +1288,7 @@ export const en = {
     },
     tabs: {
       overview: "Overview",
+      savedPosts: "Saved posts",
       security: "Security",
       activity: "Activity"
     },
@@ -1430,6 +1438,19 @@ export const en = {
         "Review your account activity regularly for unfamiliar changes.",
         "Sign out on shared devices after each session."
       ]
+    },
+    savedPosts: {
+      title: "Saved posts",
+      description: "Quickly revisit the articles you've bookmarked.",
+      empty: "You haven't saved any posts yet.",
+      savedOn: "Saved on {date}",
+      viewPost: "View article",
+      remove: "Remove",
+      unavailable: "This post is no longer available.",
+      toast: {
+        removed: "Removed from saved posts",
+        removeError: "We couldn't remove that saved post"
+      }
     },
     comments: {
       title: "My comments",

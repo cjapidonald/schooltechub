@@ -5,7 +5,7 @@ import {
   normalizeMethod,
   parseJsonBody,
 } from "../../_lib/http";
-import { recordAuditLog } from "../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../_lib/audit";
 import { requireAdmin } from "../../_lib/auth";
 import { findUserByEmail } from "../../_lib/users";
 
@@ -49,6 +49,8 @@ export default async function handler(request: Request): Promise<Response> {
     }
   }
 
+  const auditContext = getAuditRequestContext(request);
+
   const upsertResult = await supabase
     .from("app_admins")
     .upsert({ user_id: targetId }, { onConflict: "user_id" });
@@ -60,8 +62,13 @@ export default async function handler(request: Request): Promise<Response> {
   await recordAuditLog(supabase, {
     action: "admin.roles.grant",
     actorId: user.id,
+    targetType: "user",
     targetId: targetId,
-    metadata: resolvedEmail ? { email: resolvedEmail } : null,
+    details: {
+      role: "admin",
+      ...(resolvedEmail ? { email: resolvedEmail } : {}),
+    },
+    ...auditContext,
   });
 
   return jsonResponse({ success: true });

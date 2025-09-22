@@ -5,7 +5,7 @@ import {
   normalizeMethod,
   parseJsonBody,
 } from "../../_lib/http";
-import { recordAuditLog } from "../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../_lib/audit";
 import { requireAdmin } from "../../_lib/auth";
 import { findUserByEmail } from "../../_lib/users";
 
@@ -49,8 +49,9 @@ export default async function handler(request: Request): Promise<Response> {
     }
   }
 
-  const deleteResult = await supabase.from("app_admins").delete().eq("user_id", targetId);
+  const auditContext = getAuditRequestContext(request);
 
+  const deleteResult = await supabase.from("app_admins").delete().eq("user_id", targetId);
   if (deleteResult.error) {
     return errorResponse(500, "Failed to revoke admin role");
   }
@@ -58,9 +59,8 @@ export default async function handler(request: Request): Promise<Response> {
   await recordAuditLog(supabase, {
     action: "admin.roles.revoke",
     actorId: user.id,
+    targetType: "user",
     targetId: targetId,
-    metadata: resolvedEmail ? { email: resolvedEmail } : null,
-  });
-
-  return jsonResponse({ success: true });
-}
+    details: {
+      role: "admin",
+      ...(resolvedEmail ? { email: resolvedEmail } : {}),

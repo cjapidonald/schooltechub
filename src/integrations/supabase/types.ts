@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: number
+          ip: string | null
+          target_id: string
+          target_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: number
+          ip?: string | null
+          target_id: string
+          target_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: number
+          ip?: string | null
+          target_id?: string
+          target_type?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       builder_activity_favorites: {
         Row: {
           activity_slug: string
@@ -1045,6 +1089,27 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role_enum"] | null
           school_logo_url?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      saved_posts: {
+        Row: {
+          id: string
+          post_id: string
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          saved_at?: string
+          user_id?: string
         }
         Relationships: []
       }
