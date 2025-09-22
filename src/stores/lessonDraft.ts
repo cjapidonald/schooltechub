@@ -32,6 +32,7 @@ type LessonDraftStore = {
   addStep: () => LessonStep;
   renameStep: (stepId: string, title: string) => void;
   removeStep: (stepId: string) => void;
+  setStepNotes: (stepId: string, notes: string) => void;
   attachResource: (stepId: string, resourceId: string) => void;
   detachResource: (stepId: string, resourceId: string) => void;
   resetDraft: () => void;
@@ -164,6 +165,21 @@ export const useLessonDraftStore = create<LessonDraftStore>()((set, get) => ({
             ? {
                 ...step,
                 title,
+              }
+            : step,
+        ),
+      },
+    }));
+  },
+  setStepNotes: (stepId, notes) => {
+    set((state) => ({
+      draft: {
+        ...state.draft,
+        steps: state.draft.steps.map((step) =>
+          step.id === stepId
+            ? {
+                ...step,
+                notes: notes.trim().length > 0 ? notes : undefined,
               }
             : step,
         ),
