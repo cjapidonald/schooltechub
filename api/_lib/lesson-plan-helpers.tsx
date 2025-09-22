@@ -248,6 +248,9 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
   const pdfUrl =
     nullableString(record.pdf_url) ?? nullableString(record.pdf) ?? null;
 
+  const schoolLogoUrl = nullableString(record.school_logo_url);
+  const lessonDate = nullableString(record.lesson_date);
+
   return {
     id: record.id,
     slug: record.slug,
@@ -260,6 +263,8 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
     technologyTags: tech,
     durationMinutes: duration,
     pdfUrl,
+    schoolLogoUrl,
+    lessonDate,
     status: record.status ?? ("draft" as LessonPlanStatus),
     createdAt: nullableString(record.created_at),
     updatedAt: nullableString(record.updated_at),
