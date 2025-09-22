@@ -14,6 +14,219 @@ export type Database = {
   }
   public: {
     Tables: {
+      builder_activity_favorites: {
+        Row: {
+          activity_slug: string
+          anon_user_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          activity_slug: string
+          anon_user_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          activity_slug?: string
+          anon_user_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_activity_favorites_activity_slug_fkey"
+            columns: ["activity_slug"]
+            isOneToOne: false
+            referencedRelation: "tools_activities"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      builder_activity_recents: {
+        Row: {
+          activity_slug: string
+          anon_user_id: string
+          id: string
+          last_viewed: string
+          metadata: Json | null
+        }
+        Insert: {
+          activity_slug: string
+          anon_user_id: string
+          id?: string
+          last_viewed?: string
+          metadata?: Json | null
+        }
+        Update: {
+          activity_slug?: string
+          anon_user_id?: string
+          id?: string
+          last_viewed?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_activity_recents_activity_slug_fkey"
+            columns: ["activity_slug"]
+            isOneToOne: false
+            referencedRelation: "tools_activities"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      builder_collections: {
+        Row: {
+          anon_user_id: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          anon_user_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          anon_user_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      builder_collection_items: {
+        Row: {
+          activity_slug: string
+          collection_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          activity_slug: string
+          collection_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          activity_slug?: string
+          collection_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_collection_items_activity_slug_fkey"
+            columns: ["activity_slug"]
+            isOneToOne: false
+            referencedRelation: "tools_activities"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "builder_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "builder_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      builder_drafts: {
+        Row: {
+          anon_user_id: string
+          data: Json
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          anon_user_id: string
+          data?: Json
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          anon_user_id?: string
+          data?: Json
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      builder_link_health_reports: {
+        Row: {
+          failure_count: number
+          id: string
+          is_healthy: boolean
+          last_checked: string
+          last_error: string | null
+          status_code: number | null
+          status_text: string | null
+          url: string
+        }
+        Insert: {
+          failure_count?: number
+          id?: string
+          is_healthy?: boolean
+          last_checked?: string
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          url: string
+        }
+        Update: {
+          failure_count?: number
+          id?: string
+          is_healthy?: boolean
+          last_checked?: string
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      builder_resource_links: {
+        Row: {
+          draft_id: string
+          id: string
+          label: string
+          last_synced: string
+          step_id: string
+          url: string
+        }
+        Insert: {
+          draft_id: string
+          id?: string
+          label: string
+          last_synced?: string
+          step_id: string
+          url: string
+        }
+        Update: {
+          draft_id?: string
+          id?: string
+          label?: string
+          last_synced?: string
+          step_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_resource_links_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "builder_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           category: string | null
@@ -411,6 +624,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tools_activities: {
+        Row: {
+          accessibility_notes: string | null
+          activity_types: string[] | null
+          best_for: string | null
+          classroom_flow: string | null
+          cost: string
+          created_at: string
+          description: string | null
+          devices: string[] | null
+          external_link: string | null
+          featured_image_url: string | null
+          free_tier_limits: string | null
+          group_sizes: string[] | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          lesson_idea: string | null
+          name: string
+          offline_option: boolean | null
+          privacy_security_notes: string | null
+          quick_start_steps: Json | null
+          school_stages: string[] | null
+          setup_time: string | null
+          slug: string
+          subjects: string[] | null
+          updated_at: string
+          video_url?: never
+        }
+        Insert: {
+          accessibility_notes?: string | null
+          activity_types?: string[] | null
+          best_for?: string | null
+          classroom_flow?: string | null
+          cost?: string
+          created_at?: string
+          description?: string | null
+          devices?: string[] | null
+          external_link?: string | null
+          featured_image_url?: string | null
+          free_tier_limits?: string | null
+          group_sizes?: string[] | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          lesson_idea?: string | null
+          name: string
+          offline_option?: boolean | null
+          privacy_security_notes?: string | null
+          quick_start_steps?: Json | null
+          school_stages?: string[] | null
+          setup_time?: string | null
+          slug: string
+          subjects?: string[] | null
+          updated_at?: string
+          video_url?: never
+        }
+        Update: {
+          accessibility_notes?: string | null
+          activity_types?: string[] | null
+          best_for?: string | null
+          classroom_flow?: string | null
+          cost?: string
+          created_at?: string
+          description?: string | null
+          devices?: string[] | null
+          external_link?: string | null
+          featured_image_url?: string | null
+          free_tier_limits?: string | null
+          group_sizes?: string[] | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          lesson_idea?: string | null
+          name?: string
+          offline_option?: boolean | null
+          privacy_security_notes?: string | null
+          quick_start_steps?: Json | null
+          school_stages?: string[] | null
+          setup_time?: string | null
+          slug?: string
+          subjects?: string[] | null
+          updated_at?: string
+          video_url?: never
+        }
+        Relationships: []
       }
       enrollments: {
         Row: {

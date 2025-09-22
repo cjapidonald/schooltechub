@@ -25,6 +25,7 @@ import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import Builder from '@/pages/Builder';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { lang } = useParams<{ lang?: string }>();
@@ -71,6 +72,7 @@ export const LocalizedRoutes = () => {
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
       <Route path="/worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
+      <Route path="/builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
@@ -97,6 +99,7 @@ export const LocalizedRoutes = () => {
         <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
         <Route path="worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
+        <Route path="builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
         <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
         <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
