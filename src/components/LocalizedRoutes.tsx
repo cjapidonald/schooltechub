@@ -25,6 +25,11 @@ import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Builder from '@/pages/Builder';
+import AdminLayout from '@/features/admin/components/AdminLayout';
+import AdminGuard from '@/features/admin/components/AdminGuard';
+import { AdminDashboard } from '@/features/admin/pages/AdminDashboard';
+import AdminSection from '@/features/admin/components/AdminSection';
+import { ADMIN_ROUTE_META } from '@/features/admin/constants/routes';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { lang } = useParams<{ lang?: string }>();
@@ -55,8 +60,113 @@ const LegacyBuilderRedirect: React.FC<{ includeLanguage?: boolean }> = ({ includ
 };
 
 export const LocalizedRoutes = () => {
+  const renderAdminSection = (path: string, tableColumns?: string[]) => {
+    const meta = ADMIN_ROUTE_META[path];
+
+    if (!meta) {
+      return (
+        <AdminSection
+          title="Admin"
+          description="Administrative workspace."
+          tableColumns={tableColumns}
+        />
+      );
+    }
+
+    return (
+      <AdminSection
+        title={meta.title}
+        description={meta.description}
+        tableColumns={tableColumns}
+      />
+    );
+  };
+
   return (
     <Routes>
+      <Route
+        path="/admin"
+        element={(
+          <AdminGuard>
+            <AdminLayout />
+          </AdminGuard>
+        )}
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="moderation">
+          <Route index element={renderAdminSection('/admin/moderation')} />
+          <Route
+            path="resources"
+            element={renderAdminSection('/admin/moderation/resources')}
+          />
+          <Route
+            path="blogposts"
+            element={renderAdminSection('/admin/moderation/blogposts')}
+          />
+          <Route
+            path="research-applications"
+            element={renderAdminSection('/admin/moderation/research-applications')}
+          />
+          <Route
+            path="comments"
+            element={renderAdminSection('/admin/moderation/comments')}
+          />
+        </Route>
+        <Route path="content">
+          <Route index element={renderAdminSection('/admin/content')} />
+          <Route path="posts" element={renderAdminSection('/admin/content/posts')} />
+          <Route
+            path="resources"
+            element={renderAdminSection('/admin/content/resources')}
+          />
+        </Route>
+        <Route path="users">
+          <Route index element={renderAdminSection('/admin/users')} />
+          <Route
+            path="directory"
+            element={renderAdminSection('/admin/users/directory')}
+          />
+          <Route
+            path="invitations"
+            element={renderAdminSection('/admin/users/invitations')}
+          />
+          <Route path="roles" element={renderAdminSection('/admin/users/roles')} />
+        </Route>
+        <Route path="research">
+          <Route index element={renderAdminSection('/admin/research')} />
+          <Route
+            path="projects"
+            element={renderAdminSection('/admin/research/projects')}
+          />
+          <Route
+            path="documents"
+            element={renderAdminSection('/admin/research/documents')}
+          />
+          <Route
+            path="participants"
+            element={renderAdminSection('/admin/research/participants')}
+          />
+          <Route
+            path="submissions"
+            element={renderAdminSection('/admin/research/submissions')}
+          />
+        </Route>
+        <Route path="system">
+          <Route index element={renderAdminSection('/admin/system')} />
+          <Route
+            path="notifications"
+            element={renderAdminSection('/admin/system/notifications')}
+          />
+          <Route
+            path="audit-log"
+            element={renderAdminSection('/admin/system/audit-log')}
+          />
+          <Route
+            path="settings"
+            element={renderAdminSection('/admin/system/settings')}
+          />
+        </Route>
+      </Route>
       {/* English routes (default) */}
       <Route path="/" element={<RouteWrapper><Index /></RouteWrapper>} />
       <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
