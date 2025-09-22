@@ -6,6 +6,8 @@ import {
   parseJsonBody,
 } from "../_lib/http";
 import { getSupabaseClient } from "../_lib/supabase";
+import { mergeResourceValues } from "../../types/lesson-builder";
+import type { Resource } from "../../types/lesson-builder";
 
 const LESSON_PLAN_TABLE = "lesson_plan_builder_plans";
 const LESSON_PLAN_STEPS_TABLE = "lesson_plan_steps";
@@ -28,7 +30,14 @@ interface StepPayload {
   durationMinutes?: number | null;
   notes?: string | null;
   activity?: ActivityPayload | null;
-  resources?: unknown[] | null;
+  resources?: (Resource | Record<string, unknown>)[] | null;
+  learningGoals?: string[] | null;
+  learning_goals?: string[] | null;
+  grouping?: string | null;
+  deliveryMode?: string | null;
+  delivery_mode?: string | null;
+  instructionalNote?: string | null;
+  instructional_note?: string | null;
 }
 
 interface UpdatePayload {
@@ -211,7 +220,17 @@ function mapStepPayload(
   const duration =
     step.durationMinutes ?? activity?.durationMinutes ?? null;
 
-  const resources = buildResourceSnapshot(step, activity);
+  const resources = normalizeStepResources(step, activity);
+
+  const learningGoals = Array.isArray(step.learningGoals)
+    ? step.learningGoals
+    : Array.isArray(step.learning_goals)
+      ? step.learning_goals
+      : [];
+  const grouping = step.grouping ?? null;
+  const deliveryMode = step.deliveryMode ?? step.delivery_mode ?? null;
+  const instructionalNote =
+    step.instructionalNote ?? step.instructional_note ?? null;
 
   return {
     id: step.id ?? undefined,
@@ -221,6 +240,10 @@ function mapStepPayload(
     duration_minutes: duration,
     notes: step.notes ?? null,
     resources,
+    learning_goals: learningGoals.length > 0 ? learningGoals : null,
+    grouping,
+    delivery_mode: deliveryMode ?? null,
+    instructional_note: instructionalNote ?? null,
     updated_at: new Date().toISOString(),
   };
 }
@@ -233,27 +256,34 @@ function sanitizeTitle(
   return primary.trim().length > 0 ? primary.trim() : "Lesson step";
 }
 
-function buildResourceSnapshot(
+function normalizeStepResources(
   step: StepPayload,
   activity: ActivityPayload | null
-): unknown[] {
-  if (!activity) {
-    return step.resources ?? [];
+): Resource[] {
+  if (Array.isArray(step.resources) && step.resources.length > 0) {
+    return step.resources
+      .map((resource) => mergeResourceValues(resource ?? null))
+      .filter((resource): resource is Resource => resource != null);
   }
 
-  const snapshot = {
-    type: "activity",
-    activityId: activity.id,
-    title: activity.title ?? null,
-    url: activity.url ?? null,
-    provider: activity.provider ?? null,
-    thumbnailUrl: activity.thumbnailUrl ?? null,
-    durationMinutes: activity.durationMinutes ?? null,
-    summary: activity.summary ?? null,
-    embedHtml: sanitizeEmbed(activity.embedHtml ?? null),
-  };
+  if (!activity) {
+    return [];
+  }
 
-  return [snapshot];
+  return [
+    mergeResourceValues({
+      id: activity.id,
+      source_id: activity.id,
+      media_type: "activity",
+      title: activity.title ?? null,
+      summary: activity.summary ?? null,
+      url: activity.url ?? null,
+      provider: activity.provider ?? null,
+      thumbnail_url: activity.thumbnailUrl ?? null,
+      duration_minutes: activity.durationMinutes ?? null,
+      embed_html: sanitizeEmbed(activity.embedHtml ?? null),
+    }),
+  ];
 }
 
 function sanitizeEmbed(embed: string | null): string | null {

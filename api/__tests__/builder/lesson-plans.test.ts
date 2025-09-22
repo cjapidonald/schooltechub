@@ -104,12 +104,22 @@ describe("lesson plan detail", () => {
             position: 0,
             resources: [
               {
-                type: "activity",
-                activityId: "activity-1",
+                id: "activity-1",
+                source_id: "activity-1",
+                media_type: "activity",
                 title: "Activity Title",
+                summary: "Quick summary",
                 url: "https://example.com",
+                provider: "Example",
+                thumbnail_url: "https://example.com/thumb.jpg",
+                duration_minutes: 15,
+                embed_html: "<iframe src=\"https://example.com/embed\"></iframe>",
               },
             ],
+            learning_goals: ["Understand AI basics"],
+            grouping: "Whole class",
+            delivery_mode: "in-person",
+            instructional_note: "Differentiate as needed",
           },
         ],
       },
@@ -130,6 +140,24 @@ describe("lesson plan detail", () => {
                 url: "https://example.com",
                 durationMinutes: 15,
               },
+              learningGoals: ["Understand AI basics"],
+              grouping: "Whole class",
+              deliveryMode: "in-person",
+              instructionalNote: "Differentiate as needed",
+              resources: [
+                {
+                  id: "resource-1",
+                  source_id: "activity-1",
+                  media_type: "activity",
+                  title: "Activity Title",
+                  summary: "Quick summary",
+                  url: "https://example.com",
+                  provider: "Example",
+                  thumbnail_url: "https://example.com/thumb.jpg",
+                  duration_minutes: 15,
+                  embed_html: "<iframe src=\"https://example.com/embed\"></iframe>",
+                },
+              ],
             },
           ],
         }),
@@ -139,20 +167,30 @@ describe("lesson plan detail", () => {
     const body = await response.json();
     expect(body.plan.title).toBe("Updated title");
     expect(body.steps[0].resources[0]).toMatchObject({
-      activityId: "activity-1",
+      media_type: "activity",
+      source_id: "activity-1",
       title: "Activity Title",
     });
+    expect(body.steps[0].learning_goals).toEqual(["Understand AI basics"]);
+    expect(body.steps[0].grouping).toBe("Whole class");
+    expect(body.steps[0].delivery_mode).toBe("in-person");
+    expect(body.steps[0].instructional_note).toBe("Differentiate as needed");
 
     const upsertCall = stub.calls.find((call) => call.method === "upsert");
     expect(upsertCall).toBeDefined();
     const stepPayload = (upsertCall?.args[0] as any[])[0];
     expect(stepPayload.resources[0]).toMatchObject({
-      activityId: "activity-1",
+      media_type: "activity",
+      source_id: "activity-1",
       title: "Activity Title",
       url: "https://example.com",
     });
     expect(stepPayload.title).toBe("Activity Title");
     expect(stepPayload.duration_minutes).toBe(15);
+    expect(stepPayload.learning_goals).toEqual(["Understand AI basics"]);
+    expect(stepPayload.grouping).toBe("Whole class");
+    expect(stepPayload.delivery_mode).toBe("in-person");
+    expect(stepPayload.instructional_note).toBe("Differentiate as needed");
   });
 });
 
