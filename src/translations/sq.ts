@@ -5,6 +5,7 @@ export const sq = {
     services: "Shërbimet",
     blog: "Blog",
     lessonPlans: "Planet e mësimit",
+    planBuilder: "Krijuesi i planit",
     worksheets: "Fletë pune",
     events: "Evente",
     contact: "Kontakt",
