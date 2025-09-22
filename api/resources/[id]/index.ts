@@ -4,17 +4,17 @@ import {
   methodNotAllowed,
   normalizeMethod,
   parseJsonBody,
-} from "../_lib/http";
-import { getSupabaseClient } from "../_lib/supabase";
+} from "../../_lib/http";
+import { getSupabaseClient } from "../../_lib/supabase";
 import {
   buildFaviconUrl,
   extractDomain,
   mapRecordToCard,
   normalizeResourceUrl,
   sanitizeInputList,
-} from "../_lib/resource-helpers";
-import { loadOpenGraphMetadata } from "../_lib/open-graph";
-import type { ResourceRecord, ResourceStatus, ResourceVisibility } from "../_lib/resource-helpers";
+} from "../../_lib/resource-helpers";
+import { loadOpenGraphMetadata } from "../../_lib/open-graph";
+import type { ResourceRecord, ResourceStatus, ResourceVisibility } from "../../_lib/resource-helpers";
 
 interface ResourceUpdatePayload {
   userId?: string;

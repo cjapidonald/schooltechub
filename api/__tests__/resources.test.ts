@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import listHandler from "../resources";
-import updateHandler from "../resources/[id]";
+import updateHandler from "../resources/[id]/index";
 import type { ResourceCard, ResourceListResponse, ResourceRecord } from "../../types/resources";
 
 interface SupabaseResponse {
