@@ -174,8 +174,10 @@ const Blog = () => {
       let query = supabase
         .from("content_master")
         .select("*")
-        .in("page", ["research_blog", "edutech", "teacher_diary"]) 
+        .in("page", ["research_blog", "edutech", "teacher_diary"])
         .eq("is_published", true)
+        .eq("status", "published")
+        .is("deleted_at", null)
         .eq("language", language);
 
       if (searchTerm) {
