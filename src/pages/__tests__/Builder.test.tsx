@@ -49,12 +49,13 @@ describe("Lesson draft builder", () => {
     await user.clear(titleInput);
     await user.type(titleInput, "Warm-up discussion");
 
-    const previewItem = await screen.findByTestId("lesson-draft-preview-step-1");
-    expect(previewItem).toHaveTextContent("Warm-up discussion");
+    expect(screen.queryByTestId("lesson-draft-preview-step-1")).not.toBeInTheDocument();
 
     const notesField = screen.getByLabelText(/step 1 notes/i);
     await user.type(notesField, "Greet students and introduce the prompt.");
 
+    const previewItem = await screen.findByTestId("lesson-draft-preview-step-1");
+    expect(previewItem).toHaveTextContent("Warm-up discussion");
     expect(previewItem).toHaveTextContent("Greet students");
   });
 
@@ -71,6 +72,11 @@ describe("Lesson draft builder", () => {
     expect(helper).toBeInTheDocument();
 
     titleInput.blur();
+
+    expect(screen.queryByTestId("lesson-draft-preview-step-1")).not.toBeInTheDocument();
+
+    const notesField = await screen.findByLabelText(/step 1 notes/i);
+    await user.type(notesField, "Add welcome message.");
 
     const previewItem = await screen.findByTestId("lesson-draft-preview-step-1");
     expect(previewItem).toHaveTextContent("New step");
