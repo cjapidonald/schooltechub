@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { format } from "date-fns";
@@ -514,6 +514,11 @@ const Account = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
+              <Button asChild variant="secondary" className="gap-2">
+                <Link to={getLocalizedPath("/account/resources", language)}>
+                  {t.account.resources.manageCta}
+                </Link>
+              </Button>
               <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()}>
                 <Camera className="h-4 w-4" />
                 {t.account.image.changeButton}

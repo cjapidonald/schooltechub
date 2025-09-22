@@ -19,6 +19,9 @@ import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
 import Account from '@/pages/Account';
+import AccountResources from '@/pages/AccountResources';
+import AccountResourceNew from '@/pages/AccountResourceNew';
+import AccountResourceEdit from '@/pages/AccountResourceEdit';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
@@ -78,6 +81,9 @@ export const LocalizedRoutes = () => {
       <Route path="/teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
+      <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
+      <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
+      <Route path="/account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       
       {/* Localized routes for Albanian and Vietnamese */}
@@ -103,6 +109,9 @@ export const LocalizedRoutes = () => {
         <Route path="teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
         <Route path="auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
         <Route path="account" element={<RouteWrapper><Account /></RouteWrapper>} />
+        <Route path="account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
+        <Route path="account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
+        <Route path="account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
         <Route path="sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       </Route>
       
