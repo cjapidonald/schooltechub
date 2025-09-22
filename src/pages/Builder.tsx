@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
+import { LessonDraftToolbar } from "@/components/lesson-draft/LessonDraftToolbar";
 import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
 import { Button } from "@/components/ui/button";
@@ -142,6 +143,8 @@ const BuilderPage = () => {
             Capture the flow of your lesson, keep notes for yourself, and prepare the resources students will need.
           </p>
         </header>
+
+        <LessonDraftToolbar />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <div className="space-y-6">
