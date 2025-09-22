@@ -1,12 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { LayoutGrid, List, Loader2, Search, X } from "lucide-react";
+import type { User } from "@supabase/supabase-js";
 
 import { SEO } from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +28,7 @@ import { ResourceCard as LessonDraftResourceCard } from "@/components/lesson-dra
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { getSignedDownloadUrl, ResourceDataError, searchResources } from "@/lib/resources";
+import { supabase } from "@/integrations/supabase/client";
 import {
   attachResourceToActiveStep,
   getActiveLessonDraftId,
@@ -78,7 +89,7 @@ const DEFAULT_FILTER_STATE: FilterState = {
 
 const SORT_OPTIONS = [
   { value: "newest", label: "Newest" },
-  { value: "most-tagged", label: "Most tagged" },
+  { value: "most-tagged", label: "Most tags" },
   { value: "title", label: "Title A–Z" },
 ] as const;
 
@@ -95,6 +106,8 @@ type ResourceCardViewProps = {
   resource: Resource;
   view: "grid" | "list";
   onAdd: () => void;
+  isAuthenticated: boolean;
+  onRequireLogin: () => void;
 };
 
 const useDebouncedValue = <T,>(value: T, delay = 300) => {
@@ -177,7 +190,7 @@ const MultiSelectFilter = ({ label, options, selected, onChange }: MultiSelectFi
   );
 };
 
-const ResourceCardView = ({ resource, view, onAdd }: ResourceCardViewProps) => {
+const ResourceCardView = ({ resource, view, onAdd, isAuthenticated, onRequireLogin }: ResourceCardViewProps) => {
   const layout = view === "grid" ? "vertical" : "horizontal";
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
@@ -187,6 +200,11 @@ const ResourceCardView = ({ resource, view, onAdd }: ResourceCardViewProps) => {
 
   const handleDownload = async () => {
     if (!canDownload) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      onRequireLogin();
       return;
     }
 
@@ -202,6 +220,12 @@ const ResourceCardView = ({ resource, view, onAdd }: ResourceCardViewProps) => {
         downloadError instanceof ResourceDataError
           ? downloadError.message
           : "We couldn't open this resource.";
+      if (
+        downloadError instanceof ResourceDataError &&
+        downloadError.message.toLowerCase().includes("signed in")
+      ) {
+        onRequireLogin();
+      }
       toast({ title: "Download failed", description: message, variant: "destructive" });
     } finally {
       setIsDownloading(false);
@@ -231,7 +255,7 @@ const ResourceCardView = ({ resource, view, onAdd }: ResourceCardViewProps) => {
               Preparing download
             </span>
           ) : (
-            "Download resource"
+            "Download"
           )}
         </Button>
       ) : null}
@@ -250,7 +274,7 @@ const ResourceCardView = ({ resource, view, onAdd }: ResourceCardViewProps) => {
           resource={resource}
           layout={layout}
           onAdd={onAdd}
-          addButtonLabel="Add to lesson step"
+          addButtonLabel="Add to plan"
         />
         {actions}
       </CardContent>
@@ -269,11 +293,15 @@ const cloneFilterState = (state: FilterState): FilterState => ({
 const ResourcesPage = () => {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<FilterState>(() => cloneFilterState(DEFAULT_FILTER_STATE));
   const [tagInput, setTagInput] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sort, setSort] = useState<SortOption>("newest");
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [loginReason, setLoginReason] = useState<"download" | "upload" | null>(null);
 
   const debouncedSearch = useDebouncedValue(filters.searchValue, 300);
 
@@ -312,6 +340,38 @@ const ResourcesPage = () => {
       window.removeEventListener("focus", handleFocus);
     };
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data: sessionData }) => {
+      if (!mounted) {
+        return;
+      }
+      setCurrentUser(sessionData.session?.user ?? null);
+    });
+
+    const { data: authSubscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) {
+        return;
+      }
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => {
+      mounted = false;
+      authSubscription?.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentUser && loginDialogOpen) {
+      setLoginDialogOpen(false);
+      setLoginReason(null);
+    }
+  }, [currentUser, loginDialogOpen]);
+
+  const isAuthenticated = Boolean(currentUser);
 
   const sanitizedFilters = useMemo(
     () => ({
@@ -430,6 +490,20 @@ const ResourcesPage = () => {
     setTagInput("");
   };
 
+  const openLoginDialog = (reason: "download" | "upload") => {
+    setLoginReason(reason);
+    setLoginDialogOpen(true);
+  };
+
+  const handleUploadClick = () => {
+    if (!isAuthenticated) {
+      openLoginDialog("upload");
+      return;
+    }
+
+    navigate(getLocalizedPath("/account/resources/new", language));
+  };
+
   const isInitialLoading = isPending || (resources.length === 0 && isFetchingNextPage);
 
   const hasActiveFilters =
@@ -454,11 +528,18 @@ const ResourcesPage = () => {
         <div className="flex flex-col gap-12 lg:grid lg:grid-cols-[280px_1fr]">
           <aside className="flex flex-col gap-6">
             <div className="space-y-3">
-              <h1 className="text-3xl font-bold tracking-tight">Resource library</h1>
-              <p className="text-muted-foreground">
-                Explore ready-to-use learning materials shared by the SchoolTechHub community. Use filters to match your
-                classroom needs.
-              </p>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-3">
+                  <h1 className="text-3xl font-bold tracking-tight">Resource library</h1>
+                  <p className="text-muted-foreground">
+                    Explore ready-to-use learning materials shared by the SchoolTechHub community. Use filters to match your
+                    classroom needs.
+                  </p>
+                </div>
+                <Button type="button" className="w-full sm:w-auto" onClick={handleUploadClick}>
+                  Upload resource
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
@@ -564,26 +645,33 @@ const ResourcesPage = () => {
 
           <section className="space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
-                Showing {sortedResources.length} resource{sortedResources.length === 1 ? "" : "s"}
-                {data?.pages?.[0]?.total ? ` of ${data.pages[0].total}` : ""}
-              </p>
-              <ToggleGroup
-                type="single"
-                value={view}
-                onValueChange={next => {
-                  if (next === "grid" || next === "list") {
-                    setView(next);
-                  }
-                }}
-              >
-                <ToggleGroupItem value="grid" aria-label="Grid view">
-                  <LayoutGrid className="h-4 w-4" />
-                </ToggleGroupItem>
-                <ToggleGroupItem value="list" aria-label="List view">
-                  <List className="h-4 w-4" />
-                </ToggleGroupItem>
-              </ToggleGroup>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+                  Showing {sortedResources.length} resource{sortedResources.length === 1 ? "" : "s"}
+                  {data?.pages?.[0]?.total ? ` of ${data.pages[0].total}` : ""}
+                </p>
+                <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3">
+                  <Button type="button" variant="secondary" onClick={handleUploadClick}>
+                    Upload resource
+                  </Button>
+                  <ToggleGroup
+                    type="single"
+                    value={view}
+                    onValueChange={next => {
+                      if (next === "grid" || next === "list") {
+                        setView(next);
+                      }
+                    }}
+                  >
+                    <ToggleGroupItem value="grid" aria-label="Grid view">
+                      <LayoutGrid className="h-4 w-4" />
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="list" aria-label="List view">
+                      <List className="h-4 w-4" />
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+              </div>
             </div>
 
             {isError ? (
@@ -645,6 +733,8 @@ const ResourcesPage = () => {
                     resource={resource}
                     view={view}
                     onAdd={() => handleAttachResource(resource)}
+                    isAuthenticated={isAuthenticated}
+                    onRequireLogin={() => openLoginDialog("download")}
                   />
                 ))}
               </div>
@@ -671,9 +761,44 @@ const ResourcesPage = () => {
                 </Button>
               </div>
             ) : null}
+
+            <div className="flex justify-center pt-6">
+              <Button type="button" size="lg" onClick={handleUploadClick}>
+                Upload resource
+              </Button>
+            </div>
           </section>
         </div>
       </main>
+
+      <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {loginReason === "upload" ? "Sign in to upload" : "Sign in to download"}
+            </DialogTitle>
+            <DialogDescription>
+              {loginReason === "upload"
+                ? "Create a free SchoolTechHub account to share your own classroom resources with the community."
+                : "Sign in to access downloadable files and save them to your lesson plans."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setLoginDialogOpen(false)}>
+              Not now
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setLoginDialogOpen(false);
+                navigate(getLocalizedPath("/auth", language));
+              }}
+            >
+              Sign in
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
