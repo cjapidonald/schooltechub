@@ -85,7 +85,9 @@ export default function BlogPost() {
         .eq("slug", slug)
         .in("page", ["research_blog", "edutech", "teacher_diary"])
         .eq("language", language)
-        .eq("is_published", true);
+        .eq("is_published", true)
+        .eq("status", "published")
+        .is("deleted_at", null);
 
       if (error) {
         throw error;
