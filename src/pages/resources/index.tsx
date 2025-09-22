@@ -13,11 +13,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useToast } from "@/components/ui/use-toast";
+import { ResourceCard as LessonDraftResourceCard } from "@/components/lesson-draft/ResourceCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { searchResources } from "@/lib/resources";
-import type { Resource } from "@/types/resources";
+import {
+  attachResourceToActiveStep,
+  getActiveLessonDraftId,
+  getStoredActiveStepId,
+  subscribeToActiveStepChanges,
+  subscribeToLessonDraftContext,
+} from "@/lib/lesson-draft-bridge";
 import { cn } from "@/lib/utils";
+import type { Resource } from "@/types/resources";
 
 const TYPE_OPTIONS = [
   "Worksheet",
@@ -82,9 +91,10 @@ type MultiSelectFilterProps = {
   onChange: (next: string[]) => void;
 };
 
-type ResourceCardProps = {
+type ResourceCardViewProps = {
   resource: Resource;
   view: "grid" | "list";
+  onAdd: () => void;
 };
 
 const useDebouncedValue = <T,>(value: T, delay = 300) => {
@@ -167,75 +177,34 @@ const MultiSelectFilter = ({ label, options, selected, onChange }: MultiSelectFi
   );
 };
 
-const ResourceCardView = ({ resource, view }: ResourceCardProps) => {
-  const content = (
-    <div className="flex flex-col gap-3">
-      <div className="space-y-2">
-        <h3 className="line-clamp-2 text-lg font-semibold text-foreground">{resource.title}</h3>
-        {resource.description ? (
-          <p className={cn("text-sm text-muted-foreground", view === "list" ? "line-clamp-3" : "line-clamp-2")}>{resource.description}</p>
-        ) : null}
-      </div>
-      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-        {resource.type ? <Badge variant="outline">{resource.type}</Badge> : null}
-        {resource.subject ? <Badge variant="outline">{resource.subject}</Badge> : null}
-        {resource.stage ? <Badge variant="outline">{resource.stage}</Badge> : null}
-      </div>
-      {resource.tags?.length ? (
-        <div className="flex flex-wrap gap-2">
-          {resource.tags.slice(0, view === "list" ? 12 : 6).map(tag => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              #{tag}
-            </Badge>
-          ))}
-        </div>
+const ResourceCardView = ({ resource, view, onAdd }: ResourceCardViewProps) => {
+  const layout = view === "grid" ? "vertical" : "horizontal";
+  const actions = (
+    <div className="flex flex-wrap items-center gap-2 pt-1">
+      <Button asChild variant="outline" size="sm">
+        <a href={resource.url} target="_blank" rel="noreferrer">
+          View resource
+        </a>
+      </Button>
+      {resource.created_at ? (
+        <span className="text-xs text-muted-foreground">
+          Added {new Date(resource.created_at).toLocaleDateString()}
+        </span>
       ) : null}
-      <div className="flex items-center gap-2 pt-1">
-        <Button asChild variant="outline" size="sm">
-          <a href={resource.url} target="_blank" rel="noreferrer">
-            View resource
-          </a>
-        </Button>
-        {resource.created_at ? (
-          <span className="text-xs text-muted-foreground">
-            Added {new Date(resource.created_at).toLocaleDateString()}
-          </span>
-        ) : null}
-      </div>
     </div>
   );
 
-  if (view === "list") {
-    return (
-      <Card className="overflow-hidden border shadow-sm">
-        <CardContent className="flex flex-col gap-4 p-6 md:flex-row">
-          {resource.thumbnail_url ? (
-            <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded-md bg-muted md:w-48">
-              <img src={resource.thumbnail_url} alt={resource.title} className="h-full w-full object-cover" loading="lazy" />
-            </div>
-          ) : (
-            <div className="flex aspect-video w-full max-w-xs items-center justify-center rounded-md bg-muted text-xs text-muted-foreground md:w-48">
-              No preview
-            </div>
-          )}
-          <div className="flex-1">{content}</div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="overflow-hidden border shadow-sm">
-      {resource.thumbnail_url ? (
-        <div className="aspect-video w-full bg-muted">
-          <img src={resource.thumbnail_url} alt={resource.title} className="h-full w-full object-cover" loading="lazy" />
-        </div>
-      ) : (
-        <div className="flex aspect-video w-full items-center justify-center bg-muted text-xs text-muted-foreground">
-          No preview
-        </div>
-      )}
-      <CardContent className="space-y-3 p-4">{content}</CardContent>
+      <CardContent className={view === "list" ? "space-y-3 p-6" : "space-y-3 p-4"}>
+        <LessonDraftResourceCard
+          resource={resource}
+          layout={layout}
+          onAdd={onAdd}
+          addButtonLabel="Add to lesson step"
+        />
+        {actions}
+      </CardContent>
     </Card>
   );
 };
@@ -250,12 +219,50 @@ const cloneFilterState = (state: FilterState): FilterState => ({
 
 const ResourcesPage = () => {
   const { language } = useLanguage();
+  const { toast } = useToast();
   const [filters, setFilters] = useState<FilterState>(() => cloneFilterState(DEFAULT_FILTER_STATE));
   const [tagInput, setTagInput] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [sort, setSort] = useState<SortOption>("newest");
+  const [activeStepId, setActiveStepId] = useState<string | null>(null);
 
   const debouncedSearch = useDebouncedValue(filters.searchValue, 300);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const syncContext = () => {
+      const draftId = getActiveLessonDraftId();
+      setActiveStepId(draftId ? getStoredActiveStepId(draftId) : null);
+    };
+
+    syncContext();
+
+    const unsubscribeContext = subscribeToLessonDraftContext(({ draftId }) => {
+      setActiveStepId(draftId ? getStoredActiveStepId(draftId) : null);
+    });
+
+    const unsubscribeStep = subscribeToActiveStepChanges(({ draftId, stepId }) => {
+      const currentDraftId = getActiveLessonDraftId();
+      if (currentDraftId && currentDraftId === draftId) {
+        setActiveStepId(stepId);
+      }
+    });
+
+    const handleFocus = () => {
+      syncContext();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      unsubscribeContext();
+      unsubscribeStep();
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
 
   const sanitizedFilters = useMemo(
     () => ({
@@ -329,6 +336,21 @@ const ResourcesPage = () => {
       return bTime - aTime;
     });
   }, [resources, sort]);
+
+  const handleAttachResource = (resource: Resource) => {
+    if (!activeStepId) {
+      toast({ description: "Open a lesson draft to attach resources." });
+      return;
+    }
+
+    const attached = attachResourceToActiveStep(resource.id);
+    if (attached) {
+      toast({ description: `Added "${resource.title}" to your lesson draft.` });
+      return;
+    }
+
+    toast({ description: "Open a lesson draft to attach resources." });
+  };
 
   const handleTagInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" || event.key === ",") {
@@ -551,7 +573,12 @@ const ResourcesPage = () => {
             ) : (
               <div className={cn(view === "grid" ? "grid gap-6 md:grid-cols-2 xl:grid-cols-3" : "space-y-4")}>
                 {sortedResources.map(resource => (
-                  <ResourceCardView key={resource.id} resource={resource} view={view} />
+                  <ResourceCardView
+                    key={resource.id}
+                    resource={resource}
+                    view={view}
+                    onAdd={() => handleAttachResource(resource)}
+                  />
                 ))}
               </div>
             )}
