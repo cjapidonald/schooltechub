@@ -5,8 +5,10 @@ import { AdminDashboardSkeleton, AdminSectionSkeleton } from "./components/Admin
 import AdminPostsPage from "./content/AdminPostsPage";
 import AdminResourcesPage from "./content/AdminResourcesPage";
 import AdminAuditLogPage from "./system/AdminAuditLogPage";
+import AdminDashboardPage from "./dashboard/AdminDashboardPage";
 
 const PAGE_COMPONENTS: Record<string, () => JSX.Element> = {
+  "": AdminDashboardPage,
   "content/posts": AdminPostsPage,
   "content/resources": AdminResourcesPage,
   "system/audit-log": AdminAuditLogPage,
@@ -15,7 +17,8 @@ const PAGE_COMPONENTS: Record<string, () => JSX.Element> = {
 export default function AdminPage() {
   const { meta } = useOutletContext<AdminOutletContext>();
 
-  const Component = meta.slug ? PAGE_COMPONENTS[meta.slug] : undefined;
+  const slugKey = meta.slug ?? "";
+  const Component = PAGE_COMPONENTS[slugKey];
 
   if (Component) {
     return <Component />;

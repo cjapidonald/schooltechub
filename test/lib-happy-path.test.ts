@@ -176,7 +176,7 @@ function createSupabaseClient(config: ClientConfig): SupabaseClient {
     auth: {
       getSession: () =>
         Promise.resolve({
-          data: { session: { user: { id: config.userId } } },
+          data: { session: { user: { id: config.userId }, access_token: "test-access-token" } },
           error: null,
         }),
     },
@@ -497,7 +497,7 @@ describe("research helpers", () => {
       },
     },
     storage: {
-      "research-submissions": {
+      research: {
         upload: () => Promise.resolve({ error: null }),
       },
     },
