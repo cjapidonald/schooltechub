@@ -26,6 +26,7 @@ export interface LessonBuilderStepResource {
   type: string | null;
   thumbnail: string | null;
   domain: string | null;
+  notes: string | null;
   [key: string]: unknown;
 }
 
@@ -232,9 +233,19 @@ function createListItemFromPlan(plan: LessonBuilderPlan): LessonPlanListItem {
 }
 
 export function builderPlanToLessonPlan(plan: LessonBuilderPlan): LessonPlan {
+  const overview = plan.overview
+    ? {
+        ...plan.overview,
+        objectives: Array.isArray(plan.overview.objectives) ? plan.overview.objectives : [],
+        successCriteria: Array.isArray((plan.overview as { successCriteria?: unknown }).successCriteria)
+          ? ((plan.overview as { successCriteria?: string[] }).successCriteria ?? [])
+          : [],
+      }
+    : null;
+
   return {
     ...createListItemFromPlan(plan),
-    overview: plan.overview,
+    overview,
     content: builderStepsToContent(plan.steps),
     resources: plan.resources,
   };
@@ -277,6 +288,10 @@ export function mergeResourceValues(
   const base = (typeof values === "object" && values !== null ? values : {}) as Record<string, unknown>;
   const url = ensureString(base.url) ?? "";
   const label = ensureString(base.label) ?? ensureString(base.title) ?? "Resource";
+  const notes =
+    ensureString((base.notes as string | undefined) ?? (base.instructions as string | undefined)) ??
+    ensureString((base.instructionalNote as string | undefined) ?? (base.instructional_note as string | undefined)) ??
+    null;
 
   return {
     ...base,
@@ -286,6 +301,7 @@ export function mergeResourceValues(
     type: ensureString(base.type),
     thumbnail: ensureString(base.thumbnail),
     domain: ensureString(base.domain) ?? (url ? extractDomain(url) : null),
+    notes,
   } as LessonBuilderStepResource;
 }
 

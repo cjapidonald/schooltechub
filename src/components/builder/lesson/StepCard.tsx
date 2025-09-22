@@ -31,6 +31,8 @@ interface StepCardCopy {
   searchResources: string;
   resourcesTitle: string;
   resourcesEmpty: string;
+  resourceNotesLabel: string;
+  resourceNotesPlaceholder: string;
 }
 
 interface StepCardProps {
@@ -158,6 +160,27 @@ export const StepCard = ({
             return item.url !== resource.url;
           }
           return item.id !== resource.id;
+        }),
+      }));
+    },
+    [onChange]
+  );
+
+  const handleResourceNotesChange = useCallback(
+    (resource: LessonBuilderStepResource, value: string) => {
+      const trimmed = value.trim();
+      onChange((current) => ({
+        ...current,
+        resources: current.resources.map((item) => {
+          const currentId = item.id ?? item.url;
+          const targetId = resource.id ?? resource.url;
+          if (currentId !== targetId) {
+            return item;
+          }
+          return {
+            ...item,
+            notes: trimmed.length > 0 ? value : null,
+          };
         }),
       }));
     },
@@ -302,42 +325,60 @@ export const StepCard = ({
             <div className="space-y-3">
               {step.resources.map((resource) => (
                 <Fragment key={resource.id ?? resource.url}>
-                  <div className="flex items-start justify-between gap-3 rounded-md border border-border p-3">
-                    <div className="space-y-1">
-                      <a
-                        href={resource.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        {resource.label}
-                        <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-                      </a>
-                      <div className="flex flex-wrap gap-2">
-                        {resource.type ? (
-                          <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
-                            {resource.type}
-                          </Badge>
-                        ) : null}
-                        {resource.domain ? (
-                          <Badge variant="outline" className="text-[10px]">
-                            {resource.domain}
-                          </Badge>
-                        ) : null}
+                  <div className="space-y-3 rounded-md border border-border p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <a
+                          href={resource.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          {resource.label}
+                          <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+                        </a>
+                        <div className="flex flex-wrap gap-2">
+                          {resource.type ? (
+                            <Badge variant="secondary" className="text-[10px] uppercase tracking-wide">
+                              {resource.type}
+                            </Badge>
+                          ) : null}
+                          {resource.domain ? (
+                            <Badge variant="outline" className="text-[10px]">
+                              {resource.domain}
+                            </Badge>
+                          ) : null}
+                        </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleRemoveResource(resource);
+                        }}
+                        aria-label="Remove resource"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleRemoveResource(resource);
-                      }}
-                      aria-label="Remove resource"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="space-y-2">
+                      <label
+                        className="text-xs font-semibold uppercase text-muted-foreground"
+                        htmlFor={`resource-${step.id}-${resource.id ?? resource.url}-notes`}
+                      >
+                        {copy.resourceNotesLabel}
+                      </label>
+                      <Textarea
+                        id={`resource-${step.id}-${resource.id ?? resource.url}-notes`}
+                        value={resource.notes ?? ""}
+                        placeholder={copy.resourceNotesPlaceholder}
+                        className="min-h-[80px] text-sm"
+                        onClick={(event) => event.stopPropagation()}
+                        onChange={(event) => handleResourceNotesChange(resource, event.target.value)}
+                      />
+                    </div>
                   </div>
                 </Fragment>
               ))}

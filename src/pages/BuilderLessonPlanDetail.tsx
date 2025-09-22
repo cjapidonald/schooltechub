@@ -321,6 +321,7 @@ const BuilderLessonPlanDetail = () => {
       type: resource.type ?? resource.mediaType ?? null,
       thumbnail: resource.thumbnail ?? null,
       domain: resource.domain ?? null,
+      notes: resource.instructionalNote ?? null,
     });
 
     let previousResource: LessonBuilderPlan["steps"][number]["resources"][number] | null = null;
@@ -401,6 +402,7 @@ const BuilderLessonPlanDetail = () => {
       summaryLabel: t.lessonPlans.modal.summary,
       overviewTitle: t.lessonPlans.modal.overview,
       objectivesLabel: t.lessonPlans.modal.objectives,
+      successCriteriaLabel: t.lessonPlans.modal.successCriteria,
       materialsLabel: t.lessonPlans.modal.materials,
       assessmentLabel: t.lessonPlans.modal.assessment,
       technologyOverviewLabel: t.lessonPlans.modal.technologyOverview,
