@@ -805,6 +805,7 @@ export type Database = {
           lesson_date: string | null
           materials: string[]
           objectives: string[]
+          owner_id: string | null
           search_vector: unknown
           school_logo_url: string | null
           slug: string
@@ -825,6 +826,7 @@ export type Database = {
           lesson_date?: string | null
           materials?: string[]
           objectives?: string[]
+          owner_id?: string | null
           search_vector?: unknown
           school_logo_url?: string | null
           slug: string
@@ -845,6 +847,7 @@ export type Database = {
           lesson_date?: string | null
           materials?: string[]
           objectives?: string[]
+          owner_id?: string | null
           search_vector?: unknown
           school_logo_url?: string | null
           slug?: string
@@ -1091,6 +1094,7 @@ export type Database = {
           id: string
           school_logo_url: string | null
           role: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1100,6 +1104,7 @@ export type Database = {
           id: string
           school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1109,6 +1114,7 @@ export type Database = {
           id?: string
           school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
           updated_at?: string | null
         }
         Relationships: []

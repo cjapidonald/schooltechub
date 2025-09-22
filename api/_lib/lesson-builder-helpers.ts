@@ -83,8 +83,8 @@ function ensureParts(
       part.id === "overview"
         ? detail.summary ?? null
         : part.id === "activities"
-          ? `${steps.length} ${steps.length === 1 ? "step" : "steps"}`
-          : part.description,
+        ? `${steps.length} ${steps.length === 1 ? "step" : "steps"}`
+        : part.description,
     completed: part.id === "overview" ? Boolean(detail.summary) : steps.length > 0,
   }));
 }
@@ -112,20 +112,19 @@ function normalizeHistory(history: unknown): LessonBuilderVersionEntry[] {
       if (!isRecord(entry)) {
         return null;
       }
-      const id = typeof entry.id === "string" && entry.id.length > 0
-        ? entry.id
-        : cryptoRandomId("ver");
-      const createdAt = typeof entry.createdAt === "string"
-        ? entry.createdAt
-        : typeof entry.created_at === "string"
+      const id =
+        typeof entry.id === "string" && entry.id.length > 0 ? entry.id : cryptoRandomId("ver");
+      const createdAt =
+        typeof entry.createdAt === "string"
+          ? entry.createdAt
+          : typeof entry.created_at === "string"
           ? entry.created_at
           : null;
       if (!createdAt) {
         return null;
       }
-      const label = typeof entry.label === "string" && entry.label.length > 0
-        ? entry.label
-        : "Revision";
+      const label =
+        typeof entry.label === "string" && entry.label.length > 0 ? entry.label : "Revision";
       const author = typeof entry.author === "string" ? entry.author : null;
       const summary = typeof entry.summary === "string" ? entry.summary : null;
       return {
@@ -146,15 +145,17 @@ function stepsFromSections(sections: LessonPlanContentSection[]): LessonBuilderP
       title: section.title ?? `Step ${index + 1}`,
       description: section.description ?? extractFirstParagraph(section),
       activities:
-        section.blocks?.filter((block) => block.type === "list").flatMap((block) =>
-          "items" in block && Array.isArray(block.items)
-            ? block.items.map((item) =>
-                mergeActivityValues({
-                  title: typeof item === "string" ? item : "Activity",
-                })
-              )
-            : []
-        ) ?? [],
+        section.blocks
+          ?.filter((block) => block.type === "list")
+          .flatMap((block) =>
+            "items" in block && Array.isArray(block.items)
+              ? block.items.map((item) =>
+                  mergeActivityValues({
+                    title: typeof item === "string" ? item : "Activity",
+                  })
+                )
+              : []
+          ) ?? [],
     })
   );
 }
@@ -201,13 +202,17 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
 
   const parts = ensureParts(metadata.parts, detail, steps);
 
-  const lessonDateFromMetadata =
-    typeof metadata.lessonDate === "string" && metadata.lessonDate.trim().length > 0
-      ? metadata.lessonDate.trim()
+  const schoolLogoUrl =
+    typeof record.school_logo_url === "string"
+      ? record.school_logo_url
+      : typeof metadata.schoolLogoUrl === "string"
+      ? metadata.schoolLogoUrl
       : null;
-  const schoolLogoFromMetadata =
-    typeof metadata.schoolLogoUrl === "string" && metadata.schoolLogoUrl.trim().length > 0
-      ? metadata.schoolLogoUrl.trim()
+  const lessonDate =
+    typeof record.lesson_date === "string"
+      ? record.lesson_date
+      : typeof metadata.lessonDate === "string"
+      ? metadata.lessonDate
       : null;
 
   return {
@@ -222,19 +227,19 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
     deliveryMethods: detail.deliveryMethods,
     technologyTags: detail.technologyTags,
     durationMinutes: detail.durationMinutes,
-    schoolLogoUrl: detail.schoolLogoUrl,
-    lessonDate: detail.lessonDate,
+    schoolLogoUrl: schoolLogoUrl ?? detail.schoolLogoUrl ?? null,
+    lessonDate: lessonDate ?? detail.lessonDate ?? null,
     overview: detail.overview,
     steps,
     standards,
     availableStandards,
     resources: detail.resources,
-    lessonDate: lessonDateFromMetadata ?? detail.lessonDate ?? null,
-    schoolLogoUrl: schoolLogoFromMetadata ?? detail.schoolLogoUrl ?? null,
-    lastSavedAt: typeof metadata.lastSavedAt === "string" ? metadata.lastSavedAt : detail.updatedAt,
+    lastSavedAt:
+      typeof metadata.lastSavedAt === "string" ? metadata.lastSavedAt : detail.updatedAt,
     version: typeof metadata.version === "number" ? metadata.version : detail.updatedAt ? 1 : 0,
     parts,
     history,
+    ownerId: typeof record.owner_id === "string" ? record.owner_id : null,
     createdAt: detail.createdAt ?? null,
     updatedAt: detail.updatedAt ?? null,
   };
@@ -250,8 +255,8 @@ export function buildMetadataFromPlan(plan: LessonBuilderPlan): Record<string, u
       parts: plan.parts,
       lastSavedAt: plan.lastSavedAt,
       history: plan.history,
-      lessonDate: plan.lessonDate,
-      schoolLogoUrl: plan.schoolLogoUrl,
+      lessonDate: plan.lessonDate ?? null,
+      schoolLogoUrl: plan.schoolLogoUrl ?? null,
     },
   };
 }
@@ -270,11 +275,27 @@ export function buildUpdatePayload(plan: LessonBuilderPlan): Partial<LessonPlanR
     content: builderStepsToContent(plan.steps),
     resources: plan.resources,
     metadata: buildMetadataFromPlan(plan),
+    school_logo_url: plan.schoolLogoUrl ?? null,
+    lesson_date: plan.lessonDate ?? null,
   } as Partial<LessonPlanRecord>;
 }
 
 export function createDraftInsert(
-  plan: Pick<LessonBuilderPlan, "id" | "slug" | "title" | "summary" | "stage" | "stages" | "subjects" | "deliveryMethods" | "technologyTags" | "durationMinutes" | "lessonDate" | "schoolLogoUrl"> & {
+  plan: Pick<
+    LessonBuilderPlan,
+    | "id"
+    | "slug"
+    | "title"
+    | "summary"
+    | "stage"
+    | "stages"
+    | "subjects"
+    | "deliveryMethods"
+    | "technologyTags"
+    | "durationMinutes"
+    | "lessonDate"
+    | "schoolLogoUrl"
+  > & {
     status: LessonPlanRecord["status"];
     overview: LessonBuilderPlan["overview"];
     steps: LessonBuilderPlan["steps"];
@@ -310,10 +331,12 @@ export function createDraftInsert(
         parts: plan.parts,
         lastSavedAt: null,
         history: plan.history,
-        lessonDate: plan.lessonDate,
-        schoolLogoUrl: plan.schoolLogoUrl,
+        lessonDate: plan.lessonDate ?? null,
+        schoolLogoUrl: plan.schoolLogoUrl ?? null,
       },
     },
+    school_logo_url: plan.schoolLogoUrl ?? null,
+    lesson_date: plan.lessonDate ?? null,
   } as Partial<LessonPlanRecord>;
 }
 

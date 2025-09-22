@@ -39,7 +39,59 @@ export type LessonPlanContentBlock =
     }
   | {
       type: "heading";
-@@ -92,26 +94,28 @@ export interface LessonPlanRecord {
+      text: string;
+      level?: number;
+    }
+  | {
+      type: "list";
+      items: string[];
+      ordered?: boolean;
+    }
+  | {
+      type: "quote";
+      text: string;
+      attribution?: string;
+    }
+  | ({
+      type: string;
+    } & Record<string, unknown>);
+
+export interface LessonPlanContentSection {
+  id?: string;
+  title: string | null;
+  description: string | null;
+  blocks: LessonPlanContentBlock[];
+}
+
+export interface LessonPlanResource {
+  title: string;
+  url: string | null;
+  type: string | null;
+  description: string | null;
+}
+
+export interface LessonPlanDetail extends LessonPlanListItem {
+  content: LessonPlanContentSection[];
+  overview: LessonPlanOverview | null;
+  resources: LessonPlanResource[];
+}
+
+export interface LessonPlanListResponse {
+  items: LessonPlanListItem[];
+  nextCursor: string | null;
+}
+
+export interface LessonPlanRecord {
+  id: string;
+  slug: string;
+  title: string;
+  status: LessonPlanStatus;
+  owner_id?: string | null;
+  summary?: string | null;
+  excerpt?: string | null;
+  description?: string | null;
+  overview?: unknown;
+  stage?: string | null;
   stages?: string[] | null;
   stage_levels?: string[] | null;
   subjects?: string[] | null;
@@ -61,16 +113,10 @@ export type LessonPlanContentBlock =
   resources?: unknown;
   content?: unknown;
   body?: unknown;
+  school_logo_url?: string | null;
+  lesson_date?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
   published_at?: string | null;
   metadata?: unknown;
-  school_logo_url?: string | null;
-  lesson_date?: string | null;
-}
-
-  published_at?: string | null;
-  metadata?: unknown;
-  school_logo_url?: string | null;
-  lesson_date?: string | null;
 }
