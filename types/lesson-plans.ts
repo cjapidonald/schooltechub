@@ -1,38 +1,39 @@
 export type LessonPlanStatus = "draft" | "published" | "archived";
 
-export interface LessonPlanListItem {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string | null;
-  stage: string | null;
-  stages: string[];
-  subjects: string[];
-  deliveryMethods: string[];
-  technologyTags: string[];
-  durationMinutes: number | null;
-  pdfUrl: string | null;
-  status: LessonPlanStatus;
-  createdAt: string | null;
-  updatedAt: string | null;
+ LessonPlanContentSection as ApiLessonPlanContentSection,
+  LessonPlanListItem as ApiLessonPlanListItem,
+  LessonPlanListResponse as ApiLessonPlanListResponse,
+  LessonPlanOverview as ApiLessonPlanOverview,
+  LessonPlanResource as ApiLessonPlanResource,
+} from "../../types/lesson-plans";
+
+export interface Stage {
+  value: string;
+  label: string;
+  description?: string;
+  gradeRange?: string;
 }
 
-export interface LessonPlanOverview {
-  summary: string | null;
-  essentialQuestion: string | null;
-  objectives: string[];
-  materials: string[];
-  assessment: string[];
-  technology: string[];
-  delivery: string[];
-  stage: string | null;
-  subjects: string[];
-  durationMinutes: number | null;
+export interface DeliveryMode {
+  value: string;
+  label: string;
+  description?: string;
+  durationHint?: string;
 }
 
-export type LessonPlanContentBlock =
-  | {
-      type: "paragraph";
+export interface LessonPlan extends ApiLessonPlanListItem {
+  overview: ApiLessonPlanOverview | null;
+  content: ApiLessonPlanContentSection[];
+  resources: ApiLessonPlanResource[];
+  schoolLogoUrl: string | null;
+  lessonDate: string | null;
+
+export type LessonPlanListItem = ApiLessonPlanListItem;
+export type LessonPlanOverview = ApiLessonPlanOverview;
+export type LessonPlanContentBlock = ApiLessonPlanContentBlock;
+export type LessonPlanContentSection = ApiLessonPlanContentSection;
+export type LessonPlanResource = ApiLessonPlanResource;
+export type LessonPlanListResponse = ApiLessonPlanListResponse;
       text: string;
     }
   | {
@@ -112,7 +113,7 @@ export interface LessonPlanRecord {
   resources?: unknown;
   content?: unknown;
   body?: unknown;
-  created_at?: string | null;
+ created_at?: string | null;
   updated_at?: string | null;
   published_at?: string | null;
   metadata?: unknown;

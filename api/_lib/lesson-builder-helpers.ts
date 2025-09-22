@@ -278,6 +278,8 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
     deliveryMethods: detail.deliveryMethods,
     technologyTags: detail.technologyTags,
     durationMinutes: detail.durationMinutes,
+    schoolLogoUrl: detail.schoolLogoUrl,
+    lessonDate: detail.lessonDate,
     overview: detail.overview,
     steps,
     standards,
