@@ -1421,6 +1421,19 @@ export const vi = {
       confirmPasswordPlaceholder: "Nhập lại mật khẩu mới",
       updateButton: "Cập nhật mật khẩu"
     },
+    security: {
+      mfa: {
+        title: "Xác thực đa yếu tố",
+        description: "Thêm một bước xác minh trước khi đăng nhập để bảo vệ khu vực quản trị.",
+        statusVerified: "Đã xác minh MFA",
+        statusPending: "Cần xác minh",
+        verifiedDescription: "Được xác nhận vào {date}. Hãy xác nhận lại sau khi thay đổi ứng dụng xác thực.",
+        pendingDescription: "Thiết lập ứng dụng xác thực và xác nhận khi bạn tạo mã thành công.",
+        helper: "Cài đặt ứng dụng xác thực, quét mã QR của SchoolTech Hub và lưu mã dự phòng an toàn trước khi xác nhận.",
+        verifyButton: "Tôi đã bật MFA",
+        resetButton: "Đặt lại trạng thái MFA"
+      }
+    },
     securityTips: {
       title: "Gợi ý bảo mật",
       description: "Các bước tốt nhất để bảo vệ tài khoản.",
@@ -1454,7 +1467,10 @@ export const vi = {
       notificationsUpdated: "Đã lưu tùy chọn thông báo",
       settingsUpdated: "Đã lưu tùy chọn tài khoản",
       avatarUpdated: "Đã cập nhật ảnh đại diện",
-      avatarError: "Không thể tải ảnh lên"
+      avatarError: "Không thể tải ảnh lên",
+      mfaVerified: "Đã xác nhận MFA",
+      mfaReset: "Đã đặt lại trạng thái MFA",
+      mfaError: "Không thể cập nhật trạng thái MFA"
     }
   },
   common: {

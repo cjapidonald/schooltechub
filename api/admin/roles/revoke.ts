@@ -30,7 +30,29 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
-  const deleteResult = await supabase.from("app_admins").delete().eq("user_id", userId);
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("app_admins")
+    .select("user_id, deleted_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (fetchError) {
+    return errorResponse(500, "Failed to verify admin role");
+  }
+
+  if (!existing) {
+    return jsonResponse({ success: true });
+  }
+
+  if (existing.deleted_at) {
+    return jsonResponse({ success: true });
+  }
+
+  const deleteResult = await supabase
+    .from("app_admins")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("user_id", userId);
 
   if (deleteResult.error) {
     return errorResponse(500, "Failed to revoke admin role");

@@ -1421,6 +1421,19 @@ export const en = {
       confirmPasswordPlaceholder: "Re-enter the new password",
       updateButton: "Update password"
     },
+    security: {
+      mfa: {
+        title: "Multi-factor authentication",
+        description: "Add an extra step before signing in to protect sensitive administrator tools.",
+        statusVerified: "MFA verified",
+        statusPending: "Verification required",
+        verifiedDescription: "Confirmed on {date}. Reconfirm after rotating your authenticator app.",
+        pendingDescription: "Set up an authenticator app and confirm once you're generating codes successfully.",
+        helper: "Install an authenticator app, scan your SchoolTech Hub QR code, and keep backup codes safe before confirming.",
+        verifyButton: "I have enabled MFA",
+        resetButton: "Reset MFA status"
+      }
+    },
     securityTips: {
       title: "Security recommendations",
       description: "Best practices to keep your account safe.",
@@ -1454,7 +1467,10 @@ export const en = {
       notificationsUpdated: "Notification preferences saved",
       settingsUpdated: "Account settings saved",
       avatarUpdated: "Profile image updated",
-      avatarError: "We couldn't upload that image"
+      avatarError: "We couldn't upload that image",
+      mfaVerified: "Multi-factor authentication confirmed",
+      mfaReset: "MFA status reset",
+      mfaError: "We couldn't update your MFA status"
     }
   },
   common: {

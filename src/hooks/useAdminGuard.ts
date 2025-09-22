@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
 
-type AdminGuardState = "checking" | "allowed" | "forbidden" | "error";
+type AdminGuardState = "checking" | "allowed" | "forbidden" | "mfa-required" | "error";
 
 async function fetchAdminStatus(): Promise<Response> {
   const { data, error } = await supabase.auth.getSession();
@@ -35,11 +35,20 @@ export function useAdminGuard(pathname: string): AdminGuardState {
 
         if (response.ok) {
           setState("allowed");
-        } else if (response.status === 401 || response.status === 403) {
-          setState("forbidden");
-        } else {
-          setState("error");
+          return;
         }
+
+        if (response.status === 401 || response.status === 403) {
+          setState("forbidden");
+          return;
+        }
+
+        if (response.status === 428) {
+          setState("mfa-required");
+          return;
+        }
+
+        setState(response.status === 429 ? "forbidden" : "error");
       } catch (error) {
         if (!cancelled) {
           setState(error instanceof Error && error.message === "Missing access token" ? "forbidden" : "error");

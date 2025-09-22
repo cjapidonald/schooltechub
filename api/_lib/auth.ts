@@ -2,14 +2,24 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { errorResponse } from "./http";
 import { getSupabaseClient } from "./supabase";
 
-export interface AdminRequestContext {
+export interface AuthenticatedRequestContext {
   supabase: SupabaseClient;
   user: User;
 }
 
-export async function requireAdmin(
+export interface AdminRequestContext extends AuthenticatedRequestContext {
+  profile: AdminProfile;
+}
+
+interface AdminProfile {
+  id: string;
+  deleted_at: string | null;
+  mfa_verified_at: string | null;
+}
+
+export async function requireUser(
   request: Request
-): Promise<AdminRequestContext | Response> {
+): Promise<AuthenticatedRequestContext | Response> {
   const accessToken = extractAccessToken(request);
   if (!accessToken) {
     return errorResponse(401, "Authentication required");
@@ -22,12 +32,55 @@ export async function requireAdmin(
     return errorResponse(401, "Authentication required");
   }
 
-  const isAdminUser = await isAdmin(supabase, authData.user.id);
+  return { supabase, user: authData.user };
+}
+
+export async function requireAdmin(
+  request: Request
+): Promise<AdminRequestContext | Response> {
+  const userContext = await requireUser(request);
+  if (userContext instanceof Response) {
+    return userContext;
+  }
+
+  const { supabase, user } = userContext;
+
+  const isAdminUser = await isAdmin(supabase, user.id);
   if (!isAdminUser) {
     return errorResponse(403, "You do not have permission to perform this action");
   }
 
-  return { supabase, user: authData.user };
+  const normalizedPath = normalizeRequestPath(request.url);
+  if (normalizedPath) {
+    const { data: allowed, error: rateError } = await supabase.rpc<boolean>("enforce_admin_rate_limit", {
+      p_user_id: user.id,
+      p_route: normalizedPath,
+    });
+
+    if (rateError || allowed !== true) {
+      return errorResponse(429, "You are performing this action too frequently. Please wait and try again.");
+    }
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from<AdminProfile>("profiles")
+    .select("id, deleted_at, mfa_verified_at")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    return errorResponse(500, "Failed to verify administrator profile");
+  }
+
+  if (!profile || profile.deleted_at) {
+    return errorResponse(403, "Your profile has been disabled. Contact support for assistance.");
+  }
+
+  if (!profile.mfa_verified_at) {
+    return errorResponse(428, "Multi-factor authentication is required before accessing the admin console.");
+  }
+
+  return { supabase, user, profile };
 }
 
 function extractAccessToken(request: Request): string | null {
@@ -86,5 +139,14 @@ async function isAdmin(supabase: SupabaseClient, userId: string): Promise<boolea
     return Boolean(data?.user_id);
   } catch {
     return false;
+  }
+}
+
+function normalizeRequestPath(url: string): string | null {
+  try {
+    const { pathname } = new URL(url);
+    return pathname.replace(/\/+/g, "/").toLowerCase();
+  } catch {
+    return null;
   }
 }

@@ -1421,6 +1421,19 @@ export const sq = {
       confirmPasswordPlaceholder: "Rishkruaj fjalëkalimin e ri",
       updateButton: "Përditëso fjalëkalimin"
     },
+    security: {
+      mfa: {
+        title: "Autentifikim me shumë faktorë",
+        description: "Shto një hap verifikimi para se të hysh për të mbrojtur mjetet e administrimit.",
+        statusVerified: "MFA i verifikuar",
+        statusPending: "Kërkohet verifikim",
+        verifiedDescription: "U konfirmua më {date}. Konfirmo përsëri pas ndryshimit të aplikacionit të autentifikimit.",
+        pendingDescription: "Konfiguro një aplikacion autentifikimi dhe konfirmo kur të gjenerohen kodet.",
+        helper: "Instalo aplikacionin e autentifikimit, skano QR të SchoolTech Hub dhe ruaj kodet rezervë përpara konfirmimit.",
+        verifyButton: "E kam aktivizuar MFA",
+        resetButton: "Rivendos statusin MFA"
+      }
+    },
     securityTips: {
       title: "Rekomandime sigurie",
       description: "Praktikat më të mira për të mbrojtur llogarinë.",
@@ -1454,7 +1467,10 @@ export const sq = {
       notificationsUpdated: "Preferencat e njoftimeve u ruajtën",
       settingsUpdated: "Preferencat e llogarisë u ruajtën",
       avatarUpdated: "Fotoja e profilit u përditësua",
-      avatarError: "Nuk mundëm të ngarkojmë imazhin"
+      avatarError: "Nuk mundëm të ngarkojmë imazhin",
+      mfaVerified: "Autentifikimi me shumë faktorë u konfirmua",
+      mfaReset: "Statusi MFA u rivendos",
+      mfaError: "Nuk mundëm të përditësojmë statusin MFA"
     }
   },
   common: {

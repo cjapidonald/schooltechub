@@ -30,9 +30,14 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
-  const upsertResult = await supabase
-    .from("app_admins")
-    .upsert({ user_id: userId }, { onConflict: "user_id" });
+  const upsertResult = await supabase.from("app_admins").upsert(
+    {
+      user_id: userId,
+      granted_at: new Date().toISOString(),
+      deleted_at: null,
+    },
+    { onConflict: "user_id" }
+  );
 
   if (upsertResult.error) {
     return errorResponse(500, "Failed to grant admin role");

@@ -333,6 +333,55 @@ const Account = () => {
     },
   });
 
+  const updateMfaVerificationMutation = useMutation({
+    mutationFn: async (shouldVerify: boolean) => {
+      if (!user) {
+        throw new Error(t.common.error);
+      }
+
+      const { data, error } = await supabase.auth.getSession();
+      if (error || !data.session?.access_token) {
+        throw new Error("Missing access token");
+      }
+
+      const response = await fetch("/api/profile/mfa/verify", {
+        method: shouldVerify ? "POST" : "DELETE",
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        try {
+          const body = (await response.json()) as { error?: string };
+          if (body?.error) {
+            throw new Error(body.error);
+          }
+        } catch (parseError) {
+          throw new Error(parseError instanceof Error ? parseError.message : "Failed to update MFA status");
+        }
+
+        throw new Error("Failed to update MFA status");
+      }
+
+      return (await response.json()) as { verifiedAt: string | null };
+    },
+    onSuccess: (_data, shouldVerify) => {
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
+      toast({
+        title: shouldVerify ? t.account.toast.mfaVerified : t.account.toast.mfaReset,
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: t.account.toast.mfaError,
+        description: error instanceof Error ? error.message : String(error),
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateNotificationsMutation = useMutation({
     mutationFn: async () => {
       if (!user) return;
@@ -461,6 +510,20 @@ const Account = () => {
     }
     return "?";
   }, [profileForm.fullName, user?.email]);
+
+  const isMfaVerified = Boolean(profileQuery.data?.mfa_verified_at);
+  const mfaVerifiedAt = useMemo(() => {
+    const value = profileQuery.data?.mfa_verified_at;
+    if (!value) {
+      return null;
+    }
+
+    try {
+      return format(new Date(value), "PPP p");
+    } catch {
+      return value;
+    }
+  }, [profileQuery.data?.mfa_verified_at]);
 
   if (checkingSession) {
     return (
@@ -853,48 +916,97 @@ const Account = () => {
           </TabsContent>
 
           <TabsContent value="security">
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lock className="h-5 w-5 text-primary" />
-                    {t.account.password.title}
-                  </CardTitle>
-                  <CardDescription>{t.account.password.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-password">{t.account.password.newPassword}</Label>
-                    <Input
-                      id="new-password"
-                      type="password"
-                      value={passwordForm.newPassword}
-                      placeholder={t.account.password.newPasswordPlaceholder}
-                      onChange={(event) => setPasswordForm(prev => ({ ...prev, newPassword: event.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">{t.account.password.confirmPassword}</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      value={passwordForm.confirmPassword}
-                      placeholder={t.account.password.confirmPasswordPlaceholder}
-                      onChange={(event) => setPasswordForm(prev => ({ ...prev, confirmPassword: event.target.value }))}
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="justify-end">
-                  <Button onClick={() => updatePasswordMutation.mutate()} disabled={updatePasswordMutation.isPending}>
-                    {updatePasswordMutation.isPending ? t.common.loading : t.account.password.updateButton}
-                  </Button>
-                </CardFooter>
-              </Card>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Lock className="h-5 w-5 text-primary" />
+                      {t.account.password.title}
+                    </CardTitle>
+                    <CardDescription>{t.account.password.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">{t.account.password.newPassword}</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={passwordForm.newPassword}
+                        placeholder={t.account.password.newPasswordPlaceholder}
+                        onChange={(event) => setPasswordForm(prev => ({ ...prev, newPassword: event.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">{t.account.password.confirmPassword}</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={passwordForm.confirmPassword}
+                        placeholder={t.account.password.confirmPasswordPlaceholder}
+                        onChange={(event) => setPasswordForm(prev => ({ ...prev, confirmPassword: event.target.value }))}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="justify-end">
+                    <Button onClick={() => updatePasswordMutation.mutate()} disabled={updatePasswordMutation.isPending}>
+                      {updatePasswordMutation.isPending ? t.common.loading : t.account.password.updateButton}
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ShieldCheck className="h-5 w-5 text-primary" />
+                      {t.account.security.mfa.title}
+                    </CardTitle>
+                    <CardDescription>{t.account.security.mfa.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="flex flex-col gap-3 rounded-lg border border-dashed bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="space-y-1">
+                        <p className="font-semibold text-foreground">
+                          {isMfaVerified ? t.account.security.mfa.statusVerified : t.account.security.mfa.statusPending}
+                        </p>
+                        <p className="text-muted-foreground">
+                          {isMfaVerified
+                            ? t.account.security.mfa.verifiedDescription.replace("{date}", mfaVerifiedAt ?? "")
+                            : t.account.security.mfa.pendingDescription}
+                        </p>
+                      </div>
+                      <Badge variant={isMfaVerified ? "default" : "secondary"} className="self-start sm:self-auto">
+                        {isMfaVerified ? t.account.security.mfa.statusVerified : t.account.security.mfa.statusPending}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground">{t.account.security.mfa.helper}</p>
+                  </CardContent>
+                  <CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <Button
+                      onClick={() => updateMfaVerificationMutation.mutate(true)}
+                      disabled={updateMfaVerificationMutation.isPending}
+                    >
+                      {updateMfaVerificationMutation.isPending
+                        ? t.common.loading
+                        : t.account.security.mfa.verifyButton}
+                    </Button>
+                    {isMfaVerified && (
+                      <Button
+                        variant="outline"
+                        onClick={() => updateMfaVerificationMutation.mutate(false)}
+                        disabled={updateMfaVerificationMutation.isPending}
+                      >
+                        {t.account.security.mfa.resetButton}
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              </div>
 
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-primary" />
+                    <Sparkles className="h-5 w-5 text-primary" />
                     {t.account.securityTips.title}
                   </CardTitle>
                   <CardDescription>{t.account.securityTips.description}</CardDescription>

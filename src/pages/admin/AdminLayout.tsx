@@ -36,6 +36,10 @@ export default function AdminLayout() {
     return <AdminForbidden />;
   }
 
+  if (guardState === "mfa-required") {
+    return <AdminMfaRequired />;
+  }
+
   if (guardState === "error") {
     return <AdminGuardError />;
   }
@@ -193,6 +197,35 @@ function AdminForbidden() {
           </Button>
           <Button asChild variant="outline">
             <Link to="/">Return home</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function AdminMfaRequired() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-2 text-center">
+          <CardTitle className="text-xl">Secure your account</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Administrators must enable multi-factor authentication before using the console.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <p>
+            Visit your account security settings, finish MFA enrolment, and then return here. This protects sensitive admin
+            tools from compromised passwords.
+          </p>
+        </CardContent>
+        <CardContent className="flex flex-col gap-3 pt-0">
+          <Button asChild>
+            <Link to="/account">Open account security</Link>
+          </Button>
+          <Button variant="outline" onClick={() => window.location.reload()}>
+            I have enabled MFA
           </Button>
         </CardContent>
       </Card>

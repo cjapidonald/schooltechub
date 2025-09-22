@@ -32,6 +32,24 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("deleted_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (profileError) {
+    return errorResponse(500, "Failed to load the user profile");
+  }
+
+  if (!profile) {
+    return errorResponse(404, "User profile not found");
+  }
+
+  if (profile.deleted_at) {
+    return errorResponse(409, "The user has been deleted and cannot be disabled");
+  }
   const updateResult = await supabase.auth.admin.updateUserById(userId, {
     ban_duration: BAN_DURATION,
   });
