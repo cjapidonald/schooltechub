@@ -19,13 +19,46 @@ export interface LessonBuilderActivity {
   tags: string[];
 }
 
+export interface LessonBuilderStepResource {
+  id: string;
+  label: string;
+  url: string;
+  type: string | null;
+  thumbnail: string | null;
+  domain: string | null;
+  [key: string]: unknown;
+}
+
 export interface LessonBuilderStep {
   id: string;
   title: string;
   description: string | null;
+  learningGoals: string | null;
   durationMinutes: number | null;
+  duration: string | null;
+  grouping: string | null;
+  delivery: string | null;
   notes: string | null;
   activities: LessonBuilderActivity[];
+  resources: LessonBuilderStepResource[];
+}
+
+export interface LessonBuilderResourceSearchResult {
+  id: string;
+  title: string;
+  description: string | null;
+  url: string;
+  type: string | null;
+  thumbnail: string | null;
+  domain: string | null;
+  duration: string | null;
+  mediaType: string | null;
+  stage: string | null;
+  subjects: string[];
+  favicon: string | null;
+  instructionalNote: string | null;
+  hasNotes?: boolean;
+  isMine?: boolean;
 }
 
 export interface LessonBuilderStandard {
@@ -103,6 +136,15 @@ function ensureString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0
     ? value
     : null;
+}
+
+function extractDomain(url: string): string | null {
+  try {
+    const host = new URL(url).hostname;
+    return host.replace(/^www\./i, "");
+  } catch (error) {
+    return null;
+  }
 }
 
 function ensureStringArray(values: unknown): string[] {
@@ -222,20 +264,63 @@ export function mergeActivityValues(
   };
 }
 
+export function mergeResourceValues(
+  values: Partial<LessonBuilderStepResource>
+): LessonBuilderStepResource {
+  const base = (typeof values === "object" && values !== null ? values : {}) as Record<string, unknown>;
+  const url = ensureString(base.url) ?? "";
+  const label = ensureString(base.label) ?? ensureString(base.title) ?? "Resource";
+
+  return {
+    ...base,
+    id: ensureString(base.id) ?? cryptoRandomId("res"),
+    label,
+    url,
+    type: ensureString(base.type),
+    thumbnail: ensureString(base.thumbnail),
+    domain: ensureString(base.domain) ?? (url ? extractDomain(url) : null),
+  } as LessonBuilderStepResource;
+}
+
 export function mergeStepValues(
   values: Partial<LessonBuilderStep>
 ): LessonBuilderStep {
+  const base = values as Record<string, unknown>;
+  const normalizedDescription = ensureString(values.description);
+  const learningGoals =
+    ensureString((base.learningGoals as string | undefined) ?? (base.learning_goals as string | undefined)) ??
+    normalizedDescription;
+  const durationText =
+    ensureString((base.duration as string | undefined) ?? (base.durationText as string | undefined)) ??
+    (typeof values.durationMinutes === "number" && Number.isFinite(values.durationMinutes)
+      ? String(Math.max(0, Math.trunc(values.durationMinutes)))
+      : null);
+  const grouping = ensureString(base.grouping as string | undefined);
+  const delivery =
+    ensureString((base.delivery as string | undefined) ?? (base.deliveryMode as string | undefined)) ??
+    null;
+  const notes =
+    ensureString(values.notes) ??
+    ensureString((base.instructionalNote as string | undefined) ?? (base.instructional_note as string | undefined));
+
   return {
     id: values.id ?? cryptoRandomId("step"),
     title: ensureString(values.title) ?? "",
-    description: ensureString(values.description),
+    description: learningGoals ?? normalizedDescription,
+    learningGoals,
     durationMinutes:
       typeof values.durationMinutes === "number" && Number.isFinite(values.durationMinutes)
         ? Math.max(0, Math.trunc(values.durationMinutes))
         : null,
-    notes: ensureString(values.notes),
+    duration: durationText,
+    grouping,
+    delivery,
+    notes,
     activities: Array.isArray(values.activities)
       ? values.activities.map((activity) => mergeActivityValues(activity))
+      : [],
+    resources: Array.isArray((base.resources as unknown[] | undefined))
+      ? (base.resources as unknown[]).map((resource) => mergeResourceValues(resource as Partial<LessonBuilderStepResource>))
       : [],
   };
 }
