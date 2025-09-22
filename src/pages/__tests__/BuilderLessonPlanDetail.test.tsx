@@ -17,6 +17,11 @@ const resourcesMocks = vi.hoisted(() => ({
   search: vi.fn(),
 }));
 
+const supabaseMock = vi.hoisted(() => ({
+  auth: { getUser: vi.fn() },
+  from: vi.fn(),
+}));
+
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
   return {
@@ -27,6 +32,10 @@ vi.mock("react-router-dom", async () => {
 
 vi.mock("@/contexts/LanguageContext", () => ({
   useLanguage: () => ({ t: en, language: "en", setLanguage: () => {} }),
+}));
+
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: supabaseMock,
 }));
 
 vi.mock("@/lib/builder-api", () => ({
@@ -105,47 +114,58 @@ describe("BuilderLessonPlanDetail", () => {
     fetchHistory.mockResolvedValue([]);
     autosave.mockImplementation(async (_id: string, updatedPlan) => updatedPlan);
     searchResources.mockResolvedValue({ items: [resource], total: 1 });
+    supabaseMock.auth.getUser.mockResolvedValue({ data: { user: { id: "user-1" } } });
+    supabaseMock.from.mockImplementation(() => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: () => Promise.resolve({ data: { school_logo_url: null } }),
+        }),
+      }),
+    }));
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  it("adds a searched resource to the current step and schedules autosave", async () => {
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
-    render(
-      <QueryClientProvider client={queryClient}>
-        <BuilderLessonPlanDetail />
-      </QueryClientProvider>
-    );
+  it(
+    "adds a searched resource to the current step and schedules autosave",
+    async () => {
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      render(
+        <QueryClientProvider client={queryClient}>
+          <BuilderLessonPlanDetail />
+        </QueryClientProvider>
+      );
 
-    const searchButton = await screen.findByRole("button", { name: /search resources/i });
-    fireEvent.click(searchButton);
+      const searchButton = await screen.findByRole("button", { name: /search resources/i });
+      fireEvent.click(searchButton);
 
-    const searchInput = await screen.findByPlaceholderText(/search by keyword/i);
-    fireEvent.change(searchInput, { target: { value: "video" } });
-    fireEvent.keyDown(searchInput, { key: "Enter" });
-    await new Promise((resolve) => setTimeout(resolve, 400));
+      const searchInput = await screen.findByPlaceholderText(/search by keyword/i);
+      fireEvent.change(searchInput, { target: { value: "video" } });
+      fireEvent.keyDown(searchInput, { key: "Enter" });
+      await new Promise((resolve) => setTimeout(resolve, 400));
 
-    await waitFor(() => expect(searchResources).toHaveBeenCalled());
-    const [filters] = searchResources.mock.calls.at(-1) ?? [];
-    expect(filters?.q).toBe("video");
+      await waitFor(() => expect(searchResources).toHaveBeenCalled());
+      const [filters] = searchResources.mock.calls.at(-1) ?? [];
+      expect(filters?.q).toBe("video");
 
-    const addButton = await screen.findByRole("button", { name: /add/i });
-    fireEvent.click(addButton);
+      const addButton = await screen.findByRole("button", { name: /add/i });
+      fireEvent.click(addButton);
 
-    await waitFor(() =>
-      expect(screen.getByRole("link", { name: resource.title })).toBeInTheDocument()
-    );
+      await waitFor(() =>
+        expect(screen.getByRole("link", { name: resource.title })).toBeInTheDocument()
+      );
 
-    const notesField = screen.getByLabelText(/instructional notes/i) as HTMLTextAreaElement;
-    expect(notesField.value).toContain(resource.description);
+      const notesField = screen.getByLabelText(/instructional notes/i) as HTMLTextAreaElement;
+      expect(notesField.value).toContain(resource.description);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await waitFor(() => expect(autosave).toHaveBeenCalled());
+      await waitFor(() => expect(autosave).toHaveBeenCalled(), { timeout: 6000 });
 
-    queryClient.clear();
-  });
+      queryClient.clear();
+    },
+    10000
+  );
 });

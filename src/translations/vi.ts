@@ -606,6 +606,7 @@ export const vi = {
       resourceLink: "Mở tài nguyên",
       empty: "Chi tiết bài học sẽ được cập nhật sớm.",
       download: "Tải PDF",
+      downloadDocx: "Tải DOCX",
       openFull: "Mở trang đầy đủ",
       close: "Đóng",
     },

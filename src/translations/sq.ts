@@ -606,6 +606,7 @@ export const sq = {
       resourceLink: "Hap burimin",
       empty: "Detajet e planit do të shtohen së shpejti.",
       download: "Shkarko PDF",
+      downloadDocx: "Shkarko DOCX",
       openFull: "Hap faqen e plotë",
       close: "Mbyll",
     },

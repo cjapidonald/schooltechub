@@ -12,6 +12,7 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import type { LessonPlan } from "@/types/lesson-plans";
 import { builderPlanToLessonPlan } from "@/types/lesson-builder";
 import type { LessonBuilderPlanResponse } from "@/types/lesson-builder";
+import { downloadPlanExport } from "@/lib/downloadPlanExport";
 
 async function fetchLessonPlanDetail(slug: string): Promise<LessonPlan> {
   const response = await fetch(`/api/builder/lesson-plans/${slug}?lookup=slug`);
@@ -71,6 +72,7 @@ const LessonPlanPage = () => {
       noResourcesLabel: t.lessonPlans.modal.empty,
       errorLabel: t.lessonPlans.states.error,
       downloadLabel: t.lessonPlans.modal.download,
+      downloadDocxLabel: t.lessonPlans.modal.downloadDocx,
       openFullLabel: t.lessonPlans.modal.openFull,
       closeLabel: t.lessonPlans.modal.close,
       loadingLabel: t.lessonPlans.states.loading,
@@ -97,11 +99,15 @@ const LessonPlanPage = () => {
     navigate(getLocalizedPath("/lesson-plans", language));
   };
 
-  const handleDownload = () => {
+  const handleDownload = async (format: "pdf" | "docx") => {
     if (!lesson) {
       return;
     }
-    window.open(`/api/lesson-plans/${lesson.id}/pdf`, "_blank", "noopener,noreferrer");
+    try {
+      await downloadPlanExport(lesson.id, format, lesson.title ?? "Lesson plan");
+    } catch (error) {
+      console.error("Failed to download lesson plan", error);
+    }
   };
 
   const canonicalUrl = lesson
@@ -130,12 +136,20 @@ const LessonPlanPage = () => {
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
-              onClick={handleDownload}
+              onClick={() => void handleDownload("pdf")}
               disabled={!lesson}
               className="inline-flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
               {t.lessonPlans.modal.download}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void handleDownload("docx")}
+              disabled={!lesson}
+            >
+              {t.lessonPlans.modal.downloadDocx}
             </Button>
           </div>
         </div>

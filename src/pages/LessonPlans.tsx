@@ -20,6 +20,7 @@ import type {
 } from "@/types/lesson-plans";
 import { builderPlanToLessonPlan } from "@/types/lesson-builder";
 import type { LessonBuilderPlanResponse } from "@/types/lesson-builder";
+import { downloadPlanExport } from "@/lib/downloadPlanExport";
 
 const LESSON_PARAM = "lesson";
 
@@ -350,12 +351,28 @@ const LessonPlans = () => {
     navigate(getLocalizedPath(`/lesson-plans/${selectedLessonSlug}`, language));
   };
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     const lesson = lessonDetailQuery.data ?? selectedLessonPreview;
     if (!lesson) {
       return;
     }
-    window.open(`/api/lesson-plans/${lesson.id}/pdf`, "_blank", "noopener,noreferrer");
+    try {
+      await downloadPlanExport(lesson.id, "pdf", lesson.title ?? "Lesson plan");
+    } catch (error) {
+      console.error("Failed to download lesson plan", error);
+    }
+  };
+
+  const handleDownloadDocx = async () => {
+    const lesson = lessonDetailQuery.data ?? selectedLessonPreview;
+    if (!lesson) {
+      return;
+    }
+    try {
+      await downloadPlanExport(lesson.id, "docx", lesson.title ?? "Lesson plan");
+    } catch (error) {
+      console.error("Failed to download lesson plan", error);
+    }
   };
 
   const isInitialLoading = lessonPlansQuery.isLoading && !lessonPlansQuery.data;
@@ -454,6 +471,7 @@ const LessonPlans = () => {
         lesson={lessonDetailQuery.data ?? null}
         initialLesson={selectedLessonPreview}
         onDownloadPdf={handleDownloadPdf}
+        onDownloadDocx={handleDownloadDocx}
         onOpenFullPage={handleOpenFullPage}
         isLoading={lessonDetailQuery.isLoading || lessonDetailQuery.isFetching}
         errorMessage={lessonDetailQuery.isError ? t.lessonPlans.states.error : null}
@@ -477,6 +495,7 @@ const LessonPlans = () => {
           noResourcesLabel: t.lessonPlans.modal.empty,
           errorLabel: t.lessonPlans.states.error,
           downloadLabel: t.lessonPlans.modal.download,
+          downloadDocxLabel: t.lessonPlans.modal.downloadDocx,
           openFullLabel: t.lessonPlans.modal.openFull,
           closeLabel: t.lessonPlans.modal.close,
           loadingLabel: t.lessonPlans.states.loading,

@@ -7,6 +7,11 @@ export interface AdminRequestContext {
   user: User;
 }
 
+export interface AuthenticatedRequestContext {
+  supabase: SupabaseClient;
+  user: User;
+}
+
 export async function requireAdmin(
   request: Request
 ): Promise<AdminRequestContext | Response> {
@@ -25,6 +30,24 @@ export async function requireAdmin(
   const isAdminUser = await isAdmin(supabase, authData.user.id);
   if (!isAdminUser) {
     return errorResponse(403, "You do not have permission to perform this action");
+  }
+
+  return { supabase, user: authData.user };
+}
+
+export async function requireUser(
+  request: Request
+): Promise<AuthenticatedRequestContext | Response> {
+  const accessToken = extractAccessToken(request);
+  if (!accessToken) {
+    return errorResponse(401, "Authentication required");
+  }
+
+  const supabase = getSupabaseClient();
+  const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+
+  if (authError || !authData?.user) {
+    return errorResponse(401, "Authentication required");
   }
 
   return { supabase, user: authData.user };
