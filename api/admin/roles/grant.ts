@@ -7,9 +7,11 @@ import {
 } from "../../_lib/http";
 import { getAuditRequestContext, recordAuditLog } from "../../_lib/audit";
 import { requireAdmin } from "../../_lib/auth";
+import { findUserByEmail } from "../../_lib/users";
 
 interface RolePayload {
   userId?: string;
+  email?: string;
 }
 
 export default async function handler(request: Request): Promise<Response> {
@@ -22,18 +24,36 @@ export default async function handler(request: Request): Promise<Response> {
     return context;
   }
 
+  const { supabase, user } = context;
   const payload = (await parseJsonBody<RolePayload>(request)) ?? {};
   const userId = typeof payload.userId === "string" ? payload.userId.trim() : "";
+  const email = typeof payload.email === "string" ? payload.email.trim() : "";
 
-  if (userId.length === 0) {
-    return errorResponse(400, "A user id is required");
+  if (userId.length === 0 && email.length === 0) {
+    return errorResponse(400, "A user id or email address is required");
   }
 
-  const { supabase, user } = context;
+  let targetId = userId;
+  let resolvedEmail = email || null;
+
+  if (!targetId) {
+    try {
+      const lookup = await findUserByEmail(supabase, email);
+      if (!lookup) {
+        return errorResponse(404, "No user with that email address was found");
+      }
+      targetId = lookup.id;
+      resolvedEmail = lookup.email ?? resolvedEmail;
+    } catch {
+      return errorResponse(500, "Failed to resolve the requested user");
+    }
+  }
+
   const auditContext = getAuditRequestContext(request);
+
   const upsertResult = await supabase
     .from("app_admins")
-    .upsert({ user_id: userId }, { onConflict: "user_id" });
+    .upsert({ user_id: targetId }, { onConflict: "user_id" });
 
   if (upsertResult.error) {
     return errorResponse(500, "Failed to grant admin role");
@@ -43,8 +63,11 @@ export default async function handler(request: Request): Promise<Response> {
     action: "admin.roles.grant",
     actorId: user.id,
     targetType: "user",
-    targetId: userId,
-    details: { role: "admin" },
+    targetId: targetId,
+    details: {
+      role: "admin",
+      ...(resolvedEmail ? { email: resolvedEmail } : {}),
+    },
     ...auditContext,
   });
 
