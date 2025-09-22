@@ -1194,6 +1194,12 @@ export const vi = {
       subjectsLabel: "Môn học",
       durationLabel: "Thời lượng",
       technologyLabel: "Công nghệ",
+      logoLabel: "Tải logo trường",
+      logoChangeLabel: "Đổi logo",
+      logoUploadingLabel: "Đang tải...",
+      logoAlt: "Logo trường",
+      dateLabel: "Ngày bài học",
+      datePlaceholder: "Chọn ngày",
     },
     canvas: {
       title: "Chuỗi hoạt động học tập",

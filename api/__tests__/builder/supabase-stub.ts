@@ -9,6 +9,15 @@ export interface StorageResponse {
   error?: { message: string } | null;
 }
 
+export interface StorageUploadResponse {
+  error?: { message: string } | null;
+}
+
+export interface StoragePublicResponse {
+  data?: { publicUrl?: string | null } | null;
+  error?: { message: string } | null;
+}
+
 interface CallRecord {
   table: string;
   method: string;
@@ -115,9 +124,16 @@ class QueryBuilder {
 
 export class SupabaseStub {
   public calls: CallRecord[] = [];
-  public storageCalls: Array<{ bucket: string; path: string; expiresIn: number }> = [];
+  public storageCalls: Array<{
+    bucket: string;
+    path: string;
+    method: "upload" | "createSignedUrl" | "getPublicUrl";
+    expiresIn?: number;
+  }> = [];
   private responses: SupabaseResponse[] = [];
   private storageResponses: StorageResponse[] = [];
+  private storageUploadResponses: StorageUploadResponse[] = [];
+  private storagePublicResponses: StoragePublicResponse[] = [];
 
   from(table: string): QueryBuilder {
     const response = this.responses.shift() ?? { data: null, error: null };
@@ -146,17 +162,50 @@ export class SupabaseStub {
     }));
   }
 
+  setStorageUploadResponses(responses: StorageUploadResponse[]): void {
+    this.storageUploadResponses = responses.map((response) => ({
+      error: response.error ?? null,
+    }));
+  }
+
+  setStoragePublicResponses(responses: StoragePublicResponse[]): void {
+    this.storagePublicResponses = responses.map((response) => ({
+      data: response.data ?? null,
+      error: response.error ?? null,
+    }));
+  }
+
   reset(): void {
     this.calls = [];
     this.storageCalls = [];
     this.responses = [];
     this.storageResponses = [];
+    this.storageUploadResponses = [];
+    this.storagePublicResponses = [];
   }
 
   storage = {
     from: (bucket: string) => ({
+      upload: async (path: string, _file: unknown, _options?: unknown) => {
+        this.storageCalls.push({ bucket, path, method: "upload" });
+        const response = this.storageUploadResponses.shift() ?? { error: null };
+        return {
+          data: null,
+          error: response.error ?? null,
+        };
+      },
+      getPublicUrl: (path: string) => {
+        this.storageCalls.push({ bucket, path, method: "getPublicUrl" });
+        const response =
+          this.storagePublicResponses.shift() ??
+          ({ data: { publicUrl: null }, error: null } as StoragePublicResponse);
+        return {
+          data: response.data ?? null,
+          error: response.error ?? null,
+        };
+      },
       createSignedUrl: async (path: string, expiresIn: number) => {
-        this.storageCalls.push({ bucket, path, expiresIn });
+        this.storageCalls.push({ bucket, path, method: "createSignedUrl", expiresIn });
         const response =
           this.storageResponses.shift() ??
           ({ data: { signedUrl: null }, error: null } as StorageResponse);
