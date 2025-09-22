@@ -5,6 +5,8 @@ import { LayoutGrid, List, Loader2, Search, X } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 import { SEO } from "@/components/SEO";
+import { ResourceCard as LessonDraftResourceCard } from "@/components/lesson-draft/ResourceCard";
+import { UploadResourceDialog } from "@/components/resources/UploadResourceDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +26,6 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/components/ui/use-toast";
-import { ResourceCard as LessonDraftResourceCard } from "@/components/lesson-draft/ResourceCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { getSignedDownloadUrl, ResourceDataError, searchResources } from "@/lib/resources";
@@ -302,6 +303,7 @@ const ResourcesPage = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [loginReason, setLoginReason] = useState<"download" | "upload" | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   const debouncedSearch = useDebouncedValue(filters.searchValue, 300);
 
@@ -501,7 +503,7 @@ const ResourcesPage = () => {
       return;
     }
 
-    navigate(getLocalizedPath("/account/resources/new", language));
+    setUploadDialogOpen(true);
   };
 
   const isInitialLoading = isPending || (resources.length === 0 && isFetchingNextPage);
@@ -770,6 +772,15 @@ const ResourcesPage = () => {
           </section>
         </div>
       </main>
+
+      <UploadResourceDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        onSuccess={() => {
+          toast({ description: "Submitted for approval" });
+          setUploadDialogOpen(false);
+        }}
+      />
 
       <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
         <DialogContent>
