@@ -1,7 +1,10 @@
 import { mapRecordToBuilderPlan, createDraftInsert } from "../_lib/lesson-builder-helpers";
 import { getSupabaseClient } from "../_lib/supabase";
 import type { LessonBuilderDraftRequest, LessonBuilderPlanResponse } from "../../types/lesson-builder";
+import { mergeStepValues } from "../../types/lesson-builder";
 import type { LessonPlanRecord } from "../../types/lesson-plans";
+
+const TEACHER_PROFILE_TABLE = "teacher_profiles";
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -50,6 +53,7 @@ function parseRequestBody(body: unknown): LessonBuilderDraftRequest {
     subjects: Array.isArray(record.subjects)
       ? record.subjects.filter((subject): subject is string => typeof subject === "string")
       : [],
+    profileId: typeof record.profileId === "string" ? record.profileId : null,
   };
 }
 
@@ -73,7 +77,30 @@ export default async function handler(request: Request): Promise<Response> {
   const id = generateId();
   const title = payload.title?.trim() && payload.title.length > 0 ? payload.title.trim() : "Untitled Lesson";
   const slug = buildSlug(title, id);
-  const now = new Date().toISOString();
+  const now = new Date();
+  const isoNow = now.toISOString();
+  const lessonDate = isoNow.slice(0, 10);
+
+  const supabase = getSupabaseClient();
+  const profileId = payload.profileId?.trim() ? payload.profileId.trim() : null;
+  let schoolLogoUrl: string | null = null;
+
+  if (profileId) {
+    const profileResult = await supabase
+      .from(TEACHER_PROFILE_TABLE)
+      .select("school_logo_url")
+      .eq("user_id", profileId)
+      .maybeSingle();
+
+    if (profileResult.error) {
+      return errorResponse(500, "Failed to load teacher profile");
+    }
+
+    const rawLogo = profileResult.data?.school_logo_url;
+    schoolLogoUrl = typeof rawLogo === "string" && rawLogo.trim().length > 0 ? rawLogo : null;
+  }
+
+  const steps = [mergeStepValues({})];
 
   const draft = createDraftInsert({
     id,
@@ -88,7 +115,7 @@ export default async function handler(request: Request): Promise<Response> {
     durationMinutes: null,
     status: "draft",
     overview: null,
-    steps: [],
+    steps,
     standards: [],
     availableStandards: [],
     resources: [],
@@ -103,14 +130,15 @@ export default async function handler(request: Request): Promise<Response> {
       {
         id: `ver_${id.slice(0, 6)}`,
         label: "Draft v1",
-        createdAt: now,
+        createdAt: isoNow,
         author: null,
         summary: null,
       },
     ],
+    lesson_date: lessonDate,
+    school_logo_url: schoolLogoUrl,
   });
 
-  const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from<LessonPlanRecord>("lesson_plans")
     .insert(draft)

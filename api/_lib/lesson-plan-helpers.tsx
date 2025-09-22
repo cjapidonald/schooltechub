@@ -271,12 +271,16 @@ export function mapRecordToDetail(record: LessonPlanRecord): LessonPlanDetail {
   const overview = extractOverview(record, base);
   const resources = extractResources(record);
   const content = normalizeContent(record.content ?? record.body ?? null);
+  const schoolLogoUrl = nullableString(record.school_logo_url);
+  const lessonDate = nullableString(record.lesson_date);
 
   return {
     ...base,
     content,
     overview,
     resources,
+    schoolLogoUrl,
+    lessonDate,
   };
 }
 

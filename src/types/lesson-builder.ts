@@ -10,6 +10,8 @@ import type {
   LessonBuilderStandard,
   LessonBuilderStep,
   LessonBuilderVersionEntry,
+  MediaType,
+  Resource,
 } from "../../types/lesson-builder";
 
 export type {
@@ -24,6 +26,8 @@ export type {
   LessonBuilderStandard,
   LessonBuilderStep,
   LessonBuilderVersionEntry,
+  MediaType,
+  Resource,
 };
 
 export {
@@ -33,4 +37,5 @@ export {
   mergeStandardValues,
   mergeStepValues,
   cryptoRandomId,
+  mergeResourceValues,
 } from "../../types/lesson-builder";

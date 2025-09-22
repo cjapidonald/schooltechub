@@ -72,6 +72,8 @@ export interface LessonPlanDetail extends LessonPlanListItem {
   content: LessonPlanContentSection[];
   overview: LessonPlanOverview | null;
   resources: LessonPlanResource[];
+  schoolLogoUrl?: string | null;
+  lessonDate?: string | null;
 }
 
 export interface LessonPlanListResponse {
@@ -114,4 +116,6 @@ export interface LessonPlanRecord {
   updated_at?: string | null;
   published_at?: string | null;
   metadata?: unknown;
+  lesson_date?: string | null;
+  school_logo_url?: string | null;
 }

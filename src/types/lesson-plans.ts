@@ -25,6 +25,8 @@ export interface LessonPlan extends ApiLessonPlanListItem {
   overview: ApiLessonPlanOverview | null;
   content: ApiLessonPlanContentSection[];
   resources: ApiLessonPlanResource[];
+  schoolLogoUrl: string | null;
+  lessonDate: string | null;
 }
 
 export type LessonPlanListItem = ApiLessonPlanListItem;

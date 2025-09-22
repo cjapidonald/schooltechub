@@ -8,6 +8,30 @@ import type {
   LessonPlanListItem,
 } from "./lesson-plans";
 
+export type MediaType =
+  | "activity"
+  | "video"
+  | "audio"
+  | "document"
+  | "image"
+  | "website"
+  | "presentation"
+  | "other"
+  | (string & {});
+
+export interface Resource {
+  id: string;
+  source_id: string | null;
+  media_type: MediaType;
+  title: string | null;
+  summary: string | null;
+  url: string | null;
+  provider: string | null;
+  thumbnail_url: string | null;
+  duration_minutes: number | null;
+  embed_html: string | null;
+}
+
 export interface LessonBuilderActivity {
   id: string;
   title: string;
@@ -26,6 +50,11 @@ export interface LessonBuilderStep {
   durationMinutes: number | null;
   notes: string | null;
   activities: LessonBuilderActivity[];
+  learning_goals: string[];
+  grouping: string | null;
+  delivery_mode: string | null;
+  instructional_note: string | null;
+  resources: Resource[];
 }
 
 export interface LessonBuilderStandard {
@@ -75,6 +104,8 @@ export interface LessonBuilderPlan {
   history: LessonBuilderVersionEntry[];
   createdAt: string | null;
   updatedAt: string | null;
+  school_logo_url: string | null;
+  lesson_date: string | null;
 }
 
 export interface LessonBuilderPlanResponse {
@@ -93,6 +124,7 @@ export interface LessonBuilderDraftRequest {
   title?: string | null;
   stage?: string | null;
   subjects?: string[];
+  profileId?: string | null;
 }
 
 export interface LessonBuilderUpdateRequest {
@@ -154,6 +186,26 @@ export function builderStepsToContent(
       });
     }
 
+    const metadataBlock: Record<string, unknown> = {
+      type: "builderStepMetadata",
+      learning_goals: step.learning_goals,
+      grouping: step.grouping,
+      delivery_mode: step.delivery_mode,
+      instructional_note: step.instructional_note,
+      resources: step.resources,
+    };
+
+    const hasMetadata =
+      step.learning_goals.length > 0 ||
+      Boolean(step.grouping) ||
+      Boolean(step.delivery_mode) ||
+      Boolean(step.instructional_note) ||
+      step.resources.length > 0;
+
+    if (hasMetadata) {
+      blocks.push(metadataBlock as LessonPlanContentBlock);
+    }
+
     return {
       id: step.id,
       title: step.title || `Step ${index + 1}`,
@@ -188,6 +240,8 @@ export function builderPlanToLessonPlan(plan: LessonBuilderPlan): LessonPlan {
     overview: plan.overview,
     content: builderStepsToContent(plan.steps),
     resources: plan.resources,
+    schoolLogoUrl: plan.school_logo_url,
+    lessonDate: plan.lesson_date,
   };
 }
 
@@ -222,6 +276,32 @@ export function mergeActivityValues(
   };
 }
 
+export function mergeResourceValues(values: Partial<Resource> | null | undefined): Resource {
+  const mediaType =
+    typeof values?.media_type === "string" && values.media_type.trim().length > 0
+      ? (values.media_type as MediaType)
+      : "other";
+
+  const duration = values?.duration_minutes;
+  const normalizedDuration =
+    typeof duration === "number" && Number.isFinite(duration)
+      ? Math.max(0, Math.trunc(duration))
+      : null;
+
+  return {
+    id: values?.id ?? cryptoRandomId("res"),
+    source_id: ensureString(values?.source_id),
+    media_type: mediaType,
+    title: ensureString(values?.title),
+    summary: ensureString(values?.summary),
+    url: ensureString(values?.url),
+    provider: ensureString(values?.provider),
+    thumbnail_url: ensureString(values?.thumbnail_url),
+    duration_minutes: normalizedDuration,
+    embed_html: ensureString(values?.embed_html),
+  };
+}
+
 export function mergeStepValues(
   values: Partial<LessonBuilderStep>
 ): LessonBuilderStep {
@@ -236,6 +316,13 @@ export function mergeStepValues(
     notes: ensureString(values.notes),
     activities: Array.isArray(values.activities)
       ? values.activities.map((activity) => mergeActivityValues(activity))
+      : [],
+    learning_goals: ensureStringArray(values.learning_goals),
+    grouping: ensureString(values.grouping),
+    delivery_mode: ensureString(values.delivery_mode),
+    instructional_note: ensureString(values.instructional_note),
+    resources: Array.isArray(values.resources)
+      ? values.resources.map((resource) => mergeResourceValues(resource))
       : [],
   };
 }
