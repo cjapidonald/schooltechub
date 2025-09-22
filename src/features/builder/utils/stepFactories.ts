@@ -10,7 +10,7 @@ export const createResourceLink = (
 
 export const createEmptyStep = (): BuilderStep => ({
   id: nanoid(),
-  title: "New Step",
+  title: "New step",
   learningGoals: "",
   duration: "",
   grouping: "Whole Class",

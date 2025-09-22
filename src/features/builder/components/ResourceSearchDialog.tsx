@@ -32,10 +32,20 @@ export const ResourceSearchDialog = ({ open, onOpenChange, onSelect }: ResourceS
   const [gradeLevel, setGradeLevel] = useState("");
   const [format, setFormat] = useState("");
   const [creator, setCreator] = useState("");
+  const [tagQuery, setTagQuery] = useState("");
   const [results, setResults] = useState<ResourceCard[]>([]);
   const [loading, setLoading] = useState(false);
 
   const debouncedQuery = useDebouncedValue(query, 300);
+  const debouncedTags = useDebouncedValue(tagQuery, 300);
+  const parsedTags = useMemo(
+    () =>
+      debouncedTags
+        .split(",")
+        .map(tag => tag.trim())
+        .filter(Boolean),
+    [debouncedTags],
+  );
 
   useEffect(() => {
     if (!open) {
@@ -51,6 +61,7 @@ export const ResourceSearchDialog = ({ open, onOpenChange, onSelect }: ResourceS
       subject: subject || undefined,
       gradeLevel: gradeLevel || undefined,
       format: format || undefined,
+      tags: parsedTags.length ? parsedTags : undefined,
       limit: 40,
     })
       .then(response => {
@@ -73,7 +84,7 @@ export const ResourceSearchDialog = ({ open, onOpenChange, onSelect }: ResourceS
     return () => {
       active = false;
     };
-  }, [open, debouncedQuery, resourceType, subject, gradeLevel, format, toast]);
+  }, [open, debouncedQuery, resourceType, subject, gradeLevel, format, parsedTags, toast]);
 
   useEffect(() => {
     if (!open) {
@@ -83,6 +94,7 @@ export const ResourceSearchDialog = ({ open, onOpenChange, onSelect }: ResourceS
       setGradeLevel("");
       setFormat("");
       setCreator("");
+      setTagQuery("");
       setResults([]);
     }
   }, [open]);
@@ -132,6 +144,20 @@ export const ResourceSearchDialog = ({ open, onOpenChange, onSelect }: ResourceS
                 onChange={event => setCreator(event.target.value)}
                 placeholder="Filter by educator name"
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="resource-tags">
+                Tags
+              </label>
+              <Input
+                id="resource-tags"
+                value={tagQuery}
+                onChange={event => setTagQuery(event.target.value)}
+                placeholder="Filter by tags (comma separated)"
+              />
+              <p className="text-xs text-muted-foreground">
+                Match resources that include any of the tags you list.
+              </p>
             </div>
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase text-muted-foreground">Resource type</label>

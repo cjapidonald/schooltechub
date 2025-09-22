@@ -72,6 +72,7 @@ const mapRecordToCard = (record: ResourceWithProfile): ResourceCard => ({
 });
 
 const escapeIlike = (value: string) => value.replace(/[%_]/g, match => `\\${match}`);
+const escapeJsonString = (value: string) => value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
 const sanitizeTags = (tags?: string[]) => (tags ?? []).map(tag => tag.trim()).filter(Boolean);
 
@@ -119,8 +120,14 @@ export async function searchResources(params: ResourceSearchParams = {}): Promis
   }
 
   if (params.q) {
-    const escaped = escapeIlike(params.q.trim());
-    query = query.or([`title.ilike.%${escaped}%`, `description.ilike.%${escaped}%`].join(","));
+    const trimmed = params.q.trim();
+    if (trimmed) {
+      const escaped = escapeIlike(trimmed);
+      const escapedTag = escapeJsonString(trimmed);
+      query = query.or(
+        [`title.ilike.%${escaped}%`, `description.ilike.%${escaped}%`, `tags.cs.{"${escapedTag}"}`].join(","),
+      );
+    }
   }
 
   const { data, error, count } = await query;
