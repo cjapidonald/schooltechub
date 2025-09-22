@@ -41,7 +41,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import type { Database, Json } from "@/integrations/supabase/types";
-import { EnrolledClasses } from "@/components/EnrolledClasses";
+import { ClassManager } from "@/components/classes/ClassManager";
 
 const userRoleOptions: Database["public"]["Enums"]["user_role_enum"][] = [
   "Teacher",
@@ -849,7 +849,7 @@ const Account = () => {
           </TabsContent>
 
           <TabsContent value="classes">
-            <EnrolledClasses userId={user?.id} language={language} />
+            <ClassManager />
           </TabsContent>
 
           <TabsContent value="security">
