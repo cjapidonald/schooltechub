@@ -4,7 +4,7 @@ import {
   methodNotAllowed,
   normalizeMethod,
 } from "../../../_lib/http";
-import { recordAuditLog } from "../../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../../_lib/audit";
 import { requireAdmin } from "../../../_lib/auth";
 
 const VALID_DOC_TYPES = new Set(["protocol", "consent", "dataset", "report", "misc"]);
@@ -76,6 +76,7 @@ export default async function handler(request: Request): Promise<Response> {
   const status = statusRaw && VALID_STATUSES.has(statusRaw) ? statusRaw : "internal";
 
   const { supabase, user } = context;
+  const auditContext = getAuditRequestContext(request);
   const extension = resolveExtension(file);
   const safeName = sanitizeFileName(file.name || "document");
   const timestamp = Date.now();
@@ -110,13 +111,15 @@ export default async function handler(request: Request): Promise<Response> {
   await recordAuditLog(supabase, {
     action: "admin.research.documents.upload",
     actorId: user.id,
+    targetType: "research_document",
     targetId: insertResult.data.id,
-    metadata: {
+    details: {
       projectId,
       path,
       docType,
       status,
     },
+    ...auditContext,
   });
 
   return jsonResponse({

@@ -747,6 +747,8 @@ export const sq = {
   blogPost: {
     backToBlog: "Kthehu te Blogu",
     share: "Ndaj",
+    save: "Ruaj postimin",
+    saved: "E ruajtur",
     comments: "Komentet",
     commentPlaceholder: "Ndani mendimet tuaja...",
     postComment: "Posto Komentin",
@@ -765,12 +767,17 @@ export const sq = {
       authRequiredTitle: "Kërkohet autentifikimi",
       authRequiredComment: "Ju lutemi hyni për të komentuar",
       authRequiredReply: "Ju lutemi hyni për t'u përgjigjur",
+      authRequiredSave: "Ju lutemi hyni për të ruajtur postimet",
       errorTitle: "Gabim",
       commentError: "Dështoi publikimi i komentit",
       replyError: "Dështoi publikimi i përgjigjes",
+      saveError: "Dështoi ruajtja e postimit",
+      removeError: "Dështoi heqja e postimit të ruajtur",
       successTitle: "Sukses",
       commentSuccess: "Komenti u postua me sukses",
-      replySuccess: "Përgjigjja u postua me sukses"
+      replySuccess: "Përgjigjja u postua me sukses",
+      saveSuccess: "Postimi u ruajt në listën tuaj",
+      removeSuccess: "U hoq nga postimet e ruajtura"
     }
   },
   contact: {
@@ -1281,6 +1288,7 @@ export const sq = {
     },
     tabs: {
       overview: "Përmbledhje",
+      savedPosts: "Postimet e ruajtura",
       security: "Siguria",
       activity: "Aktiviteti"
     },
@@ -1430,6 +1438,19 @@ export const sq = {
         "Rishiko rregullisht aktivitetin e llogarisë për ndryshime të panjohura.",
         "Dil nga pajisjet e përbashkëta pasi të përfundosh."
       ]
+    },
+    savedPosts: {
+      title: "Postimet e ruajtura",
+      description: "Kthehuni shpejt te artikujt që keni shënuar.",
+      empty: "Nuk keni ruajtur ende asnjë postim.",
+      savedOn: "Ruajtur më {date}",
+      viewPost: "Shiko artikullin",
+      remove: "Hiq",
+      unavailable: "Ky postim nuk është më i disponueshëm.",
+      toast: {
+        removed: "U hoq nga postimet e ruajtura",
+        removeError: "Nuk mundëm ta hiqnim këtë postim të ruajtur"
+      }
     },
     comments: {
       title: "Komentet e mia",

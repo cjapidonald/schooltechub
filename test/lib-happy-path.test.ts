@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { listMyClasses, getClass, createClass, updateClass, deleteClass, linkPlanToClass, unlinkPlanFromClass } from "@/lib/classes";
+import {
+  listMyClasses,
+  listMyClassesWithPlanCount,
+  listClassLessonPlans,
+  getClass,
+  createClass,
+  updateClass,
+  deleteClass,
+  linkPlanToClass,
+  unlinkPlanFromClass,
+} from "@/lib/classes";
 import { saveDraft, getMyPlans, getPlanWithSteps, exportPlanToDocx, exportPlanToPDF } from "@/lib/lessonPlans";
 import { getMyNotifications, markRead, getPrefs, updatePrefs } from "@/lib/notifications";
 import {
@@ -176,7 +186,7 @@ function createSupabaseClient(config: ClientConfig): SupabaseClient {
     auth: {
       getSession: () =>
         Promise.resolve({
-          data: { session: { user: { id: config.userId } } },
+          data: { session: { user: { id: config.userId }, access_token: "test-access-token" } },
           error: null,
         }),
     },
@@ -225,6 +235,20 @@ describe("classes data helpers", () => {
     title: "STEM Club",
     owner_id: "user-1",
     created_at: "2024-01-01T00:00:00Z",
+    class_lesson_plans: [{ id: "link-1" }],
+  };
+
+  const classLessonPlanRow = {
+    id: "link-1",
+    class_id: "class-1",
+    lesson_plan_id: "plan-1",
+    added_at: "2024-01-02T00:00:00Z",
+    lesson_plans: {
+      id: "plan-1",
+      title: "Math Lesson",
+      date: "2024-01-10",
+      duration: "45 minutes",
+    },
   };
 
   const baseClient = createSupabaseClient({
@@ -246,6 +270,11 @@ describe("classes data helpers", () => {
         delete: () => Promise.resolve({ error: null }),
       },
       class_lesson_plans: {
+        selectOrder: () =>
+          Promise.resolve({
+            data: [classLessonPlanRow],
+            error: null,
+          }),
         insert: payload =>
           Promise.resolve({ data: { id: "link-1", ...payload }, error: null }),
         delete: () => Promise.resolve({ error: null }),
@@ -257,6 +286,11 @@ describe("classes data helpers", () => {
     const classes = await listMyClasses(baseClient);
     expect(classes).toHaveLength(1);
     expect(classes[0].title).toBe("STEM Club");
+  });
+
+  it("lists classes with plan counts", async () => {
+    const classes = await listMyClassesWithPlanCount(baseClient);
+    expect(classes[0].planCount).toBe(1);
   });
 
   it("fetches a class", async () => {
@@ -282,6 +316,13 @@ describe("classes data helpers", () => {
   it("links and unlinks lesson plans", async () => {
     await expect(linkPlanToClass("plan-1", "class-1", baseClient)).resolves.toBeUndefined();
     await expect(unlinkPlanFromClass("plan-1", "class-1", baseClient)).resolves.toBeUndefined();
+  });
+
+  it("lists lesson plans linked to a class", async () => {
+    const plans = await listClassLessonPlans("class-1", baseClient);
+    expect(plans).toHaveLength(1);
+    expect(plans[0].title).toBe("Math Lesson");
+    expect(plans[0].lessonPlanId).toBe("plan-1");
   });
 });
 
@@ -497,7 +538,7 @@ describe("research helpers", () => {
       },
     },
     storage: {
-      "research-submissions": {
+      research: {
         upload: () => Promise.resolve({ error: null }),
       },
     },

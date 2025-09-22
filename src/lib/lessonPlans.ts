@@ -8,6 +8,8 @@ const LESSON_STEP_SELECT = "*";
 
 type Client = SupabaseClient;
 
+const SIGNED_FILE_ENDPOINT = "/api/files/signed";
+
 export class LessonPlanDataError extends Error {
   declare cause?: unknown;
 
@@ -63,6 +65,65 @@ async function requireUserId(client: Client, action: string): Promise<string> {
   }
 
   return userId;
+}
+
+async function requireAccessToken(client: Client, action: string): Promise<string> {
+  const { data, error } = await client.auth.getSession();
+
+  if (error) {
+    throw new LessonPlanDataError("Unable to verify authentication state.", { cause: error });
+  }
+
+  const accessToken = data.session?.access_token;
+
+  if (!accessToken) {
+    throw new LessonPlanDataError(`You must be signed in to ${action}.`);
+  }
+
+  return accessToken;
+}
+
+async function requestSignedExportUrl(
+  client: Client,
+  path: string,
+  action: string,
+): Promise<string> {
+  const accessToken = await requireAccessToken(client, action);
+  const query = new URLSearchParams({ bucket: "lesson-plans", path }).toString();
+
+  let response: Response;
+  try {
+    response = await fetch(`${SIGNED_FILE_ENDPOINT}?${query}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  } catch (error) {
+    throw new LessonPlanDataError("Failed to request a signed download link.", { cause: error });
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+  const payload = isJson ? await response.json().catch(() => null) : null;
+
+  if (!response.ok) {
+    const message =
+      payload && typeof payload.error === "string" && payload.error.trim()
+        ? payload.error
+        : `Unable to ${action}.`;
+    throw new LessonPlanDataError(message);
+  }
+
+  const url = payload && typeof (payload as Record<string, unknown>).url === "string"
+    ? (payload as { url: string }).url
+    : null;
+
+  if (!url) {
+    throw new LessonPlanDataError("Download URL was not provided by the server.");
+  }
+
+  return url;
 }
 
 function mapLessonPlan(record: Record<string, any>): LessonPlan {
@@ -281,6 +342,18 @@ export async function getPlanWithSteps(
   const steps = Array.isArray(stepData) ? stepData.map(mapLessonStep) : [];
 
   return { plan, steps } satisfies LessonPlanWithSteps;
+}
+
+export async function getLessonPlanExportUrl(
+  exportPath: string,
+  client: Client = supabase,
+): Promise<string> {
+  const trimmedPath = exportPath.trim();
+  if (!trimmedPath) {
+    throw new LessonPlanDataError("No export file is available for this lesson plan.");
+  }
+
+  return requestSignedExportUrl(client, trimmedPath, "download this lesson plan export");
 }
 
 function renderLessonPlan(plan: LessonPlan, steps: LessonStep[]): string {
