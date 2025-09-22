@@ -9,7 +9,7 @@ export type LessonStep = {
 };
 
 export type LessonDraft = {
-  id?: string;
+  id: string;
   title?: string;
   date?: string;
   logoUrl?: string;
@@ -39,6 +39,7 @@ type LessonDraftStore = {
 };
 
 export const createEmptyLessonDraft = (): LessonDraft => ({
+  id: nanoid(),
   steps: [],
 });
 
@@ -69,6 +70,7 @@ const sanitizeDraft = (maybeDraft: unknown): LessonDraft => {
   }
 
   const draft = maybeDraft as Partial<LessonDraft> & { [key: string]: unknown };
+  const baseDraft = createEmptyLessonDraft();
   const steps = Array.isArray(draft.steps)
     ? draft.steps
         .map(sanitizeStep)
@@ -76,8 +78,9 @@ const sanitizeDraft = (maybeDraft: unknown): LessonDraft => {
     : [];
 
   return {
-    ...createEmptyLessonDraft(),
+    ...baseDraft,
     ...draft,
+    id: typeof draft.id === "string" && draft.id.trim().length > 0 ? draft.id : baseDraft.id,
     steps,
   };
 };

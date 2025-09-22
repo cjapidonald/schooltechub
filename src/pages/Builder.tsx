@@ -1,15 +1,28 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { SEO } from "@/components/SEO";
 import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
+import { useLessonDraftStore } from "@/stores/lessonDraft";
+import {
+  clearLessonDraftContext,
+  getStoredActiveStepId,
+  persistActiveStepId,
+  setActiveLessonDraftId,
+  subscribeToResourceAttachments,
+} from "@/lib/lesson-draft-bridge";
 
 const BuilderPage = () => {
+  const draftId = useLessonDraftStore(state => state.draft.id);
+  const steps = useLessonDraftStore(state => state.draft.steps);
+  const attachResource = useLessonDraftStore(state => state.attachResource);
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
   const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
+  const [activeStepId, setActiveStepId] = useState<string | null>(null);
 
   const handleRequestResourceSearch = useCallback((stepId: string) => {
+    setActiveStepId(stepId);
     setResourceSearchStepId(stepId);
     setIsResourceSearchOpen(true);
   }, []);
@@ -20,6 +33,71 @@ const BuilderPage = () => {
       setResourceSearchStepId(null);
     }
   }, []);
+
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    setActiveLessonDraftId(draftId);
+    return () => {
+      clearLessonDraftContext(draftId);
+    };
+  }, [draftId]);
+
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    setActiveStepId(prev => {
+      if (steps.length === 0) {
+        return prev === null ? prev : null;
+      }
+
+      if (prev && steps.some(step => step.id === prev)) {
+        return prev;
+      }
+
+      const stored = getStoredActiveStepId(draftId);
+      if (stored && steps.some(step => step.id === stored)) {
+        return stored;
+      }
+
+      return steps[0].id;
+    });
+  }, [draftId, steps]);
+
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    persistActiveStepId(draftId, activeStepId);
+  }, [draftId, activeStepId]);
+
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    const unsubscribe = subscribeToResourceAttachments(({ draftId: targetDraftId, stepId, resourceId }) => {
+      if (targetDraftId !== draftId) {
+        return;
+      }
+
+      const state = useLessonDraftStore.getState();
+      const stepExists = state.draft.steps.some(step => step.id === stepId);
+      if (!stepExists) {
+        return;
+      }
+
+      attachResource(stepId, resourceId);
+      setActiveStepId(stepId);
+    });
+
+    return unsubscribe;
+  }, [attachResource, draftId]);
 
   return (
     <div className="min-h-screen bg-muted/20 py-10">
