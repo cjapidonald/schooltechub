@@ -609,6 +609,30 @@ export const en = {
       notFoundTitle: "Lesson plan not found",
       notFoundDescription: "This lesson plan may have been unpublished or removed.",
     },
+    toolbar: {
+      shareLabel: "Share",
+      shareOptions: {
+        private: "Private",
+        link: "Anyone with the link",
+        org: "Organization",
+        public: "Public",
+      },
+      readOnly: "Read-only viewer",
+      exportLabel: "Export",
+      exporting: "Generating export...",
+      exportReady: "Download should begin automatically.",
+      exportError: "We couldn't generate that export. Please try again.",
+      exportFormats: {
+        pdf: "PDF (teacher)",
+        docx: "DOCX (teacher)",
+        handoutPdf: "Student handout (PDF)",
+        handoutDocx: "Student handout (DOCX + QR codes)",
+      },
+      versionHistory: "Version history",
+      versionEmpty: "No saved versions yet.",
+      versionRestore: "Restore",
+      versionRestored: "Version restored",
+    },
   },
   worksheets: {
     seo: {

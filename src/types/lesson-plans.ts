@@ -5,6 +5,9 @@ import type {
   LessonPlanListResponse as ApiLessonPlanListResponse,
   LessonPlanOverview as ApiLessonPlanOverview,
   LessonPlanResource as ApiLessonPlanResource,
+  LessonPlanShareAccess as ApiLessonPlanShareAccess,
+  LessonPlanVersion as ApiLessonPlanVersion,
+  LessonPlanViewerRole as ApiLessonPlanViewerRole,
 } from "../../types/lesson-plans";
 
 export interface Stage {
@@ -33,3 +36,6 @@ export type LessonPlanContentBlock = ApiLessonPlanContentBlock;
 export type LessonPlanContentSection = ApiLessonPlanContentSection;
 export type LessonPlanResource = ApiLessonPlanResource;
 export type LessonPlanListResponse = ApiLessonPlanListResponse;
+export type LessonPlanShareAccess = ApiLessonPlanShareAccess;
+export type LessonPlanViewerRole = ApiLessonPlanViewerRole;
+export type LessonPlanVersion = ApiLessonPlanVersion;
