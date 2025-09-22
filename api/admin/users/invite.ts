@@ -5,7 +5,7 @@ import {
   normalizeMethod,
   parseJsonBody,
 } from "../../_lib/http";
-import { recordAuditLog } from "../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../_lib/audit";
 import { requireAdmin } from "../../_lib/auth";
 
 interface InvitePayload {
@@ -31,6 +31,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
+  const auditContext = getAuditRequestContext(request);
   const inviteResult = await supabase.auth.admin.inviteUserByEmail(email, {
     data: payload.metadata ?? undefined,
   });
@@ -40,15 +41,19 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const invitedUserId = inviteResult.data.user?.id ?? null;
+  const targetId = invitedUserId ?? email;
 
   await recordAuditLog(supabase, {
     action: "admin.users.invite",
     actorId: user.id,
-    targetId: invitedUserId,
-    metadata: {
+    targetType: "user",
+    targetId,
+    details: {
       email,
+      invitedUserId,
       metadata: payload.metadata ?? null,
     },
+    ...auditContext,
   });
 
   return jsonResponse({

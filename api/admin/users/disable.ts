@@ -5,7 +5,7 @@ import {
   normalizeMethod,
   parseJsonBody,
 } from "../../_lib/http";
-import { recordAuditLog } from "../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../_lib/audit";
 import { requireAdmin } from "../../_lib/auth";
 
 interface DisablePayload {
@@ -32,6 +32,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
+  const auditContext = getAuditRequestContext(request);
   const updateResult = await supabase.auth.admin.updateUserById(userId, {
     ban_duration: BAN_DURATION,
   });
@@ -43,7 +44,10 @@ export default async function handler(request: Request): Promise<Response> {
   await recordAuditLog(supabase, {
     action: "admin.users.disable",
     actorId: user.id,
+    targetType: "user",
     targetId: userId,
+    details: { banDuration: BAN_DURATION },
+    ...auditContext,
   });
 
   return jsonResponse({ success: true });

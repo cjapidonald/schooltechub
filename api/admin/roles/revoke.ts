@@ -5,7 +5,7 @@ import {
   normalizeMethod,
   parseJsonBody,
 } from "../../_lib/http";
-import { recordAuditLog } from "../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../_lib/audit";
 import { requireAdmin } from "../../_lib/auth";
 
 interface RolePayload {
@@ -30,6 +30,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
+  const auditContext = getAuditRequestContext(request);
   const deleteResult = await supabase.from("app_admins").delete().eq("user_id", userId);
 
   if (deleteResult.error) {
@@ -39,7 +40,10 @@ export default async function handler(request: Request): Promise<Response> {
   await recordAuditLog(supabase, {
     action: "admin.roles.revoke",
     actorId: user.id,
+    targetType: "user",
     targetId: userId,
+    details: { role: "admin" },
+    ...auditContext,
   });
 
   return jsonResponse({ success: true });

@@ -4,12 +4,14 @@ import type { AdminOutletContext } from "./AdminLayout";
 import { AdminDashboardSkeleton, AdminSectionSkeleton } from "./components/AdminSkeletons";
 import AdminPostsPage from "./content/AdminPostsPage";
 import AdminResourcesPage from "./content/AdminResourcesPage";
+import AdminAuditLogPage from "./system/AdminAuditLogPage";
 import AdminDashboardPage from "./dashboard/AdminDashboardPage";
 
 const PAGE_COMPONENTS: Record<string, () => JSX.Element> = {
   "": AdminDashboardPage,
   "content/posts": AdminPostsPage,
   "content/resources": AdminResourcesPage,
+  "system/audit-log": AdminAuditLogPage,
 };
 
 export default function AdminPage() {
