@@ -29,6 +29,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { getSignedDownloadUrl, ResourceDataError, searchResources } from "@/lib/resources";
+import { logActivity } from "@/lib/activity-log";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ACTIVE_DRAFT_FLAG_STORAGE_KEY,
@@ -371,6 +372,7 @@ const ResourcesPage = () => {
         event.key === ACTIVE_DRAFT_FLAG_STORAGE_KEY ||
         event.key === ACTIVE_DRAFT_ID_STORAGE_KEY ||
         event.key === GLOBAL_ACTIVE_STEP_STORAGE_KEY ||
+        event.key === "activeStepId" ||
         event.key.startsWith(ACTIVE_STEP_STORAGE_PREFIX)
       ) {
         syncContext();
@@ -507,6 +509,11 @@ const ResourcesPage = () => {
 
     const attached = attachResourceToActiveStep(resource.id);
     if (attached) {
+      logActivity("resource-attached", `Added “${resource.title}” to your current lesson step.`, {
+        resourceId: resource.id,
+        stepId: activeStepId ?? undefined,
+        resourceTitle: resource.title,
+      });
       toast({ description: "Added to current step." });
       return;
     }

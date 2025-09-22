@@ -6,6 +6,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 
 import { searchResources } from "@/lib/resources";
+import { logActivity } from "@/lib/activity-log";
 import type { Resource } from "@/types/resources";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
 import {
@@ -520,8 +521,30 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
     if (!activeStepId) {
       return;
     }
+
+    const draftState = useLessonDraftStore.getState();
+    const step = draftState.draft.steps.find(item => item.id === activeStepId);
+    const stepTitle = step?.title?.trim();
+
     resourceIds.forEach(id => {
+      const alreadyAttached = step?.resourceIds.includes(id);
       attachResource(activeStepId, id);
+
+      if (alreadyAttached) {
+        return;
+      }
+
+      const resource = resources.find(item => item.id === id);
+      const resourceTitle = resource?.title?.trim();
+      const resourceLabel = resourceTitle ? `“${resourceTitle}”` : "a resource";
+      const stepLabel = stepTitle ? `“${stepTitle}”` : "this lesson step";
+
+      logActivity("resource-attached", `Attached ${resourceLabel} to ${stepLabel}.`, {
+        resourceId: id,
+        resourceTitle: resourceTitle ?? undefined,
+        stepId: activeStepId,
+        stepTitle: stepTitle ?? undefined,
+      });
     });
   };
 

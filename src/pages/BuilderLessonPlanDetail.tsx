@@ -22,6 +22,7 @@ import {
   fetchLessonBuilderHistory,
   fetchLessonBuilderPlan,
 } from "@/lib/builder-api";
+import { logActivity } from "@/lib/activity-log";
 import type {
   LessonBuilderPlan,
   LessonBuilderVersionEntry,
@@ -175,6 +176,12 @@ const BuilderLessonPlanDetail = () => {
       setPlan(updated);
       queryClient.setQueryData(["builder-plan", id], updated);
       queryClient.setQueryData(["builder-plan-history", id], updated.history);
+
+      const planTitle = updated.title?.trim();
+      logActivity("plan-saved", `Saved lesson plan ${planTitle ? `“${planTitle}”` : "updates"}.`, {
+        planId: updated.id,
+        planTitle: planTitle ?? undefined,
+      });
     },
   });
 
