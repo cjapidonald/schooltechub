@@ -1,12 +1,9 @@
-import type {
-  ResourceCard,
-  ResourceListResponse,
-  ResourceStatus,
-  ResourceVisibility,
-} from "../../types/resources";
+import { supabase } from "@/integrations/supabase/client";
+
+import type { ResourceCard, ResourceListResponse, ResourceRecord } from "../../types/resources";
 
 export class ResourceApiError extends Error {
-  constructor(public status: number, message: string, public payload?: unknown) {
+  constructor(public status: number, message: string) {
     super(message);
     this.name = "ResourceApiError";
   }
@@ -17,109 +14,228 @@ export interface ResourceSearchParams {
   page?: number;
   limit?: number;
   id?: string;
-  subjects?: string[];
-  topics?: string[];
+  resourceType?: string;
+  subject?: string;
+  gradeLevel?: string;
+  format?: string;
+  creatorId?: string;
   tags?: string[];
-  types?: string[];
-  status?: ResourceStatus;
-  visibility?: ResourceVisibility;
-  ownerId?: string;
 }
 
 export interface ResourceCreateRequest {
   userId: string;
-  title?: string;
-  description?: string | null;
+  title: string;
   url: string;
+  description?: string | null;
   resourceType?: string | null;
-  subjects?: string[];
-  topics?: string[];
+  subject?: string | null;
+  gradeLevel?: string | null;
+  format?: string | null;
   tags?: string[];
-  status?: ResourceStatus;
-  visibility?: ResourceVisibility;
   instructionalNotes?: string | null;
-  thumbnailUrl?: string | null;
 }
 
 export interface ResourceUpdateRequest {
   userId: string;
-  title?: string | null;
+  title?: string;
+  url?: string;
   description?: string | null;
-  url?: string | null;
   resourceType?: string | null;
-  subjects?: string[];
-  topics?: string[];
+  subject?: string | null;
+  gradeLevel?: string | null;
+  format?: string | null;
   tags?: string[];
-  status?: ResourceStatus;
-  visibility?: ResourceVisibility;
   instructionalNotes?: string | null;
-  thumbnailUrl?: string | null;
-  refreshMetadata?: boolean;
 }
 
-interface ResourceResponsePayload {
-  resource: ResourceCard;
+interface ResourceWithProfile extends ResourceRecord {
+  profiles?: {
+    full_name: string | null;
+  } | null;
 }
+
+const mapRecordToCard = (record: ResourceWithProfile): ResourceCard => ({
+  id: record.id,
+  title: record.title,
+  description: record.description,
+  url: record.url,
+  tags: record.tags ?? [],
+  resourceType: record.resource_type,
+  subject: record.subject,
+  gradeLevel: record.grade_level,
+  format: record.format,
+  instructionalNotes: record.instructional_notes,
+  creatorId: record.creator_id,
+  creatorName: record.profiles?.full_name ?? null,
+  createdAt: record.created_at,
+  updatedAt: record.updated_at,
+});
+
+const escapeIlike = (value: string) => value.replace(/[%_]/g, match => `\\${match}`);
+
+const sanitizeTags = (tags?: string[]) => (tags ?? []).map(tag => tag.trim()).filter(Boolean);
 
 export async function searchResources(params: ResourceSearchParams = {}): Promise<ResourceListResponse> {
-  const query = new URLSearchParams();
+  const page = Math.max(1, params.page ?? 1);
+  const limit = Math.max(1, params.limit ?? 20);
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
-  if (params.q) query.set("q", params.q);
-  if (params.page) query.set("page", String(params.page));
-  if (params.limit) query.set("limit", String(params.limit));
-  if (params.id) query.set("id", params.id);
-  if (params.status) query.set("status", params.status);
-  if (params.visibility) query.set("visibility", params.visibility);
-  if (params.ownerId) query.set("ownerId", params.ownerId);
+  let query = supabase
+    .from("resources")
+    .select(
+      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at,profiles:creator_id(full_name)`,
+      { count: "exact" },
+    )
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
-  appendList(query, "subjects", params.subjects);
-  appendList(query, "topics", params.topics);
-  appendList(query, "tags", params.tags);
-  appendList(query, "types", params.types);
+  if (params.id) {
+    query = query.eq("id", params.id);
+  }
 
-  return request<ResourceListResponse>(`/api/resources${query.toString() ? `?${query.toString()}` : ""}`);
+  if (params.resourceType) {
+    query = query.eq("resource_type", params.resourceType);
+  }
+
+  if (params.subject) {
+    query = query.eq("subject", params.subject);
+  }
+
+  if (params.gradeLevel) {
+    query = query.eq("grade_level", params.gradeLevel);
+  }
+
+  if (params.format) {
+    query = query.eq("format", params.format);
+  }
+
+  if (params.creatorId) {
+    query = query.eq("creator_id", params.creatorId);
+  }
+
+  if (params.tags && params.tags.length) {
+    query = query.contains("tags", sanitizeTags(params.tags));
+  }
+
+  if (params.q) {
+    const escaped = escapeIlike(params.q.trim());
+    query = query.or([`title.ilike.%${escaped}%`, `description.ilike.%${escaped}%`].join(","));
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    throw new ResourceApiError(500, error.message);
+  }
+
+  const records = (data ?? []) as ResourceWithProfile[];
+  const items = records.map(mapRecordToCard);
+  const total = count ?? items.length;
+  const hasMore = from + items.length < total;
+
+  return {
+    items,
+    total,
+    page,
+    pageSize: limit,
+    hasMore,
+    nextPage: hasMore ? page + 1 : null,
+  };
 }
 
 export async function createResource(payload: ResourceCreateRequest): Promise<ResourceCard> {
-  const response = await request<ResourceResponsePayload>("/api/resources", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return response.resource;
+  const now = new Date().toISOString();
+  const tags = sanitizeTags(payload.tags);
+
+  const { data, error } = await supabase
+    .from("resources")
+    .insert({
+      creator_id: payload.userId,
+      title: payload.title,
+      url: payload.url,
+      description: payload.description ?? null,
+      resource_type: payload.resourceType ?? null,
+      subject: payload.subject ?? null,
+      grade_level: payload.gradeLevel ?? null,
+      format: payload.format ?? null,
+      tags,
+      instructional_notes: payload.instructionalNotes ?? null,
+      created_at: now,
+      updated_at: now,
+    })
+    .select(
+      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at,profiles:creator_id(full_name)`,
+    )
+    .single();
+
+  if (error || !data) {
+    throw new ResourceApiError(500, error?.message ?? "Failed to create resource");
+  }
+
+  return mapRecordToCard(data as ResourceWithProfile);
 }
 
 export async function updateResource(id: string, payload: ResourceUpdateRequest): Promise<ResourceCard> {
-  const response = await request<ResourceResponsePayload>(`/api/resources/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return response.resource;
+  const tags = sanitizeTags(payload.tags);
+
+  const updatePayload: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (payload.title !== undefined) updatePayload.title = payload.title;
+  if (payload.url !== undefined) updatePayload.url = payload.url;
+  if (payload.description !== undefined) updatePayload.description = payload.description ?? null;
+  if (payload.resourceType !== undefined) updatePayload.resource_type = payload.resourceType ?? null;
+  if (payload.subject !== undefined) updatePayload.subject = payload.subject ?? null;
+  if (payload.gradeLevel !== undefined) updatePayload.grade_level = payload.gradeLevel ?? null;
+  if (payload.format !== undefined) updatePayload.format = payload.format ?? null;
+  if (payload.tags !== undefined) updatePayload.tags = tags;
+  if (payload.instructionalNotes !== undefined) {
+    updatePayload.instructional_notes = payload.instructionalNotes ?? null;
+  }
+
+  const { data, error } = await supabase
+    .from("resources")
+    .update(updatePayload)
+    .eq("id", id)
+    .eq("creator_id", payload.userId)
+    .select(
+      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at,profiles:creator_id(full_name)`,
+    )
+    .single();
+
+  if (error || !data) {
+    throw new ResourceApiError(500, error?.message ?? "Failed to update resource");
+  }
+
+  return mapRecordToCard(data as ResourceWithProfile);
+}
+
+export async function deleteResource(id: string, userId: string): Promise<void> {
+  const { error } = await supabase.from("resources").delete().eq("id", id).eq("creator_id", userId);
+  if (error) {
+    throw new ResourceApiError(500, error.message);
+  }
 }
 
 export async function getResource(id: string, ownerId: string): Promise<ResourceCard | null> {
-  const result = await searchResources({ id, ownerId, limit: 1, page: 1 });
-  return result.items[0] ?? null;
-}
+  const { data, error } = await supabase
+    .from("resources")
+    .select(
+      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at,profiles:creator_id(full_name)`,
+    )
+    .eq("id", id)
+    .eq("creator_id", ownerId)
+    .maybeSingle();
 
-async function request<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, init);
-  const contentType = response.headers.get("Content-Type");
-  const isJson = contentType ? /application\/json/i.test(contentType) : false;
-  const data = isJson ? await response.json().catch(() => ({})) : null;
-
-  if (!response.ok) {
-    const message = data && typeof data === "object" && "error" in data && typeof (data as Record<string, unknown>).error === "string"
-      ? ((data as Record<string, unknown>).error as string)
-      : response.statusText || "Request failed";
-    throw new ResourceApiError(response.status, message, data ?? undefined);
+  if (error) {
+    throw new ResourceApiError(500, error.message);
   }
 
-  return (data as T) ?? ({} as T);
-}
+  if (!data) {
+    return null;
+  }
 
-function appendList(params: URLSearchParams, key: string, values?: string[]) {
-  if (!values || values.length === 0) return;
-  params.append(key, values.join(","));
+  return mapRecordToCard(data as ResourceWithProfile);
 }

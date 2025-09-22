@@ -1337,29 +1337,22 @@ export const vi = {
         canonical: "https://schooltechhub.com/account/resources"
       },
       listTitle: "Danh sách tài nguyên",
-      listDescription: "Điều chỉnh quyền hiển thị, trạng thái và thêm tài nguyên mới.",
+      listDescription: "Cập nhật chi tiết, làm mới liên kết hoặc chia sẻ thêm tài nguyên cho đồng nghiệp.",
       newCta: "Thêm tài nguyên",
       empty: "Bạn chưa thêm tài nguyên nào.",
       emptyCta: "Thêm tài nguyên đầu tiên",
       viewLink: "Mở liên kết",
-      statusLabel: "Trạng thái",
-      visibilityLabel: "Quyền hiển thị",
       pagination: "Trang {current} trên {total}",
       toast: {
         created: "Đã gửi tài nguyên",
         updated: "Đã cập nhật tài nguyên",
-        updateError: "Không thể cập nhật tài nguyên"
+        deleted: "Đã xóa tài nguyên",
+        updateError: "Không thể cập nhật tài nguyên",
+        deleteError: "Không thể xóa tài nguyên"
       },
-      status: {
-        draft: "Bản nháp",
-        published: "Đã xuất bản",
-        archived: "Đã lưu trữ"
-      },
-      visibility: {
-        private: "Riêng tư",
-        unlisted: "Không công khai",
-        public: "Công khai"
-      },
+      instructionalNotesLabel: "Ghi chú giảng dạy",
+      deleteConfirmTitle: "Xóa tài nguyên này?",
+      deleteConfirmBody: "Thao tác này sẽ xóa tài nguyên khỏi bảng điều khiển của bạn nhưng không gỡ khỏi các kế hoạch bài dạy hiện có.",
       form: {
         title: "Gửi tài nguyên",
         editTitle: "Cập nhật tài nguyên",
@@ -1372,18 +1365,14 @@ export const vi = {
         descriptionPlaceholder: "Tài nguyên này giúp giáo viên điều gì?",
         typeLabel: "Loại tài nguyên",
         typePlaceholder: "Ví dụ: Video, Mẫu, Bài viết",
-        statusLabel: "Trạng thái",
-        statusPlaceholder: "Chọn trạng thái",
-        visibilityLabel: "Quyền hiển thị",
-        visibilityPlaceholder: "Chọn quyền hiển thị",
         subjectsLabel: "Môn học",
-        subjectsPlaceholder: "Thêm môn học và nhấn Enter",
-        topicsLabel: "Chủ đề",
-        topicsPlaceholder: "Thêm chủ đề và nhấn Enter",
+        subjectsPlaceholder: "Thêm môn học",
+        gradeLabel: "Khối lớp",
+        gradePlaceholder: "Ví dụ: 3-5",
+        formatLabel: "Định dạng",
+        formatPlaceholder: "PDF, Trang web, Trình chiếu...",
         tagsLabel: "Thẻ",
         tagsPlaceholder: "Thêm thẻ để dễ tìm",
-        thumbnailLabel: "Ảnh xem trước",
-        thumbnailPlaceholder: "https://example.com/preview.jpg",
         notesLabel: "Ghi chú giảng dạy",
         notesPlaceholder: "Chia sẻ cách bạn sử dụng tài nguyên này",
         submit: "Lưu tài nguyên"

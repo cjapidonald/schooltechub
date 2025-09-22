@@ -16,7 +16,7 @@ import {
   sanitizeInputList,
 } from "../_lib/resource-helpers";
 import { loadOpenGraphMetadata } from "../_lib/open-graph";
-import type { ResourceRecord, ResourceStatus, ResourceVisibility } from "../../types/resources";
+import type { ResourceRecord, ResourceStatus, ResourceVisibility } from "../_lib/resource-helpers";
 
 interface ResourceCreatePayload {
   userId?: string;

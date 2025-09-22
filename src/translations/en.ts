@@ -1337,29 +1337,22 @@ export const en = {
         canonical: "https://schooltechhub.com/account/resources"
       },
       listTitle: "Your resources",
-      listDescription: "Adjust visibility, update metadata, or add a new resource for peers.",
+      listDescription: "Update details, refresh links, or share another resource with peers.",
       newCta: "Submit resource",
       empty: "You haven't added any resources yet.",
       emptyCta: "Add your first resource",
       viewLink: "Open resource",
-      statusLabel: "Status",
-      visibilityLabel: "Visibility",
       pagination: "Page {current} of {total}",
       toast: {
         created: "Resource submitted",
         updated: "Resource updated",
-        updateError: "We couldn't update that resource"
+        deleted: "Resource removed",
+        updateError: "We couldn't update that resource",
+        deleteError: "We couldn't delete that resource"
       },
-      status: {
-        draft: "Draft",
-        published: "Published",
-        archived: "Archived"
-      },
-      visibility: {
-        private: "Private",
-        unlisted: "Unlisted",
-        public: "Public"
-      },
+      instructionalNotesLabel: "Instructional notes",
+      deleteConfirmTitle: "Remove this resource?",
+      deleteConfirmBody: "This will delete the resource from your dashboard but won't remove it from existing lesson plans.",
       form: {
         title: "Submit a resource",
         editTitle: "Update resource",
@@ -1372,18 +1365,14 @@ export const en = {
         descriptionPlaceholder: "What does this resource help educators accomplish?",
         typeLabel: "Resource type",
         typePlaceholder: "e.g. Video, Template, Article",
-        statusLabel: "Status",
-        statusPlaceholder: "Select status",
-        visibilityLabel: "Visibility",
-        visibilityPlaceholder: "Select visibility",
-        subjectsLabel: "Subjects",
-        subjectsPlaceholder: "Add a subject and press enter",
-        topicsLabel: "Topics",
-        topicsPlaceholder: "Add a topic and press enter",
+        subjectsLabel: "Subject",
+        subjectsPlaceholder: "Add a subject",
+        gradeLabel: "Grade band",
+        gradePlaceholder: "e.g. 3-5",
+        formatLabel: "Format",
+        formatPlaceholder: "PDF, Slides, Website...",
         tagsLabel: "Tags",
         tagsPlaceholder: "Add tags to help discovery",
-        thumbnailLabel: "Thumbnail image",
-        thumbnailPlaceholder: "https://example.com/preview.jpg",
         notesLabel: "Instructional notes",
         notesPlaceholder: "Explain how you use this resource in class",
         submit: "Save resource"

@@ -198,6 +198,7 @@ export type Database = {
           id: string
           label: string
           last_synced: string
+          resource_id: string | null
           step_id: string
           url: string
         }
@@ -206,6 +207,7 @@ export type Database = {
           id?: string
           label: string
           last_synced?: string
+          resource_id?: string | null
           step_id: string
           url: string
         }
@@ -214,6 +216,7 @@ export type Database = {
           id?: string
           label?: string
           last_synced?: string
+          resource_id?: string | null
           step_id?: string
           url?: string
         }
@@ -913,130 +916,56 @@ export type Database = {
       }
       resources: {
         Row: {
-          cost: string | null
           created_at: string
-          created_by: string | null
-          delivery_mode: "offline" | "blended" | "online" | null
+          creator_id: string | null
           description: string | null
-          download_url: string | null
-          duration_minutes: number | null
-          grade_levels: string[]
+          format: string | null
+          grade_level: string | null
           id: string
-          language: string
-          learning_goals: string | null
-          lesson_plan_id: string | null
-          metadata: Json
-          provider: string | null
-          published_at: string | null
-          resource_type:
-            | "video"
-            | "article"
-            | "worksheet"
-            | "template"
-            | "interactive"
-            | "tool"
-            | "other"
-          search_vector: unknown
-          status: "draft" | "published" | "archived"
-          step_id: string | null
-          subjects: string[]
-          summary: string | null
-          tags: string[]
-          thumbnail_url: string | null
+          instructional_notes: string | null
+          resource_type: string | null
+          subject: string | null
+          tags: string[] | null
           title: string
           updated_at: string
-          url: string | null
+          url: string
         }
         Insert: {
-          cost?: string | null
           created_at?: string
-          created_by?: string | null
-          delivery_mode?: "offline" | "blended" | "online" | null
+          creator_id?: string | null
           description?: string | null
-          download_url?: string | null
-          duration_minutes?: number | null
-          grade_levels?: string[]
+          format?: string | null
+          grade_level?: string | null
           id?: string
-          language?: string
-          learning_goals?: string | null
-          lesson_plan_id?: string | null
-          metadata?: Json
-          provider?: string | null
-          published_at?: string | null
-          resource_type:
-            | "video"
-            | "article"
-            | "worksheet"
-            | "template"
-            | "interactive"
-            | "tool"
-            | "other"
-          search_vector?: unknown
-          status?: "draft" | "published" | "archived"
-          step_id?: string | null
-          subjects?: string[]
-          summary?: string | null
-          tags?: string[]
-          thumbnail_url?: string | null
+          instructional_notes?: string | null
+          resource_type?: string | null
+          subject?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
-          url?: string | null
+          url: string
         }
         Update: {
-          cost?: string | null
           created_at?: string
-          created_by?: string | null
-          delivery_mode?: "offline" | "blended" | "online" | null
+          creator_id?: string | null
           description?: string | null
-          download_url?: string | null
-          duration_minutes?: number | null
-          grade_levels?: string[]
+          format?: string | null
+          grade_level?: string | null
           id?: string
-          language?: string
-          learning_goals?: string | null
-          lesson_plan_id?: string | null
-          metadata?: Json
-          provider?: string | null
-          published_at?: string | null
-          resource_type?:
-            | "video"
-            | "article"
-            | "worksheet"
-            | "template"
-            | "interactive"
-            | "tool"
-            | "other"
-          search_vector?: unknown
-          status?: "draft" | "published" | "archived"
-          step_id?: string | null
-          subjects?: string[]
-          summary?: string | null
-          tags?: string[]
-          thumbnail_url?: string | null
+          instructional_notes?: string | null
+          resource_type?: string | null
+          subject?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
-          url?: string | null
+          url?: string
         }
         Relationships: [
           {
-            foreignKeyName: "resources_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "resources_creator_id_fkey"
+            columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "resources_lesson_plan_id_fkey"
-            columns: ["lesson_plan_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "resources_step_id_fkey"
-            columns: ["step_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_plan_steps"
             referencedColumns: ["id"]
           },
         ]

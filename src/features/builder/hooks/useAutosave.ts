@@ -39,6 +39,8 @@ export const useAutosave = (state: BuilderState, options: UseAutosaveOptions = {
         objective: state.objective,
         stage: state.stage,
         subject: state.subject,
+        schoolLogoUrl: state.schoolLogoUrl,
+        lessonDate: state.lessonDate,
         steps: state.steps,
       };
 

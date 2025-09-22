@@ -1,18 +1,17 @@
 import { useEffect, useMemo, useState, type ReactNode, type KeyboardEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { ResourceCard, ResourceStatus, ResourceVisibility } from "../../../../types/resources";
+import type { ResourceCard } from "../../../../types/resources";
 import {
   ResourceApiError,
   createResource,
@@ -32,19 +31,17 @@ interface FormValues {
   url: string;
   description: string;
   resourceType: string;
-  subjects: string[];
-  topics: string[];
+  subject: string;
+  gradeLevel: string;
+  format: string;
   tags: string[];
-  status: ResourceStatus;
-  visibility: ResourceVisibility;
   instructionalNotes: string;
-  thumbnailUrl: string;
 }
 
-const STATUS_OPTIONS: ResourceStatus[] = ["draft", "published", "archived"];
-const VISIBILITY_OPTIONS: ResourceVisibility[] = ["private", "unlisted", "public"];
-const SUBJECT_SUGGESTIONS = ["Math", "Science", "English", "ICT", "STEAM"];
-const TOPIC_SUGGESTIONS = ["STEM", "Assessment", "Differentiation", "Project-Based Learning"];
+const RESOURCE_TYPE_SUGGESTIONS = ["Worksheet", "Video", "Game", "Image", "Presentation", "Article", "Interactive"];
+const SUBJECT_SUGGESTIONS = ["Math", "Science", "English", "ICT", "STEM", "Arts"];
+const GRADE_LEVEL_SUGGESTIONS = ["K-2", "3-5", "6-8", "9-12"];
+const FORMAT_SUGGESTIONS = ["PDF", "Slides", "Website", "Printable", "Interactive"];
 const TAG_SUGGESTIONS = ["ai", "worksheet", "video", "interactive", "free"];
 
 export function AccountResourceForm({ userId, resource, onSuccess }: AccountResourceFormProps) {
@@ -58,13 +55,11 @@ export function AccountResourceForm({ userId, resource, onSuccess }: AccountReso
     url: resource?.url ?? "",
     description: resource?.description ?? "",
     resourceType: resource?.resourceType ?? "",
-    subjects: resource?.subjects ?? [],
-    topics: resource?.topics ?? [],
+    subject: resource?.subject ?? "",
+    gradeLevel: resource?.gradeLevel ?? "",
+    format: resource?.format ?? "",
     tags: resource?.tags ?? [],
-    status: resource?.status ?? "draft",
-    visibility: resource?.visibility ?? "private",
     instructionalNotes: resource?.instructionalNotes ?? "",
-    thumbnailUrl: resource?.thumbnailUrl ?? "",
   }), [resource]);
 
   const form = useForm<FormValues>({
@@ -84,13 +79,11 @@ export function AccountResourceForm({ userId, resource, onSuccess }: AccountReso
         title: values.title,
         description: values.description || null,
         resourceType: values.resourceType || null,
-        subjects: values.subjects,
-        topics: values.topics,
+        subject: values.subject || null,
+        gradeLevel: values.gradeLevel || null,
+        format: values.format || null,
         tags: values.tags,
-        status: values.status,
-        visibility: values.visibility,
         instructionalNotes: values.instructionalNotes || null,
-        thumbnailUrl: values.thumbnailUrl || null,
       } satisfies Omit<ResourceCreateRequest, "url"> & ResourceUpdateRequest;
 
       if (isEdit && resource) {
@@ -107,7 +100,7 @@ export function AccountResourceForm({ userId, resource, onSuccess }: AccountReso
       };
       return await createResource(createPayload);
     },
-    onSuccess: (result) => {
+    onSuccess: result => {
       setFormError(null);
       queryClient.invalidateQueries({ queryKey: ["account-resources", userId] });
       toast({
@@ -116,14 +109,14 @@ export function AccountResourceForm({ userId, resource, onSuccess }: AccountReso
       });
       onSuccess?.(result);
     },
-    onError: (error) => {
+    onError: error => {
       const message = error instanceof ResourceApiError ? error.message : t.common.error;
       setFormError(message);
       toast({ title: t.common.error, description: message, variant: "destructive" });
     },
   });
 
-  const handleSubmit = form.handleSubmit((values) => {
+  const handleSubmit = form.handleSubmit(values => {
     mutation.mutate(values);
   });
 
@@ -131,9 +124,7 @@ export function AccountResourceForm({ userId, resource, onSuccess }: AccountReso
     <form onSubmit={handleSubmit} className="space-y-4">
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>
-            {isEdit ? t.account.resources.form.editTitle : t.account.resources.form.title}
-          </CardTitle>
+          <CardTitle>{isEdit ? t.account.resources.form.editTitle : t.account.resources.form.title}</CardTitle>
           <CardDescription>
             {isEdit ? t.account.resources.form.editDescription : t.account.resources.form.description}
           </CardDescription>
@@ -170,97 +161,52 @@ export function AccountResourceForm({ userId, resource, onSuccess }: AccountReso
             />
           </FormField>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <FormField label={t.account.resources.form.typeLabel}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <SuggestionInput
+              label={t.account.resources.form.typeLabel}
+              placeholder={t.account.resources.form.typePlaceholder}
+              suggestions={RESOURCE_TYPE_SUGGESTIONS}
+              value={form.watch("resourceType")}
+              onSelect={value => form.setValue("resourceType", value)}
+            >
               <Input {...form.register("resourceType")} placeholder={t.account.resources.form.typePlaceholder} />
-            </FormField>
-            <FormField label={t.account.resources.form.statusLabel}>
-              <Controller
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t.account.resources.form.statusPlaceholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {t.account.resources.status[option] ?? option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </FormField>
-            <FormField label={t.account.resources.form.visibilityLabel}>
-              <Controller
-                control={form.control}
-                name="visibility"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t.account.resources.form.visibilityPlaceholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {VISIBILITY_OPTIONS.map((option) => (
-                        <SelectItem key={option} value={option}>
-                          {t.account.resources.visibility[option] ?? option}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </FormField>
+            </SuggestionInput>
+            <SuggestionInput
+              label={t.account.resources.form.subjectsLabel}
+              placeholder={t.account.resources.form.subjectsPlaceholder}
+              suggestions={SUBJECT_SUGGESTIONS}
+              value={form.watch("subject")}
+              onSelect={value => form.setValue("subject", value)}
+            >
+              <Input {...form.register("subject")} placeholder={t.account.resources.form.subjectsPlaceholder} />
+            </SuggestionInput>
+            <SuggestionInput
+              label={t.account.resources.form.gradeLabel}
+              placeholder={t.account.resources.form.gradePlaceholder}
+              suggestions={GRADE_LEVEL_SUGGESTIONS}
+              value={form.watch("gradeLevel")}
+              onSelect={value => form.setValue("gradeLevel", value)}
+            >
+              <Input {...form.register("gradeLevel")} placeholder={t.account.resources.form.gradePlaceholder} />
+            </SuggestionInput>
+            <SuggestionInput
+              label={t.account.resources.form.formatLabel}
+              placeholder={t.account.resources.form.formatPlaceholder}
+              suggestions={FORMAT_SUGGESTIONS}
+              value={form.watch("format")}
+              onSelect={value => form.setValue("format", value)}
+            >
+              <Input {...form.register("format")} placeholder={t.account.resources.form.formatPlaceholder} />
+            </SuggestionInput>
           </div>
 
-          <Controller
-            control={form.control}
-            name="subjects"
-            render={({ field }) => (
-              <TokenField
-                label={t.account.resources.form.subjectsLabel}
-                placeholder={t.account.resources.form.subjectsPlaceholder}
-                value={field.value}
-                onChange={field.onChange}
-                suggestions={SUBJECT_SUGGESTIONS}
-              />
-            )}
+          <TokenField
+            label={t.account.resources.form.tagsLabel}
+            placeholder={t.account.resources.form.tagsPlaceholder}
+            value={form.watch("tags")}
+            onChange={value => form.setValue("tags", value)}
+            suggestions={TAG_SUGGESTIONS}
           />
-
-          <Controller
-            control={form.control}
-            name="topics"
-            render={({ field }) => (
-              <TokenField
-                label={t.account.resources.form.topicsLabel}
-                placeholder={t.account.resources.form.topicsPlaceholder}
-                value={field.value}
-                onChange={field.onChange}
-                suggestions={TOPIC_SUGGESTIONS}
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <TokenField
-                label={t.account.resources.form.tagsLabel}
-                placeholder={t.account.resources.form.tagsPlaceholder}
-                value={field.value}
-                onChange={field.onChange}
-                suggestions={TAG_SUGGESTIONS}
-              />
-            )}
-          />
-
-          <FormField label={t.account.resources.form.thumbnailLabel}>
-            <Input {...form.register("thumbnailUrl")} placeholder={t.account.resources.form.thumbnailPlaceholder} />
-          </FormField>
 
           <FormField label={t.account.resources.form.notesLabel}>
             <Textarea
@@ -318,14 +264,14 @@ function TokenField({ label, placeholder, value, onChange, suggestions = [] }: T
     <div className="space-y-2">
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2 rounded-md border border-input p-2">
-        {value.map((item) => (
+        {value.map(item => (
           <Badge key={item} variant="secondary" className="flex items-center gap-1">
             {item}
             <button
               type="button"
               className="text-xs"
               aria-label={`Remove ${item}`}
-              onClick={() => onChange(value.filter((token) => token !== item))}
+              onClick={() => onChange(value.filter(token => token !== item))}
             >
               ×
             </button>
@@ -333,7 +279,7 @@ function TokenField({ label, placeholder, value, onChange, suggestions = [] }: T
         ))}
         <Input
           value={inputValue}
-          onChange={(event) => setInputValue(event.target.value)}
+          onChange={event => setInputValue(event.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={() => handleAdd(inputValue)}
           placeholder={placeholder}
@@ -342,7 +288,7 @@ function TokenField({ label, placeholder, value, onChange, suggestions = [] }: T
       </div>
       {suggestions.length > 0 && (
         <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-          {suggestions.map((suggestion) => (
+          {suggestions.map(suggestion => (
             <button
               key={suggestion}
               type="button"
@@ -350,6 +296,40 @@ function TokenField({ label, placeholder, value, onChange, suggestions = [] }: T
               className="rounded-full border border-dashed border-input px-3 py-1 hover:border-primary hover:text-primary"
             >
               {suggestion}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface SuggestionInputProps {
+  label: string;
+  placeholder: string;
+  suggestions: string[];
+  value: string;
+  onSelect: (value: string) => void;
+  children: ReactNode;
+}
+
+function SuggestionInput({ label, placeholder, suggestions, value, onSelect, children }: SuggestionInputProps) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      {children}
+      {suggestions.length > 0 && (
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          {suggestions.map(option => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onSelect(option)}
+              className={`rounded-full border border-dashed border-input px-3 py-1 hover:border-primary hover:text-primary ${
+                option === value ? "border-primary text-primary" : ""
+              }`}
+            >
+              {option}
             </button>
           ))}
         </div>
