@@ -10,8 +10,9 @@ The Supabase client is already configured with the following credentials:
 - **Project ID**: `ruybexkjupmannggnstn`
 - **URL**: `https://ruybexkjupmannggnstn.supabase.co`
 - **Anon Key**: Already configured in `src/integrations/supabase/client.ts`
+- **Service Role Key**: Required for all serverless API routes. Store it as `SUPABASE_SERVICE_ROLE_KEY` in Netlify/Render/Node server environments and in a local `.env` file for development.
 
-> **Service role access:** Administrative scripts that seed or moderate lesson plans should run with the Supabase service role key. Store it as `SUPABASE_SERVICE_ROLE_KEY` in server-side environments only.
+> **Service role access:** Administrative scripts that seed or moderate lesson plans must run with the Supabase service role key. Retrieve it from **Project Settings → API → Service Role secret** and never expose it to client-side code. The serverless API will now throw an error at startup if the key is missing so deployments fail fast when misconfigured.
 
 ### Database Schema
 
