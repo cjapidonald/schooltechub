@@ -1160,6 +1160,68 @@ export const vi = {
       vi: "Tiếng Việt"
     }
   },
+  lessonBuilder: {
+    states: {
+      creating: "Đang chuẩn bị kế hoạch học tập mới của bạn...",
+      creatingDescription: "Đang thiết lập không gian làm việc mới cho ý tưởng của bạn.",
+      error: "Không thể mở trình xây dựng",
+      errorDescription: "Vui lòng thử lại hoặc tải lại trang.",
+      retry: "Thử lại",
+      loading: "Đang tải kế hoạch học tập...",
+    },
+    toolbar: {
+      draftStatus: "Bản nháp",
+      publishedStatus: "Đã xuất bản",
+      previewLabel: "Xem trước",
+      savingLabel: "Đang lưu...",
+      historyLabel: "Lịch sử phiên bản",
+      lastSavedPrefix: "Lưu gần nhất",
+      noHistory: "Chưa có phiên bản nào",
+    },
+    parts: {
+      title: "Cấu trúc kế hoạch",
+      empty: "Thêm các phần để tổ chức kế hoạch của bạn.",
+    },
+    history: {
+      title: "Phiên bản gần đây",
+      empty: "Chưa có phiên bản được lưu.",
+    },
+    meta: {
+      titleLabel: "Tiêu đề bài học",
+      summaryLabel: "Tóm tắt bài học",
+      stageLabel: "Cấp học",
+      subjectsLabel: "Môn học",
+      durationLabel: "Thời lượng",
+      technologyLabel: "Công nghệ",
+    },
+    canvas: {
+      title: "Chuỗi hoạt động học tập",
+      addStep: "Thêm bước",
+      empty: "Bắt đầu bằng cách thêm bước học tập đầu tiên.",
+      stepCopy: {
+        titlePlaceholder: "Đặt tên cho bước học tập này",
+        descriptionPlaceholder: "Mô tả những gì diễn ra trong bước này...",
+        notesPlaceholder: "Thêm ghi chú hoặc ý tưởng phân hóa",
+        activitiesTitle: "Hoạt động đính kèm",
+        removeActivity: "Xóa",
+      },
+    },
+    activities: {
+      title: "Tìm hoạt động",
+      placeholder: "Tìm theo chủ đề, công cụ hoặc kết quả",
+      helper: "Nhập ít nhất {min} ký tự để tìm kiếm trong thư viện hoạt động.",
+      addLabel: "Thêm vào bước",
+      empty: "Chưa có hoạt động phù hợp với tìm kiếm.",
+    },
+    standards: {
+      title: "Chuẩn & mục tiêu",
+      empty: "Chưa có chuẩn nào.",
+      selectedLabel: "Mục tiêu chung",
+    },
+    preview: {
+      title: "Xem trước kế hoạch",
+    },
+  },
   account: {
     seo: {
       title: "Tài khoản của tôi | SchoolTech Hub",
