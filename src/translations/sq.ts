@@ -1299,6 +1299,86 @@ export const sq = {
       lastLogin: "Hyrja e fundit",
       neverLoggedIn: "Nuk ka ende hyrje të regjistruar"
     },
+    resources: {
+      manageCta: "Menaxho burimet",
+      heading: "Burimet e mia mësimore",
+      subheading: "Përditësoni lidhjet dhe materialet që keni shpërndarë.",
+      seo: {
+        title: "Burimet e mia | SchoolTech Hub",
+        description: "Rishiko dhe përditëso burimet që ke dërguar për komunitetin e mësuesve.",
+        canonical: "https://schooltechhub.com/account/resources"
+      },
+      listTitle: "Burimet tuaja",
+      listDescription: "Rregulloni dukshmërinë, statusin dhe shtoni burime të reja për kolegët.",
+      newCta: "Shto burim",
+      empty: "Ende nuk keni shtuar burime.",
+      emptyCta: "Shto burimin e parë",
+      viewLink: "Hap lidhjen",
+      statusLabel: "Statusi",
+      visibilityLabel: "Dukshmëria",
+      pagination: "Faqja {current} nga {total}",
+      toast: {
+        created: "Burimi u dërgua",
+        updated: "Burimi u përditësua",
+        updateError: "Nuk mundëm të përditësojmë burimin"
+      },
+      status: {
+        draft: "Draft",
+        published: "Publikuar",
+        archived: "Arkivuar"
+      },
+      visibility: {
+        private: "Private",
+        unlisted: "I fshehur",
+        public: "Publike"
+      },
+      form: {
+        title: "Dërgo burim",
+        editTitle: "Përditëso burimin",
+        description: "Ndani burime të besuara me kolegët tuaj.",
+        editDescription: "Përditësoni detajet dhe shënimet për këtë burim.",
+        titleLabel: "Titulli",
+        titlePlaceholder: "Emri i burimit",
+        urlLabel: "Lidhja",
+        descriptionLabel: "Përshkrim i shkurtër",
+        descriptionPlaceholder: "Si i ndihmon ky burim mësuesit?",
+        typeLabel: "Lloji i burimit",
+        typePlaceholder: "p.sh. Video, Model, Artikull",
+        statusLabel: "Statusi",
+        statusPlaceholder: "Zgjidh statusin",
+        visibilityLabel: "Dukshmëria",
+        visibilityPlaceholder: "Zgjidh dukshmërinë",
+        subjectsLabel: "Lëndët",
+        subjectsPlaceholder: "Shtoni një lëndë dhe shtypni Enter",
+        topicsLabel: "Tema",
+        topicsPlaceholder: "Shtoni një temë dhe shtypni Enter",
+        tagsLabel: "Etiketat",
+        tagsPlaceholder: "Shtoni etiketa për kërkim më të lehtë",
+        thumbnailLabel: "Figura paraprake",
+        thumbnailPlaceholder: "https://example.com/preview.jpg",
+        notesLabel: "Shënime didaktike",
+        notesPlaceholder: "Shpjegoni si e përdorni këtë burim",
+        submit: "Ruaj burimin"
+      },
+      new: {
+        heading: "Shto një burim të ri",
+        subheading: "Ndihmo mësuesit e tjerë me materiale gati për klasën.",
+        seo: {
+          title: "Shto burim | SchoolTech Hub",
+          description: "Dërgo një burim të ri që mësuesit të mund ta zbulojnë.",
+          canonical: "https://schooltechhub.com/account/resources/new"
+        }
+      },
+      edit: {
+        heading: "Redakto burimin",
+        subheading: "Sigurohu që informacioni është i saktë para se të shpërndash.",
+        seo: {
+          title: "Redakto {title} | SchoolTech Hub",
+          description: "Përditëso metadata dhe shënimet për këtë burim mësimor.",
+          canonical: "https://schooltechhub.com/account/resources"
+        }
+      }
+    },
     support: {
       title: "Keni nevojë për ndihmë?",
       description: "Ekipi ynë është gati të ndihmojë për çdo ndryshim në llogari.",

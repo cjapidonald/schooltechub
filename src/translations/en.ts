@@ -1299,6 +1299,86 @@ export const en = {
       lastLogin: "Last sign in",
       neverLoggedIn: "No sign-in recorded yet"
     },
+    resources: {
+      manageCta: "Manage resources",
+      heading: "My teaching resources",
+      subheading: "Update the links and materials you've shared with the community.",
+      seo: {
+        title: "My Resources | SchoolTech Hub",
+        description: "Review, update, and share your classroom resources from a single dashboard.",
+        canonical: "https://schooltechhub.com/account/resources"
+      },
+      listTitle: "Your resources",
+      listDescription: "Adjust visibility, update metadata, or add a new resource for peers.",
+      newCta: "Submit resource",
+      empty: "You haven't added any resources yet.",
+      emptyCta: "Add your first resource",
+      viewLink: "Open resource",
+      statusLabel: "Status",
+      visibilityLabel: "Visibility",
+      pagination: "Page {current} of {total}",
+      toast: {
+        created: "Resource submitted",
+        updated: "Resource updated",
+        updateError: "We couldn't update that resource"
+      },
+      status: {
+        draft: "Draft",
+        published: "Published",
+        archived: "Archived"
+      },
+      visibility: {
+        private: "Private",
+        unlisted: "Unlisted",
+        public: "Public"
+      },
+      form: {
+        title: "Submit a resource",
+        editTitle: "Update resource",
+        description: "Share resources you trust with fellow educators.",
+        editDescription: "Keep the details, metadata, and notes accurate for this resource.",
+        titleLabel: "Title",
+        titlePlaceholder: "Resource name",
+        urlLabel: "Link",
+        descriptionLabel: "Summary",
+        descriptionPlaceholder: "What does this resource help educators accomplish?",
+        typeLabel: "Resource type",
+        typePlaceholder: "e.g. Video, Template, Article",
+        statusLabel: "Status",
+        statusPlaceholder: "Select status",
+        visibilityLabel: "Visibility",
+        visibilityPlaceholder: "Select visibility",
+        subjectsLabel: "Subjects",
+        subjectsPlaceholder: "Add a subject and press enter",
+        topicsLabel: "Topics",
+        topicsPlaceholder: "Add a topic and press enter",
+        tagsLabel: "Tags",
+        tagsPlaceholder: "Add tags to help discovery",
+        thumbnailLabel: "Thumbnail image",
+        thumbnailPlaceholder: "https://example.com/preview.jpg",
+        notesLabel: "Instructional notes",
+        notesPlaceholder: "Explain how you use this resource in class",
+        submit: "Save resource"
+      },
+      new: {
+        heading: "Submit a new resource",
+        subheading: "Share a classroom-ready resource with other educators.",
+        seo: {
+          title: "Submit Resource | SchoolTech Hub",
+          description: "Add a new classroom resource for teachers to discover.",
+          canonical: "https://schooltechhub.com/account/resources/new"
+        }
+      },
+      edit: {
+        heading: "Edit resource",
+        subheading: "Keep resource details accurate before publishing.",
+        seo: {
+          title: "Edit {title} | SchoolTech Hub",
+          description: "Update the metadata and notes for this teaching resource.",
+          canonical: "https://schooltechhub.com/account/resources"
+        }
+      }
+    },
     support: {
       title: "Need help?",
       description: "Our team is here to support any account changes.",
