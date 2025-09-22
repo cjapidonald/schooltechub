@@ -34,11 +34,29 @@ The Supabase client is already configured with the following credentials:
    - Search: generated `search_vector` column backed by GIN indexes for fast keyword lookups
    - Access: defaults to `draft`; only `status = 'published'` rows are exposed through public RLS policies
 
+5. **Builder tables** - Lesson plan authoring workspace
+   - **activities** – reusable learning experiences with stage, delivery mode, technology, and resource metadata
+   - **lesson_plans** – normalized lesson plans with owner IDs, share codes, overview JSON, and searchable tags
+   - **lesson_plan_sections**/**lesson_plan_steps** – ordered structure for plan sections and individual steps
+   - **standards**/**lesson_plan_standards** – catalog of standards with plan alignment mappings
+   - **plan_versions** – immutable JSON snapshots for change history and collaboration
+   - Supporting indexes: GIN indexes on all array columns plus trigram indexes on URL domains for quick lookup
+
 #### Row Level Security (RLS)
 - All tables have RLS enabled
 - Users can only view/modify their own data
 - Classes are publicly viewable but only instructors can modify
-- Lesson plans are publicly readable only when `status = 'published'`; use a service role key for inserts, updates, or moderation tasks.
+- Discovery lesson plans remain publicly readable only when `status = 'published'`
+- Builder tables ship with layered policies:
+  - **Owner manage** – authenticated owners (or the service role) can insert/update/delete their activities, plans, steps, and versions
+  - **Shared access** – collaborators listed in the `shared_with` array or requests presenting a matching `builder_share_code` JWT claim can read shared drafts
+  - **Published read** – builder lesson plans marked `published` remain readable by anonymous clients for the public catalogue
+  - Standards are world-readable; authoring is reserved for the service role or the creating user
+
+#### Required Extensions
+- `pgcrypto` – provides `gen_random_uuid()` for primary keys and share codes
+- `uuid-ossp` – enables `uuid_nil()` used during legacy data backfill
+- `pg_trgm` – powers trigram GIN indexes on resource URL domains for fast lookups
 
 ## Features Implemented
 
