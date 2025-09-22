@@ -39,9 +39,11 @@ import {
   BellRing,
   Globe,
   GraduationCap,
+  FlaskConical,
 } from "lucide-react";
 import type { Database, Json } from "@/integrations/supabase/types";
 import { EnrolledClasses } from "@/components/EnrolledClasses";
+import { ResearchDashboard } from "@/components/account/research/ResearchDashboard";
 
 const userRoleOptions: Database["public"]["Enums"]["user_role_enum"][] = [
   "Teacher",
@@ -600,6 +602,10 @@ const Account = () => {
               <MessageCircle className="h-4 w-4" />
               {t.account.tabs.activity}
             </TabsTrigger>
+            <TabsTrigger value="research" className="gap-2">
+              <FlaskConical className="h-4 w-4" />
+              {t.account.research.tabLabel}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -997,6 +1003,9 @@ const Account = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+          <TabsContent value="research">
+            <ResearchDashboard />
           </TabsContent>
         </Tabs>
       </div>

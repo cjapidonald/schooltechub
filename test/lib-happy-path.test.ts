@@ -27,6 +27,7 @@ type TableHandlers = {
 
 type StorageHandlers = {
   upload?: (path: string, _body: Blob | ArrayBuffer, options: { contentType: string; upsert: boolean }) => Promise<{ error: null }>;
+  createSignedUrl?: (path: string, expiresIn: number) => Promise<{ data: { signedUrl: string } | null; error: null }>;
 };
 
 type ClientConfig = {
@@ -208,11 +209,18 @@ function createSupabaseClient(config: ClientConfig): SupabaseClient {
     storage: {
       from(bucket: string) {
         const handler = config.storage?.[bucket];
-        if (!handler || !handler.upload) {
+        if (!handler) {
           throw new Error(`No storage handlers configured for bucket ${bucket}`);
         }
         return {
           upload: handler.upload,
+          createSignedUrl:
+            handler.createSignedUrl ??
+            ((path: string) =>
+              Promise.resolve({
+                data: { signedUrl: `https://storage.example.com/${bucket}/${path}` },
+                error: null,
+              })),
         } as any;
       },
     },

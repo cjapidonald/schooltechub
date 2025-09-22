@@ -1445,6 +1445,77 @@ export const en = {
       statusDraft: "Draft",
       readPost: "Open article"
     },
+    research: {
+      tabLabel: "Research",
+      notAvailable: "Not available",
+      genericError: "We couldn't load this data right now.",
+      statuses: {
+        pending: "Pending",
+        approved: "Approved",
+        rejected: "Rejected",
+        submitted: "Submitted",
+        accepted: "Accepted",
+        needs_changes: "Needs changes"
+      },
+      applications: {
+        title: "Research applications",
+        description: "Track the progress of the projects you've applied to.",
+        empty: "You haven't applied to any research projects yet.",
+        footerNote: "Applications are reviewed within 7-10 days.",
+        applyCta: "Apply to a project",
+        submittedLabel: "Submitted",
+        viewProject: "View project",
+        toast: {
+          successTitle: "Application submitted",
+          successDescription: "We'll email you when the research team reviews your request.",
+          errorTitle: "Couldn't submit application",
+          errorDescription: "Please try again or contact support if the issue continues.",
+          selectProject: "Choose a project before submitting your application."
+        },
+        dialog: {
+          title: "Apply to a research project",
+          description: "Share a short motivation so the research team understands your interest.",
+          empty: "There are no open projects available to apply for right now.",
+          projectLabel: "Project",
+          projectPlaceholder: "Select a project",
+          statementLabel: "Motivation",
+          statementPlaceholder: "Explain why you'd like to join this study.",
+          submit: "Submit application"
+        }
+      },
+      participations: {
+        title: "Project participations",
+        description: "Access shared documents and manage your submissions for each project.",
+        empty: "You aren't part of any research projects yet.",
+        joinedLabel: "Joined:",
+        downloadsTitle: "Participant documents",
+        downloadsDescription: "Download consent forms, protocols, and resources shared with you.",
+        docsEmpty: "No participant documents are available yet.",
+        unknownDocType: "Document",
+        submissionsTitle: "My submissions",
+        submissionsDescription: "Upload your work and review the feedback status.",
+        submissionsEmpty: "You haven't uploaded any submissions yet.",
+        submittedLabel: "Submitted:",
+        upload: {
+          titleLabel: "Title",
+          titlePlaceholder: "e.g. Interim results",
+          fileLabel: "Upload file",
+          descriptionLabel: "Notes for reviewers",
+          descriptionPlaceholder: "Provide context or instructions for the reviewers (optional)",
+          submit: "Upload submission"
+        },
+        toast: {
+          uploadSuccessTitle: "Submission uploaded",
+          uploadSuccessDescription: "We'll notify you when reviewers respond.",
+          uploadErrorTitle: "Couldn't upload submission",
+          uploadErrorDescription: "Please try again with a smaller file or different format.",
+          fileRequired: "Please choose a file before uploading.",
+          downloadErrorTitle: "Couldn't prepare download",
+          downloadErrorDescription: "Please try again in a few moments.",
+          downloadUnavailable: "This file isn't available yet."
+        }
+      }
+    },
     toast: {
       profileUpdated: "Profile updated",
       passwordMismatch: "Passwords must match",

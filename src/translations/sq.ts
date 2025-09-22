@@ -1445,6 +1445,77 @@ export const sq = {
       statusDraft: "Draft",
       readPost: "Hap artikullin"
     },
+    research: {
+      tabLabel: "Research",
+      notAvailable: "Nuk disponohet",
+      genericError: "Aktualisht nuk mundëm të ngarkojmë të dhënat.",
+      statuses: {
+        pending: "Në pritje",
+        approved: "Aprovuar",
+        rejected: "Refuzuar",
+        submitted: "Dërguar",
+        accepted: "Pranuar",
+        needs_changes: "Kërkon ndryshime"
+      },
+      applications: {
+        title: "Aplikimet kërkimore",
+        description: "Ndiq përparimin e projekteve ku ke aplikuar.",
+        empty: "Nuk keni aplikuar ende për projekte kërkimore.",
+        footerNote: "Aplikimet shqyrtohen brenda 7-10 ditësh.",
+        applyCta: "Apliko në projekt",
+        submittedLabel: "Dërguar",
+        viewProject: "Shiko projektin",
+        toast: {
+          successTitle: "Aplikimi u dërgua",
+          successDescription: "Do t'ju njoftojmë me email sapo ekipi kërkimor të përgjigjet.",
+          errorTitle: "Aplikimi nuk u dërgua",
+          errorDescription: "Ju lutemi provoni përsëri ose kontaktoni mbështetjen nëse problemi vazhdon.",
+          selectProject: "Zgjidhni një projekt para se të dorëzoni aplikimin."
+        },
+        dialog: {
+          title: "Apliko në një projekt kërkimor",
+          description: "Shkruani shkurt pse dëshironi të bashkoheni që ekipi të kuptojë interesin tuaj.",
+          empty: "Aktualisht nuk ka projekte të hapura për aplikim.",
+          projectLabel: "Projekt",
+          projectPlaceholder: "Zgjidh projektin",
+          statementLabel: "Motivimi",
+          statementPlaceholder: "Shpjegoni pse dëshironi të bashkoheni në studim.",
+          submit: "Dërgo aplikimin"
+        }
+      },
+      participations: {
+        title: "Pjesëmarrjet e mia",
+        description: "Shkarko dokumentet e ndara dhe menaxho dorëzimet për çdo projekt.",
+        empty: "Nuk jeni pjesë e projekteve kërkimore për momentin.",
+        joinedLabel: "Bashkuar:",
+        downloadsTitle: "Dokumente për pjesëmarrësit",
+        downloadsDescription: "Shkarko formularët e pëlqimit, protokollet dhe materialet e ndara.",
+        docsEmpty: "Ende nuk ka dokumente për pjesëmarrësit.",
+        unknownDocType: "Dokument",
+        submissionsTitle: "Dorëzimet e mia",
+        submissionsDescription: "Ngarko punën tënde dhe ndiq statusin e vlerësimit.",
+        submissionsEmpty: "Nuk keni ngarkuar ende dorëzime.",
+        submittedLabel: "Dërguar:",
+        upload: {
+          titleLabel: "Titulli",
+          titlePlaceholder: "p.sh. Rezultatet paraprake",
+          fileLabel: "Ngarko skedarin",
+          descriptionLabel: "Shënime për recensuesit",
+          descriptionPlaceholder: "Jepni kontekst ose udhëzime për recensuesit (opsionale)",
+          submit: "Ngarko dorëzimin"
+        },
+        toast: {
+          uploadSuccessTitle: "Dorëzimi u ngarkua",
+          uploadSuccessDescription: "Do të njoftoheni kur recensuesit të përgjigjen.",
+          uploadErrorTitle: "Dorëzimi nuk u ngarkua",
+          uploadErrorDescription: "Provoni përsëri me një skedar më të vogël ose format tjetër.",
+          fileRequired: "Zgjidhni një skedar para se të ngarkoni.",
+          downloadErrorTitle: "Nuk u përgatit shkarkimi",
+          downloadErrorDescription: "Ju lutem provoni sërish pas pak.",
+          downloadUnavailable: "Ky skedar ende nuk është i disponueshëm."
+        }
+      }
+    },
     toast: {
       profileUpdated: "Profili u përditësua",
       passwordMismatch: "Fjalëkalimet duhet të përputhen",

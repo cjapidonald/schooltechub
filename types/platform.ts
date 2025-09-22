@@ -143,6 +143,14 @@ export interface ResearchParticipant {
   joinedAt: string;
 }
 
+export interface ResearchApplicationWithProject extends ResearchApplication {
+  project: ResearchProject | null;
+}
+
+export interface ResearchParticipation extends ResearchParticipant {
+  project: ResearchProject;
+}
+
 export type ResearchSubmissionStatus =
   | "submitted"
   | "accepted"

@@ -1445,6 +1445,77 @@ export const vi = {
       statusDraft: "Bản nháp",
       readPost: "Mở bài viết"
     },
+    research: {
+      tabLabel: "Nghiên cứu",
+      notAvailable: "Chưa có dữ liệu",
+      genericError: "Không thể tải dữ liệu ngay lúc này.",
+      statuses: {
+        pending: "Đang chờ",
+        approved: "Được chấp nhận",
+        rejected: "Bị từ chối",
+        submitted: "Đã gửi",
+        accepted: "Đã duyệt",
+        needs_changes: "Cần chỉnh sửa"
+      },
+      applications: {
+        title: "Đơn tham gia nghiên cứu",
+        description: "Theo dõi tiến độ các dự án bạn đã đăng ký.",
+        empty: "Bạn chưa nộp đơn cho dự án nghiên cứu nào.",
+        footerNote: "Đơn sẽ được xem xét trong vòng 7-10 ngày.",
+        applyCta: "Đăng ký tham gia",
+        submittedLabel: "Đã gửi",
+        viewProject: "Xem dự án",
+        toast: {
+          successTitle: "Đã gửi đơn",
+          successDescription: "Chúng tôi sẽ email cho bạn khi nhóm nghiên cứu phản hồi.",
+          errorTitle: "Không thể gửi đơn",
+          errorDescription: "Vui lòng thử lại hoặc liên hệ hỗ trợ nếu lỗi tiếp diễn.",
+          selectProject: "Hãy chọn một dự án trước khi gửi."
+        },
+        dialog: {
+          title: "Đăng ký tham gia nghiên cứu",
+          description: "Chia sẻ lý do ngắn gọn để nhóm nghiên cứu hiểu rõ động lực của bạn.",
+          empty: "Hiện chưa có dự án mở cho đăng ký.",
+          projectLabel: "Dự án",
+          projectPlaceholder: "Chọn dự án",
+          statementLabel: "Lý do tham gia",
+          statementPlaceholder: "Hãy giải thích vì sao bạn muốn tham gia nghiên cứu này.",
+          submit: "Gửi đơn"
+        }
+      },
+      participations: {
+        title: "Dự án tôi tham gia",
+        description: "Tải tài liệu được chia sẻ và quản lý các lần nộp của bạn.",
+        empty: "Bạn chưa tham gia dự án nghiên cứu nào.",
+        joinedLabel: "Tham gia từ:",
+        downloadsTitle: "Tài liệu cho người tham gia",
+        downloadsDescription: "Tải biểu mẫu đồng ý, quy trình và tài nguyên được cung cấp.",
+        docsEmpty: "Chưa có tài liệu nào được chia sẻ.",
+        unknownDocType: "Tài liệu",
+        submissionsTitle: "Bài nộp của tôi",
+        submissionsDescription: "Tải lên công việc và theo dõi trạng thái phản hồi.",
+        submissionsEmpty: "Bạn chưa tải lên bài nộp nào.",
+        submittedLabel: "Đã gửi:",
+        upload: {
+          titleLabel: "Tiêu đề",
+          titlePlaceholder: "ví dụ: Kết quả tạm thời",
+          fileLabel: "Chọn tệp",
+          descriptionLabel: "Ghi chú cho người đánh giá",
+          descriptionPlaceholder: "Cung cấp bối cảnh hoặc hướng dẫn (không bắt buộc)",
+          submit: "Tải lên bài nộp"
+        },
+        toast: {
+          uploadSuccessTitle: "Đã tải lên bài nộp",
+          uploadSuccessDescription: "Chúng tôi sẽ thông báo khi có phản hồi.",
+          uploadErrorTitle: "Không thể tải lên",
+          uploadErrorDescription: "Vui lòng thử lại với tệp nhỏ hơn hoặc định dạng khác.",
+          fileRequired: "Hãy chọn tệp trước khi tải lên.",
+          downloadErrorTitle: "Không thể tạo liên kết tải",
+          downloadErrorDescription: "Vui lòng thử lại sau ít phút.",
+          downloadUnavailable: "Tệp này hiện chưa sẵn sàng."
+        }
+      }
+    },
     toast: {
       profileUpdated: "Đã cập nhật hồ sơ",
       passwordMismatch: "Mật khẩu nhập lại chưa khớp",

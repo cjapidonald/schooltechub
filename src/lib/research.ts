@@ -2,12 +2,15 @@ import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   ResearchApplication,
+  ResearchApplicationWithProject,
   ResearchApplicationStatus,
   ResearchDocument,
   ResearchDocumentStatus,
   ResearchProject,
   ResearchProjectStatus,
   ResearchProjectVisibility,
+  ResearchParticipant,
+  ResearchParticipation,
   ResearchSubmission,
   ResearchSubmissionStatus,
 } from "@/types/platform";
@@ -19,6 +22,8 @@ const PARTICIPANT_SELECT = "id";
 const SUBMISSION_SELECT = "*";
 
 const SUBMISSIONS_BUCKET = "research-submissions";
+const DOCUMENTS_BUCKET = "research";
+const DEFAULT_SIGNED_URL_EXPIRY_SECONDS = 60 * 60; // 1 hour
 
 type Client = SupabaseClient;
 
@@ -97,6 +102,15 @@ function mapApplication(record: Record<string, any>): ResearchApplication {
     approvedAt: record.approved_at ?? null,
     approvedBy: record.approved_by ?? null,
   } satisfies ResearchApplication;
+}
+
+function mapParticipant(record: Record<string, any>): ResearchParticipant {
+  return {
+    id: String(record.id ?? ""),
+    projectId: record.project_id ?? record.projectId ?? "",
+    userId: record.user_id ?? record.userId ?? "",
+    joinedAt: record.joined_at ?? new Date().toISOString(),
+  } satisfies ResearchParticipant;
 }
 
 function mapSubmission(record: Record<string, any>): ResearchSubmission {
@@ -201,12 +215,12 @@ export async function apply(
 
 export async function listMyApplications(
   client: Client = supabase,
-): Promise<ResearchApplication[]> {
+): Promise<ResearchApplicationWithProject[]> {
   const userId = await requireUserId(client, "view your research applications");
 
   const { data, error } = await client
     .from("research_applications")
-    .select(APPLICATION_SELECT)
+    .select(`${APPLICATION_SELECT}, project:research_projects(${PROJECT_SELECT})`)
     .eq("applicant_id", userId)
     .order("submitted_at", { ascending: false, nullsLast: true });
 
@@ -214,7 +228,14 @@ export async function listMyApplications(
     throw new ResearchDataError("Failed to load your applications.", { cause: error });
   }
 
-  return Array.isArray(data) ? data.map(mapApplication) : [];
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data.map(record => ({
+    ...mapApplication(record),
+    project: record.project ? mapProject(record.project) : null,
+  }));
 }
 
 export async function listParticipantDocs(
@@ -232,6 +253,33 @@ export async function listParticipantDocs(
   }
 
   return Array.isArray(data) ? data.map(mapDocument) : [];
+}
+
+export async function listMyParticipations(
+  client: Client = supabase,
+): Promise<ResearchParticipation[]> {
+  const userId = await requireUserId(client, "view your research participations");
+
+  const { data, error } = await client
+    .from("research_participants")
+    .select(`*, project:research_projects(${PROJECT_SELECT})`)
+    .eq("user_id", userId)
+    .order("joined_at", { ascending: false, nullsLast: true });
+
+  if (error) {
+    throw new ResearchDataError("Failed to load your research participations.", { cause: error });
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .filter(record => record?.project)
+    .map(record => ({
+      ...mapParticipant(record),
+      project: mapProject(record.project),
+    }));
 }
 
 export interface SubmissionMeta {
@@ -355,4 +403,43 @@ export async function listMySubmissions(
   }
 
   return Array.isArray(data) ? data.map(mapSubmission) : [];
+}
+
+async function createSignedUrl(
+  bucket: string,
+  path: string,
+  client: Client,
+  expiresIn: number = DEFAULT_SIGNED_URL_EXPIRY_SECONDS,
+): Promise<string> {
+  const { data, error } = await client.storage.from(bucket).createSignedUrl(path, expiresIn);
+
+  if (error || !data?.signedUrl) {
+    throw new ResearchDataError("Failed to generate a download link.", { cause: error });
+  }
+
+  return data.signedUrl;
+}
+
+export async function getDocumentDownloadUrl(
+  document: Pick<ResearchDocument, "id" | "storagePath">,
+  client: Client = supabase,
+  options: { expiresIn?: number } = {},
+): Promise<string> {
+  if (!document.storagePath) {
+    throw new ResearchDataError("This document is not available for download.");
+  }
+
+  return createSignedUrl(DOCUMENTS_BUCKET, document.storagePath, client, options.expiresIn);
+}
+
+export async function getSubmissionDownloadUrl(
+  submission: Pick<ResearchSubmission, "id" | "storagePath">,
+  client: Client = supabase,
+  options: { expiresIn?: number } = {},
+): Promise<string> {
+  if (!submission.storagePath) {
+    throw new ResearchDataError("This submission does not have a file to download.");
+  }
+
+  return createSignedUrl(SUBMISSIONS_BUCKET, submission.storagePath, client, options.expiresIn);
 }
