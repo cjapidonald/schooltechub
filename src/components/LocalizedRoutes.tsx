@@ -5,6 +5,7 @@ import About from '@/pages/About';
 import Services from '@/pages/Services';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
+import Resources from '@/pages/resources';
 import Events from '@/pages/Events';
 import EventDetail from '@/pages/EventDetail';
 import Contact from '@/pages/Contact';
@@ -67,6 +68,7 @@ export const LocalizedRoutes = () => {
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
+      <Route path="/resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
@@ -93,6 +95,7 @@ export const LocalizedRoutes = () => {
         <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
+        <Route path="resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
         <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
         <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
