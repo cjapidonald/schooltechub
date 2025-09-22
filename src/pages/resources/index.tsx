@@ -421,6 +421,7 @@ const ResourcesPage = () => {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="resource-search"
+                    type="search"
                     value={filters.searchValue}
                     onChange={event =>
                       setFilters(current => ({ ...current, searchValue: event.target.value }))
@@ -514,7 +515,7 @@ const ResourcesPage = () => {
 
           <section className="space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
                 Showing {sortedResources.length} resource{sortedResources.length === 1 ? "" : "s"}
                 {data?.pages?.[0]?.total ? ` of ${data.pages[0].total}` : ""}
               </p>
@@ -537,14 +538,24 @@ const ResourcesPage = () => {
             </div>
 
             {isError ? (
-              <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-destructive/40 bg-destructive/5 p-12 text-center text-destructive">
+              <div
+                className="flex flex-col items-center gap-4 rounded-3xl border border-dashed border-destructive/40 bg-destructive/5 p-12 text-center text-destructive"
+                role="alert"
+                aria-live="assertive"
+              >
                 <p className="text-base font-medium">We couldn&apos;t load resources right now.</p>
                 <Button type="button" variant="outline" onClick={() => refetch()}>
                   Try again
                 </Button>
               </div>
             ) : isInitialLoading ? (
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div
+                className="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
+                role="status"
+                aria-live="polite"
+                aria-busy="true"
+              >
+                <span className="sr-only">Loading resources…</span>
                 {Array.from({ length: 6 }).map((_, index) => (
                   <Card key={index} className="overflow-hidden border shadow-sm">
                     <Skeleton className="aspect-video w-full" />
@@ -561,7 +572,11 @@ const ResourcesPage = () => {
                 ))}
               </div>
             ) : sortedResources.length === 0 ? (
-              <div className="flex flex-col items-center gap-4 rounded-3xl border border-dashed p-12 text-center">
+              <div
+                className="flex flex-col items-center gap-4 rounded-3xl border border-dashed p-12 text-center"
+                role="status"
+                aria-live="polite"
+              >
                 <p className="text-lg font-semibold">No resources match your filters yet.</p>
                 <p className="max-w-md text-sm text-muted-foreground">
                   Try removing some filters or searching for a different keyword to explore more of the library.
@@ -571,7 +586,10 @@ const ResourcesPage = () => {
                 </Button>
               </div>
             ) : (
-              <div className={cn(view === "grid" ? "grid gap-6 md:grid-cols-2 xl:grid-cols-3" : "space-y-4")}>
+              <div
+                className={cn(view === "grid" ? "grid gap-6 md:grid-cols-2 xl:grid-cols-3" : "space-y-4")}
+                aria-busy={isFetchingNextPage}
+              >
                 {sortedResources.map(resource => (
                   <ResourceCardView
                     key={resource.id}

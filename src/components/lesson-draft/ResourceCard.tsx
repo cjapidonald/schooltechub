@@ -61,19 +61,23 @@ export const ResourceCard = ({
 
   const content = (
     <div className={cn("min-w-0 flex-1 space-y-2", isVertical && "min-w-full")}>
-      <p className="line-clamp-2 text-sm font-semibold text-foreground">{resource.title}</p>
+      <p className="line-clamp-2 break-words text-sm font-semibold text-foreground">{resource.title}</p>
       {resource.description ? (
         <p className="line-clamp-2 text-xs text-muted-foreground">{resource.description}</p>
       ) : null}
       {metadata.length || tags.length ? (
         <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
           {metadata.map(item => (
-            <Badge key={`meta-${item}`} variant="outline">
+            <Badge key={`meta-${item}`} variant="outline" className="max-w-full break-words whitespace-normal">
               {item}
             </Badge>
           ))}
           {tags.map(tag => (
-            <Badge key={`tag-${tag}`} variant="secondary" className="rounded-full">
+            <Badge
+              key={`tag-${tag}`}
+              variant="secondary"
+              className="max-w-full break-words whitespace-normal rounded-full"
+            >
               #{tag}
             </Badge>
           ))}
