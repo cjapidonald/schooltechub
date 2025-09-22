@@ -61,6 +61,41 @@ async function requireUserId(client: Client, action: string): Promise<string> {
   return userId;
 }
 
+async function requireAdmin(
+  client: Client,
+  action: string,
+): Promise<{ userId: string; role: string }> {
+  const { data, error } = await client.auth.getSession();
+
+  if (error) {
+    throw new ResearchDataError("Unable to verify authentication state.", {
+      cause: error,
+    });
+  }
+
+  const user = data.session?.user;
+  if (!user?.id) {
+    throw new ResearchDataError(`You must be signed in to ${action}.`);
+  }
+
+  const appMetadataRole =
+    typeof (user.app_metadata as Record<string, unknown> | undefined)?.role === "string"
+      ? ((user.app_metadata as Record<string, unknown>).role as string)
+      : undefined;
+  const userMetadataRole =
+    typeof (user.user_metadata as Record<string, unknown> | undefined)?.role === "string"
+      ? ((user.user_metadata as Record<string, unknown>).role as string)
+      : undefined;
+
+  const role = appMetadataRole ?? userMetadataRole;
+
+  if (role !== "admin") {
+    throw new ResearchDataError(`You must be an admin to ${action}.`);
+  }
+
+  return { userId: user.id, role };
+}
+
 function mapProject(record: Record<string, any>): ResearchProject {
   return {
     id: String(record.id ?? ""),
@@ -197,6 +232,118 @@ export async function apply(
   }
 
   return mapApplication(data);
+}
+
+export async function approveApplication(
+  applicationId: string,
+  client: Client = supabase,
+): Promise<ResearchApplication> {
+  const { userId: adminId } = await requireAdmin(client, "approve research applications");
+
+  const { data: existing, error: existingError } = await client
+    .from("research_applications")
+    .select("*, project:research_projects(slug)")
+    .eq("id", applicationId)
+    .maybeSingle();
+
+  if (existingError) {
+    throw new ResearchDataError("Failed to load the research application.", {
+      cause: existingError,
+    });
+  }
+
+  if (!existing) {
+    throw new ResearchDataError("The research application could not be found.");
+  }
+
+  const projectId = existing.project_id ?? existing.projectId ?? "";
+  const applicantId = existing.applicant_id ?? existing.applicantId ?? "";
+  if (!projectId || !applicantId) {
+    throw new ResearchDataError("The research application is missing required data.");
+  }
+
+  const alreadyApproved = existing.status === "approved";
+
+  let applicationRecord: Record<string, unknown> = existing;
+
+  if (!alreadyApproved) {
+    const { data: updated, error: updateError } = await client
+      .from("research_applications")
+      .update({
+        status: "approved",
+        approved_at: new Date().toISOString(),
+        approved_by: adminId,
+      })
+      .eq("id", applicationId)
+      .select(APPLICATION_SELECT)
+      .single();
+
+    if (updateError || !updated) {
+      throw new ResearchDataError("Failed to approve the research application.", {
+        cause: updateError,
+      });
+    }
+
+    applicationRecord = updated;
+  } else if (!applicationRecord.approved_at || !applicationRecord.approved_by) {
+    const { data: refreshed, error: refreshError } = await client
+      .from("research_applications")
+      .select(APPLICATION_SELECT)
+      .eq("id", applicationId)
+      .single();
+
+    if (refreshError || !refreshed) {
+      throw new ResearchDataError("Failed to load the approved research application.", {
+        cause: refreshError,
+      });
+    }
+
+    applicationRecord = refreshed;
+  }
+
+  const { error: participantError } = await client
+    .from("research_participants")
+    .upsert(
+      { project_id: projectId, user_id: applicantId },
+      { onConflict: "project_id,user_id" },
+    );
+
+  if (participantError) {
+    throw new ResearchDataError("Failed to grant project access to the applicant.", {
+      cause: participantError,
+    });
+  }
+
+  if (!alreadyApproved) {
+    const projectSlug =
+      typeof existing.project === "object" && existing.project
+        ? (existing.project as { slug?: string | null }).slug ?? null
+        : null;
+
+    const payload: Record<string, unknown> = {
+      applicationId,
+      projectId,
+    };
+
+    if (projectSlug) {
+      payload.projectSlug = projectSlug;
+      payload.link = `/research/${projectSlug}`;
+    }
+
+    const { error: notificationError } = await client.from("notifications").insert({
+      user_id: applicantId,
+      type: "research_application_approved",
+      payload,
+    });
+
+    if (notificationError) {
+      throw new ResearchDataError("Failed to send the approval notification.", {
+        cause: notificationError,
+      });
+    }
+  }
+
+  return mapApplication(applicationRecord as Record<string, any>);
 }
 
 export async function listMyApplications(
