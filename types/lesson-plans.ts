@@ -119,6 +119,4 @@ export interface LessonPlanRecord {
   updated_at?: string | null;
   published_at?: string | null;
   metadata?: unknown;
-  school_logo_url?: string | null;
-  lesson_date?: string | null;
 }

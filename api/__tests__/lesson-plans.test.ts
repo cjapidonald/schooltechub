@@ -11,6 +11,8 @@ vi.mock("@react-pdf/renderer", () => ({
   Page: ({ children }: { children: unknown }) => children,
   Text: ({ children }: { children: unknown }) => children,
   View: ({ children }: { children: unknown }) => children,
+  Image: ({ children }: { children: unknown }) => children,
+  Link: ({ children }: { children: unknown }) => children,
   StyleSheet: { create: () => ({}) },
   renderToBuffer: async () => new Uint8Array([1]),
 }));
