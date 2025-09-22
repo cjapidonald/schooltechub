@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LessonPlan, LessonStep } from "@/types/platform";
+import { logActivity } from "@/lib/activity-log";
 
 const LESSON_PLAN_SELECT = "*";
 const LESSON_STEP_SELECT = "*";
@@ -212,6 +213,12 @@ export async function saveDraft(
   if (!result) {
     throw new LessonPlanDataError("Lesson plan could not be reloaded after saving.");
   }
+
+  const planTitle = result.plan.title?.trim();
+  logActivity("plan-saved", `Saved lesson plan ${planTitle ? `“${planTitle}”` : "updates"}.`, {
+    planId: result.plan.id,
+    planTitle: planTitle ?? undefined,
+  });
 
   return result;
 }

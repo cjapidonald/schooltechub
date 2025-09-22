@@ -4,6 +4,7 @@ const ACTIVE_STEP_STORAGE_PREFIX = "lesson-draft:active-step:";
 const ACTIVE_DRAFT_FLAG_STORAGE_KEY = "lesson-draft:active";
 const ACTIVE_DRAFT_ID_STORAGE_KEY = "lesson-draft:active-id";
 const GLOBAL_ACTIVE_STEP_STORAGE_KEY = "lesson-draft:active-step-id";
+const LEGACY_ACTIVE_STEP_STORAGE_KEY = "activeStepId";
 const CONTEXT_EVENT = "lesson-draft:context-change";
 const ACTIVE_STEP_EVENT = "lesson-draft:active-step-change";
 const ATTACH_RESOURCE_EVENT = "lesson-draft:attach-resource";
@@ -131,8 +132,10 @@ const setGlobalActiveStepId = (stepId: string | null) => {
   try {
     if (stepId && stepId.trim().length > 0) {
       storage.setItem(GLOBAL_ACTIVE_STEP_STORAGE_KEY, stepId);
+      storage.setItem(LEGACY_ACTIVE_STEP_STORAGE_KEY, stepId);
     } else {
       storage.removeItem(GLOBAL_ACTIVE_STEP_STORAGE_KEY);
+      storage.removeItem(LEGACY_ACTIVE_STEP_STORAGE_KEY);
     }
   } catch {
     // Ignore storage errors
@@ -146,7 +149,8 @@ const getGlobalActiveStepId = (): string | null => {
   }
 
   try {
-    const value = storage.getItem(GLOBAL_ACTIVE_STEP_STORAGE_KEY);
+    const value =
+      storage.getItem(GLOBAL_ACTIVE_STEP_STORAGE_KEY) ?? storage.getItem(LEGACY_ACTIVE_STEP_STORAGE_KEY);
     return typeof value === "string" && value.trim().length > 0 ? value : null;
   } catch {
     return null;
@@ -346,6 +350,12 @@ export const clearLessonDraftContext = (draftId: LessonDraft["id"]) => {
   if (getStoredActiveDraftId() === draftId) {
     setStoredActiveDraftId(null);
     setGlobalActiveStepId(null);
+    const storage = getStorage();
+    try {
+      storage?.removeItem(LEGACY_ACTIVE_STEP_STORAGE_KEY);
+    } catch {
+      // Ignore storage errors
+    }
   }
 
   dispatchEvent<LessonDraftContextDetail>(CONTEXT_EVENT, { draftId: null });

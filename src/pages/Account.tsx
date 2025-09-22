@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
@@ -39,7 +39,18 @@ import {
   BellRing,
   Globe,
   GraduationCap,
+  Activity,
+  Paperclip,
+  FlaskConical,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
+  ACTIVITY_TYPE_LABELS,
+  getRecentActivity,
+  subscribeToActivityLog,
+  type ActivityEntry,
+  type ActivityType,
+} from "@/lib/activity-log";
 import type { Database, Json } from "@/integrations/supabase/types";
 import { EnrolledClasses } from "@/components/EnrolledClasses";
 
@@ -77,6 +88,13 @@ const defaultAccountSettings: AccountSettings = {
   theme: "system",
 };
 
+const activityTypeIcons: Record<ActivityType, LucideIcon> = {
+  "class-created": GraduationCap,
+  "plan-saved": FileText,
+  "resource-attached": Paperclip,
+  "research-submitted": FlaskConical,
+};
+
 type CommentWithContent = Database["public"]["Tables"]["comments"]["Row"] & {
   content_master: Pick<
     Database["public"]["Tables"]["content_master"]["Row"],
@@ -107,6 +125,7 @@ const Account = () => {
     role: userRoleOptions[0],
     bio: "",
   });
+  const [activityFeed, setActivityFeed] = useState<ActivityEntry[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -148,6 +167,15 @@ const Account = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, language]);
+
+  useEffect(() => {
+    setActivityFeed(getRecentActivity(10));
+    const unsubscribe = subscribeToActivityLog(entries => {
+      setActivityFeed(entries.slice(0, 10));
+    });
+
+    return unsubscribe;
+  }, []);
 
   const profileQuery = useQuery({
     queryKey: ["profile", user?.id],
@@ -824,6 +852,56 @@ const Account = () => {
                         {activitySummary.lastLogin ?? t.account.activity.neverLoggedIn}
                       </p>
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="h-5 w-5 text-primary" />
+                      Recent activity
+                    </CardTitle>
+                    <CardDescription>
+                      See your latest lesson planning, classes, and research actions.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {activityFeed.length === 0 ? (
+                      <div className="rounded-lg border border-dashed bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+                        Your activity feed is empty for now. Actions from lesson builder, classes, and research submissions will
+                        appear here.
+                      </div>
+                    ) : (
+                      <ul className="space-y-3">
+                        {activityFeed.map(entry => {
+                          const Icon = activityTypeIcons[entry.type] ?? Sparkles;
+                          const relativeTime = (() => {
+                            try {
+                              return formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true });
+                            } catch {
+                              return "";
+                            }
+                          })();
+
+                          return (
+                            <li key={entry.id} className="flex gap-3 rounded-lg border bg-muted/40 p-3">
+                              <span className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <Icon className="h-4 w-4" />
+                              </span>
+                              <div className="flex-1 space-y-1">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className="text-sm font-medium text-foreground">{entry.message}</p>
+                                  <span className="whitespace-nowrap text-xs text-muted-foreground">{relativeTime}</span>
+                                </div>
+                                <Badge variant="outline" className="text-xs font-normal">
+                                  {ACTIVITY_TYPE_LABELS[entry.type]}
+                                </Badge>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </CardContent>
                 </Card>
 

@@ -11,6 +11,7 @@ import type {
   ResearchSubmission,
   ResearchSubmissionStatus,
 } from "@/types/platform";
+import { logActivity } from "@/lib/activity-log";
 
 const PROJECT_SELECT = "*";
 const DOCUMENT_SELECT = "*";
@@ -334,7 +335,15 @@ export async function uploadSubmission(
     throw new ResearchDataError("Failed to record the submission.", { cause: error });
   }
 
-  return mapSubmission(data);
+  const result = mapSubmission(data);
+  const submissionTitle = result.title?.trim();
+  logActivity("research-submitted", `Submitted research ${submissionTitle ? `“${submissionTitle}”` : "work"}.`, {
+    submissionId: result.id,
+    projectId: result.projectId,
+    submissionTitle: submissionTitle ?? undefined,
+  });
+
+  return result;
 }
 
 export async function listMySubmissions(

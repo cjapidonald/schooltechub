@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Class, ClassStatus } from "@/types/platform";
+import { logActivity } from "@/lib/activity-log";
 
 const CLASS_SELECT = "*";
 
@@ -185,7 +186,14 @@ export async function createClass(
     throw new ClassDataError("Unable to create the class.", { cause: error });
   }
 
-  return mapClass(data);
+  const result = mapClass(data);
+  const classTitle = result.title?.trim();
+  logActivity("class-created", classTitle ? `Created class “${classTitle}”.` : "Created a new class.", {
+    classId: result.id,
+    classTitle: classTitle ?? undefined,
+  });
+
+  return result;
 }
 
 export async function updateClass(
