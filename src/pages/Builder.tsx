@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { ChevronDown } from "lucide-react";
+
 import { SEO } from "@/components/SEO";
 import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
 import {
   clearLessonDraftContext,
@@ -137,46 +143,46 @@ const BuilderPage = () => {
           </p>
         </header>
 
-        <Sheet open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr),minmax(320px,0.75fr)] lg:items-start">
-            <div className="space-y-6">
-              <div className="lg:hidden">
-                <SheetTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full justify-between gap-2"
-                    aria-haspopup="dialog"
-                    aria-expanded={isMobilePreviewOpen}
-                    aria-controls="lesson-preview-drawer"
-                  >
-                    <span>View live preview</span>
-                    <span className="text-sm text-muted-foreground">{stepSummaryLabel}</span>
-                  </Button>
-                </SheetTrigger>
-              </div>
-              <StepEditor
-                onRequestResourceSearch={handleRequestResourceSearch}
-                activeResourceStepId={resourceSearchStepId}
-                isResourceSearchOpen={isResourceSearchOpen}
-              />
-            </div>
-            <div className="hidden lg:block lg:sticky lg:top-4">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+          <div className="space-y-6">
+            <StepEditor
+              onRequestResourceSearch={handleRequestResourceSearch}
+              activeResourceStepId={resourceSearchStepId}
+              isResourceSearchOpen={isResourceSearchOpen}
+            />
+          </div>
+          <div className="hidden lg:block">
+            <div className="sticky top-4">
               <LessonPreview />
             </div>
           </div>
+        </div>
 
-          <SheetContent
-            side="bottom"
-            className="h-[85vh] w-full overflow-y-auto bg-background sm:max-w-full lg:hidden"
-            aria-labelledby="lesson-preview-heading-mobile"
-            id="lesson-preview-drawer"
-          >
-            <div className="pb-8">
-              <LessonPreview headingId="lesson-preview-heading-mobile" />
-            </div>
-          </SheetContent>
-        </Sheet>
+        <div className="lg:hidden">
+          <Collapsible open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex w-full items-center justify-between"
+                aria-expanded={isMobilePreviewOpen}
+                aria-controls="lesson-preview-collapsible"
+              >
+                <span>{isMobilePreviewOpen ? "Hide live preview" : "Show live preview"}</span>
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {stepSummaryLabel}
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${isMobilePreviewOpen ? "rotate-180" : "rotate-0"}`}
+                  />
+                </span>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent id="lesson-preview-collapsible">
+              <div className="mt-4">
+                <LessonPreview />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
       </main>
 
       <ResourceSearchModal
