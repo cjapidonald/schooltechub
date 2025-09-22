@@ -34,21 +34,53 @@ export async function fetchLinkStatuses(urls: string[]): Promise<Record<string, 
 }
 
 export async function syncResourceLinks(draftId: string, steps: BuilderStep[]) {
+  const existingResponse = await supabase
+    .from("builder_resource_links")
+    .select("id,step_id,url")
+    .eq("draft_id", draftId);
+
+  if (existingResponse.error) {
+    throw existingResponse.error;
+  }
+
   const records = steps.flatMap(step =>
     step.resources.map(resource => ({
       draft_id: draftId,
       step_id: step.id,
-      label: resource.label,
+      label: resource.title,
       url: resource.url,
+      resource_id: resource.resourceId ?? null,
       last_synced: new Date().toISOString(),
     })),
   );
 
-  if (!records.length) return;
+  if (!records.length) {
+    if ((existingResponse.data?.length ?? 0) > 0) {
+      const { error: deleteError } = await supabase
+        .from("builder_resource_links")
+        .delete()
+        .eq("draft_id", draftId);
+      if (deleteError) throw deleteError;
+    }
+    return;
+  }
 
   const { error } = await supabase.from("builder_resource_links").upsert(records, {
     onConflict: "draft_id,step_id,url",
   });
 
   if (error) throw error;
+
+  const keepKeys = new Set(records.map(record => `${record.step_id}::${record.url}`));
+  const staleIds = (existingResponse.data ?? [])
+    .filter(row => !keepKeys.has(`${row.step_id}::${row.url}`))
+    .map(row => row.id);
+
+  if (staleIds.length) {
+    const { error: deleteError } = await supabase
+      .from("builder_resource_links")
+      .delete()
+      .in("id", staleIds);
+    if (deleteError) throw deleteError;
+  }
 }

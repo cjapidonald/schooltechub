@@ -1337,29 +1337,22 @@ export const sq = {
         canonical: "https://schooltechhub.com/account/resources"
       },
       listTitle: "Burimet tuaja",
-      listDescription: "Rregulloni dukshmërinë, statusin dhe shtoni burime të reja për kolegët.",
+      listDescription: "Përditësoni detajet, rifreskoni lidhjet ose ndani një burim të ri me kolegët.",
       newCta: "Shto burim",
       empty: "Ende nuk keni shtuar burime.",
       emptyCta: "Shto burimin e parë",
       viewLink: "Hap lidhjen",
-      statusLabel: "Statusi",
-      visibilityLabel: "Dukshmëria",
       pagination: "Faqja {current} nga {total}",
       toast: {
         created: "Burimi u dërgua",
         updated: "Burimi u përditësua",
-        updateError: "Nuk mundëm të përditësojmë burimin"
+        deleted: "Burimi u hoq",
+        updateError: "Nuk mundëm të përditësojmë burimin",
+        deleteError: "Nuk mundëm ta fshijmë burimin"
       },
-      status: {
-        draft: "Draft",
-        published: "Publikuar",
-        archived: "Arkivuar"
-      },
-      visibility: {
-        private: "Private",
-        unlisted: "I fshehur",
-        public: "Publike"
-      },
+      instructionalNotesLabel: "Shënime didaktike",
+      deleteConfirmTitle: "Të hiqet ky burim?",
+      deleteConfirmBody: "Kjo do ta fshijë burimin nga paneli juaj, por nuk e heq nga planet ekzistuese.",
       form: {
         title: "Dërgo burim",
         editTitle: "Përditëso burimin",
@@ -1372,18 +1365,14 @@ export const sq = {
         descriptionPlaceholder: "Si i ndihmon ky burim mësuesit?",
         typeLabel: "Lloji i burimit",
         typePlaceholder: "p.sh. Video, Model, Artikull",
-        statusLabel: "Statusi",
-        statusPlaceholder: "Zgjidh statusin",
-        visibilityLabel: "Dukshmëria",
-        visibilityPlaceholder: "Zgjidh dukshmërinë",
-        subjectsLabel: "Lëndët",
-        subjectsPlaceholder: "Shtoni një lëndë dhe shtypni Enter",
-        topicsLabel: "Tema",
-        topicsPlaceholder: "Shtoni një temë dhe shtypni Enter",
+        subjectsLabel: "Lënda",
+        subjectsPlaceholder: "Shtoni një lëndë",
+        gradeLabel: "Grupi i klasës",
+        gradePlaceholder: "p.sh. 3-5",
+        formatLabel: "Formati",
+        formatPlaceholder: "PDF, Prezantim, Ueb...",
         tagsLabel: "Etiketat",
         tagsPlaceholder: "Shtoni etiketa për kërkim më të lehtë",
-        thumbnailLabel: "Figura paraprake",
-        thumbnailPlaceholder: "https://example.com/preview.jpg",
         notesLabel: "Shënime didaktike",
         notesPlaceholder: "Shpjegoni si e përdorni këtë burim",
         submit: "Ruaj burimin"

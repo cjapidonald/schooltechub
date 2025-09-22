@@ -25,6 +25,8 @@ const createDefaultState = (): BuilderState => ({
   objective: "",
   stage: "",
   subject: "",
+  schoolLogoUrl: null,
+  lessonDate: new Date().toISOString().slice(0, 10),
   steps: [createEmptyStep()],
   updatedAt: new Date().toISOString(),
 });

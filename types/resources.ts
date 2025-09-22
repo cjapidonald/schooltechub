@@ -1,23 +1,15 @@
-export type ResourceStatus = "draft" | "published" | "archived";
-export type ResourceVisibility = "private" | "unlisted" | "public";
-
 export interface ResourceRecord {
   id: string;
-  owner_id: string;
   title: string;
-  description: string | null;
   url: string;
-  normalized_url: string;
-  domain: string;
-  favicon_url: string | null;
-  thumbnail_url: string | null;
-  resource_type: string | null;
-  subjects: string[] | null;
-  topics: string[] | null;
+  description: string | null;
   tags: string[] | null;
+  resource_type: string | null;
+  subject: string | null;
+  grade_level: string | null;
+  format: string | null;
   instructional_notes: string | null;
-  status: ResourceStatus;
-  visibility: ResourceVisibility;
+  creator_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -27,16 +19,14 @@ export interface ResourceCard {
   title: string;
   description: string | null;
   url: string;
-  domain: string;
-  faviconUrl: string | null;
-  thumbnailUrl: string | null;
-  resourceType: string | null;
-  subjects: string[];
-  topics: string[];
   tags: string[];
+  resourceType: string | null;
+  subject: string | null;
+  gradeLevel: string | null;
+  format: string | null;
   instructionalNotes: string | null;
-  status: ResourceStatus;
-  visibility: ResourceVisibility;
+  creatorId: string | null;
+  creatorName: string | null;
   createdAt: string;
   updatedAt: string;
 }

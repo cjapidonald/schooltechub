@@ -1,22 +1,19 @@
 import type { BuilderState } from "../types";
 import type { LinkHealthStatus } from "../api/linkHealth";
 
-const formatStep = (index: number, step: BuilderState["steps"][number], includeOffline: boolean) => {
-  const lines = [
-    `${index + 1}. ${step.title} (${step.durationMinutes} min)`
-  ];
-  if (step.goal) lines.push(`Goal: ${step.goal}`);
-  if (step.notes) lines.push(`Notes: ${step.notes}`);
+const formatStep = (index: number, step: BuilderState["steps"][number]) => {
+  const lines = [`${index + 1}. ${step.title}${step.duration ? ` (${step.duration})` : ""}`];
+  if (step.learningGoals) lines.push(`Learning goals: ${step.learningGoals}`);
   if (step.grouping) lines.push(`Grouping: ${step.grouping}`);
   if (step.deliveryMode) lines.push(`Delivery: ${step.deliveryMode}`);
-  if (step.tags.length) lines.push(`Tags: ${step.tags.join(", ")}`);
-  if (includeOffline && step.offlineFallback) {
-    lines.push(`Offline fallback: ${step.offlineFallback}`);
-  }
+  if (step.notes) lines.push(`Teacher notes: ${step.notes}`);
   if (step.resources.length) {
     lines.push("Resources:");
     for (const resource of step.resources) {
-      lines.push(`  - ${resource.label}: ${resource.url}`);
+      lines.push(`  - ${resource.title}: ${resource.url}`);
+      if (resource.instructionalNotes) {
+        lines.push(`      Notes: ${resource.instructionalNotes}`);
+      }
     }
   }
   return lines.join("\n");
@@ -39,7 +36,7 @@ export const generateTeacherExport = (state: BuilderState, linkLookup: Record<st
     }
   });
 
-  const steps = state.steps.map((step, index) => formatStep(index, step, true)).join("\n\n");
+  const steps = state.steps.map((step, index) => formatStep(index, step)).join("\n\n");
 
   return [header, warnings.length ? "Link warnings:\n" + warnings.join("\n") : null, "Steps:", steps]
     .filter(Boolean)
@@ -49,7 +46,7 @@ export const generateTeacherExport = (state: BuilderState, linkLookup: Record<st
 export const generateStudentExport = (state: BuilderState) => {
   const header = `Lesson: ${state.title}`;
   const steps = state.steps
-    .map((step, index) => formatStep(index, step, false))
+    .map((step, index) => formatStep(index, step))
     .join("\n\n");
   return [header, "Steps:", steps].join("\n\n");
 };

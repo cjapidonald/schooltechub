@@ -15,24 +15,28 @@ export interface BuilderActivitySummary {
 
 export interface BuilderResourceLink {
   id: string;
-  label: string;
+  resourceId: string;
+  title: string;
   url: string;
-  isHealthy?: boolean;
-  statusText?: string | null;
-  lastChecked?: string | null;
+  description: string | null;
+  tags: string[];
+  resourceType: string | null;
+  subject: string | null;
+  gradeLevel: string | null;
+  format: string | null;
+  instructionalNotes: string | null;
+  creatorId: string | null;
+  creatorName: string | null;
 }
 
 export interface BuilderStep {
   id: string;
   title: string;
-  goal: string;
-  notes: string;
-  durationMinutes: number;
+  learningGoals: string;
+  duration: string;
   grouping: string;
   deliveryMode: string;
-  technology: string[];
-  tags: string[];
-  offlineFallback: string;
+  notes: string;
   resources: BuilderResourceLink[];
 }
 
@@ -42,6 +46,8 @@ export interface BuilderState {
   objective: string;
   stage: string;
   subject: string;
+  schoolLogoUrl: string | null;
+  lessonDate: string;
   steps: BuilderStep[];
   updatedAt: string;
 }
@@ -52,6 +58,8 @@ export interface BuilderDraftPayload {
   stage?: string;
   subject?: string;
   steps?: BuilderStep[];
+  schoolLogoUrl?: string | null;
+  lessonDate?: string;
 }
 
 export type BuilderDraftJSON = Json;
