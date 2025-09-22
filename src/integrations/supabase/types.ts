@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          delivery_modes: Database["public"]["Enums"]["lesson_delivery_mode"][]
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          materials: string[]
+          metadata: Json
+          owner_id: string
+          resource_domain: string | null
+          resource_url: string | null
+          share_code: string
+          shared_with: string[]
+          slug: string
+          stage: Database["public"]["Enums"]["lesson_stage"]
+          subjects: string[]
+          summary: string | null
+          technology_tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_modes?: Database["public"]["Enums"]["lesson_delivery_mode"][]
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          materials?: string[]
+          metadata?: Json
+          owner_id: string
+          resource_domain?: string | null
+          resource_url?: string | null
+          share_code?: string
+          shared_with?: string[]
+          slug: string
+          stage: Database["public"]["Enums"]["lesson_stage"]
+          subjects?: string[]
+          summary?: string | null
+          technology_tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_modes?: Database["public"]["Enums"]["lesson_delivery_mode"][]
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          materials?: string[]
+          metadata?: Json
+          owner_id?: string
+          resource_domain?: string | null
+          resource_url?: string | null
+          share_code?: string
+          shared_with?: string[]
+          slug?: string
+          stage?: Database["public"]["Enums"]["lesson_stage"]
+          subjects?: string[]
+          summary?: string | null
+          technology_tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           category: string | null
@@ -497,60 +571,324 @@ export type Database = {
       }
       lesson_plans: {
         Row: {
-          activities: Json
           created_at: string
+          delivery_modes: Database["public"]["Enums"]["lesson_delivery_mode"][]
           duration_minutes: number | null
           grade_levels: string[]
           id: string
-          materials: string[]
-          objectives: string[]
+          notes: string | null
+          overview: Json
+          owner_id: string
+          published_at: string | null
           search_vector: unknown
+          share_code: string
+          shared_with: string[]
           slug: string
-          standards: string[]
+          stage: Database["public"]["Enums"]["lesson_stage"] | null
           status: string
-          subject: string | null
+          subjects: string[]
           summary: string | null
           tags: string[]
+          technology_tags: string[]
           title: string
           updated_at: string
         }
         Insert: {
-          activities?: Json
           created_at?: string
+          delivery_modes?: Database["public"]["Enums"]["lesson_delivery_mode"][]
           duration_minutes?: number | null
           grade_levels?: string[]
           id?: string
-          materials?: string[]
-          objectives?: string[]
+          notes?: string | null
+          overview?: Json
+          owner_id: string
+          published_at?: string | null
           search_vector?: unknown
+          share_code?: string
+          shared_with?: string[]
           slug: string
-          standards?: string[]
+          stage?: Database["public"]["Enums"]["lesson_stage"] | null
           status?: string
-          subject?: string | null
+          subjects?: string[]
           summary?: string | null
           tags?: string[]
+          technology_tags?: string[]
           title: string
           updated_at?: string
         }
         Update: {
-          activities?: Json
           created_at?: string
+          delivery_modes?: Database["public"]["Enums"]["lesson_delivery_mode"][]
           duration_minutes?: number | null
           grade_levels?: string[]
           id?: string
-          materials?: string[]
-          objectives?: string[]
+          notes?: string | null
+          overview?: Json
+          owner_id?: string
+          published_at?: string | null
           search_vector?: unknown
+          share_code?: string
+          shared_with?: string[]
           slug?: string
-          standards?: string[]
+          stage?: Database["public"]["Enums"]["lesson_stage"] | null
           status?: string
-          subject?: string | null
+          subjects?: string[]
           summary?: string | null
           tags?: string[]
+          technology_tags?: string[]
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plans_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          plan_id: string
+          position: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          plan_id: string
+          position?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          plan_id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_sections_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_standards: {
+        Row: {
+          aligned_at: string
+          created_at: string
+          is_primary: boolean
+          plan_id: string
+          standard_id: string
+          updated_at: string
+        }
+        Insert: {
+          aligned_at?: string
+          created_at?: string
+          is_primary?: boolean
+          plan_id: string
+          standard_id: string
+          updated_at?: string
+        }
+        Update: {
+          aligned_at?: string
+          created_at?: string
+          is_primary?: boolean
+          plan_id?: string
+          standard_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_standards_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_standards_standard_id_fkey"
+            columns: ["standard_id"]
+            isOneToOne: false
+            referencedRelation: "standards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_steps: {
+        Row: {
+          activity_id: string | null
+          created_at: string
+          delivery_modes: Database["public"]["Enums"]["lesson_delivery_mode"][]
+          duration_minutes: number | null
+          id: string
+          instructions: string | null
+          materials: string[]
+          position: number
+          resource_domain: string | null
+          resource_url: string | null
+          section_id: string
+          stage: Database["public"]["Enums"]["lesson_stage"] | null
+          technology_tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          activity_id?: string | null
+          created_at?: string
+          delivery_modes?: Database["public"]["Enums"]["lesson_delivery_mode"][]
+          duration_minutes?: number | null
+          id?: string
+          instructions?: string | null
+          materials?: string[]
+          position?: number
+          resource_domain?: string | null
+          resource_url?: string | null
+          section_id: string
+          stage?: Database["public"]["Enums"]["lesson_stage"] | null
+          technology_tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string | null
+          created_at?: string
+          delivery_modes?: Database["public"]["Enums"]["lesson_delivery_mode"][]
+          duration_minutes?: number | null
+          id?: string
+          instructions?: string | null
+          materials?: string[]
+          position?: number
+          resource_domain?: string | null
+          resource_url?: string | null
+          section_id?: string
+          stage?: Database["public"]["Enums"]["lesson_stage"] | null
+          technology_tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_steps_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_steps_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plan_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          plan_id: string
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          plan_id: string
+          snapshot: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          plan_id?: string
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_versions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      standards: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          framework: string
+          grade_band: string | null
+          id: string
+          subject: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          framework: string
+          grade_band?: string | null
+          id?: string
+          subject?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          framework?: string
+          grade_band?: string | null
+          id?: string
+          subject?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
@@ -682,7 +1020,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      lesson_plan_permissions: {
+        Row: {
+          owner_id: string
+          plan_id: string
+          share_code: string
+          shared_with: string[]
+          status: string
+        }
+      }
     }
     Functions: {
       get_newsletter_subscriber_count: {
@@ -758,6 +1104,18 @@ export type Database = {
         | "Cooperative Learning"
         | "Experiential Learning"
         | "Design Thinking"
+      lesson_delivery_mode:
+        | "in-person"
+        | "blended"
+        | "online"
+        | "project-based"
+        | "flipped"
+      lesson_stage:
+        | "early childhood"
+        | "elementary"
+        | "middle school"
+        | "high school"
+        | "adult learners"
         | "Socratic Seminar"
         | "Station Rotation"
         | "Blended Learning"

@@ -1,21 +1,23 @@
 import type {
+  LessonDeliveryModeValue,
   LessonPlanContentBlock as ApiLessonPlanContentBlock,
   LessonPlanContentSection as ApiLessonPlanContentSection,
   LessonPlanListItem as ApiLessonPlanListItem,
   LessonPlanListResponse as ApiLessonPlanListResponse,
   LessonPlanOverview as ApiLessonPlanOverview,
   LessonPlanResource as ApiLessonPlanResource,
+  LessonStageValue,
 } from "../../types/lesson-plans";
 
 export interface Stage {
-  value: string;
+  value: LessonStageValue;
   label: string;
   description?: string;
   gradeRange?: string;
 }
 
 export interface DeliveryMode {
-  value: string;
+  value: LessonDeliveryModeValue;
   label: string;
   description?: string;
   durationHint?: string;
