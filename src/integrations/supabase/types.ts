@@ -38,6 +38,169 @@ export type Database = {
         }
         Relationships: []
       }
+      builder_activity_favorites: {
+        Row: {
+          activity_slug: string | null
+          anon_user_id: string | null
+          created_at: string | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          activity_slug?: string | null
+          anon_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          activity_slug?: string | null
+          anon_user_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_activity_favorites_activity_slug_fkey"
+            columns: ["activity_slug"]
+            isOneToOne: false
+            referencedRelation: "tools_activities"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      builder_activity_recents: {
+        Row: {
+          activity_slug: string | null
+          anon_user_id: string | null
+          id: string
+          last_viewed: string | null
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_slug?: string | null
+          anon_user_id?: string | null
+          id?: string
+          last_viewed?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_slug?: string | null
+          anon_user_id?: string | null
+          id?: string
+          last_viewed?: string | null
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_activity_recents_activity_slug_fkey"
+            columns: ["activity_slug"]
+            isOneToOne: false
+            referencedRelation: "tools_activities"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      builder_collection_items: {
+        Row: {
+          activity_slug: string | null
+          collection_id: string | null
+          created_at: string | null
+          id: string
+          position: number | null
+        }
+        Insert: {
+          activity_slug?: string | null
+          collection_id?: string | null
+          created_at?: string | null
+          id?: string
+          position?: number | null
+        }
+        Update: {
+          activity_slug?: string | null
+          collection_id?: string | null
+          created_at?: string | null
+          id?: string
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "builder_collection_items_activity_slug_fkey"
+            columns: ["activity_slug"]
+            isOneToOne: false
+            referencedRelation: "tools_activities"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "builder_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "builder_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      builder_collections: {
+        Row: {
+          anon_user_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anon_user_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anon_user_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      builder_lesson_plans: {
+        Row: {
+          anon_user_id: string
+          created_at: string | null
+          data: Json | null
+          id: string
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          anon_user_id: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          anon_user_id?: string
+          created_at?: string | null
+          data?: Json | null
+          id?: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       classes: {
         Row: {
           category: string | null
@@ -721,6 +884,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tools_activities: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          grade_levels: string[] | null
+          instructions: string | null
+          learning_objectives: string[] | null
+          materials: string[] | null
+          name: string
+          slug: string
+          subjects: string[] | null
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          grade_levels?: string[] | null
+          instructions?: string | null
+          learning_objectives?: string[] | null
+          materials?: string[] | null
+          name: string
+          slug: string
+          subjects?: string[] | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          grade_levels?: string[] | null
+          instructions?: string | null
+          learning_objectives?: string[] | null
+          materials?: string[] | null
+          name?: string
+          slug?: string
+          subjects?: string[] | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
