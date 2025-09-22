@@ -1,7 +1,9 @@
+import type { MouseEvent } from "react";
 import { Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Resource } from "@/types/resources";
 
@@ -10,6 +12,8 @@ interface ResourceCardProps {
   layout?: "horizontal" | "vertical";
   onAdd?: () => void;
   addButtonLabel?: string;
+  addButtonDisabled?: boolean;
+  addButtonTooltip?: string;
 }
 
 const formatMetadata = (resource: Resource) => {
@@ -31,6 +35,8 @@ export const ResourceCard = ({
   layout = "horizontal",
   onAdd,
   addButtonLabel,
+  addButtonDisabled = false,
+  addButtonTooltip,
 }: ResourceCardProps) => {
   const metadata = formatMetadata(resource);
   const tags = resource.tags?.filter(tag => tag.trim().length > 0).slice(0, 4) ?? [];
@@ -86,6 +92,29 @@ export const ResourceCard = ({
     </div>
   );
 
+  const handleAddClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (addButtonDisabled) {
+      return;
+    }
+    onAdd?.();
+  };
+
+  const addButton = (
+    <Button
+      type="button"
+      variant="secondary"
+      size="icon"
+      className="absolute right-3 top-3 h-7 w-7"
+      onClick={handleAddClick}
+      aria-label={addButtonLabel ?? "Add resource"}
+      disabled={addButtonDisabled}
+    >
+      <Plus className="h-4 w-4" aria-hidden />
+    </Button>
+  );
+
   return (
     <article
       className={cn(
@@ -95,20 +124,18 @@ export const ResourceCard = ({
       )}
     >
       {showAddButton ? (
-        <Button
-          type="button"
-          variant="secondary"
-          size="icon"
-          className="absolute right-3 top-3 h-7 w-7"
-          onClick={event => {
-            event.preventDefault();
-            event.stopPropagation();
-            onAdd?.();
-          }}
-          aria-label={addButtonLabel ?? "Add resource"}
-        >
-          <Plus className="h-4 w-4" aria-hidden />
-        </Button>
+        addButtonTooltip ? (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>{addButton}</TooltipTrigger>
+              <TooltipContent side="left" align="center">
+                {addButtonTooltip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          addButton
+        )
       ) : null}
       {isVertical ? (
         <>
