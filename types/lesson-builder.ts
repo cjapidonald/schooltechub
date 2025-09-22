@@ -39,7 +39,7 @@ export interface LessonBuilderStandard {
 
 export interface LessonBuilderPart {
   id: string;
-  label: string;
+label: string;
   description: string | null;
   completed: boolean;
 }
@@ -64,13 +64,13 @@ export interface LessonBuilderPlan {
   deliveryMethods: string[];
   technologyTags: string[];
   durationMinutes: number | null;
+  schoolLogoUrl: string | null;
+  lessonDate: string | null;
   overview: LessonPlanOverview | null;
   steps: LessonBuilderStep[];
   standards: LessonBuilderStandard[];
   availableStandards: LessonBuilderStandard[];
   resources: LessonPlanResource[];
-  lessonDate: string | null;
-  schoolLogoUrl: string | null;
   lastSavedAt: string | null;
   version: number;
   parts: LessonBuilderPart[];
@@ -85,6 +85,10 @@ export interface LessonBuilderPlanResponse {
 
 export interface LessonBuilderHistoryResponse {
   versions: LessonBuilderVersionEntry[];
+}
+
+export interface LessonBuilderActivitySearchResponse {
+  results: LessonBuilderActivity[];
 }
 
 export interface LessonBuilderActivitySearchResponse {
@@ -149,11 +153,7 @@ export function builderStepsToContent(
       });
     }
 
-    if (step.notes) {
-      blocks.push({
-        type: "quote",
-        text: step.notes,
-      });
+   });
     }
 
     return {
@@ -178,8 +178,8 @@ function createListItemFromPlan(plan: LessonBuilderPlan): LessonPlanListItem {
     technologyTags: plan.technologyTags,
     durationMinutes: plan.durationMinutes,
     pdfUrl: null,
-    lessonDate: plan.lessonDate,
     schoolLogoUrl: plan.schoolLogoUrl,
+    lessonDate: plan.lessonDate,
     status: plan.status,
     createdAt: plan.createdAt,
     updatedAt: plan.updatedAt,
@@ -205,49 +205,3 @@ export function mergeStandardValues(
     domain: ensureString(values.domain),
     subject: ensureString(values.subject),
     gradeLevels: ensureStringArray(values.gradeLevels),
-  };
-}
-
-export function mergeActivityValues(
-  values: Partial<LessonBuilderActivity>
-): LessonBuilderActivity {
-  return {
-    id: values.id ?? cryptoRandomId("act"),
-    title: ensureString(values.title) ?? "Untitled Activity",
-    summary: ensureString(values.summary),
-    subjects: ensureStringArray(values.subjects),
-    gradeLevels: ensureStringArray(values.gradeLevels),
-    durationMinutes:
-      typeof values.durationMinutes === "number" && Number.isFinite(values.durationMinutes)
-        ? Math.max(0, Math.trunc(values.durationMinutes))
-        : null,
-    sourceUrl: ensureString(values.sourceUrl),
-    tags: ensureStringArray(values.tags),
-  };
-}
-
-export function mergeStepValues(
-  values: Partial<LessonBuilderStep>
-): LessonBuilderStep {
-  return {
-    id: values.id ?? cryptoRandomId("step"),
-    title: ensureString(values.title) ?? "",
-    description: ensureString(values.description),
-    durationMinutes:
-      typeof values.durationMinutes === "number" && Number.isFinite(values.durationMinutes)
-        ? Math.max(0, Math.trunc(values.durationMinutes))
-        : null,
-    notes: ensureString(values.notes),
-    activities: Array.isArray(values.activities)
-      ? values.activities.map((activity) => mergeActivityValues(activity))
-      : [],
-  };
-}
-
-export function cryptoRandomId(prefix: string): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return `${prefix}_${crypto.randomUUID()}`;
-  }
-  const random = Math.random().toString(36).slice(2, 10);
-  return `${prefix}_${random}`;
-}

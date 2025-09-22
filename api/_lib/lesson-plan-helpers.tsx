@@ -223,9 +223,7 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
   const delivery = uniqStrings([
     ...ensureStringArray(record.delivery_methods),
     ...ensureStringArray(record.delivery),
-    ...ensureStringArray(record.delivery_modes),
-    ...ensureStringArray(record.delivery_format),
-  ]);
+ ]);
   const tech = uniqStrings([
     ...ensureStringArray(record.technology_tags),
     ...ensureStringArray(record.technology),
@@ -250,8 +248,8 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
   const pdfUrl =
     nullableString(record.pdf_url) ?? nullableString(record.pdf) ?? null;
 
-  const lessonDate = extractLessonDateValue(record);
-  const schoolLogoUrl = extractSchoolLogoUrlValue(record);
+  const schoolLogoUrl = nullableString(record.school_logo_url);
+  const lessonDate = nullableString(record.lesson_date);
 
   return {
     id: record.id,
@@ -265,8 +263,8 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
     technologyTags: tech,
     durationMinutes: duration,
     pdfUrl,
-    lessonDate,
     schoolLogoUrl,
+    lessonDate,
     status: record.status ?? ("draft" as LessonPlanStatus),
     createdAt: nullableString(record.created_at),
     updatedAt: nullableString(record.updated_at),
@@ -280,6 +278,18 @@ export function mapRecordToDetail(record: LessonPlanRecord): LessonPlanDetail {
   const content = normalizeContent(record.content ?? record.body ?? null);
 
   return {
+    ...base,
+    content,
+    overview,
+    resources,
+  };
+}
+
+export function buildListResponse(
+  records: LessonPlanRecord[],
+  filters: LessonPlanListFilters
+): LessonPlanListResponse {
+  const hasMore = records.length > filters.limit;
     ...base,
     content,
     overview,
