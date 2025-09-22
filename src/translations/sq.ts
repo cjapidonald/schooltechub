@@ -1194,6 +1194,12 @@ export const sq = {
       subjectsLabel: "Lëndët",
       durationLabel: "Kohëzgjatja",
       technologyLabel: "Teknologjia",
+      logoLabel: "Ngarko logon e shkollës",
+      logoChangeLabel: "Ndrysho logon",
+      logoUploadingLabel: "Duke ngarkuar...",
+      logoAlt: "Logo e shkollës",
+      dateLabel: "Data e mësimit",
+      datePlaceholder: "Zgjidh një datë",
     },
     canvas: {
       title: "Rrjedha e të nxënit",

@@ -802,9 +802,12 @@ export type Database = {
           duration_minutes: number | null
           grade_levels: string[]
           id: string
+          lesson_date: string | null
           materials: string[]
           objectives: string[]
+          owner_id: string | null
           search_vector: unknown
+          school_logo_url: string | null
           slug: string
           standards: string[]
           status: string
@@ -820,9 +823,12 @@ export type Database = {
           duration_minutes?: number | null
           grade_levels?: string[]
           id?: string
+          lesson_date?: string | null
           materials?: string[]
           objectives?: string[]
+          owner_id?: string | null
           search_vector?: unknown
+          school_logo_url?: string | null
           slug: string
           standards?: string[]
           status?: string
@@ -838,9 +844,12 @@ export type Database = {
           duration_minutes?: number | null
           grade_levels?: string[]
           id?: string
+          lesson_date?: string | null
           materials?: string[]
           objectives?: string[]
+          owner_id?: string | null
           search_vector?: unknown
+          school_logo_url?: string | null
           slug?: string
           standards?: string[]
           status?: string
@@ -851,6 +860,186 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      lesson_plan_steps: {
+        Row: {
+          created_at: string
+          delivery_mode: "offline" | "blended" | "online" | null
+          duration_minutes: number | null
+          id: string
+          learning_goals: string | null
+          lesson_plan_id: string
+          notes: string | null
+          position: number | null
+          resources: Json | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_mode?: "offline" | "blended" | "online" | null
+          duration_minutes?: number | null
+          id?: string
+          learning_goals?: string | null
+          lesson_plan_id: string
+          notes?: string | null
+          position?: number | null
+          resources?: Json | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_mode?: "offline" | "blended" | "online" | null
+          duration_minutes?: number | null
+          id?: string
+          learning_goals?: string | null
+          lesson_plan_id?: string
+          notes?: string | null
+          position?: number | null
+          resources?: Json | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_steps_lesson_plan_id_fkey"
+            columns: ["lesson_plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resources: {
+        Row: {
+          cost: string | null
+          created_at: string
+          created_by: string | null
+          delivery_mode: "offline" | "blended" | "online" | null
+          description: string | null
+          download_url: string | null
+          duration_minutes: number | null
+          grade_levels: string[]
+          id: string
+          language: string
+          learning_goals: string | null
+          lesson_plan_id: string | null
+          metadata: Json
+          provider: string | null
+          published_at: string | null
+          resource_type:
+            | "video"
+            | "article"
+            | "worksheet"
+            | "template"
+            | "interactive"
+            | "tool"
+            | "other"
+          search_vector: unknown
+          status: "draft" | "published" | "archived"
+          step_id: string | null
+          subjects: string[]
+          summary: string | null
+          tags: string[]
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          cost?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_mode?: "offline" | "blended" | "online" | null
+          description?: string | null
+          download_url?: string | null
+          duration_minutes?: number | null
+          grade_levels?: string[]
+          id?: string
+          language?: string
+          learning_goals?: string | null
+          lesson_plan_id?: string | null
+          metadata?: Json
+          provider?: string | null
+          published_at?: string | null
+          resource_type:
+            | "video"
+            | "article"
+            | "worksheet"
+            | "template"
+            | "interactive"
+            | "tool"
+            | "other"
+          search_vector?: unknown
+          status?: "draft" | "published" | "archived"
+          step_id?: string | null
+          subjects?: string[]
+          summary?: string | null
+          tags?: string[]
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          cost?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_mode?: "offline" | "blended" | "online" | null
+          description?: string | null
+          download_url?: string | null
+          duration_minutes?: number | null
+          grade_levels?: string[]
+          id?: string
+          language?: string
+          learning_goals?: string | null
+          lesson_plan_id?: string | null
+          metadata?: Json
+          provider?: string | null
+          published_at?: string | null
+          resource_type?:
+            | "video"
+            | "article"
+            | "worksheet"
+            | "template"
+            | "interactive"
+            | "tool"
+            | "other"
+          search_vector?: unknown
+          status?: "draft" | "published" | "archived"
+          step_id?: string | null
+          subjects?: string[]
+          summary?: string | null
+          tags?: string[]
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_lesson_plan_id_fkey"
+            columns: ["lesson_plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plan_steps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
@@ -903,7 +1092,9 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          school_logo_url: string | null
           role: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -911,7 +1102,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -919,7 +1112,9 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
           updated_at?: string | null
         }
         Relationships: []

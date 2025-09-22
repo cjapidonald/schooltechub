@@ -26,6 +26,8 @@ interface BuilderMetadata {
   parts?: unknown;
   lastSavedAt?: unknown;
   history?: unknown;
+  lessonDate?: unknown;
+  schoolLogoUrl?: unknown;
 }
 
 const DEFAULT_PARTS: Array<{ id: string; label: string; description: string | null }> = [
@@ -52,6 +54,8 @@ function normalizeMetadata(value: unknown): BuilderMetadata {
     parts: builderRaw.parts,
     lastSavedAt: builderRaw.lastSavedAt ?? builderRaw.last_saved_at,
     history: builderRaw.history,
+    lessonDate: builderRaw.lessonDate ?? builderRaw.lesson_date,
+    schoolLogoUrl: builderRaw.schoolLogoUrl ?? builderRaw.school_logo_url,
   } as BuilderMetadata;
 }
 
@@ -193,6 +197,18 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
   const history = normalizeHistory(metadata.history);
 
   const parts = ensureParts(metadata.parts, detail, steps);
+  const schoolLogoUrl =
+    typeof record.school_logo_url === "string"
+      ? record.school_logo_url
+      : typeof metadata.schoolLogoUrl === "string"
+        ? metadata.schoolLogoUrl
+        : null;
+  const lessonDate =
+    typeof record.lesson_date === "string"
+      ? record.lesson_date
+      : typeof metadata.lessonDate === "string"
+        ? metadata.lessonDate
+        : null;
 
   return {
     id: detail.id,
@@ -206,6 +222,8 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
     deliveryMethods: detail.deliveryMethods,
     technologyTags: detail.technologyTags,
     durationMinutes: detail.durationMinutes,
+    schoolLogoUrl: detail.schoolLogoUrl,
+    lessonDate: detail.lessonDate,
     overview: detail.overview,
     steps,
     standards,
@@ -215,6 +233,9 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
     version: typeof metadata.version === "number" ? metadata.version : detail.updatedAt ? 1 : 0,
     parts,
     history,
+    schoolLogoUrl,
+    lessonDate,
+    ownerId: typeof record.owner_id === "string" ? record.owner_id : null,
     createdAt: detail.createdAt ?? null,
     updatedAt: detail.updatedAt ?? null,
   };
@@ -230,6 +251,8 @@ export function buildMetadataFromPlan(plan: LessonBuilderPlan): Record<string, u
       parts: plan.parts,
       lastSavedAt: plan.lastSavedAt,
       history: plan.history,
+      lessonDate: plan.lessonDate,
+      schoolLogoUrl: plan.schoolLogoUrl,
     },
   };
 }
@@ -248,6 +271,8 @@ export function buildUpdatePayload(plan: LessonBuilderPlan): Partial<LessonPlanR
     content: builderStepsToContent(plan.steps),
     resources: plan.resources,
     metadata: buildMetadataFromPlan(plan),
+    school_logo_url: plan.schoolLogoUrl,
+    lesson_date: plan.lessonDate,
   } as Partial<LessonPlanRecord>;
 }
 
@@ -262,6 +287,8 @@ export function createDraftInsert(
     version: number;
     parts: LessonBuilderPlan["parts"];
     history: LessonBuilderPlan["history"];
+    schoolLogoUrl?: LessonBuilderPlan["schoolLogoUrl"];
+    lessonDate?: LessonBuilderPlan["lessonDate"];
   }
 ): Partial<LessonPlanRecord> {
   return {
@@ -288,8 +315,12 @@ export function createDraftInsert(
         parts: plan.parts,
         lastSavedAt: null,
         history: plan.history,
+        lessonDate: plan.lessonDate ?? null,
+        schoolLogoUrl: plan.schoolLogoUrl ?? null,
       },
     },
+    school_logo_url: plan.schoolLogoUrl ?? null,
+    lesson_date: plan.lessonDate ?? null,
   } as Partial<LessonPlanRecord>;
 }
 

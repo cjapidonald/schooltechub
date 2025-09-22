@@ -1194,6 +1194,12 @@ export const en = {
       subjectsLabel: "Subjects",
       durationLabel: "Duration",
       technologyLabel: "Technology",
+      logoLabel: "Upload school logo",
+      logoChangeLabel: "Change logo",
+      logoUploadingLabel: "Uploading...",
+      logoAlt: "School logo",
+      dateLabel: "Lesson date",
+      datePlaceholder: "Select a date",
     },
     canvas: {
       title: "Learning sequence",

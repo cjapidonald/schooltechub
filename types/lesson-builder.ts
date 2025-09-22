@@ -97,6 +97,8 @@ export interface LessonBuilderPlan {
   deliveryMethods: string[];
   technologyTags: string[];
   durationMinutes: number | null;
+  schoolLogoUrl: string | null;
+  lessonDate: string | null;
   overview: LessonPlanOverview | null;
   steps: LessonBuilderStep[];
   standards: LessonBuilderStandard[];
@@ -106,6 +108,9 @@ export interface LessonBuilderPlan {
   version: number;
   parts: LessonBuilderPart[];
   history: LessonBuilderVersionEntry[];
+  schoolLogoUrl: string | null;
+  lessonDate: string | null;
+  ownerId?: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 }
@@ -218,6 +223,8 @@ function createListItemFromPlan(plan: LessonBuilderPlan): LessonPlanListItem {
     technologyTags: plan.technologyTags,
     durationMinutes: plan.durationMinutes,
     pdfUrl: null,
+    schoolLogoUrl: plan.schoolLogoUrl,
+    lessonDate: plan.lessonDate,
     status: plan.status,
     createdAt: plan.createdAt,
     updatedAt: plan.updatedAt,
