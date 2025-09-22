@@ -5,17 +5,26 @@ import { Separator } from "@/components/ui/separator";
 import type { LessonBuilderStep } from "@/types/lesson-builder";
 import { StepCard } from "./StepCard";
 
+interface StepCardCopy {
+  titlePlaceholder: string;
+  learningGoalsLabel: string;
+  learningGoalsPlaceholder: string;
+  durationLabel: string;
+  durationPlaceholder: string;
+  groupingLabel: string;
+  deliveryLabel: string;
+  instructionalNoteLabel: string;
+  instructionalNotePlaceholder: string;
+  searchResources: string;
+  resourcesTitle: string;
+  resourcesEmpty: string;
+}
+
 interface PlanCanvasCopy {
   title: string;
   addStep: string;
   empty: string;
-  stepCopy: {
-    titlePlaceholder: string;
-    descriptionPlaceholder: string;
-    notesPlaceholder: string;
-    activitiesTitle: string;
-    removeActivity: string;
-  };
+  stepCopy: StepCardCopy;
 }
 
 interface PlanCanvasProps {
@@ -25,6 +34,7 @@ interface PlanCanvasProps {
   onAddStep: () => void;
   onRemoveStep: (id: string) => void;
   onStepChange: (id: string, updater: (step: LessonBuilderStep) => LessonBuilderStep) => void;
+  onSearchResources: (id: string) => void;
   copy: PlanCanvasCopy;
 }
 
@@ -35,6 +45,7 @@ export const PlanCanvas = ({
   onAddStep,
   onRemoveStep,
   onStepChange,
+  onSearchResources,
   copy,
 }: PlanCanvasProps) => {
   return (
@@ -59,6 +70,7 @@ export const PlanCanvas = ({
                   onSelect={() => onSelectStep(step.id)}
                   onRemove={() => onRemoveStep(step.id)}
                   onChange={(updater) => onStepChange(step.id, updater)}
+                  onSearchResources={() => onSearchResources(step.id)}
                   copy={copy.stepCopy}
                 />
                 {index < steps.length - 1 ? <Separator /> : null}

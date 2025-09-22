@@ -9,6 +9,8 @@ import type {
   LessonBuilderPart,
   LessonBuilderStandard,
   LessonBuilderStep,
+  LessonBuilderStepResource,
+  LessonBuilderResourceSearchResult,
   LessonBuilderVersionEntry,
 } from "../../types/lesson-builder";
 
@@ -23,6 +25,8 @@ export type {
   LessonBuilderPart,
   LessonBuilderStandard,
   LessonBuilderStep,
+  LessonBuilderStepResource,
+  LessonBuilderResourceSearchResult,
   LessonBuilderVersionEntry,
 };
 
@@ -32,5 +36,6 @@ export {
   mergeActivityValues,
   mergeStandardValues,
   mergeStepValues,
+  mergeResourceValues,
   cryptoRandomId,
 } from "../../types/lesson-builder";

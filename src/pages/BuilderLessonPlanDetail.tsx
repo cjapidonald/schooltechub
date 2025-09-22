@@ -6,28 +6,27 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  ActivitySearchPanel,
-} from "@/components/builder/lesson/ActivitySearchPanel";
+import { ToastAction } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 import { MetaBar } from "@/components/builder/lesson/MetaBar";
 import { PartsSidebar } from "@/components/builder/lesson/PartsSidebar";
 import { PlanCanvas } from "@/components/builder/lesson/PlanCanvas";
 import { StandardsPicker } from "@/components/builder/lesson/StandardsPicker";
 import { Toolbar } from "@/components/builder/lesson/Toolbar";
 import { PreviewModal } from "@/components/builder/lesson/PreviewModal";
+import { ResourceSearchModal } from "@/components/builder/lesson/ResourceSearchModal";
 import type { LessonDetailCopy } from "@/components/lesson-plans/LessonModal";
 import {
   autosaveLessonBuilderPlan,
   fetchLessonBuilderHistory,
   fetchLessonBuilderPlan,
-  searchLessonBuilderActivities,
 } from "@/lib/builder-api";
 import type {
-  LessonBuilderActivity,
   LessonBuilderPlan,
   LessonBuilderVersionEntry,
+  LessonBuilderResourceSearchResult,
 } from "@/types/lesson-builder";
-import { mergeStepValues } from "@/types/lesson-builder";
+import { mergeResourceValues, mergeStepValues } from "@/types/lesson-builder";
 
 const AUTOSAVE_DELAY = 1500;
 
@@ -35,6 +34,7 @@ const BuilderLessonPlanDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const planQuery = useQuery({
     queryKey: ["builder-plan", id],
@@ -51,11 +51,15 @@ const BuilderLessonPlanDetail = () => {
   const [plan, setPlan] = useState<LessonBuilderPlan | null>(null);
   const [selectedPart, setSelectedPart] = useState<string | null>(null);
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
-  const [activityQuery, setActivityQuery] = useState("");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [profileId, setProfileId] = useState<string | null>(null);
-  const [profileLogoUrl, setProfileLogoUrl] = useState<string | null>(null);
-  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
+
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestPlan = useRef<LessonBuilderPlan | null>(null);
+
+  useEffect(() => {
+    if (planQuery.data) {
+      setPlan(planQuery.data);
 
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestPlan = useRef<LessonBuilderPlan | null>(null);
@@ -135,6 +139,34 @@ const BuilderLessonPlanDetail = () => {
       clearTimeout(autosaveTimer.current);
     }
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isResourceSearchOpen) {
+        setIsResourceSearchOpen(false);
+        setResourceSearchStepId(null);
+      }
+      if (event.key === "Enter" && !isResourceSearchOpen && selectedStepId) {
+        const target = event.target as HTMLElement | null;
+        if (target) {
+          const tagName = target.tagName;
+          if (
+            tagName === "INPUT" ||
+            tagName === "TEXTAREA" ||
+            tagName === "SELECT" ||
+            target.isContentEditable
+          ) {
+            return;
+          }
+        }
+        setResourceSearchStepId(selectedStepId);
+        setIsResourceSearchOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isResourceSearchOpen, selectedStepId]);
 
   const autosaveMutation = useMutation({
     mutationFn: (updatedPlan: LessonBuilderPlan) => autosaveLessonBuilderPlan(id as string, updatedPlan),
@@ -249,22 +281,91 @@ const BuilderLessonPlanDetail = () => {
     }));
   };
 
-  const handleAddActivity = (activity: LessonBuilderActivity) => {
-    if (!selectedStepId) {
+  const openResourceSearchForStep = (stepId: string) => {
+    setSelectedStepId(stepId);
+    setResourceSearchStepId(stepId);
+    setIsResourceSearchOpen(true);
+  };
+
+  const mergeInstructionalNotes = (existing: string | null, addition: string | null) => {
+    if (!addition) {
+      return existing;
+    }
+    const trimmedAddition = addition.trim();
+    if (trimmedAddition.length === 0) {
+      return existing;
+    }
+    if (!existing || existing.trim().length === 0) {
+      return trimmedAddition;
+    }
+    if (existing.includes(trimmedAddition)) {
+      return existing;
+    }
+    return `${existing.trim()}\n\n${trimmedAddition}`;
+  };
+
+  const handleResourceSelect = (resource: LessonBuilderResourceSearchResult) => {
+    const stepId = resourceSearchStepId ?? selectedStepId;
+    if (!stepId) {
       return;
     }
-    updatePlan((current) => ({
-      ...current,
-      steps: current.steps.map((step) => {
-        if (step.id !== selectedStepId) {
-          return step;
-        }
-        const exists = step.activities.some((item) => item.id === activity.id);
-        return exists
-          ? step
-          : { ...step, activities: [...step.activities, activity] };
-      }),
-    }));
+
+    const snapshot = mergeResourceValues({
+      id: resource.id,
+      label: resource.title,
+      url: resource.url,
+      type: resource.type ?? resource.mediaType ?? null,
+      thumbnail: resource.thumbnail ?? null,
+      domain: resource.domain ?? null,
+    });
+
+    let previousResource: LessonBuilderPlan["steps"][number]["resources"][number] | null = null;
+    let previousNotes: string | null = null;
+
+    handleStepChange(stepId, (step) => {
+      const existingResources = Array.isArray(step.resources) ? step.resources : [];
+      previousResource = existingResources[0] ?? null;
+      previousNotes = step.notes ?? null;
+      const filtered = existingResources.filter((item) => {
+        const currentId = item.id ?? item.url;
+        const incomingId = snapshot.id ?? snapshot.url;
+        return currentId !== incomingId;
+      });
+      return {
+        ...step,
+        resources: [snapshot, ...filtered],
+        notes: mergeInstructionalNotes(step.notes ?? null, resource.instructionalNote ?? null),
+      };
+    });
+
+    setIsResourceSearchOpen(false);
+    setResourceSearchStepId(null);
+
+    toast({
+      description: `${resource.title} added.`,
+      action: (
+        <ToastAction
+          altText="Undo resource"
+          onClick={() => {
+            handleStepChange(stepId, (step) => {
+              const filtered = step.resources.filter((item) => {
+                const currentId = item.id ?? item.url;
+                const incomingId = snapshot.id ?? snapshot.url;
+                return currentId !== incomingId;
+              });
+              const restored = previousResource ? [previousResource, ...filtered] : filtered;
+              return {
+                ...step,
+                resources: restored,
+                notes: previousNotes ?? null,
+              };
+            });
+          }}
+        >
+          Undo
+        </ToastAction>
+      ),
+    });
   };
 
   const handleToggleStandard = (standard: LessonBuilderPlan["standards"][number]) => {
@@ -284,13 +385,6 @@ const BuilderLessonPlanDetail = () => {
     });
   };
 
-  const activitiesQuery = useQuery({
-    queryKey: ["builder-plan-activities", id, activityQuery],
-    enabled: Boolean(id) && activityQuery.trim().length >= 3,
-    queryFn: () => searchLessonBuilderActivities(id as string, activityQuery),
-  });
-
-  const activityResults = activityQuery.trim().length >= 3 ? activitiesQuery.data ?? [] : [];
   const history = historyQuery.data ?? plan?.history ?? [];
 
   const lessonCopy = useMemo<LessonDetailCopy>(() => ({
@@ -319,6 +413,8 @@ const BuilderLessonPlanDetail = () => {
     minutesFormatter: (minutes: number) =>
       t.lessonPlans.card.durationLabel.replace("{minutes}", String(minutes)),
   }), [t]);
+
+  const resourceSearchCopy = t.lessonBuilder.resourceSearch;
 
   if (planQuery.isLoading) {
     return (
@@ -360,7 +456,7 @@ const BuilderLessonPlanDetail = () => {
         onPreview={() => setIsPreviewOpen(true)}
         copy={t.lessonBuilder.toolbar}
       />
-      <div className="grid gap-6 lg:grid-cols-[280px,1fr,320px]">
+      <div className="grid gap-6 lg:grid-cols-[280px,1fr]">
         <div className="space-y-6">
           <PartsSidebar
             parts={plan.parts}
@@ -369,6 +465,12 @@ const BuilderLessonPlanDetail = () => {
             copy={t.lessonBuilder.parts}
             history={history as LessonBuilderVersionEntry[]}
             historyCopy={t.lessonBuilder.history}
+          />
+          <StandardsPicker
+            available={plan.availableStandards}
+            selected={plan.standards}
+            onToggle={handleToggleStandard}
+            copy={t.lessonBuilder.standards}
           />
         </div>
         <div className="space-y-6">
@@ -385,26 +487,23 @@ const BuilderLessonPlanDetail = () => {
             onAddStep={handleAddStep}
             onRemoveStep={handleRemoveStep}
             onStepChange={handleStepChange}
+            onSearchResources={openResourceSearchForStep}
             copy={t.lessonBuilder.canvas}
           />
         </div>
-        <div className="space-y-6">
-          <ActivitySearchPanel
-            query={activityQuery}
-            onQueryChange={setActivityQuery}
-            results={activityResults}
-            onAdd={handleAddActivity}
-            isLoading={activitiesQuery.isFetching}
-            copy={t.lessonBuilder.activities}
-          />
-          <StandardsPicker
-            available={plan.availableStandards}
-            selected={plan.standards}
-            onToggle={handleToggleStandard}
-            copy={t.lessonBuilder.standards}
-          />
-        </div>
       </div>
+      <ResourceSearchModal
+        planId={plan.id}
+        open={isResourceSearchOpen}
+        onOpenChange={(open) => {
+          setIsResourceSearchOpen(open);
+          if (!open) {
+            setResourceSearchStepId(null);
+          }
+        }}
+        onSelect={handleResourceSelect}
+        copy={resourceSearchCopy}
+      />
       <PreviewModal
         plan={plan}
         open={isPreviewOpen}
