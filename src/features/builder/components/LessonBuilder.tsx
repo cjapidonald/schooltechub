@@ -11,14 +11,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 import { StepCard } from "./StepCard";
+import { ActivitySearchPanel } from "./ActivitySearchPanel";
 import { BuilderProvider, useBuilder } from "../context/BuilderContext";
+import type { BuilderActivitySummary } from "../types";
 import { useAutosave } from "../hooks/useAutosave";
 import { fetchLinkStatuses, type LinkHealthStatus } from "../api/linkHealth";
 import { BuilderCommandPalette } from "./command/BuilderCommandPalette";
 import { ExportMenu } from "./export/ExportMenu";
+import { LessonPreview } from "./LessonPreview";
 
 const BuilderShell = () => {
   const { state, setState, addStep, duplicateStep, removeStep, reorderSteps } = useBuilder();
+  const [activeActivity, setActiveActivity] = useState<BuilderActivitySummary | null>(null);
   const [linkLookup, setLinkLookup] = useState<Record<string, LinkHealthStatus>>({});
   const [autosaveStatus, setAutosaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [profileId, setProfileId] = useState<string | null>(null);
@@ -31,7 +35,13 @@ const BuilderShell = () => {
 
     const loadProfile = async () => {
       try {
-        const { data } = await supabase.auth.getUser();
+        const authClient = supabase.auth;
+        if (!authClient?.getUser) {
+          setProfileId(null);
+          return;
+        }
+
+        const { data } = await authClient.getUser();
         if (!active) return;
 
         const user = data?.user ?? null;
@@ -115,6 +125,32 @@ const BuilderShell = () => {
 
   const handleDrop = (fromId: string, toId: string) => {
     reorderSteps(fromId, toId);
+  };
+
+  const handleActivitySelect = (activity: BuilderActivitySummary) => {
+    setActiveActivity(activity);
+    setState(prev => ({
+      ...prev,
+      stage: activity.schoolStages[0] ?? prev.stage,
+      subject: activity.subjects[0] ?? prev.subject,
+      title: prev.title === "Untitled Lesson" ? activity.name : prev.title,
+      steps: prev.steps.map((step, index) =>
+        index === 0
+          ? {
+              ...step,
+              title:
+                step.title.trim().length === 0 || step.title.trim().toLowerCase() === "new step"
+                  ? activity.name
+                  : step.title,
+              learningGoals:
+                step.learningGoals.trim().length > 0
+                  ? step.learningGoals
+                  : activity.description ?? step.learningGoals,
+              deliveryMode: activity.delivery ?? step.deliveryMode,
+            }
+          : step,
+      ),
+    }));
   };
 
   const handleLogoUpload = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -207,174 +243,195 @@ const BuilderShell = () => {
   }, [lessonMetadata.date]);
 
   return (
-    <div className="flex h-full min-h-[80vh] flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Lesson builder</h1>
-          <p className="text-sm text-muted-foreground">
-            Assemble a tech-integrated lesson in minutes. Drag steps, open the command palette (⌘/Ctrl+K), and export teacher or
-            student views.
-          </p>
+    <>
+      <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)_420px] lg:grid-cols-[360px_minmax(0,1fr)]">
+        <div className="space-y-4">
+          <ActivitySearchPanel
+            activeActivitySlug={activeActivity?.slug ?? null}
+            onSelectActivity={handleActivitySelect}
+          />
         </div>
-        <div className="flex items-center gap-3">
-          <ExportMenu state={state} linkLookup={linkLookup} />
-          <span className="text-xs text-muted-foreground" data-testid="autosave-status">
-            {autosaveStatus === "saving" ? "Saving..." : autosaveStatus === "saved" ? "Saved" : "Auto-save ready"}
-          </span>
+
+        <div className="flex h-full min-h-[80vh] flex-col gap-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Lesson builder</h1>
+              <p className="text-sm text-muted-foreground">
+                Assemble a tech-integrated lesson in minutes. Drag steps, open the command palette (⌘/Ctrl+K), and export teacher
+                or student views.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <ExportMenu state={state} linkLookup={linkLookup} />
+              <span className="text-xs text-muted-foreground" data-testid="autosave-status">
+                {autosaveStatus === "saving" ? "Saving..." : autosaveStatus === "saved" ? "Saved" : "Auto-save ready"}
+              </span>
+            </div>
+          </div>
+
+          <Card className="border-none bg-background">
+            <CardHeader className="border-b border-border/60">
+              <CardTitle className="text-2xl font-semibold">Lesson blueprint</CardTitle>
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-title-input">
+                    Lesson title
+                  </label>
+                  <Input
+                    id="lesson-title-input"
+                    value={state.title}
+                    onChange={event => setState(prev => ({ ...prev, title: event.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-stage-input">
+                    Stage
+                  </label>
+                  <Input
+                    id="lesson-stage-input"
+                    value={state.stage}
+                    onChange={event => setState(prev => ({ ...prev, stage: event.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-subject-input">
+                    Subject
+                  </label>
+                  <Input
+                    id="lesson-subject-input"
+                    value={state.subject}
+                    onChange={event => setState(prev => ({ ...prev, subject: event.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <Textarea
+                id="lesson-objective-textarea"
+                value={state.objective}
+                onChange={event => setState(prev => ({ ...prev, objective: event.target.value }))}
+                placeholder="What will students accomplish?"
+                rows={3}
+              />
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-logo-input">
+                    School logo
+                  </label>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-muted/40">
+                      {state.schoolLogoUrl ? (
+                        <img src={state.schoolLogoUrl} alt="School logo" className="h-full w-full object-contain" />
+                      ) : (
+                        <span className="px-2 text-center text-xs text-muted-foreground">Upload logo</span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploadingLogo || (!profileId && typeof window !== "undefined")}
+                      >
+                        {isUploadingLogo ? "Uploading..." : state.schoolLogoUrl ? "Replace logo" : "Upload logo"}
+                      </Button>
+                      {state.schoolLogoUrl ? (
+                        <Button type="button" variant="ghost" size="sm" onClick={handleLogoRemove} disabled={isUploadingLogo}>
+                          Remove
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                  <input
+                    id="lesson-logo-input"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleLogoUpload}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {profileId ? "Saved to your profile for future lessons." : "Sign in to save your logo for future plans."}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-date-input">
+                    Lesson date
+                  </label>
+                  <Input
+                    id="lesson-date-input"
+                    type="date"
+                    value={state.lessonDate}
+                    onChange={event => setState(prev => ({ ...prev, lessonDate: event.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="text-xs text-muted-foreground">
+                {lessonMetadata.steps} steps • Stage: {lessonMetadata.stage || "Choose"} • Subject: {lessonMetadata.subject || "Pick"}
+                {formattedDate ? ` • Date: ${formattedDate}` : ""}
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-0">
+              <Tabs defaultValue="steps">
+                <TabsList className="border-b border-border bg-muted/30 px-6 py-2">
+                  <TabsTrigger value="steps">Steps</TabsTrigger>
+                  <TabsTrigger value="notes">Notes</TabsTrigger>
+                </TabsList>
+                <TabsContent value="steps" className="p-0">
+                  <ScrollArea className="h-[65vh]">
+                    <div className="space-y-4 p-6">
+                      {state.steps.map((step, index) => (
+                        <StepCard
+                          key={step.id}
+                          index={index}
+                          step={step}
+                          healthLookup={linkLookup}
+                          onChange={handleStepChange}
+                          onRemove={removeStep}
+                          onDuplicate={duplicateStep}
+                          onDragStart={() => undefined}
+                          onDrop={(fromId, toId) => handleDrop(fromId, toId)}
+                        />
+                      ))}
+                      <Button type="button" variant="outline" onClick={addStep} className="w-full" data-testid="add-step">
+                        <Plus className="mr-2 h-4 w-4" /> Add step
+                      </Button>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="notes" className="p-6">
+                  <Textarea
+                    rows={10}
+                    placeholder="Add facilitator notes, differentiation options, or reflections to revisit later."
+                  />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="hidden xl:block xl:sticky xl:top-24">
+          <LessonPreview state={state} />
         </div>
       </div>
 
-      <Card className="border-none bg-background">
-        <CardHeader className="border-b border-border/60">
-          <CardTitle className="text-2xl font-semibold">Lesson blueprint</CardTitle>
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-title-input">
-                Lesson title
-              </label>
-              <Input
-                id="lesson-title-input"
-                value={state.title}
-                onChange={event => setState(prev => ({ ...prev, title: event.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-stage-input">
-                Stage
-              </label>
-              <Input
-                id="lesson-stage-input"
-                value={state.stage}
-                onChange={event => setState(prev => ({ ...prev, stage: event.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-subject-input">
-                Subject
-              </label>
-              <Input
-                id="lesson-subject-input"
-                value={state.subject}
-                onChange={event => setState(prev => ({ ...prev, subject: event.target.value }))}
-              />
-            </div>
-          </div>
-
-          <Textarea
-            id="lesson-objective-textarea"
-            value={state.objective}
-            onChange={event => setState(prev => ({ ...prev, objective: event.target.value }))}
-            placeholder="What will students accomplish?"
-            rows={3}
-          />
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-logo-input">
-                School logo
-              </label>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border border-dashed border-border bg-muted/40">
-                  {state.schoolLogoUrl ? (
-                    <img src={state.schoolLogoUrl} alt="School logo" className="h-full w-full object-contain" />
-                  ) : (
-                    <span className="px-2 text-center text-xs text-muted-foreground">Upload logo</span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingLogo || (!profileId && typeof window !== "undefined")}
-                  >
-                    {isUploadingLogo ? "Uploading..." : state.schoolLogoUrl ? "Replace logo" : "Upload logo"}
-                  </Button>
-                  {state.schoolLogoUrl ? (
-                    <Button type="button" variant="ghost" size="sm" onClick={handleLogoRemove} disabled={isUploadingLogo}>
-                      Remove
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-              <input
-                id="lesson-logo-input"
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleLogoUpload}
-              />
-              <p className="text-xs text-muted-foreground">
-                {profileId ? "Saved to your profile for future lessons." : "Sign in to save your logo for future plans."}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="lesson-date-input">
-                Lesson date
-              </label>
-              <Input
-                id="lesson-date-input"
-                type="date"
-                value={state.lessonDate}
-                onChange={event => setState(prev => ({ ...prev, lessonDate: event.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div className="text-xs text-muted-foreground">
-            {lessonMetadata.steps} steps • Stage: {lessonMetadata.stage || "Choose"} • Subject: {lessonMetadata.subject || "Pick"}
-            {formattedDate ? ` • Date: ${formattedDate}` : ""}
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-0">
-          <Tabs defaultValue="steps">
-            <TabsList className="border-b border-border bg-muted/30 px-6 py-2">
-              <TabsTrigger value="steps">Steps</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-            </TabsList>
-            <TabsContent value="steps" className="p-0">
-              <ScrollArea className="h-[65vh]">
-                <div className="space-y-4 p-6">
-                  {state.steps.map((step, index) => (
-                    <StepCard
-                      key={step.id}
-                      index={index}
-                      step={step}
-                      healthLookup={linkLookup}
-                      onChange={handleStepChange}
-                      onRemove={removeStep}
-                      onDuplicate={duplicateStep}
-                      onDragStart={() => undefined}
-                      onDrop={(fromId, toId) => handleDrop(fromId, toId)}
-                    />
-                  ))}
-                  <Button type="button" variant="outline" onClick={addStep} className="w-full" data-testid="add-step">
-                    <Plus className="mr-2 h-4 w-4" /> Add step
-                  </Button>
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            <TabsContent value="notes" className="p-6">
-              <Textarea
-                rows={10}
-                placeholder="Add facilitator notes, differentiation options, or reflections to revisit later."
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+      <div className="xl:hidden">
+        <LessonPreview state={state} />
+      </div>
 
       <BuilderCommandPalette
         onAddStep={addStep}
         onDuplicateStep={() => duplicateStep(state.steps[state.steps.length - 1]?.id ?? "")}
         onFocusSearch={() =>
-          document.querySelector<HTMLButtonElement>("button[data-builder-resource-search]")?.focus()
+          document
+            .querySelector<HTMLInputElement>("input[placeholder='Search by keyword, skill, or tool...']")
+            ?.focus()
         }
       />
-    </div>
+    </>
   );
 };
 

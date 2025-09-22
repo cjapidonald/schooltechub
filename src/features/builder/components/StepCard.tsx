@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ExternalLink, GripVertical, Link2, MoreVertical, ShieldAlert, Trash2 } from "lucide-react";
+import { ExternalLink, GripVertical, MoreVertical, Search, ShieldAlert, Trash2 } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,7 +68,8 @@ export const StepCard = ({
     });
 
     const existing = step.resources.filter(item => item.resourceId !== resource.id);
-    const shouldRenameStep = existing.length === 0 && (!step.title || step.title === "New Step");
+    const normalizedTitle = step.title.trim().toLowerCase();
+    const shouldRenameStep = existing.length === 0 && (!step.title || normalizedTitle === "new step");
 
     onChange(step.id, {
       resources: [...existing, mapped],
@@ -105,7 +106,7 @@ export const StepCard = ({
         <div className="flex flex-1 flex-col gap-1">
           <CardTitle className="flex items-center gap-2 text-lg">
             <GripVertical className="h-4 w-4 cursor-grab text-muted-foreground" aria-hidden />
-            Step {index + 1}: {step.title}
+            {step.title.trim() || "New step"}
             {unhealthyResources.length ? (
               <TooltipProvider>
                 <Tooltip>
@@ -162,7 +163,7 @@ export const StepCard = ({
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor={`step-${step.id}-title`}>
-              Step title
+              Title
             </label>
             <Input
               id={`step-${step.id}-title`}
@@ -218,23 +219,21 @@ export const StepCard = ({
         </div>
 
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <p className="text-sm font-medium">Resources</p>
-              <p className="text-xs text-muted-foreground">
-                Search classroom-ready materials with embedded instructional notes.
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsSearchOpen(true)}
-              data-builder-resource-search
-            >
-              <Link2 className="mr-2 h-4 w-4" /> Search resources
-            </Button>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Resources</p>
+            <p className="text-xs text-muted-foreground">
+              Search classroom-ready materials with embedded instructional notes.
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="group flex w-full items-center gap-2 rounded-md border border-dashed border-border/70 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            data-builder-resource-search
+          >
+            <Search className="h-4 w-4 text-muted-foreground transition group-hover:text-foreground" />
+            <span className="flex-1 text-left">Search by title or tag to add a resource</span>
+          </button>
           <div className="space-y-4">
             {step.resources.length === 0 ? (
               <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
@@ -312,13 +311,13 @@ export const StepCard = ({
 
         <div className="space-y-2">
           <label className="text-sm font-medium" htmlFor={`step-${step.id}-notes`}>
-            Additional teacher notes
+            Offline fallback (teacher only)
           </label>
           <Textarea
             id={`step-${step.id}-notes`}
             value={step.notes}
             onChange={event => handleFieldChange("notes", event.target.value)}
-            placeholder="Add differentiation ideas, questions to ask, or reminders for yourself."
+            placeholder="Describe the analog or no-tech alternative for this step."
             rows={3}
           />
         </div>
