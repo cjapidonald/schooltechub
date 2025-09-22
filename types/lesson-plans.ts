@@ -23,6 +23,7 @@ export interface LessonPlanOverview {
   summary: string | null;
   essentialQuestion: string | null;
   objectives: string[];
+  successCriteria: string[];
   materials: string[];
   assessment: string[];
   technology: string[];

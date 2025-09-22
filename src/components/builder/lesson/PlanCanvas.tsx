@@ -18,6 +18,8 @@ interface StepCardCopy {
   searchResources: string;
   resourcesTitle: string;
   resourcesEmpty: string;
+  resourceNotesLabel: string;
+  resourceNotesPlaceholder: string;
 }
 
 interface PlanCanvasCopy {

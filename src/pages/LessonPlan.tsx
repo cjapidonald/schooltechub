@@ -59,6 +59,7 @@ const LessonPlanPage = () => {
       summaryLabel: t.lessonPlans.modal.summary,
       overviewTitle: t.lessonPlans.modal.overview,
       objectivesLabel: t.lessonPlans.modal.objectives,
+      successCriteriaLabel: t.lessonPlans.modal.successCriteria,
       materialsLabel: t.lessonPlans.modal.materials,
       assessmentLabel: t.lessonPlans.modal.assessment,
       technologyOverviewLabel: t.lessonPlans.modal.technologyOverview,

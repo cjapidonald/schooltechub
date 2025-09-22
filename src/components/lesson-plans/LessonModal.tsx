@@ -25,6 +25,7 @@ export interface LessonDetailCopy {
   summaryLabel: string;
   overviewTitle: string;
   objectivesLabel: string;
+  successCriteriaLabel: string;
   materialsLabel: string;
   assessmentLabel: string;
   technologyOverviewLabel: string;
@@ -188,6 +189,16 @@ export function LessonDetailContent({
                 <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                   {lesson.overview.objectives.map((objective, index) => (
                     <li key={index}>{objective}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {lesson.overview.successCriteria?.length ? (
+              <div>
+                <h4 className="text-sm font-semibold">{copy.successCriteriaLabel}</h4>
+                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  {lesson.overview.successCriteria.map((criterion, index) => (
+                    <li key={index}>{criterion}</li>
                   ))}
                 </ul>
               </div>
