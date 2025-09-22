@@ -39,6 +39,7 @@ import {
   BellRing,
   Globe,
   GraduationCap,
+  Bookmark,
 } from "lucide-react";
 import type { Database, Json } from "@/integrations/supabase/types";
 import { ClassManager } from "@/components/classes/ClassManager";
@@ -89,6 +90,13 @@ type BlogSummary = Pick<
   "id" | "title" | "slug" | "page" | "is_published" | "created_at" | "author" | "language"
 >;
 
+type SavedPostWithContent = Database["public"]["Tables"]["saved_posts"]["Row"] & {
+  content?: Pick<
+    Database["public"]["Tables"]["content_master"]["Row"],
+    "id" | "title" | "slug" | "language" | "page" | "published_at"
+  > | null;
+};
+
 const Account = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -107,6 +115,7 @@ const Account = () => {
     role: userRoleOptions[0],
     bio: "",
   });
+  const [removingPostId, setRemovingPostId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -250,6 +259,91 @@ const Account = () => {
       });
 
       return filtered;
+    },
+  });
+
+  const savedPostsQuery = useQuery({
+    queryKey: ["saved-posts", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      if (!user?.id) return [] as SavedPostWithContent[];
+
+      const { data, error } = await supabase
+        .from("saved_posts")
+        .select("id,post_id,saved_at")
+        .eq("user_id", user.id)
+        .order("saved_at", { ascending: false })
+        .limit(100);
+
+      if (error) {
+        throw error;
+      }
+
+      const rows = (data ?? []) as Database["public"]["Tables"]["saved_posts"]["Row"][];
+
+      if (rows.length === 0) {
+        return [] as SavedPostWithContent[];
+      }
+
+      const postIds = Array.from(new Set(rows.map(row => row.post_id)));
+
+      const { data: postsData, error: postsError } = await supabase
+        .from("content_master")
+        .select("id,title,slug,page,language,published_at")
+        .in("id", postIds)
+        .in("page", ["research_blog", "edutech", "teacher_diary"]);
+
+      if (postsError) {
+        throw postsError;
+      }
+
+      const postsById = new Map(
+        (postsData ?? []).map(post => [post.id, post as SavedPostWithContent["content"]])
+      );
+
+      return rows.map(row => ({
+        ...row,
+        content: postsById.get(row.post_id) ?? null,
+      })) as SavedPostWithContent[];
+    },
+  });
+
+  const removeSavedPostMutation = useMutation({
+    mutationFn: async (postId: string) => {
+      if (!user?.id) {
+        throw new Error("Missing user");
+      }
+
+      const { error } = await supabase
+        .from("saved_posts")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("post_id", postId);
+
+      if (error) {
+        throw error;
+      }
+    },
+    onMutate: (postId) => {
+      setRemovingPostId(postId);
+    },
+    onSuccess: (_data, postId) => {
+      queryClient.invalidateQueries({ queryKey: ["saved-posts", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["saved-post", user?.id, postId] });
+      toast({
+        title: t.blogPost.toast.successTitle,
+        description: t.account.savedPosts.toast.removed,
+      });
+    },
+    onError: () => {
+      toast({
+        title: t.blogPost.toast.errorTitle,
+        description: t.account.savedPosts.toast.removeError,
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setRemovingPostId(null);
     },
   });
 
@@ -592,6 +686,10 @@ const Account = () => {
               <GraduationCap className="h-4 w-4" />
               Classes
             </TabsTrigger>
+            <TabsTrigger value="saved-posts" className="gap-2">
+              <Bookmark className="h-4 w-4" />
+              {t.account.tabs.savedPosts}
+            </TabsTrigger>
             <TabsTrigger value="security" className="gap-2">
               <Lock className="h-4 w-4" />
               {t.account.tabs.security}
@@ -850,6 +948,82 @@ const Account = () => {
 
           <TabsContent value="classes">
             <ClassManager />
+          </TabsContent>
+
+          <TabsContent value="saved-posts" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bookmark className="h-5 w-5 text-primary" />
+                  {t.account.savedPosts.title}
+                </CardTitle>
+                <CardDescription>{t.account.savedPosts.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {savedPostsQuery.isLoading && (
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-6 w-2/3" />
+                    <Skeleton className="h-6 w-1/2" />
+                  </div>
+                )}
+
+                {!savedPostsQuery.isLoading && (savedPostsQuery.data?.length ?? 0) === 0 && (
+                  <p className="text-sm text-muted-foreground">{t.account.savedPosts.empty}</p>
+                )}
+
+                {!savedPostsQuery.isLoading && savedPostsQuery.data && savedPostsQuery.data.length > 0 && (
+                  <div className="space-y-4">
+                    {savedPostsQuery.data.map(savedPost => {
+                      const savedOn = format(new Date(savedPost.saved_at), "PPP");
+                      const post = savedPost.content;
+
+                      return (
+                        <div
+                          key={savedPost.id}
+                          className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between"
+                        >
+                          <div>
+                            <p className="font-medium">
+                              {post?.title ?? t.account.savedPosts.unavailable}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {t.account.savedPosts.savedOn.replace("{date}", savedOn)}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-2 md:flex-row">
+                            {post?.slug && (
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  navigate(
+                                    getLocalizedPath(
+                                      `/blog/${post.slug}`,
+                                      (post.language as string | null) ?? language
+                                    )
+                                  )
+                                }
+                              >
+                                {t.account.savedPosts.viewPost}
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              onClick={() => removeSavedPostMutation.mutate(savedPost.post_id)}
+                              disabled={removeSavedPostMutation.isPending && removingPostId === savedPost.post_id}
+                            >
+                              {removeSavedPostMutation.isPending && removingPostId === savedPost.post_id
+                                ? t.common.loading
+                                : t.account.savedPosts.remove}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="security">

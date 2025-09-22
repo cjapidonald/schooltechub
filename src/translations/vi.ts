@@ -747,6 +747,8 @@ export const vi = {
   blogPost: {
     backToBlog: "Quay lại Blog",
     share: "Chia sẻ",
+    save: "Lưu bài viết",
+    saved: "Đã lưu",
     comments: "Bình luận",
     commentPlaceholder: "Chia sẻ suy nghĩ của bạn...",
     postComment: "Đăng bình luận",
@@ -765,12 +767,17 @@ export const vi = {
       authRequiredTitle: "Cần đăng nhập",
       authRequiredComment: "Vui lòng đăng nhập để bình luận",
       authRequiredReply: "Vui lòng đăng nhập để trả lời",
+      authRequiredSave: "Vui lòng đăng nhập để lưu bài viết",
       errorTitle: "Lỗi",
       commentError: "Không thể đăng bình luận",
       replyError: "Không thể đăng phản hồi",
+      saveError: "Không thể lưu bài viết",
+      removeError: "Không thể gỡ bài viết đã lưu",
       successTitle: "Thành công",
       commentSuccess: "Đăng bình luận thành công",
-      replySuccess: "Đăng phản hồi thành công"
+      replySuccess: "Đăng phản hồi thành công",
+      saveSuccess: "Bài viết đã được lưu vào danh sách",
+      removeSuccess: "Đã gỡ khỏi bài viết đã lưu"
     }
   },
   contact: {
@@ -1281,6 +1288,7 @@ export const vi = {
     },
     tabs: {
       overview: "Tổng quan",
+      savedPosts: "Bài viết đã lưu",
       security: "Bảo mật",
       activity: "Hoạt động"
     },
@@ -1430,6 +1438,19 @@ export const vi = {
         "Kiểm tra hoạt động tài khoản thường xuyên để phát hiện bất thường.",
         "Đăng xuất khỏi thiết bị dùng chung sau khi sử dụng."
       ]
+    },
+    savedPosts: {
+      title: "Bài viết đã lưu",
+      description: "Quay lại nhanh các bài viết bạn đã đánh dấu.",
+      empty: "Bạn chưa lưu bài viết nào.",
+      savedOn: "Đã lưu vào {date}",
+      viewPost: "Xem bài viết",
+      remove: "Gỡ",
+      unavailable: "Bài viết này không còn khả dụng.",
+      toast: {
+        removed: "Đã gỡ khỏi bài viết đã lưu",
+        removeError: "Không thể gỡ bài viết đã lưu đó"
+      }
     },
     comments: {
       title: "Bình luận của tôi",

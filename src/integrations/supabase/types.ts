@@ -1092,6 +1092,27 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_posts: {
+        Row: {
+          id: string
+          post_id: string
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          saved_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           consent: boolean | null
