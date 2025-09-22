@@ -18,7 +18,9 @@ const APPLICATION_SELECT = "*";
 const PARTICIPANT_SELECT = "id";
 const SUBMISSION_SELECT = "*";
 
-const SUBMISSIONS_BUCKET = "research-submissions";
+const SUBMISSIONS_BUCKET = "research";
+
+const SIGNED_FILE_ENDPOINT = "/api/files/signed";
 
 type Client = SupabaseClient;
 
@@ -42,6 +44,66 @@ export class ResearchDataError extends Error {
       this.message = `${message} (${options.cause.message})`;
     }
   }
+}
+
+async function requireAccessToken(client: Client, action: string): Promise<string> {
+  const { data, error } = await client.auth.getSession();
+
+  if (error) {
+    throw new ResearchDataError("Unable to verify authentication state.", { cause: error });
+  }
+
+  const accessToken = data.session?.access_token;
+
+  if (!accessToken) {
+    throw new ResearchDataError(`You must be signed in to ${action}.`);
+  }
+
+  return accessToken;
+}
+
+async function requestSignedFileUrl(
+  client: Client,
+  bucket: string,
+  path: string,
+  action: string,
+): Promise<string> {
+  const accessToken = await requireAccessToken(client, action);
+  const query = new URLSearchParams({ bucket, path }).toString();
+
+  let response: Response;
+  try {
+    response = await fetch(`${SIGNED_FILE_ENDPOINT}?${query}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  } catch (error) {
+    throw new ResearchDataError("Failed to request a signed download link.", { cause: error });
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+  const payload = isJson ? await response.json().catch(() => null) : null;
+
+  if (!response.ok) {
+    const message =
+      payload && typeof payload.error === "string" && payload.error.trim()
+        ? payload.error
+        : `Unable to ${action}.`;
+    throw new ResearchDataError(message);
+  }
+
+  const url = payload && typeof (payload as Record<string, unknown>).url === "string"
+    ? (payload as { url: string }).url
+    : null;
+
+  if (!url) {
+    throw new ResearchDataError("Download URL was not provided by the server.");
+  }
+
+  return url;
 }
 
 async function requireUserId(client: Client, action: string): Promise<string> {
@@ -234,6 +296,17 @@ export async function listParticipantDocs(
   return Array.isArray(data) ? data.map(mapDocument) : [];
 }
 
+export async function getDocumentDownloadUrl(
+  document: Pick<ResearchDocument, "storagePath">,
+  client: Client = supabase,
+): Promise<string> {
+  if (!document.storagePath) {
+    throw new ResearchDataError("This document does not have a downloadable file attached.");
+  }
+
+  return requestSignedFileUrl(client, SUBMISSIONS_BUCKET, document.storagePath, "download this document");
+}
+
 export interface SubmissionMeta {
   title?: string | null;
   description?: string | null;
@@ -355,4 +428,15 @@ export async function listMySubmissions(
   }
 
   return Array.isArray(data) ? data.map(mapSubmission) : [];
+}
+
+export async function getSubmissionDownloadUrl(
+  submission: Pick<ResearchSubmission, "storagePath">,
+  client: Client = supabase,
+): Promise<string> {
+  if (!submission.storagePath) {
+    throw new ResearchDataError("This submission does not include an uploaded file.");
+  }
+
+  return requestSignedFileUrl(client, SUBMISSIONS_BUCKET, submission.storagePath, "download this submission");
 }
