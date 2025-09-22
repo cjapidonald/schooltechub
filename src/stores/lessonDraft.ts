@@ -3,6 +3,7 @@ import { create } from "zustand";
 
 export type LessonStep = {
   id: string;
+  remoteId: string | null;
   title: string;
   notes?: string;
   resourceIds: string[];
@@ -10,6 +11,7 @@ export type LessonStep = {
 
 export type LessonDraft = {
   id: string;
+  remotePlanId: string | null;
   title?: string;
   date?: string;
   logoUrl?: string;
@@ -40,6 +42,7 @@ type LessonDraftStore = {
 
 export const createEmptyLessonDraft = (): LessonDraft => ({
   id: nanoid(),
+  remotePlanId: null,
   steps: [],
 });
 
@@ -50,6 +53,8 @@ const sanitizeStep = (maybeStep: unknown): LessonStep | undefined => {
 
   const step = maybeStep as Partial<LessonStep> & { [key: string]: unknown };
   const id = typeof step.id === "string" ? step.id : nanoid();
+  const remoteId =
+    typeof step.remoteId === "string" && step.remoteId.trim().length > 0 ? step.remoteId : null;
   const title = typeof step.title === "string" ? step.title : "";
   const notes = typeof step.notes === "string" ? step.notes : undefined;
   const resourceIds = Array.isArray(step.resourceIds)
@@ -58,6 +63,7 @@ const sanitizeStep = (maybeStep: unknown): LessonStep | undefined => {
 
   return {
     id,
+    remoteId,
     title,
     notes,
     resourceIds,
@@ -81,6 +87,10 @@ const sanitizeDraft = (maybeDraft: unknown): LessonDraft => {
     ...baseDraft,
     ...draft,
     id: typeof draft.id === "string" && draft.id.trim().length > 0 ? draft.id : baseDraft.id,
+    remotePlanId:
+      typeof draft.remotePlanId === "string" && draft.remotePlanId.trim().length > 0
+        ? draft.remotePlanId
+        : null,
     steps,
   };
 };
@@ -146,6 +156,7 @@ export const useLessonDraftStore = create<LessonDraftStore>()((set, get) => ({
   addStep: () => {
     const newStep: LessonStep = {
       id: nanoid(),
+      remoteId: null,
       title: "New step",
       resourceIds: [],
     };
