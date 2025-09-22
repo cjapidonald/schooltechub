@@ -1281,6 +1281,7 @@ export const vi = {
     },
     tabs: {
       overview: "Tổng quan",
+      lessonPlans: "Lesson Plans",
       security: "Bảo mật",
       activity: "Hoạt động"
     },
@@ -1335,6 +1336,42 @@ export const vi = {
       posts: "Bài viết",
       lastLogin: "Lần đăng nhập gần nhất",
       neverLoggedIn: "Chưa có lần đăng nhập nào"
+    },
+    lessonPlans: {
+      heading: "My lesson plans",
+      subheading: "Export, preview, and attach lesson plans to your classes.",
+      empty: "You haven't saved any lesson plans yet.",
+      emptyCta: "Open Lesson Builder",
+      table: {
+        title: "Lesson plan",
+        date: "Date",
+        updated: "Last updated",
+        attached: "Attached classes",
+        actions: "Actions"
+      },
+      actions: {
+        preview: "Preview",
+        downloadPdf: "Download PDF",
+        downloadDocx: "Download DOCX",
+        attach: "Attach to class",
+        delete: "Delete"
+      },
+      noClasses: "Create a class to attach this plan.",
+      previewTitle: "Lesson plan preview",
+      previewDescription: "Review the lesson steps and linked resources before sharing.",
+      previewFallback: "We couldn't load this lesson plan.",
+      deleteConfirm: {
+        title: "Delete this lesson plan?",
+        description: "This will remove the plan and unlink it from any classes. This action can't be undone.",
+        confirm: "Delete plan"
+      },
+      toast: {
+        attachSuccess: "Lesson plan attached to class.",
+        attachError: "We couldn't attach that lesson plan.",
+        deleteSuccess: "Lesson plan deleted.",
+        deleteError: "We couldn't delete that lesson plan.",
+        downloadError: "We couldn't download that lesson plan."
+      }
     },
     resources: {
       manageCta: "Quản lý tài nguyên",

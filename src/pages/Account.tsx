@@ -39,9 +39,11 @@ import {
   BellRing,
   Globe,
   GraduationCap,
+  NotebookPen,
 } from "lucide-react";
 import type { Database, Json } from "@/integrations/supabase/types";
 import { EnrolledClasses } from "@/components/EnrolledClasses";
+import { LessonPlansTab } from "@/components/account/lesson-plans/LessonPlansTab";
 
 const userRoleOptions: Database["public"]["Enums"]["user_role_enum"][] = [
   "Teacher",
@@ -592,6 +594,10 @@ const Account = () => {
               <GraduationCap className="h-4 w-4" />
               Classes
             </TabsTrigger>
+            <TabsTrigger value="lesson-plans" className="gap-2">
+              <NotebookPen className="h-4 w-4" />
+              {t.account.tabs.lessonPlans}
+            </TabsTrigger>
             <TabsTrigger value="security" className="gap-2">
               <Lock className="h-4 w-4" />
               {t.account.tabs.security}
@@ -850,6 +856,10 @@ const Account = () => {
 
           <TabsContent value="classes">
             <EnrolledClasses userId={user?.id} language={language} />
+          </TabsContent>
+
+          <TabsContent value="lesson-plans">
+            <LessonPlansTab />
           </TabsContent>
 
           <TabsContent value="security">

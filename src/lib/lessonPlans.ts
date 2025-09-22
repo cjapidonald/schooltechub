@@ -341,3 +341,49 @@ export async function exportPlanToDocx(
     type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   });
 }
+
+export async function deletePlan(
+  id: string,
+  client: Client = supabase,
+): Promise<void> {
+  const userId = await requireUserId(client, "delete lesson plans");
+  const planId = typeof id === "string" ? id.trim() : "";
+
+  if (!planId) {
+    throw new LessonPlanDataError("A lesson plan id is required to delete the plan.");
+  }
+
+  const { error: attachmentError } = await client
+    .from("class_lesson_plans")
+    .delete()
+    .eq("lesson_plan_id", planId);
+
+  if (attachmentError) {
+    throw new LessonPlanDataError("Failed to remove existing class attachments for the lesson plan.", {
+      cause: attachmentError,
+    });
+  }
+
+  const { error: stepError } = await client
+    .from("lesson_plan_steps")
+    .delete()
+    .eq("lesson_plan_id", planId);
+
+  if (stepError) {
+    throw new LessonPlanDataError("Failed to delete lesson plan steps.", {
+      cause: stepError,
+    });
+  }
+
+  const { error: planError } = await client
+    .from("lesson_plans")
+    .delete()
+    .eq("id", planId)
+    .eq("owner_id", userId);
+
+  if (planError) {
+    throw new LessonPlanDataError("Failed to delete the lesson plan.", {
+      cause: planError,
+    });
+  }
+}

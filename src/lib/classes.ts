@@ -270,3 +270,47 @@ export async function unlinkPlanFromClass(
     });
   }
 }
+
+export async function getPlanAttachmentCounts(
+  planIds: string[],
+  client: Client = supabase,
+): Promise<Record<string, number>> {
+  await requireUserId(client, "view lesson plan attachments");
+
+  const uniqueIds = Array.from(
+    new Set(planIds.map(id => (typeof id === "string" ? id.trim() : "")).filter(Boolean)),
+  );
+
+  if (uniqueIds.length === 0) {
+    return {};
+  }
+
+  const { data, error } = await client
+    .from("class_lesson_plans")
+    .select("lesson_plan_id")
+    .in("lesson_plan_id", uniqueIds);
+
+  if (error) {
+    throw new ClassDataError("Failed to load lesson plan attachment counts.", { cause: error });
+  }
+
+  const counts: Record<string, number> = {};
+
+  (data ?? []).forEach(record => {
+    const rawId = (record as { lesson_plan_id?: unknown }).lesson_plan_id;
+    if (!rawId) {
+      return;
+    }
+
+    const planId = typeof rawId === "string" ? rawId : String(rawId);
+    counts[planId] = (counts[planId] ?? 0) + 1;
+  });
+
+  uniqueIds.forEach(id => {
+    if (!(id in counts)) {
+      counts[id] = 0;
+    }
+  });
+
+  return counts;
+}
