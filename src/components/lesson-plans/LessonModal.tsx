@@ -37,6 +37,7 @@ export interface LessonDetailCopy {
   noResourcesLabel: string;
   errorLabel: string;
   downloadLabel: string;
+  downloadDocxLabel: string;
   openFullLabel: string;
   closeLabel: string;
   loadingLabel: string;
@@ -55,6 +56,7 @@ interface LessonModalProps extends LessonDetailContentProps {
   isOpen: boolean;
   onClose: () => void;
   onDownloadPdf?: () => void;
+  onDownloadDocx?: () => void;
   onOpenFullPage?: () => void;
 }
 
@@ -315,6 +317,7 @@ export function LessonModal({
   lesson,
   initialLesson,
   onDownloadPdf,
+  onDownloadDocx,
   onOpenFullPage,
   copy,
   isLoading = false,
@@ -355,6 +358,11 @@ export function LessonModal({
             ) : null}
             {onDownloadPdf ? (
               <Button onClick={onDownloadPdf}>{copy.downloadLabel}</Button>
+            ) : null}
+            {onDownloadDocx ? (
+              <Button variant="outline" onClick={onDownloadDocx}>
+                {copy.downloadDocxLabel}
+              </Button>
             ) : null}
             <Button variant="ghost" onClick={onClose}>
               {copy.closeLabel}

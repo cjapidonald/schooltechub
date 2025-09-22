@@ -602,6 +602,7 @@ export const en = {
       resourceLink: "Open resource",
       empty: "Lesson details will be added soon.",
       download: "Download PDF",
+      downloadDocx: "Download Word doc",
       openFull: "Open full page",
       close: "Close",
     },

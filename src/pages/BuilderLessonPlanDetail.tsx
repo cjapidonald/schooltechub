@@ -422,6 +422,7 @@ const BuilderLessonPlanDetail = () => {
       noResourcesLabel: t.lessonPlans.modal.empty,
       errorLabel: t.lessonPlans.states.error,
       downloadLabel: t.lessonPlans.modal.download,
+      downloadDocxLabel: t.lessonPlans.modal.downloadDocx,
       openFullLabel: t.lessonPlans.modal.openFull,
       closeLabel: t.lessonPlans.modal.close,
       loadingLabel: t.lessonPlans.states.loading,
