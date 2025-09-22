@@ -15,8 +15,6 @@ import TeacherDiary from '@/pages/TeacherDiary';
 import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
 import LessonPlans from '@/pages/LessonPlans';
 import LessonPlan from '@/pages/LessonPlan';
-import Worksheets from '@/pages/Worksheets';
-import Worksheet from '@/pages/Worksheet';
 import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
@@ -70,8 +68,6 @@ export const LocalizedRoutes = () => {
       <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
-      <Route path="/worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
-      <Route path="/worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
       <Route path="/builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
@@ -97,8 +93,6 @@ export const LocalizedRoutes = () => {
         <Route path="builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
         <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
-        <Route path="worksheets" element={<RouteWrapper><Worksheets /></RouteWrapper>} />
-        <Route path="worksheets/:slug" element={<RouteWrapper><Worksheet /></RouteWrapper>} />
         <Route path="builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
         <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
