@@ -68,6 +68,7 @@ export type NotificationType =
   | "resource_approved"
   | "blogpost_approved"
   | "research_application_approved"
+  | "research_submission_reviewed"
   | "comment_reply";
 
 export interface Notification {
@@ -86,6 +87,7 @@ export interface NotificationPrefs {
   resourceApproved: boolean;
   blogpostApproved: boolean;
   researchApplicationApproved: boolean;
+  researchSubmissionReviewed: boolean;
   commentReply: boolean;
   updatedAt: string;
 }
@@ -158,5 +160,6 @@ export interface ResearchSubmission {
   status: ResearchSubmissionStatus;
   reviewedBy: string | null;
   reviewedAt: string | null;
+  reviewNote: string | null;
   submittedAt: string | null;
 }

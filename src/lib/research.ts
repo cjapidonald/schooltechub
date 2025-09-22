@@ -110,6 +110,7 @@ function mapSubmission(record: Record<string, any>): ResearchSubmission {
     status: (record.status as ResearchSubmissionStatus | undefined) ?? "submitted",
     reviewedBy: record.reviewed_by ?? null,
     reviewedAt: record.reviewed_at ?? null,
+    reviewNote: record.review_note ?? record.reviewNote ?? null,
     submittedAt: record.submitted_at ?? record.created_at ?? null,
   } satisfies ResearchSubmission;
 }
