@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,7 @@ import { ShareButton } from "@/components/ShareButton";
 import RichContent from "@/components/RichContent";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
-import { ArrowLeft, Calendar, User, Clock, Tag, MessageCircle, ThumbsUp, Flag } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, Tag, MessageCircle, ThumbsUp, Flag, Bookmark, BookmarkCheck } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -54,10 +55,13 @@ const getReadTimeLabel = (
   return null;
 };
 
+type SavedPostRow = Database["public"]["Tables"]["saved_posts"]["Row"];
+
 export default function BlogPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { language, t } = useLanguage();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<any[]>([]);
@@ -96,6 +100,100 @@ export default function BlogPost() {
       return data?.[0] ?? null;
     }
   });
+
+  const savedPostQuery = useQuery({
+    queryKey: ["saved-post", user?.id, post?.id],
+    enabled: !!user?.id && !!post?.id,
+    queryFn: async () => {
+      if (!user?.id || !post?.id) {
+        return null;
+      }
+
+      const { data, error } = await supabase
+        .from("saved_posts")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("post_id", post.id)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? null) as SavedPostRow | null;
+    }
+  });
+
+  const toggleSaveMutation = useMutation({
+    mutationFn: async (action: "save" | "remove") => {
+      if (!user?.id || !post?.id) {
+        throw new Error("Missing user or post");
+      }
+
+      if (action === "save") {
+        const { error } = await supabase
+          .from("saved_posts")
+          .upsert(
+            { user_id: user.id, post_id: post.id },
+            { onConflict: "user_id,post_id" }
+          );
+
+        if (error) {
+          throw error;
+        }
+
+        return action;
+      }
+
+      const { error } = await supabase
+        .from("saved_posts")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("post_id", post.id);
+
+      if (error) {
+        throw error;
+      }
+
+      return action;
+    },
+    onSuccess: (action) => {
+      queryClient.invalidateQueries({ queryKey: ["saved-post", user?.id, post?.id] });
+      queryClient.invalidateQueries({ queryKey: ["saved-posts", user?.id] });
+      toast({
+        title: t.blogPost.toast.successTitle,
+        description: action === "save" ? t.blogPost.toast.saveSuccess : t.blogPost.toast.removeSuccess
+      });
+    },
+    onError: (_error, action) => {
+      toast({
+        title: t.blogPost.toast.errorTitle,
+        description: action === "save" ? t.blogPost.toast.saveError : t.blogPost.toast.removeError,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleToggleSave = () => {
+    if (!user) {
+      toast({
+        title: t.blogPost.toast.authRequiredTitle,
+        description: t.blogPost.toast.authRequiredSave,
+        variant: "destructive"
+      });
+      navigate(getLocalizedPath("/auth", language));
+      return;
+    }
+
+    if (!post?.id || savedPostQuery.isLoading || toggleSaveMutation.isPending) {
+      return;
+    }
+
+    const action: "save" | "remove" = savedPostQuery.data ? "remove" : "save";
+    toggleSaveMutation.mutate(action);
+  };
+
+  const isPostSaved = !!savedPostQuery.data;
 
   // Fetch comments
   useEffect(() => {
@@ -451,13 +549,27 @@ export default function BlogPost() {
               )}
             </div>
 
-            <div className="mt-4">
-              <ShareButton
-                url={canonicalUrl}
-                title={post.title}
-                buttonLabel={t.blogPost.share}
-              />
-            </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              variant={isPostSaved ? "secondary" : "outline"}
+              onClick={handleToggleSave}
+              disabled={savedPostQuery.isLoading || toggleSaveMutation.isPending}
+              aria-pressed={isPostSaved}
+              className="gap-2"
+            >
+              {isPostSaved ? (
+                <BookmarkCheck className="h-4 w-4" />
+              ) : (
+                <Bookmark className="h-4 w-4" />
+              )}
+              {isPostSaved ? t.blogPost.saved : t.blogPost.save}
+            </Button>
+            <ShareButton
+              url={canonicalUrl}
+              title={post.title}
+              buttonLabel={t.blogPost.share}
+            />
+          </div>
           </header>
 
           {/* Article Content */}

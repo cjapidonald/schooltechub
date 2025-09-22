@@ -5,7 +5,7 @@ import {
   normalizeMethod,
   parseJsonBody,
 } from "../../_lib/http";
-import { recordAuditLog } from "../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../_lib/audit";
 import { requireAdmin } from "../../_lib/auth";
 
 interface ResetPayload {
@@ -30,6 +30,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
+  const auditContext = getAuditRequestContext(request);
   const userResult = await supabase.auth.admin.getUserById(userId);
 
   if (userResult.error || !userResult.data?.user) {
@@ -53,8 +54,10 @@ export default async function handler(request: Request): Promise<Response> {
   await recordAuditLog(supabase, {
     action: "admin.users.reset_password",
     actorId: user.id,
+    targetType: "user",
     targetId: userId,
-    metadata: { email },
+    details: { email },
+    ...auditContext,
   });
 
   return jsonResponse({ success: true });

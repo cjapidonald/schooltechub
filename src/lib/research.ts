@@ -18,7 +18,9 @@ const APPLICATION_SELECT = "*";
 const PARTICIPANT_SELECT = "id";
 const SUBMISSION_SELECT = "*";
 
-const SUBMISSIONS_BUCKET = "research-submissions";
+const SUBMISSIONS_BUCKET = "research";
+
+const SIGNED_FILE_ENDPOINT = "/api/files/signed";
 
 type Client = SupabaseClient;
 
@@ -44,6 +46,66 @@ export class ResearchDataError extends Error {
   }
 }
 
+async function requireAccessToken(client: Client, action: string): Promise<string> {
+  const { data, error } = await client.auth.getSession();
+
+  if (error) {
+    throw new ResearchDataError("Unable to verify authentication state.", { cause: error });
+  }
+
+  const accessToken = data.session?.access_token;
+
+  if (!accessToken) {
+    throw new ResearchDataError(`You must be signed in to ${action}.`);
+  }
+
+  return accessToken;
+}
+
+async function requestSignedFileUrl(
+  client: Client,
+  bucket: string,
+  path: string,
+  action: string,
+): Promise<string> {
+  const accessToken = await requireAccessToken(client, action);
+  const query = new URLSearchParams({ bucket, path }).toString();
+
+  let response: Response;
+  try {
+    response = await fetch(`${SIGNED_FILE_ENDPOINT}?${query}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  } catch (error) {
+    throw new ResearchDataError("Failed to request a signed download link.", { cause: error });
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
+  const payload = isJson ? await response.json().catch(() => null) : null;
+
+  if (!response.ok) {
+    const message =
+      payload && typeof payload.error === "string" && payload.error.trim()
+        ? payload.error
+        : `Unable to ${action}.`;
+    throw new ResearchDataError(message);
+  }
+
+  const url = payload && typeof (payload as Record<string, unknown>).url === "string"
+    ? (payload as { url: string }).url
+    : null;
+
+  if (!url) {
+    throw new ResearchDataError("Download URL was not provided by the server.");
+  }
+
+  return url;
+}
+
 async function requireUserId(client: Client, action: string): Promise<string> {
   const { data, error } = await client.auth.getSession();
 
@@ -59,6 +121,41 @@ async function requireUserId(client: Client, action: string): Promise<string> {
   }
 
   return userId;
+}
+
+async function requireAdmin(
+  client: Client,
+  action: string,
+): Promise<{ userId: string; role: string }> {
+  const { data, error } = await client.auth.getSession();
+
+  if (error) {
+    throw new ResearchDataError("Unable to verify authentication state.", {
+      cause: error,
+    });
+  }
+
+  const user = data.session?.user;
+  if (!user?.id) {
+    throw new ResearchDataError(`You must be signed in to ${action}.`);
+  }
+
+  const appMetadataRole =
+    typeof (user.app_metadata as Record<string, unknown> | undefined)?.role === "string"
+      ? ((user.app_metadata as Record<string, unknown>).role as string)
+      : undefined;
+  const userMetadataRole =
+    typeof (user.user_metadata as Record<string, unknown> | undefined)?.role === "string"
+      ? ((user.user_metadata as Record<string, unknown>).role as string)
+      : undefined;
+
+  const role = appMetadataRole ?? userMetadataRole;
+
+  if (role !== "admin") {
+    throw new ResearchDataError(`You must be an admin to ${action}.`);
+  }
+
+  return { userId: user.id, role };
 }
 
 function mapProject(record: Record<string, any>): ResearchProject {
@@ -199,6 +296,118 @@ export async function apply(
   return mapApplication(data);
 }
 
+export async function approveApplication(
+  applicationId: string,
+  client: Client = supabase,
+): Promise<ResearchApplication> {
+  const { userId: adminId } = await requireAdmin(client, "approve research applications");
+
+  const { data: existing, error: existingError } = await client
+    .from("research_applications")
+    .select("*, project:research_projects(slug)")
+    .eq("id", applicationId)
+    .maybeSingle();
+
+  if (existingError) {
+    throw new ResearchDataError("Failed to load the research application.", {
+      cause: existingError,
+    });
+  }
+
+  if (!existing) {
+    throw new ResearchDataError("The research application could not be found.");
+  }
+
+  const projectId = existing.project_id ?? existing.projectId ?? "";
+  const applicantId = existing.applicant_id ?? existing.applicantId ?? "";
+  if (!projectId || !applicantId) {
+    throw new ResearchDataError("The research application is missing required data.");
+  }
+
+  const alreadyApproved = existing.status === "approved";
+
+  let applicationRecord: Record<string, unknown> = existing;
+
+  if (!alreadyApproved) {
+    const { data: updated, error: updateError } = await client
+      .from("research_applications")
+      .update({
+        status: "approved",
+        approved_at: new Date().toISOString(),
+        approved_by: adminId,
+      })
+      .eq("id", applicationId)
+      .select(APPLICATION_SELECT)
+      .single();
+
+    if (updateError || !updated) {
+      throw new ResearchDataError("Failed to approve the research application.", {
+        cause: updateError,
+      });
+    }
+
+    applicationRecord = updated;
+  } else if (!applicationRecord.approved_at || !applicationRecord.approved_by) {
+    const { data: refreshed, error: refreshError } = await client
+      .from("research_applications")
+      .select(APPLICATION_SELECT)
+      .eq("id", applicationId)
+      .single();
+
+    if (refreshError || !refreshed) {
+      throw new ResearchDataError("Failed to load the approved research application.", {
+        cause: refreshError,
+      });
+    }
+
+    applicationRecord = refreshed;
+  }
+
+  const { error: participantError } = await client
+    .from("research_participants")
+    .upsert(
+      { project_id: projectId, user_id: applicantId },
+      { onConflict: "project_id,user_id" },
+    );
+
+  if (participantError) {
+    throw new ResearchDataError("Failed to grant project access to the applicant.", {
+      cause: participantError,
+    });
+  }
+
+  if (!alreadyApproved) {
+    const projectSlug =
+      typeof existing.project === "object" && existing.project
+        ? (existing.project as { slug?: string | null }).slug ?? null
+        : null;
+
+    const payload: Record<string, unknown> = {
+      applicationId,
+      projectId,
+    };
+
+    if (projectSlug) {
+      payload.projectSlug = projectSlug;
+      payload.link = `/research/${projectSlug}`;
+    }
+
+    const { error: notificationError } = await client.from("notifications").insert({
+      user_id: applicantId,
+      type: "research_application_approved",
+      payload,
+    });
+
+    if (notificationError) {
+      throw new ResearchDataError("Failed to send the approval notification.", {
+        cause: notificationError,
+      });
+    }
+  }
+
+  return mapApplication(applicationRecord as Record<string, any>);
+}
+
 export async function listMyApplications(
   client: Client = supabase,
 ): Promise<ResearchApplication[]> {
@@ -232,6 +441,17 @@ export async function listParticipantDocs(
   }
 
   return Array.isArray(data) ? data.map(mapDocument) : [];
+}
+
+export async function getDocumentDownloadUrl(
+  document: Pick<ResearchDocument, "storagePath">,
+  client: Client = supabase,
+): Promise<string> {
+  if (!document.storagePath) {
+    throw new ResearchDataError("This document does not have a downloadable file attached.");
+  }
+
+  return requestSignedFileUrl(client, SUBMISSIONS_BUCKET, document.storagePath, "download this document");
 }
 
 export interface SubmissionMeta {
@@ -355,4 +575,15 @@ export async function listMySubmissions(
   }
 
   return Array.isArray(data) ? data.map(mapSubmission) : [];
+}
+
+export async function getSubmissionDownloadUrl(
+  submission: Pick<ResearchSubmission, "storagePath">,
+  client: Client = supabase,
+): Promise<string> {
+  if (!submission.storagePath) {
+    throw new ResearchDataError("This submission does not include an uploaded file.");
+  }
+
+  return requestSignedFileUrl(client, SUBMISSIONS_BUCKET, submission.storagePath, "download this submission");
 }

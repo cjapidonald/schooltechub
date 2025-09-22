@@ -5,7 +5,7 @@ import {
   normalizeMethod,
   parseJsonBody,
 } from "../../../_lib/http";
-import { recordAuditLog } from "../../../_lib/audit";
+import { getAuditRequestContext, recordAuditLog } from "../../../_lib/audit";
 import { requireAdmin } from "../../../_lib/auth";
 import { createNotification } from "../../../_lib/notifications";
 
@@ -38,6 +38,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const { supabase, user } = context;
+  const auditContext = getAuditRequestContext(request);
   const existingResult = await supabase
     .from<ResearchApplicationRecord>("research_applications")
     .select("id, applicant_id, project_id, status")
@@ -96,11 +97,14 @@ export default async function handler(request: Request): Promise<Response> {
   await recordAuditLog(supabase, {
     action: "admin.research.applications.approve",
     actorId: user.id,
+    targetType: "research_application",
     targetId: applicationId,
-    metadata: {
+    details: {
       projectId: updateResult.data.project_id,
       previousStatus: existingResult.data.status,
+      approvedAt: now,
     },
+    ...auditContext,
   });
 
   return jsonResponse({ success: true, application: updateResult.data });

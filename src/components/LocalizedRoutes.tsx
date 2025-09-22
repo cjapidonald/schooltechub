@@ -16,7 +16,7 @@ import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
 import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
-import Account from '@/pages/Account';
+import Account from '@/pages/account';
 import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
 import AccountResourceEdit from '@/pages/AccountResourceEdit';
