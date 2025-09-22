@@ -73,27 +73,27 @@ export const adminNavigation: AdminNavGroup[] = [
         slug: "content/resources",
         description: "Curate approved resources and update catalogue metadata.",
       },
-      {
-        title: "Users",
-        path: "/admin/content/users",
-        slug: "content/users",
-        description: "Oversee contributor access and publishing permissions.",
-      },
     ],
   },
   {
-    label: "Directory",
+    label: "Users",
     items: [
       {
+        title: "Directory",
+        path: "/admin/users/directory",
+        slug: "users/directory",
+        description: "Audit accounts, access levels, and sign-in activity.",
+      },
+      {
         title: "Invitations",
-        path: "/admin/directory/invitations",
-        slug: "directory/invitations",
+        path: "/admin/users/invitations",
+        slug: "users/invitations",
         description: "Track outstanding invitations and reminders for collaborators.",
       },
       {
         title: "Roles (Admins)",
-        path: "/admin/directory/roles",
-        slug: "directory/roles",
+        path: "/admin/users/roles",
+        slug: "users/roles",
         description: "Grant or revoke administrative roles across the organisation.",
       },
     ],

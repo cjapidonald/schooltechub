@@ -70,6 +70,20 @@ function mapClass(record: Record<string, any>): Class {
   } satisfies Class;
 }
 
+export interface ClassWithPlanCount extends Class {
+  planCount: number;
+}
+
+export interface ClassLessonPlanLinkSummary {
+  id: string;
+  classId: string;
+  lessonPlanId: string;
+  title: string;
+  date: string | null;
+  duration: string | null;
+  addedAt: string | null;
+}
+
 async function requireUserId(client: Client, action: string): Promise<string> {
   const { data, error } = await client.auth.getSession();
 
@@ -147,6 +161,34 @@ export async function listMyClasses(client: Client = supabase): Promise<Class[]>
   }
 
   return Array.isArray(data) ? data.map(mapClass) : [];
+}
+
+export async function listMyClassesWithPlanCount(
+  client: Client = supabase,
+): Promise<ClassWithPlanCount[]> {
+  await requireUserId(client, "view classes");
+
+  const { data, error } = await client
+    .from("classes")
+    .select("*, class_lesson_plans ( id )")
+    .order("created_at", { ascending: false, nullsLast: true });
+
+  if (error) {
+    throw new ClassDataError("Failed to load your classes.", { cause: error });
+  }
+
+  return Array.isArray(data)
+    ? data.map(record => {
+        const planLinks = Array.isArray(record.class_lesson_plans)
+          ? record.class_lesson_plans
+          : [];
+
+        return {
+          ...mapClass(record),
+          planCount: planLinks.length,
+        } satisfies ClassWithPlanCount;
+      })
+    : [];
 }
 
 export async function getClass(
@@ -269,4 +311,60 @@ export async function unlinkPlanFromClass(
       cause: error,
     });
   }
+}
+
+export async function listClassLessonPlans(
+  classId: string,
+  client: Client = supabase,
+): Promise<ClassLessonPlanLinkSummary[]> {
+  await requireUserId(client, "view class lesson plans");
+
+  const { data, error } = await client
+    .from("class_lesson_plans")
+    .select(
+      `
+        id,
+        class_id,
+        lesson_plan_id,
+        added_at,
+        lesson_plans (
+          id,
+          title,
+          date,
+          duration
+        )
+      `,
+    )
+    .eq("class_id", classId)
+    .order("added_at", { ascending: false });
+
+  if (error) {
+    throw new ClassDataError("Failed to load lesson plans linked to the class.", {
+      cause: error,
+    });
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data.map(record => {
+    const lessonPlan = (record as Record<string, any>).lesson_plans ?? null;
+    const lessonPlanTitle =
+      lessonPlan && typeof lessonPlan.title === "string" && lessonPlan.title.length > 0
+        ? lessonPlan.title
+        : "Untitled lesson";
+
+    return {
+      id: String(record.id ?? ""),
+      classId: String(record.class_id ?? classId ?? ""),
+      lessonPlanId: String(
+        record.lesson_plan_id ?? (lessonPlan ? lessonPlan.id ?? "" : ""),
+      ),
+      title: lessonPlanTitle,
+      date: (lessonPlan?.date as string | null | undefined) ?? null,
+      duration: (lessonPlan?.duration as string | null | undefined) ?? null,
+      addedAt: (record.added_at as string | null | undefined) ?? null,
+    } satisfies ClassLessonPlanLinkSummary;
+  });
 }
