@@ -60,6 +60,17 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Lesson builder workflow
+
+The new lesson builder lives at `/builder` and introduces a productivity-oriented flow for assembling tech-rich lessons:
+
+- Search activities with stage/subject/skill chips, then flip between **Recents**, **Favorites**, and **Collections** tabs. Favorites and collections are stored in Supabase so they follow you between sessions.
+- Press <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> to open the command palette for quick actions like adding or duplicating steps or jumping into the activity search.
+- Each step now includes an **Offline fallback** field—perfect for teacher exports when Wi-Fi drops. It is automatically hidden from the student handout export.
+- Autosave keeps drafts synced to Supabase after an 800 ms pause, and a background link checker flags any broken resource URLs inline on each step.
+
+The export menu provides teacher and student-ready text downloads that respect link health warnings and offline contingency plans.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/fa54b19d-935f-4ccd-a25c-f152751d8c29) and click on Share -> Publish.
