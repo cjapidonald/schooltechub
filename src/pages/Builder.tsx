@@ -4,6 +4,8 @@ import { SEO } from "@/components/SEO";
 import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
 import {
   clearLessonDraftContext,
@@ -20,6 +22,8 @@ const BuilderPage = () => {
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
   const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
+  const stepSummaryLabel = steps.length === 0 ? "No steps yet" : `${steps.length} step${steps.length === 1 ? "" : "s"}`;
 
   const handleRequestResourceSearch = useCallback((stepId: string) => {
     setActiveStepId(stepId);
@@ -44,6 +48,26 @@ const BuilderPage = () => {
       clearLessonDraftContext(draftId);
     };
   }, [draftId]);
+
+  useEffect(() => {
+    if (!isMobilePreviewOpen) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobilePreviewOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMobilePreviewOpen]);
 
   useEffect(() => {
     if (!draftId) {
@@ -113,14 +137,46 @@ const BuilderPage = () => {
           </p>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr),minmax(0,1fr)]">
-          <StepEditor
-            onRequestResourceSearch={handleRequestResourceSearch}
-            activeResourceStepId={resourceSearchStepId}
-            isResourceSearchOpen={isResourceSearchOpen}
-          />
-          <LessonPreview />
-        </div>
+        <Sheet open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr),minmax(320px,0.75fr)] lg:items-start">
+            <div className="space-y-6">
+              <div className="lg:hidden">
+                <SheetTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-between gap-2"
+                    aria-haspopup="dialog"
+                    aria-expanded={isMobilePreviewOpen}
+                    aria-controls="lesson-preview-drawer"
+                  >
+                    <span>View live preview</span>
+                    <span className="text-sm text-muted-foreground">{stepSummaryLabel}</span>
+                  </Button>
+                </SheetTrigger>
+              </div>
+              <StepEditor
+                onRequestResourceSearch={handleRequestResourceSearch}
+                activeResourceStepId={resourceSearchStepId}
+                isResourceSearchOpen={isResourceSearchOpen}
+              />
+            </div>
+            <div className="hidden lg:block lg:sticky lg:top-4">
+              <LessonPreview />
+            </div>
+          </div>
+
+          <SheetContent
+            side="bottom"
+            className="h-[85vh] w-full overflow-y-auto bg-background sm:max-w-full lg:hidden"
+            aria-labelledby="lesson-preview-heading-mobile"
+            id="lesson-preview-drawer"
+          >
+            <div className="pb-8">
+              <LessonPreview headingId="lesson-preview-heading-mobile" />
+            </div>
+          </SheetContent>
+        </Sheet>
       </main>
 
       <ResourceSearchModal

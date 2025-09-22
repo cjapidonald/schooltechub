@@ -12,7 +12,11 @@ const getStepDisplayTitle = (title: string) => {
   return trimmed.length > 0 ? trimmed : "New step";
 };
 
-export const LessonPreview = () => {
+type LessonPreviewProps = {
+  headingId?: string;
+};
+
+export const LessonPreview = ({ headingId = "lesson-draft-preview-heading" }: LessonPreviewProps) => {
   const steps = useLessonDraftStore(state => state.draft.steps);
   const [resourcesById, setResourcesById] = useState<Record<string, Resource | null>>({});
 
@@ -106,9 +110,9 @@ export const LessonPreview = () => {
   }, [uniqueResourceIds, resourcesById]);
 
   return (
-    <Card aria-labelledby="lesson-draft-preview-heading">
+    <Card aria-labelledby={headingId}>
       <CardHeader>
-        <CardTitle id="lesson-draft-preview-heading" className="text-xl">
+        <CardTitle id={headingId} className="text-xl">
           Lesson preview
         </CardTitle>
         <CardDescription>

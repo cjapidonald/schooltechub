@@ -205,7 +205,11 @@ const ResourceGrid = ({
 
   if (resources.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border/60 bg-background/60">
+      <div
+        className="flex h-full items-center justify-center rounded-lg border border-dashed border-border/60 bg-background/60"
+        role="status"
+        aria-live="polite"
+      >
         <p className="text-sm text-muted-foreground">No resources match your filters yet.</p>
       </div>
     );
@@ -215,6 +219,8 @@ const ResourceGrid = ({
     <div
       ref={scrollContainerRef}
       className="h-[480px] overflow-y-auto rounded-lg border border-border/60 bg-background/60"
+      aria-busy={isFetchingNextPage}
+      aria-label="Resource results"
     >
       <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
         {virtualItems.map(virtualRow => {
@@ -240,7 +246,7 @@ const ResourceGrid = ({
                   <article
                     key={resource.id}
                     className={cn(
-                      "flex h-full flex-col gap-3 rounded-lg border bg-card p-3 shadow-sm transition",
+                      "flex h-full min-w-0 flex-col gap-3 rounded-lg border bg-card p-3 shadow-sm transition",
                       isSelected
                         ? "border-primary/80 ring-1 ring-primary/30"
                         : "border-border/60 hover:border-primary/40",
@@ -268,6 +274,7 @@ const ResourceGrid = ({
                         className="absolute right-2 top-2 h-7 px-2 text-xs"
                         onClick={() => onAddSingle(resource.id)}
                         disabled={!canAdd}
+                        aria-label={`Add ${resource.title} to this lesson step`}
                       >
                         + Add
                       </Button>
@@ -280,16 +287,32 @@ const ResourceGrid = ({
                         aria-label={isSelected ? "Deselect resource" : "Select resource"}
                       />
                       <div className="flex-1 space-y-2">
-                        <p className="line-clamp-2 text-sm font-semibold text-foreground">{resource.title}</p>
+                        <p className="line-clamp-2 break-words text-sm font-semibold text-foreground">{resource.title}</p>
                         <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
-                          {resource.type ? <Badge variant="outline">{resource.type}</Badge> : null}
-                          {resource.subject ? <Badge variant="outline">{resource.subject}</Badge> : null}
-                          {resource.stage ? <Badge variant="outline">{resource.stage}</Badge> : null}
+                          {resource.type ? (
+                            <Badge variant="outline" className="max-w-full break-words whitespace-normal">
+                              {resource.type}
+                            </Badge>
+                          ) : null}
+                          {resource.subject ? (
+                            <Badge variant="outline" className="max-w-full break-words whitespace-normal">
+                              {resource.subject}
+                            </Badge>
+                          ) : null}
+                          {resource.stage ? (
+                            <Badge variant="outline" className="max-w-full break-words whitespace-normal">
+                              {resource.stage}
+                            </Badge>
+                          ) : null}
                         </div>
                         {resource.tags?.length ? (
                           <div className="flex flex-wrap gap-1">
                             {resource.tags.slice(0, 6).map(tag => (
-                              <Badge key={tag} variant="secondary" className="text-xs">
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="break-words text-xs whitespace-normal"
+                              >
                                 {tag}
                               </Badge>
                             ))}
@@ -315,7 +338,7 @@ const ResourceGrid = ({
         />
       </div>
       {isFetchingNextPage ? (
-        <div className="flex justify-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+        <div className="flex justify-center gap-2 px-4 py-3 text-sm text-muted-foreground" role="status" aria-live="polite">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading more resources...
         </div>
       ) : null}
@@ -331,6 +354,7 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [columnCount, setColumnCount] = useState(1);
 
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -551,7 +575,18 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent id="lesson-draft-resource-search" className="max-w-5xl">
+      <DialogContent
+        id="lesson-draft-resource-search"
+        className="max-w-5xl"
+        onOpenAutoFocus={event => {
+          event.preventDefault();
+          searchInputRef.current?.focus();
+        }}
+        onEscapeKeyDown={event => {
+          event.preventDefault();
+          onOpenChange(false);
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Search resources</DialogTitle>
           <DialogDescription>
@@ -564,11 +599,13 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                ref={searchInputRef}
                 type="search"
                 value={filters.searchValue}
                 onChange={event => setFilters(current => ({ ...current, searchValue: event.target.value }))}
                 placeholder="Search by topic, tool, or keyword"
                 className="pl-9"
+                aria-label="Search resources"
               />
             </div>
             <Button
@@ -636,14 +673,24 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
           ) : null}
 
           {isError ? (
-            <div className="flex h-[240px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-destructive/40 bg-destructive/5 text-destructive">
+            <div
+              className="flex h-[240px] flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-destructive/40 bg-destructive/5 text-destructive"
+              role="alert"
+              aria-live="assertive"
+            >
               <p className="text-sm font-medium">We couldn&apos;t load resources right now.</p>
               <Button type="button" variant="outline" onClick={() => refetch()}>
                 Try again
               </Button>
             </div>
           ) : isInitialLoading ? (
-            <div className="grid h-[480px] grid-cols-1 gap-4 overflow-hidden rounded-lg border border-border/60 bg-background/60 p-4 md:grid-cols-2 lg:grid-cols-3">
+            <div
+              className="grid h-[480px] grid-cols-1 gap-4 overflow-hidden rounded-lg border border-border/60 bg-background/60 p-4 md:grid-cols-2 lg:grid-cols-3"
+              role="status"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <span className="sr-only">Loading resources…</span>
               {Array.from({ length: 6 }).map((_, index) => (
                 <div key={index} className="flex flex-col gap-3">
                   <Skeleton className="h-32 w-full rounded-md" />
