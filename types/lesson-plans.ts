@@ -12,6 +12,8 @@ export interface LessonPlanListItem {
   technologyTags: string[];
   durationMinutes: number | null;
   pdfUrl: string | null;
+  lessonDate: string | null;
+  schoolLogoUrl: string | null;
   status: LessonPlanStatus;
   createdAt: string | null;
   updatedAt: string | null;

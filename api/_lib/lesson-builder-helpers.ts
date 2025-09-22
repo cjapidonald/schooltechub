@@ -26,6 +26,8 @@ interface BuilderMetadata {
   parts?: unknown;
   lastSavedAt?: unknown;
   history?: unknown;
+  lessonDate?: unknown;
+  schoolLogoUrl?: unknown;
 }
 
 const DEFAULT_PARTS: Array<{ id: string; label: string; description: string | null }> = [
@@ -52,6 +54,11 @@ function normalizeMetadata(value: unknown): BuilderMetadata {
     parts: builderRaw.parts,
     lastSavedAt: builderRaw.lastSavedAt ?? builderRaw.last_saved_at,
     history: builderRaw.history,
+    lessonDate: builderRaw.lessonDate ?? builderRaw.lesson_date,
+    schoolLogoUrl:
+      builderRaw.schoolLogoUrl ??
+      builderRaw.school_logo_url ??
+      (isRecord(builderRaw.schoolLogo) ? builderRaw.schoolLogo.url : builderRaw.schoolLogo),
   } as BuilderMetadata;
 }
 
@@ -194,6 +201,15 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
 
   const parts = ensureParts(metadata.parts, detail, steps);
 
+  const lessonDateFromMetadata =
+    typeof metadata.lessonDate === "string" && metadata.lessonDate.trim().length > 0
+      ? metadata.lessonDate.trim()
+      : null;
+  const schoolLogoFromMetadata =
+    typeof metadata.schoolLogoUrl === "string" && metadata.schoolLogoUrl.trim().length > 0
+      ? metadata.schoolLogoUrl.trim()
+      : null;
+
   return {
     id: detail.id,
     slug: detail.slug,
@@ -211,6 +227,8 @@ export function mapRecordToBuilderPlan(record: LessonPlanRecord): LessonBuilderP
     standards,
     availableStandards,
     resources: detail.resources,
+    lessonDate: lessonDateFromMetadata ?? detail.lessonDate ?? null,
+    schoolLogoUrl: schoolLogoFromMetadata ?? detail.schoolLogoUrl ?? null,
     lastSavedAt: typeof metadata.lastSavedAt === "string" ? metadata.lastSavedAt : detail.updatedAt,
     version: typeof metadata.version === "number" ? metadata.version : detail.updatedAt ? 1 : 0,
     parts,
@@ -230,6 +248,8 @@ export function buildMetadataFromPlan(plan: LessonBuilderPlan): Record<string, u
       parts: plan.parts,
       lastSavedAt: plan.lastSavedAt,
       history: plan.history,
+      lessonDate: plan.lessonDate,
+      schoolLogoUrl: plan.schoolLogoUrl,
     },
   };
 }
@@ -252,7 +272,7 @@ export function buildUpdatePayload(plan: LessonBuilderPlan): Partial<LessonPlanR
 }
 
 export function createDraftInsert(
-  plan: Pick<LessonBuilderPlan, "id" | "slug" | "title" | "summary" | "stage" | "stages" | "subjects" | "deliveryMethods" | "technologyTags" | "durationMinutes"> & {
+  plan: Pick<LessonBuilderPlan, "id" | "slug" | "title" | "summary" | "stage" | "stages" | "subjects" | "deliveryMethods" | "technologyTags" | "durationMinutes" | "lessonDate" | "schoolLogoUrl"> & {
     status: LessonPlanRecord["status"];
     overview: LessonBuilderPlan["overview"];
     steps: LessonBuilderPlan["steps"];
@@ -288,6 +308,8 @@ export function createDraftInsert(
         parts: plan.parts,
         lastSavedAt: null,
         history: plan.history,
+        lessonDate: plan.lessonDate,
+        schoolLogoUrl: plan.schoolLogoUrl,
       },
     },
   } as Partial<LessonPlanRecord>;

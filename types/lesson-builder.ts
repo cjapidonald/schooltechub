@@ -69,6 +69,8 @@ export interface LessonBuilderPlan {
   standards: LessonBuilderStandard[];
   availableStandards: LessonBuilderStandard[];
   resources: LessonPlanResource[];
+  lessonDate: string | null;
+  schoolLogoUrl: string | null;
   lastSavedAt: string | null;
   version: number;
   parts: LessonBuilderPart[];
@@ -176,6 +178,8 @@ function createListItemFromPlan(plan: LessonBuilderPlan): LessonPlanListItem {
     technologyTags: plan.technologyTags,
     durationMinutes: plan.durationMinutes,
     pdfUrl: null,
+    lessonDate: plan.lessonDate,
+    schoolLogoUrl: plan.schoolLogoUrl,
     status: plan.status,
     createdAt: plan.createdAt,
     updatedAt: plan.updatedAt,

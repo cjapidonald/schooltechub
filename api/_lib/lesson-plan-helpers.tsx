@@ -4,6 +4,8 @@ import {
   Text,
   View,
   StyleSheet,
+  Image,
+  Link,
   renderToBuffer,
 } from "@react-pdf/renderer";
 import type { PostgrestFilterBuilder } from "@supabase/postgrest-js";
@@ -248,6 +250,9 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
   const pdfUrl =
     nullableString(record.pdf_url) ?? nullableString(record.pdf) ?? null;
 
+  const lessonDate = extractLessonDateValue(record);
+  const schoolLogoUrl = extractSchoolLogoUrlValue(record);
+
   return {
     id: record.id,
     slug: record.slug,
@@ -260,6 +265,8 @@ export function mapRecordToListItem(record: LessonPlanRecord): LessonPlanListIte
     technologyTags: tech,
     durationMinutes: duration,
     pdfUrl,
+    lessonDate,
+    schoolLogoUrl,
     status: record.status ?? ("draft" as LessonPlanStatus),
     createdAt: nullableString(record.created_at),
     updatedAt: nullableString(record.updated_at),
@@ -315,6 +322,14 @@ export async function renderLessonPlanToPdf(
     summary: {
       marginBottom: 16,
     },
+    logoContainer: {
+      marginBottom: 16,
+      alignItems: "flex-end",
+    },
+    logo: {
+      width: 96,
+      height: 96,
+    },
     metaGroup: {
       marginBottom: 12,
     },
@@ -336,16 +351,29 @@ export async function renderLessonPlanToPdf(
       marginLeft: 12,
       marginBottom: 4,
     },
+    resourceItem: {
+      marginBottom: 8,
+    },
+    link: {
+      color: "#2563eb",
+      textDecoration: "underline",
+    },
   });
 
   const doc = (
     <Document>
       <Page size="A4" style={styles.page}>
+        {lesson.schoolLogoUrl ? (
+          <View style={styles.logoContainer}>
+            <Image src={lesson.schoolLogoUrl} style={styles.logo} />
+          </View>
+        ) : null}
         <Text style={styles.title}>{lesson.title}</Text>
         {lesson.summary ? (
           <Text style={styles.summary}>{lesson.summary}</Text>
         ) : null}
         <View style={styles.metaGroup}>
+          {renderMetaLine("Date", lesson.lessonDate, styles)}
           {renderMetaLine("Stage", lesson.stage, styles)}
           {renderMetaLine(
             "Subjects",
@@ -370,7 +398,7 @@ export async function renderLessonPlanToPdf(
             styles
           )}
         </View>
-        {lesson.content.length === 0 ? (
+          {lesson.content.length === 0 ? (
           <Text style={styles.paragraph}>Lesson content coming soon.</Text>
         ) : (
           lesson.content.map((section, index) => (
@@ -387,6 +415,25 @@ export async function renderLessonPlanToPdf(
             </View>
           ))
         )}
+        {lesson.resources.length ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Resources</Text>
+            {lesson.resources.map((resource, index) => (
+              <View key={`${resource.title}-${index}`} style={styles.resourceItem}>
+                {resource.url ? (
+                  <Link src={resource.url} style={styles.link}>
+                    {resource.title}
+                  </Link>
+                ) : (
+                  <Text style={styles.paragraph}>{resource.title}</Text>
+                )}
+                {resource.description ? (
+                  <Text style={styles.paragraph}>{resource.description}</Text>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        ) : null}
       </Page>
     </Document>
   );
@@ -511,6 +558,95 @@ function firstNumber(values: Array<number | null | undefined>): number | null {
 
 function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (match) => `\\${match}`);
+}
+
+function extractNestedString(source: unknown, paths: string[][]): string | null {
+  if (!source || typeof source !== "object") {
+    return null;
+  }
+
+  for (const path of paths) {
+    let current: unknown = source;
+    let matched = true;
+
+    for (const segment of path) {
+      if (!current || typeof current !== "object") {
+        matched = false;
+        break;
+      }
+      current = (current as Record<string, unknown>)[segment];
+    }
+
+    if (!matched) {
+      continue;
+    }
+
+    if (typeof current === "string" && current.trim().length > 0) {
+      return current.trim();
+    }
+
+    if (current && typeof current === "object") {
+      const record = current as Record<string, unknown>;
+      const url = record.url;
+      if (typeof url === "string" && url.trim().length > 0) {
+        return url.trim();
+      }
+    }
+  }
+
+  return null;
+}
+
+function extractLessonDateValue(record: LessonPlanRecord): string | null {
+  const sources = [record.metadata, record.overview];
+  const paths = [
+    ["lessonDate"],
+    ["lesson_date"],
+    ["scheduledDate"],
+    ["scheduled_date"],
+    ["schedule", "date"],
+    ["schedule", "scheduledFor"],
+    ["schedule", "scheduled_for"],
+    ["builder", "lessonDate"],
+    ["builder", "lesson_date"],
+    ["date"],
+  ];
+
+  for (const source of sources) {
+    const value = extractNestedString(source, paths);
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+function extractSchoolLogoUrlValue(record: LessonPlanRecord): string | null {
+  const sources = [record.metadata, record.overview];
+  const paths = [
+    ["schoolLogoUrl"],
+    ["school_logo_url"],
+    ["branding", "logoUrl"],
+    ["branding", "logo_url"],
+    ["branding", "logo", "url"],
+    ["branding", "logo"],
+    ["school", "logoUrl"],
+    ["school", "logo_url"],
+    ["builder", "schoolLogoUrl"],
+    ["builder", "school_logo_url"],
+    ["logoUrl"],
+    ["logo_url"],
+  ];
+
+  for (const source of sources) {
+    const value = extractNestedString(source, paths);
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
 }
 
 function extractOverviewSummary(record: LessonPlanRecord): string | null {

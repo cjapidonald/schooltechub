@@ -42,6 +42,8 @@ export interface BuilderState {
   objective: string;
   stage: string;
   subject: string;
+  lessonDate: string | null;
+  schoolLogoUrl: string | null;
   steps: BuilderStep[];
   updatedAt: string;
 }
