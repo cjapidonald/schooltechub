@@ -1,13 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { useMyClasses } from "@/hooks/useMyClasses";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { SUBJECTS, type Subject } from "@/lib/constants/subjects";
 
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
 import type { LessonPlanMetaDraft } from "./types";
+import { createLessonPlan, getLessonPlan, updateLessonPlan } from "./api";
+
+const AUTOSAVE_DELAY = 800;
 
 const createInitialMeta = (): LessonPlanMetaDraft => ({
   title: "",
@@ -18,10 +26,138 @@ const createInitialMeta = (): LessonPlanMetaDraft => ({
   successCriteria: "",
 });
 
+function mapSubject(value: string | null): Subject | null {
+  if (!value) {
+    return null;
+  }
+
+  const match = SUBJECTS.find(subject => subject === value);
+  return match ?? null;
+}
+
 const LessonBuilderPage = () => {
   const [meta, setMeta] = useState<LessonPlanMetaDraft>(createInitialMeta);
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [searchParams] = useSearchParams();
+  const planParam = searchParams.get("id");
+  const { t } = useLanguage();
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
   const { classes } = useMyClasses();
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestMeta = useRef(meta);
+  const skipNextAutosave = useRef(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    latestMeta.current = meta;
+  }, [meta]);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      if (autosaveTimer.current) {
+        clearTimeout(autosaveTimer.current);
+        autosaveTimer.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const initialise = async () => {
+      try {
+        if (planParam) {
+          const record = await getLessonPlan(planParam);
+          if (!active || !isMounted.current) {
+            return;
+          }
+
+          setPlanId(record.id);
+          setMeta({
+            title: record.title,
+            subject: mapSubject(record.subject),
+            classId: record.classId,
+            date: record.date,
+            objective: record.objective,
+            successCriteria: record.successCriteria,
+          });
+
+          const timestamp = record.lastSavedAt ?? record.updatedAt;
+          setLastSavedAt(timestamp ? new Date(timestamp) : null);
+          skipNextAutosave.current = true;
+        } else {
+          const record = await createLessonPlan(latestMeta.current);
+          if (!active || !isMounted.current) {
+            return;
+          }
+
+          setPlanId(record.id);
+          const timestamp = record.lastSavedAt ?? record.updatedAt;
+          setLastSavedAt(timestamp ? new Date(timestamp) : null);
+          skipNextAutosave.current = false;
+        }
+      } catch (error) {
+        console.error("Failed to initialise lesson plan", error);
+      }
+    };
+
+    void initialise();
+
+    return () => {
+      active = false;
+    };
+  }, [planParam]);
+
+  useEffect(() => {
+    if (!planId) {
+      return;
+    }
+
+    if (skipNextAutosave.current) {
+      skipNextAutosave.current = false;
+      return;
+    }
+
+    if (autosaveTimer.current) {
+      clearTimeout(autosaveTimer.current);
+    }
+
+    let active = true;
+
+    autosaveTimer.current = setTimeout(() => {
+      const run = async () => {
+        try {
+          setIsSaving(true);
+          const record = await updateLessonPlan(planId, latestMeta.current);
+          if (!active || !isMounted.current) {
+            return;
+          }
+
+          const timestamp = record.lastSavedAt ?? record.updatedAt ?? new Date().toISOString();
+          setLastSavedAt(new Date(timestamp));
+        } catch (error) {
+          console.error("Failed to autosave lesson plan", error);
+        } finally {
+          if (active && isMounted.current) {
+            setIsSaving(false);
+          }
+        }
+      };
+
+      void run();
+    }, AUTOSAVE_DELAY);
+
+    return () => {
+      active = false;
+      if (autosaveTimer.current) {
+        clearTimeout(autosaveTimer.current);
+        autosaveTimer.current = null;
+      }
+    };
+  }, [meta, planId]);
 
   const metaFormValue = useMemo<LessonMetaFormValue>(
     () => ({
@@ -60,11 +196,34 @@ const LessonBuilderPage = () => {
     [fullName, schoolName, schoolLogoUrl],
   );
 
+  const savingCopy = t.lessonBuilder.toolbar;
+  const lastSavedLabel = useMemo(() => {
+    if (!lastSavedAt) {
+      return null;
+    }
+
+    try {
+      return `${savingCopy.lastSavedPrefix} ${format(lastSavedAt, "HH:mm")}`;
+    } catch {
+      return `${savingCopy.lastSavedPrefix}`;
+    }
+  }, [lastSavedAt, savingCopy.lastSavedPrefix]);
+
   return (
     <main className="bg-slate-50">
       <div className="container mx-auto px-4 py-12">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-semibold text-slate-900">Lesson Builder</h1>
+          <div className="mt-2 flex justify-center text-sm text-slate-600">
+            {isSaving ? (
+              <span className="inline-flex items-center gap-2" role="status">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {savingCopy.savingLabel}
+              </span>
+            ) : lastSavedLabel ? (
+              <span>{lastSavedLabel}</span>
+            ) : null}
+          </div>
           <p className="mt-2 text-base text-slate-600">
             Draft your lesson on the left and preview the experience on the right.
           </p>
