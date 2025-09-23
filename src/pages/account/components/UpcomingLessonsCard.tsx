@@ -1,7 +1,7 @@
 import { Fragment, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { Calendar, CalendarDays } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { listUpcomingLessonPlans, type UpcomingLessonPlanSummary } from "@/lib/lessonPlans";
+import { cn } from "@/lib/utils";
 
 const formatLessonDate = (value: string | null): string => {
   if (!value) {
@@ -38,9 +39,10 @@ const createLessonSummary = (lesson: UpcomingLessonPlanSummary): string[] => {
 
 export type UpcomingLessonsCardProps = {
   isEnabled: boolean;
+  className?: string;
 };
 
-export const UpcomingLessonsCard = ({ isEnabled }: UpcomingLessonsCardProps) => {
+export const UpcomingLessonsCard = ({ isEnabled, className }: UpcomingLessonsCardProps) => {
   const { language } = useLanguage();
 
   const query = useQuery({
@@ -136,10 +138,20 @@ export const UpcomingLessonsCard = ({ isEnabled }: UpcomingLessonsCardProps) => 
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">Upcoming lessons</CardTitle>
-        <CardDescription>Stay ready for what&apos;s next on your teaching calendar.</CardDescription>
+    <Card
+      className={cn(
+        "border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]",
+        className,
+      )}
+    >
+      <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <div className="space-y-1">
+          <CardTitle className="text-xl font-semibold">Upcoming lessons</CardTitle>
+          <CardDescription>Stay ready for what&apos;s next on your teaching calendar.</CardDescription>
+        </div>
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_25px_hsl(var(--glow-primary)/0.2)]">
+          <CalendarDays className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />
+        </span>
       </CardHeader>
       <CardContent>{content}</CardContent>
     </Card>
