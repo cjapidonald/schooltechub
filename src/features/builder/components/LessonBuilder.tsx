@@ -455,8 +455,14 @@ export const BuilderShell = () => {
           </div>
 
           <div className="hidden print:block lg:block">
-            <div className="sticky top-24" ref={previewRef} data-print-section="lesson-preview">
-              <LessonPreview />
+            <div className="sticky top-24">
+              <div
+                className="rounded-xl border-2 border-dashed border-border/70 bg-muted/20 p-4 shadow-sm"
+                ref={previewRef}
+                data-print-section="lesson-preview"
+              >
+                <LessonPreview className="min-h-[320px] max-h-[calc(100vh-8rem)] overflow-y-auto border-none bg-transparent shadow-none" />
+              </div>
             </div>
           </div>
         </div>
