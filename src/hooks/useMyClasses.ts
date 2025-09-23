@@ -51,13 +51,19 @@ export function useMyClasses() {
 
     void loadClasses();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
-      void loadClasses();
-    });
+    const authClient = supabase.auth;
+    let authSubscription: { unsubscribe: () => void } | null = null;
+
+    if (authClient && typeof authClient.onAuthStateChange === "function") {
+      const { data } = authClient.onAuthStateChange(() => {
+        void loadClasses();
+      });
+      authSubscription = data?.subscription ?? null;
+    }
 
     return () => {
       isMounted = false;
-      authListener?.subscription.unsubscribe();
+      authSubscription?.unsubscribe();
     };
   }, []);
 

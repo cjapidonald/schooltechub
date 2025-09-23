@@ -7,6 +7,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2, MoreHorizontal, Play } from "lucide-react";
 import type { LessonBuilderPlan, LessonBuilderVersionEntry } from "@/types/lesson-builder";
 
@@ -26,6 +33,12 @@ interface ToolbarProps {
   isSaving: boolean;
   onPreview: () => void;
   copy: ToolbarCopy;
+  classes: { id: string; title: string }[];
+  selectedClassId?: string;
+  isLoadingClasses?: boolean;
+  isLinkingClass?: boolean;
+  classError?: string | null;
+  onSelectClass?: (classId: string) => void;
 }
 
 function formatLastSaved(date: string | null, prefix: string): string {
@@ -39,9 +52,32 @@ function formatLastSaved(date: string | null, prefix: string): string {
   }
 }
 
-export const Toolbar = ({ plan, history, isSaving, onPreview, copy }: ToolbarProps) => {
+export const Toolbar = ({
+  plan,
+  history,
+  isSaving,
+  onPreview,
+  copy,
+  classes,
+  selectedClassId,
+  isLoadingClasses,
+  isLinkingClass,
+  classError,
+  onSelectClass,
+}: ToolbarProps) => {
   const statusLabel = plan?.status === "published" ? copy.publishedStatus : copy.draftStatus;
   const lastSavedLabel = formatLastSaved(plan?.lastSavedAt ?? plan?.updatedAt ?? null, copy.lastSavedPrefix);
+  const hasClasses = classes.length > 0;
+  const selectDisabled = !plan || isLoadingClasses || isLinkingClass || Boolean(classError);
+  const placeholder = classError
+    ? classError
+    : isLoadingClasses
+      ? "Loading classes..."
+      : hasClasses
+        ? isLinkingClass
+          ? "Linking lesson..."
+          : "Save to class"
+        : "No classes yet";
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card/50 px-4 py-3">
@@ -56,6 +92,36 @@ export const Toolbar = ({ plan, history, isSaving, onPreview, copy }: ToolbarPro
         ) : null}
       </div>
       <div className="flex items-center gap-2">
+        <Select
+          value={selectedClassId}
+          onValueChange={value => {
+            if (onSelectClass) {
+              onSelectClass(value);
+            }
+          }}
+          disabled={selectDisabled}
+        >
+          <SelectTrigger className="w-[220px]">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {classError ? (
+              <SelectItem value="__error" disabled>
+                {classError}
+              </SelectItem>
+            ) : hasClasses ? (
+              classes.map(classItem => (
+                <SelectItem key={classItem.id} value={classItem.id}>
+                  {classItem.title}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="__no-classes" disabled>
+                No classes yet
+              </SelectItem>
+            )}
+          </SelectContent>
+        </Select>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
