@@ -98,7 +98,7 @@ export async function fetchActivities(filters: ActivityFilterState) {
 
   const { data, error } = await query.limit(50);
   if (error) throw error;
-  return (data ?? []).map(toSummary);
+  return ((data ?? []) as unknown as SupabaseActivityRecord[]).map(toSummary);
 }
 
 export async function fetchRecents() {
@@ -113,10 +113,10 @@ export async function fetchRecents() {
     .limit(12);
 
   if (error) throw error;
-  return (data ?? [])
+  return ((data ?? []) as any[])
     .filter(
       (row): row is { last_viewed: string; metadata: Record<string, unknown>; activity: SupabaseActivityRecord } =>
-        Boolean(row.activity),
+        Boolean(row?.activity),
     )
     .map(row => ({
       summary: toSummary(row.activity),

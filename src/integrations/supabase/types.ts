@@ -201,6 +201,78 @@ export type Database = {
         }
         Relationships: []
       }
+      builder_link_health_reports: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_healthy: boolean | null
+          last_checked: string | null
+          last_error: string | null
+          status_code: number | null
+          status_text: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      builder_resource_links: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_healthy: boolean | null
+          last_checked: string | null
+          last_error: string | null
+          status_code: number | null
+          status_text: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       classes: {
         Row: {
           category: string | null
