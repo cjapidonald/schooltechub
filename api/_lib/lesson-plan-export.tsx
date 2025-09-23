@@ -1,11 +1,25 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
+  LessonBuilderPart,
   LessonBuilderPlan,
+  LessonBuilderStep,
   LessonBuilderStepResource,
+  LessonBuilderStandard,
+  LessonBuilderVersionEntry,
 } from "../../types/lesson-builder";
-import type { LessonPlanRecord } from "../../types/lesson-plans";
 import { mapRecordToBuilderPlan } from "./lesson-builder-helpers";
+import {
+  cryptoRandomId,
+  mergeStandardValues,
+  mergeStepValues,
+} from "../../types/lesson-builder";
+import type {
+  LessonPlanOverview,
+  LessonPlanRecord,
+  LessonPlanResource,
+  LessonPlanStatus,
+} from "../../types/lesson-plans";
 import React from "react";
 import type { JSX } from "react";
 
@@ -45,8 +59,55 @@ interface PreviewModel {
 }
 
 const READABLE_CLASS_ROLES = new Set(["owner", "teacher", "assistant"]);
+const BUILDER_PLAN_TABLE = "lesson_plan_builder_plans";
+const PLAN_STEPS_TABLE = "lesson_plan_steps";
+const CLASS_PLAN_LINKS_TABLE = "class_lesson_plans";
 
 export async function loadLessonPlanExportData(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<LessonPlanExportData | null> {
+  const {
+    data: builderData,
+    error: builderError,
+  } = await supabase
+    .from<Record<string, any>>(BUILDER_PLAN_TABLE)
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (builderError) {
+    throw new Error("Failed to load lesson plan");
+  }
+
+  if (builderData) {
+    const {
+      data: stepData,
+      error: stepError,
+    } = await supabase
+      .from<Record<string, any>>(PLAN_STEPS_TABLE)
+      .select("*")
+      .eq("lesson_plan_id", id);
+
+    if (stepError) {
+      throw new Error("Failed to load lesson plan steps");
+    }
+
+    const classIds = await loadLinkedClassIds(supabase, id);
+    const plan = mapBuilderPlanForExport(
+      builderData,
+      Array.isArray(stepData) ? stepData : [],
+    );
+    const ownerId =
+      typeof builderData.owner_id === "string" ? builderData.owner_id : null;
+
+    return { plan, ownerId, classIds };
+  }
+
+  return loadPublishedPlanExportData(supabase, id);
+}
+
+async function loadPublishedPlanExportData(
   supabase: SupabaseClient,
   id: string,
 ): Promise<LessonPlanExportData | null> {
@@ -64,25 +125,548 @@ export async function loadLessonPlanExportData(
     return null;
   }
 
-  const { data: classLinks, error: classError } = await supabase
-    .from<{ class_id: string }>("class_lesson_plans")
-    .select("class_id")
-    .eq("lesson_plan_id", id);
-
-  if (classError) {
-    throw new Error("Failed to load linked classes");
-  }
-
-  const classIds = Array.isArray(classLinks)
-    ? classLinks
-        .map((row) => (typeof row.class_id === "string" ? row.class_id : null))
-        .filter((value): value is string => Boolean(value))
-    : [];
-
+  const classIds = await loadLinkedClassIds(supabase, id);
   const plan = mapRecordToBuilderPlan(data);
   const ownerId = typeof data.owner_id === "string" ? data.owner_id : null;
 
   return { plan, ownerId, classIds };
+}
+
+async function loadLinkedClassIds(
+  supabase: SupabaseClient,
+  planId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from<{ class_id: string | null }>(CLASS_PLAN_LINKS_TABLE)
+    .select("class_id")
+    .eq("lesson_plan_id", planId);
+
+  if (error) {
+    throw new Error("Failed to load linked classes");
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((row) => (typeof row.class_id === "string" ? row.class_id : null))
+    .filter((value): value is string => Boolean(value));
+}
+
+type BuilderMetadata = {
+  version?: number;
+  steps?: unknown;
+  standards?: unknown;
+  availableStandards?: unknown;
+  parts?: unknown;
+  lastSavedAt?: unknown;
+  history?: unknown;
+  lessonDate?: unknown;
+  schoolLogoUrl?: unknown;
+};
+
+function mapBuilderPlanForExport(
+  record: Record<string, any>,
+  stepRecords: Record<string, any>[],
+): LessonBuilderPlan {
+  const id = normalizeId(record.id);
+  const title = normalizeString(record.title) ?? "Untitled lesson";
+  const slug = resolveSlug(record, title, id);
+  const summary = normalizeString(record.summary);
+  const stage = normalizeString(record.stage);
+  const baseStages = normalizeStringArray(record.stages);
+  const stages = stage && !baseStages.includes(stage)
+    ? [...baseStages, stage]
+    : baseStages;
+  const subjects = normalizeSubjects(record);
+  const deliveryMethods = normalizeDelivery(record);
+  const technologyTags = normalizeTechnology(record);
+  const durationMinutes = normalizeNumber(
+    record.duration_minutes ?? record.duration ?? record.time_required,
+  );
+
+  const metadata = extractBuilderMetadata(record.metadata);
+  const sortedSteps = sortStepRecords(stepRecords);
+  const storedSteps = sortedSteps.map((step, index) =>
+    mapBuilderStep(step, index),
+  );
+  const steps =
+    Array.isArray(metadata.steps) && metadata.steps.length > 0
+      ? metadata.steps.map((step) =>
+          mergeStepValues(step as Partial<LessonBuilderStep>),
+        )
+      : storedSteps;
+
+  const standards = normalizeStandards(metadata.standards);
+  const availableStandardsRaw = normalizeStandards(metadata.availableStandards);
+  const availableStandards =
+    availableStandardsRaw.length > 0 ? availableStandardsRaw : standards;
+  const schoolLogoUrl =
+    normalizeString(metadata.schoolLogoUrl) ??
+    normalizeString(record.school_logo_url ?? record.logo_url);
+  const lessonDate =
+    normalizeString(metadata.lessonDate) ??
+    normalizeString(record.lesson_date ?? record.date);
+  const overview = buildOverview(
+    record,
+    summary,
+    subjects,
+    stage,
+    durationMinutes,
+    deliveryMethods,
+    technologyTags,
+  );
+  const resources = normalizePlanResources(record.resources);
+  const parts = normalizeParts(metadata.parts, summary, steps.length);
+  const history = normalizeHistory(metadata.history);
+  const lastSavedAt =
+    normalizeString(metadata.lastSavedAt) ??
+    normalizeString(record.updated_at ?? record.last_saved_at);
+  const version =
+    typeof metadata.version === "number" && Number.isFinite(metadata.version)
+      ? metadata.version
+      : 1;
+
+  return {
+    id,
+    slug,
+    title,
+    summary,
+    status: normalizeStatus(record.status),
+    stage,
+    stages,
+    subjects,
+    deliveryMethods,
+    technologyTags,
+    durationMinutes,
+    schoolLogoUrl,
+    lessonDate,
+    overview,
+    steps,
+    standards,
+    availableStandards,
+    resources,
+    lastSavedAt,
+    version,
+    parts,
+    history,
+    ownerId: normalizeString(record.owner_id),
+    createdAt: normalizeString(record.created_at),
+    updatedAt: normalizeString(record.updated_at),
+  } satisfies LessonBuilderPlan;
+}
+
+function extractBuilderMetadata(value: unknown): BuilderMetadata {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  const record = value as Record<string, unknown>;
+  const builderRaw =
+    record.builder && typeof record.builder === "object"
+      ? (record.builder as Record<string, unknown>)
+      : record;
+
+  return {
+    version: builderRaw.version as number | undefined,
+    steps: builderRaw.steps,
+    standards: builderRaw.standards,
+    availableStandards:
+      (builderRaw.availableStandards as unknown) ??
+      builderRaw.available_standards,
+    parts: builderRaw.parts,
+    lastSavedAt:
+      (builderRaw.lastSavedAt as unknown) ?? builderRaw.last_saved_at,
+    history: builderRaw.history,
+    lessonDate:
+      (builderRaw.lessonDate as unknown) ?? builderRaw.lesson_date,
+    schoolLogoUrl:
+      (builderRaw.schoolLogoUrl as unknown) ?? builderRaw.school_logo_url,
+  } satisfies BuilderMetadata;
+}
+
+function normalizeId(value: unknown): string {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value.trim();
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return cryptoRandomId("plan");
+}
+
+function resolveSlug(
+  record: Record<string, any>,
+  title: string,
+  id: string,
+): string {
+  const existing = normalizeString(record.slug);
+  if (existing) {
+    return existing;
+  }
+
+  const base = slugify(title);
+  if (!base) {
+    return id;
+  }
+
+  const suffix = id.replace(/[^a-z0-9]+/gi, "").slice(0, 6) || "plan";
+  return `${base}-${suffix}`;
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-");
+}
+
+function normalizeString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function normalizeNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!value) {
+    return [];
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeString(item))
+      .filter((item): item is string => Boolean(item));
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? [trimmed] : [];
+  }
+  return [];
+}
+
+function normalizeSubjects(record: Record<string, any>): string[] {
+  const subjects = normalizeStringArray(record.subjects);
+  if (subjects.length > 0) {
+    return subjects;
+  }
+  const fallback = normalizeString(record.subject);
+  return fallback ? [fallback] : [];
+}
+
+function normalizeDelivery(record: Record<string, any>): string[] {
+  return normalizeStringArray(
+    record.delivery_methods ??
+      record.delivery ??
+      record.delivery_modes ??
+      record.delivery_format,
+  );
+}
+
+function normalizeTechnology(record: Record<string, any>): string[] {
+  return normalizeStringArray(
+    record.technology_tags ??
+      record.technology ??
+      record.tech ??
+      record.tools,
+  );
+}
+
+function sortStepRecords(
+  stepRecords: Record<string, any>[],
+): Record<string, any>[] {
+  return [...stepRecords].sort((a, b) => {
+    const posA = normalizeNumber(a.position);
+    const posB = normalizeNumber(b.position);
+
+    if (posA === null && posB === null) {
+      return 0;
+    }
+    if (posA === null) {
+      return 1;
+    }
+    if (posB === null) {
+      return -1;
+    }
+    return posA - posB;
+  });
+}
+
+function mapBuilderStep(
+  step: Record<string, any>,
+  index: number,
+): LessonBuilderStep {
+  const id = normalizeStepId(step.id, index);
+  const title = normalizeString(step.title) ?? `Step ${index + 1}`;
+  const notes = normalizeString(step.notes);
+  const durationMinutes = normalizeNumber(
+    step.duration_minutes ?? step.durationMinutes,
+  );
+  const resources = normalizeResourceList(step.resources);
+
+  return mergeStepValues({
+    id,
+    title,
+    notes: notes ?? undefined,
+    durationMinutes: durationMinutes ?? undefined,
+    resources,
+  });
+}
+
+function normalizeStepId(value: unknown, index: number): string {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value.trim();
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return `step_${index + 1}`;
+}
+
+function normalizeResourceList(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function normalizeStandards(value: unknown): LessonBuilderStandard[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .map((standard) =>
+      mergeStandardValues(standard as Partial<LessonBuilderStandard>),
+    )
+    .filter((standard): standard is LessonBuilderStandard => Boolean(standard));
+}
+
+function normalizePlanResources(value: unknown): LessonPlanResource[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((resource) => normalizePlanResource(resource))
+    .filter((resource): resource is LessonPlanResource => resource !== null);
+}
+
+function normalizePlanResource(value: unknown): LessonPlanResource | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const title = normalizeString(record.title) ?? normalizeString(record.name);
+  if (!title) {
+    return null;
+  }
+
+  return {
+    title,
+    url: normalizeString(record.url),
+    type: normalizeString(record.type),
+    description: normalizeString(record.description),
+  } satisfies LessonPlanResource;
+}
+
+function normalizeParts(
+  value: unknown,
+  summary: string | null,
+  stepCount: number,
+): LessonBuilderPart[] {
+  if (Array.isArray(value)) {
+    const normalized = value
+      .map((part) => normalizePart(part))
+      .filter((part): part is LessonBuilderPart => Boolean(part));
+
+    if (normalized.length > 0) {
+      return normalized;
+    }
+  }
+
+  return buildDefaultParts(summary, stepCount);
+}
+
+function normalizePart(value: unknown): LessonBuilderPart | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const id =
+    normalizeString(record.id) ?? cryptoRandomId("part");
+  const label = normalizeString(record.label) ?? "Part";
+  const description = normalizeString(record.description);
+
+  return {
+    id,
+    label,
+    description,
+    completed: Boolean(record.completed),
+  } satisfies LessonBuilderPart;
+}
+
+function buildDefaultParts(
+  summary: string | null,
+  stepCount: number,
+): LessonBuilderPart[] {
+  return [
+    {
+      id: "overview",
+      label: "Overview",
+      description: summary,
+      completed: Boolean(summary),
+    },
+    {
+      id: "activities",
+      label: "Learning Activities",
+      description:
+        stepCount > 0
+          ? `${stepCount} ${stepCount === 1 ? "step" : "steps"}`
+          : null,
+      completed: stepCount > 0,
+    },
+    {
+      id: "assessment",
+      label: "Assessment",
+      description: null,
+      completed: false,
+    },
+    {
+      id: "resources",
+      label: "Resources",
+      description: null,
+      completed: false,
+    },
+  ];
+}
+
+function normalizeHistory(value: unknown): LessonBuilderVersionEntry[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => normalizeHistoryEntry(entry))
+    .filter((entry): entry is LessonBuilderVersionEntry => Boolean(entry));
+}
+
+function normalizeHistoryEntry(value: unknown): LessonBuilderVersionEntry | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const id = normalizeString(record.id) ?? cryptoRandomId("ver");
+  const createdAt = normalizeString(record.createdAt ?? record.created_at);
+
+  if (!createdAt) {
+    return null;
+  }
+
+  const label = normalizeString(record.label) ?? "Revision";
+  const author = normalizeString(record.author);
+  const summary = normalizeString(record.summary);
+
+  return {
+    id,
+    label,
+    createdAt,
+    author,
+    summary,
+  } satisfies LessonBuilderVersionEntry;
+}
+
+function normalizeSuccessCriteria(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => normalizeString(entry))
+      .filter((entry): entry is string => Boolean(entry));
+  }
+
+  const text = normalizeString(value);
+  if (!text) {
+    return [];
+  }
+
+  return text
+    .split(/\r?\n/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function buildOverview(
+  record: Record<string, any>,
+  summary: string | null,
+  subjects: string[],
+  stage: string | null,
+  durationMinutes: number | null,
+  deliveryMethods: string[],
+  technologyTags: string[],
+): LessonPlanOverview | null {
+  const objective = normalizeString(record.objective);
+  const successCriteria = normalizeSuccessCriteria(
+    record.success_criteria ?? record.successCriteria,
+  );
+  const essentialQuestion = normalizeString(
+    record.essential_question ?? record.essentialQuestion,
+  );
+
+  if (!summary && !objective && successCriteria.length === 0 && !essentialQuestion) {
+    return null;
+  }
+
+  return {
+    summary,
+    essentialQuestion,
+    objectives: objective ? [objective] : [],
+    successCriteria,
+    materials: [],
+    assessment: [],
+    technology: technologyTags,
+    delivery: deliveryMethods,
+    stage,
+    subjects,
+    durationMinutes,
+  } satisfies LessonPlanOverview;
+}
+
+const VALID_STATUSES: LessonPlanStatus[] = [
+  "draft",
+  "published",
+  "archived",
+];
+
+function normalizeStatus(value: unknown): LessonPlanStatus {
+  if (typeof value === "string") {
+    const lower = value.toLowerCase();
+    if ((VALID_STATUSES as string[]).includes(lower)) {
+      return lower as LessonPlanStatus;
+    }
+  }
+  return "draft";
 }
 
 export async function verifyLessonPlanAccess(
