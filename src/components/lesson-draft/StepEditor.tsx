@@ -20,11 +20,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { LessonStep } from "@/stores/lessonDraft";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
+import { getResourcesByIds } from "@/lib/resources";
+import type { Resource } from "@/types/resources";
 
 interface StepEditorProps {
   onRequestResourceSearch: (stepId: string) => void;
@@ -35,76 +35,36 @@ interface StepEditorProps {
 interface StepFormProps {
   step: LessonStep;
   index: number;
-  onRename: (stepId: string, value: string) => void;
-  onCommitName: (stepId: string) => void;
   onRemove: (stepId: string) => void;
-  onUpdateNotes: (stepId: string, value: string) => void;
   onRequestResources: (stepId: string) => void;
   isResourceSearchOpen: boolean;
   isResourceSearchOpenForStep: boolean;
+  resources: Resource[];
+  pendingResourceIds: string[];
+  missingResourceIds: string[];
 }
-
-const STEP_TITLE_LIMIT = 80;
-
-const getStepDisplayTitle = (title: string) => {
-  const trimmed = title.trim();
-  return trimmed.length > 0 ? trimmed : "New step";
-};
 
 const StepForm = ({
   step,
   index,
-  onRename,
-  onCommitName,
   onRemove,
-  onUpdateNotes,
   onRequestResources,
   isResourceSearchOpen,
   isResourceSearchOpenForStep,
+  resources,
+  pendingResourceIds,
+  missingResourceIds,
 }: StepFormProps) => {
-  const [isTitleTouched, setIsTitleTouched] = useState(false);
-
-  const trimmedTitle = step.title.trim();
-  const showTitleError = isTitleTouched && trimmedTitle.length === 0;
-  const remainingCharacters = Math.max(0, STEP_TITLE_LIMIT - step.title.length);
-  const helperId = `step-${step.id}-title-help`;
-
-  useEffect(() => {
-    if (isTitleTouched && trimmedTitle.length > 0) {
-      setIsTitleTouched(false);
-    }
-  }, [isTitleTouched, trimmedTitle]);
-
-  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const nextValue = event.target.value.slice(0, STEP_TITLE_LIMIT);
-    setIsTitleTouched(true);
-    onRename(step.id, nextValue);
-  };
-
-  const handleTitleBlur = () => {
-    onCommitName(step.id);
-  };
-
-  const handleNotesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onUpdateNotes(step.id, event.target.value);
-  };
-
-  const handleResourceFocus = () => {
+  const handleResourceClick = () => {
     if (!isResourceSearchOpen || !isResourceSearchOpenForStep) {
       onRequestResources(step.id);
     }
   };
 
-  const handleResourceKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onRequestResources(step.id);
-    }
-  };
-
-  const resourceSummary = step.resourceIds.length
-    ? `${step.resourceIds.length} resource${step.resourceIds.length === 1 ? "" : "s"} added`
-    : "";
+  const resourceCount = step.resourceIds.length;
+  const resourceSummary = resourceCount
+    ? `${resourceCount} resource${resourceCount === 1 ? "" : "s"} attached`
+    : "No resources added yet";
 
   return (
     <section
@@ -120,7 +80,7 @@ const StepForm = ({
           >
             Step {index + 1}
           </p>
-          <p className="text-base font-semibold text-foreground">{getStepDisplayTitle(step.title)}</p>
+          <p className="text-base font-semibold text-foreground">{resourceSummary}</p>
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -137,7 +97,7 @@ const StepForm = ({
             <AlertDialogHeader>
               <AlertDialogTitle>Remove this step?</AlertDialogTitle>
               <AlertDialogDescription>
-                “{getStepDisplayTitle(step.title)}” will be removed from your lesson plan.
+                This step will be removed from your lesson plan.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -148,57 +108,58 @@ const StepForm = ({
         </AlertDialog>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={`step-${step.id}-title`}>Step {index + 1} title</Label>
-        <Input
-          id={`step-${step.id}-title`}
-          data-testid={`lesson-draft-step-${index + 1}-title`}
-          value={step.title}
-          onChange={handleTitleChange}
-          onBlur={handleTitleBlur}
-          aria-invalid={showTitleError}
-          aria-describedby={helperId}
-          maxLength={STEP_TITLE_LIMIT}
-        />
-        <p
-          id={helperId}
-          className={`text-sm ${showTitleError ? "text-destructive" : "text-muted-foreground"}`}
-        >
-          {showTitleError
-            ? "Each step needs a title. Try something descriptive."
-            : `${remainingCharacters} characters remaining`}
-        </p>
-      </div>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            onClick={handleResourceClick}
+            aria-expanded={isResourceSearchOpenForStep}
+            aria-controls="lesson-draft-resource-search"
+          >
+            {resourceCount > 0 ? "Add more resources" : "Add resources"}
+          </Button>
+          <span className="text-sm text-muted-foreground">{resourceSummary}</span>
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={`step-${step.id}-notes`}>Step {index + 1} notes (optional)</Label>
-        <Textarea
-          id={`step-${step.id}-notes`}
-          value={step.notes ?? ""}
-          onChange={handleNotesChange}
-          placeholder="Add facilitation notes, differentiation strategies, or reminders..."
-          rows={3}
-        />
-      </div>
+        {resources.length > 0 ? (
+          <ul className="space-y-3">
+            {resources.map(resource => (
+              <li
+                key={resource.id}
+                className="rounded-md border border-border/60 bg-background/60 p-3"
+              >
+                <p className="text-sm font-medium text-foreground">{resource.title}</p>
+                {resource.description ? (
+                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                    {resource.description}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
-      <div className="space-y-2">
-        <Label htmlFor={`step-${step.id}-resources`}>Step {index + 1} resources</Label>
-        <Input
-          id={`step-${step.id}-resources`}
-          value={resourceSummary}
-          placeholder="Add resources"
-          onFocus={handleResourceFocus}
-          onClick={handleResourceFocus}
-          onKeyDown={handleResourceKeyDown}
-          readOnly
-          role="combobox"
-          aria-haspopup="dialog"
-          aria-expanded={isResourceSearchOpenForStep}
-          aria-controls="lesson-draft-resource-search"
-        />
-        <p className="text-sm text-muted-foreground">
-          Search our library to attach links, files, or activities to this step.
-        </p>
+        {pendingResourceIds.length > 0 ? (
+          <div className="space-y-2" aria-live="polite">
+            {pendingResourceIds.map(id => (
+              <Skeleton key={id} className="h-14 w-full rounded-md" />
+            ))}
+          </div>
+        ) : null}
+
+        {missingResourceIds.length > 0 ? (
+          <p className="rounded-md border border-dashed border-border/60 bg-muted/40 p-3 text-sm text-muted-foreground">
+            {missingResourceIds.length === 1
+              ? "We couldn't load one of the attached resources. It may have been removed."
+              : "Some resources could not be loaded. They may have been removed."}
+          </p>
+        ) : null}
+
+        {resourceCount === 0 && pendingResourceIds.length === 0 && missingResourceIds.length === 0 ? (
+          <p className="rounded-md border border-dashed border-border/60 bg-muted/40 p-3 text-sm text-muted-foreground">
+            Use the button above to attach links, files, or activities for this part of your lesson.
+          </p>
+        ) : null}
       </div>
     </section>
   );
@@ -211,46 +172,102 @@ export const StepEditor = ({
 }: StepEditorProps) => {
   const steps = useLessonDraftStore(state => state.draft.steps);
   const addStep = useLessonDraftStore(state => state.addStep);
-  const renameStep = useLessonDraftStore(state => state.renameStep);
   const removeStep = useLessonDraftStore(state => state.removeStep);
-  const setStepNotes = useLessonDraftStore(state => state.setStepNotes);
-
-  const [pendingFocusStepId, setPendingFocusStepId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!pendingFocusStepId) {
-      return;
-    }
-
-    const input = document.getElementById(`step-${pendingFocusStepId}-title`) as HTMLInputElement | null;
-    if (input) {
-      input.focus();
-      input.select();
-      setPendingFocusStepId(null);
-    }
-  }, [pendingFocusStepId, steps]);
+  const [resourcesById, setResourcesById] = useState<Record<string, Resource | null>>({});
 
   const handleAddStep = () => {
     const step = addStep();
-    setPendingFocusStepId(step.id);
-  };
-
-  const handleCommitName = (stepId: string) => {
-    const step = steps.find(item => item.id === stepId);
-    if (!step) {
-      return;
-    }
-    const trimmed = step.title.trim();
-    if (trimmed.length === 0) {
-      renameStep(stepId, "New step");
-      return;
-    }
-    if (trimmed !== step.title) {
-      renameStep(stepId, trimmed);
-    }
+    onRequestResourceSearch(step.id);
   };
 
   const orderedSteps = useMemo(() => steps.map((step, index) => ({ step, index })), [steps]);
+
+  const uniqueResourceIds = useMemo(() => {
+    const ids = new Set<string>();
+    steps.forEach(step => {
+      step.resourceIds.forEach(resourceId => {
+        if (typeof resourceId === "string" && resourceId.trim().length > 0) {
+          ids.add(resourceId);
+        }
+      });
+    });
+    return Array.from(ids);
+  }, [steps]);
+
+  useEffect(() => {
+    if (uniqueResourceIds.length === 0) {
+      setResourcesById({});
+      return;
+    }
+
+    setResourcesById(prev => {
+      const next = { ...prev };
+      let changed = false;
+
+      Object.keys(next).forEach(id => {
+        if (!uniqueResourceIds.includes(id)) {
+          delete next[id];
+          changed = true;
+        }
+      });
+
+      return changed ? next : prev;
+    });
+  }, [uniqueResourceIds]);
+
+  useEffect(() => {
+    const missing = uniqueResourceIds.filter(id => resourcesById[id] === undefined);
+
+    if (missing.length === 0) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    getResourcesByIds(missing)
+      .then(fetched => {
+        if (isCancelled) {
+          return;
+        }
+
+        setResourcesById(prev => {
+          const next = { ...prev };
+          const receivedIds = new Set<string>();
+
+          fetched.forEach(resource => {
+            next[resource.id] = resource;
+            receivedIds.add(resource.id);
+          });
+
+          missing.forEach(id => {
+            if (!receivedIds.has(id)) {
+              next[id] = null;
+            }
+          });
+
+          return next;
+        });
+      })
+      .catch(() => {
+        if (isCancelled) {
+          return;
+        }
+
+        setResourcesById(prev => {
+          const next = { ...prev };
+          missing.forEach(id => {
+            if (!(id in next)) {
+              next[id] = null;
+            }
+          });
+          return next;
+        });
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [uniqueResourceIds, resourcesById]);
 
   return (
     <Card aria-labelledby="lesson-draft-step-editor-heading">
@@ -260,7 +277,7 @@ export const StepEditor = ({
             Step editor
           </CardTitle>
           <CardDescription>
-            Build your learning sequence and capture teacher-facing notes for each moment.
+            Add learning resources to each part of your lesson. Use multiple steps to organise the flow.
           </CardDescription>
         </div>
         <Button type="button" onClick={handleAddStep} data-testid="lesson-draft-add-step">
@@ -270,7 +287,7 @@ export const StepEditor = ({
       <CardContent className="space-y-6">
         {orderedSteps.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border/80 bg-muted/40 p-6 text-sm text-muted-foreground">
-            No steps yet. Use the “Add step” button to start outlining your lesson.
+            No steps yet. Use the “Add step” button to begin attaching resources for your lesson.
           </p>
         ) : (
           <div className="space-y-6">
@@ -279,13 +296,15 @@ export const StepEditor = ({
                 key={step.id}
                 step={step}
                 index={index}
-                onRename={renameStep}
-                onCommitName={handleCommitName}
                 onRemove={removeStep}
-                onUpdateNotes={setStepNotes}
                 onRequestResources={onRequestResourceSearch}
                 isResourceSearchOpen={isResourceSearchOpen}
                 isResourceSearchOpenForStep={isResourceSearchOpen && activeResourceStepId === step.id}
+                resources={step.resourceIds
+                  .map(id => resourcesById[id])
+                  .filter((resource): resource is Resource => Boolean(resource))}
+                pendingResourceIds={step.resourceIds.filter(id => resourcesById[id] === undefined)}
+                missingResourceIds={step.resourceIds.filter(id => resourcesById[id] === null)}
               />
             ))}
           </div>

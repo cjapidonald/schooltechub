@@ -71,9 +71,7 @@ export const LocalizedRoutes = () => {
         path="/lesson-builder"
         element={
           <RouteWrapper>
-            <AuthGuard>
-              <LessonBuilderPage />
-            </AuthGuard>
+            <LessonBuilderPage />
           </RouteWrapper>
         }
       />
@@ -146,9 +144,7 @@ export const LocalizedRoutes = () => {
           path="lesson-builder"
           element={
             <RouteWrapper>
-              <AuthGuard>
-                <LessonBuilderPage />
-              </AuthGuard>
+              <LessonBuilderPage />
             </RouteWrapper>
           }
         />
