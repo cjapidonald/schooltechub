@@ -81,8 +81,12 @@ const Navigation = () => {
             onSubmit={handleSearch}
             className="relative hidden flex-1 items-center md:flex md:max-w-xs lg:max-w-sm xl:max-w-md"
           >
+            <label htmlFor="desktop-search" className="sr-only">
+              {t.common.search}
+            </label>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
+              id="desktop-search"
               type="text"
               placeholder={t.common.search}
               value={searchQuery}
@@ -176,8 +180,12 @@ const Navigation = () => {
               <div className="mt-8 flex flex-col space-y-4">
                 {/* Mobile Search */}
                 <form onSubmit={handleSearch} className="relative">
+                  <label htmlFor="mobile-search" className="sr-only">
+                    {t.common.search}
+                  </label>
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
                   <Input
+                    id="mobile-search"
                     type="text"
                     placeholder={t.common.search}
                     value={searchQuery}
