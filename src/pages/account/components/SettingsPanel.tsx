@@ -25,6 +25,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  PROFILE_IMAGE_BUCKET,
+  createProfileImageSignedUrl,
+  resolveAvatarReference,
+  isHttpUrl,
+} from "@/lib/avatar";
 
 type ThemePreference = "system" | "light" | "dark";
 type LanguageOption = "en" | "sq" | "vi";
@@ -40,27 +46,6 @@ const createFileIdentifier = () => {
   }
 
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-};
-
-const getAvatarUrlFromMetadata = (metadata: Record<string, unknown> | null | undefined): string | null => {
-  if (!metadata) {
-    return null;
-  }
-
-  const valueCandidates = [
-    metadata.avatar_url,
-    metadata.avatarUrl,
-    metadata.avatar,
-    metadata.picture,
-  ];
-
-  for (const candidate of valueCandidates) {
-    if (typeof candidate === "string" && candidate.trim().length > 0) {
-      return candidate.trim();
-    }
-  }
-
-  return null;
 };
 
 const isLanguageOption = (value: unknown): value is LanguageOption =>
@@ -88,6 +73,8 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     refresh: refreshProfile,
     isLoading: isProfileLoading,
   } = useMyProfile();
+  const { reference: initialAvatarReference, url: initialAvatarUrl } =
+    resolveAvatarReference(metadata ?? null);
   const [schoolName, setSchoolName] = useState<string>(initialSchoolName);
   const [storedSchoolLogoUrl, setStoredSchoolLogoUrl] = useState<string | null>(initialSchoolLogoUrl);
   const [schoolLogoFile, setSchoolLogoFile] = useState<File | null>(null);
@@ -96,9 +83,10 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const [isSavingSchoolInfo, setIsSavingSchoolInfo] = useState(false);
   const schoolLogoInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(() =>
-    getAvatarUrlFromMetadata(user.user_metadata as Record<string, unknown> | undefined)
+  const [currentAvatarReference, setCurrentAvatarReference] = useState<string | null>(
+    initialAvatarReference,
   );
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(initialAvatarUrl);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -126,10 +114,12 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   useEffect(() => {
-    setCurrentAvatarUrl(
-      getAvatarUrlFromMetadata(user.user_metadata as Record<string, unknown> | undefined)
-    );
     const metadata = user.user_metadata as Record<string, unknown> | undefined;
+    const { reference, url } = resolveAvatarReference(metadata ?? null);
+
+    setCurrentAvatarReference(reference);
+    setCurrentAvatarUrl(url);
+
     const storedTimezone = metadata?.timezone;
     const storedLanguage = metadata?.language;
     const storedTheme = metadata?.theme;
@@ -175,6 +165,34 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
       schoolLogoInputRef.current.value = "";
     }
   }, [isProfileLoading, profileSchoolName, profileSchoolLogoUrl]);
+
+  useEffect(() => {
+    if (!currentAvatarReference || isHttpUrl(currentAvatarReference)) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const resolveSignedUrl = async () => {
+      try {
+        const signedUrl = await createProfileImageSignedUrl(currentAvatarReference);
+        if (!isCancelled) {
+          setCurrentAvatarUrl(signedUrl);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error("Failed to resolve avatar image URL", error);
+          setCurrentAvatarUrl(null);
+        }
+      }
+    };
+
+    void resolveSignedUrl();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentAvatarReference]);
 
   useEffect(() => {
     return () => {
@@ -251,7 +269,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
         const filePath = `${user.id}/school-logos/${createFileIdentifier()}.${safeExtension}`;
 
         const { error: uploadError } = await supabase.storage
-          .from("profile-images")
+          .from(PROFILE_IMAGE_BUCKET)
           .upload(filePath, schoolLogoFile, {
             cacheControl: "3600",
             upsert: true,
@@ -263,7 +281,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
 
         const {
           data: { publicUrl },
-        } = supabase.storage.from("profile-images").getPublicUrl(filePath);
+        } = supabase.storage.from(PROFILE_IMAGE_BUCKET).getPublicUrl(filePath);
 
         nextLogoUrl = publicUrl;
       } else if (isLogoRemoved) {
@@ -353,7 +371,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
       const filePath = `${user.id}/${createFileIdentifier()}.${safeExtension}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("profile-images")
+        .from(PROFILE_IMAGE_BUCKET)
         .upload(filePath, avatarFile, {
           cacheControl: "3600",
           upsert: true,
@@ -365,11 +383,14 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
 
       const {
         data: { publicUrl },
-      } = supabase.storage.from("profile-images").getPublicUrl(filePath);
+      } = supabase.storage.from(PROFILE_IMAGE_BUCKET).getPublicUrl(filePath);
+
+      const signedUrl = await createProfileImageSignedUrl(filePath);
 
       const { error: updateError } = await supabase.auth.updateUser({
         data: {
           avatar_url: publicUrl,
+          avatar_storage_path: filePath,
         },
       });
 
@@ -377,7 +398,8 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
         throw updateError;
       }
 
-      setCurrentAvatarUrl(publicUrl);
+      setCurrentAvatarReference(filePath);
+      setCurrentAvatarUrl(signedUrl);
       setAvatarFile(null);
       setAvatarPreviewUrl(null);
       if (fileInputRef.current) {

@@ -27,6 +27,11 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { listMyClasses } from "@/lib/classes";
+import {
+  createProfileImageSignedUrl,
+  resolveAvatarReference,
+  isHttpUrl,
+} from "@/lib/avatar";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { UpcomingLessonsCard } from "./components/UpcomingLessonsCard";
 
@@ -81,6 +86,8 @@ const AccountDashboard = () => {
   const [counts, setCounts] = useState<TabCounts | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { fullName: profileFullName, schoolName, schoolLogoUrl } = useMyProfile();
+  const [avatarReference, setAvatarReference] = useState<string | null>(null);
+  const [resolvedAvatarUrl, setResolvedAvatarUrl] = useState<string | null>(null);
 
   const classesQuery = useQuery({
     queryKey: ["my-classes"],
@@ -97,6 +104,48 @@ const AccountDashboard = () => {
 
     return () => clearTimeout(timeout);
   }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setAvatarReference(null);
+      setResolvedAvatarUrl(null);
+      return;
+    }
+
+    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const { reference, url } = resolveAvatarReference(metadata);
+
+    setAvatarReference(reference);
+    setResolvedAvatarUrl(url);
+  }, [user]);
+
+  useEffect(() => {
+    if (!avatarReference || isHttpUrl(avatarReference)) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    const loadSignedUrl = async () => {
+      try {
+        const signedUrl = await createProfileImageSignedUrl(avatarReference);
+        if (!isCancelled) {
+          setResolvedAvatarUrl(signedUrl);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error("Failed to resolve dashboard avatar", error);
+          setResolvedAvatarUrl(null);
+        }
+      }
+    };
+
+    void loadSignedUrl();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [avatarReference]);
 
   const summaryTabs = useMemo(
     () =>
@@ -125,10 +174,7 @@ const AccountDashboard = () => {
     return <Navigate to={getLocalizedPath("/auth", language)} replace />;
   }
 
-  const avatarUrl =
-    typeof user.user_metadata?.avatar_url === "string" && user.user_metadata.avatar_url.trim().length > 0
-      ? user.user_metadata.avatar_url
-      : null;
+  const avatarUrl = resolvedAvatarUrl;
 
   const fallbackName = "Mr Donald";
   const fullDisplayName =
