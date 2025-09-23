@@ -13,6 +13,7 @@ import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useMyProfile } from "@/hooks/useMyProfile";
 import { listMyClasses } from "@/lib/classes";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { UpcomingLessonsCard } from "./components/UpcomingLessonsCard";
@@ -54,10 +55,11 @@ const loadingSkeleton = (
 
 const AccountDashboard = () => {
   const { user, loading } = useRequireAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const queryClient = useQueryClient();
   const [counts, setCounts] = useState<TabCounts | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { fullName: profileFullName, schoolName, schoolLogoUrl } = useMyProfile();
 
   const classesQuery = useQuery({
     queryKey: ["my-classes"],
@@ -85,12 +87,14 @@ const AccountDashboard = () => {
 
   const greetingName = useMemo(() => {
     if (!user) return "";
-    const fullName = typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "";
-    if (fullName.trim()) {
-      return fullName.trim().split(" ")[0];
+    const metadataName =
+      typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "";
+    const resolvedName = (profileFullName ?? metadataName).trim();
+    if (resolvedName) {
+      return resolvedName.split(" ")[0];
     }
     return user.email ?? "there";
-  }, [user]);
+  }, [profileFullName, user]);
 
   if (loading) {
     return loadingSkeleton;
@@ -111,6 +115,27 @@ const AccountDashboard = () => {
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">My Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {greetingName}.</p>
+          {schoolName || schoolLogoUrl ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-background/80 p-3 sm:mt-3">
+              {schoolLogoUrl ? (
+                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-border/50 bg-white">
+                  <img
+                    src={schoolLogoUrl}
+                    alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              ) : null}
+              {schoolName ? (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {t.account.school.nameLabel}
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">{schoolName}</p>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="flex w-full flex-wrap gap-2">

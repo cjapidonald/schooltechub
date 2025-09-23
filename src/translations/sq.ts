@@ -1284,6 +1284,19 @@ export const sq = {
       changeButton: "Ndrysho foton",
       uploadButton: "Ruaj avatarin"
     },
+    school: {
+      title: "Informacioni i shkollës",
+      description: "Ndani detajet e shkollës suaj për të personalizuar pamjet dhe eksportet e mësimeve.",
+      nameLabel: "Emri i shkollës",
+      namePlaceholder: "p.sh. Shkolla “Naim Frashëri”",
+      logoLabel: "Logo e shkollës",
+      logoAlt: "Logo e shkollës",
+      logoPlaceholder: "Ende pa logo",
+      logoHelp: "Ngarkoni një imazh katror nën 1MB për rezultatet më të mira.",
+      uploadButton: "Zgjidh imazhin",
+      removeButton: "Hiq logon",
+      restoreButton: "Rikthe logon"
+    },
     actions: {
       backToHome: "Kthehu në faqen kryesore"
     },
@@ -1476,6 +1489,7 @@ export const sq = {
       readPost: "Hap artikullin"
     },
     toast: {
+      schoolInfoSaved: "Të dhënat e shkollës u ruajtën",
       profileUpdated: "Profili u përditësua",
       passwordMismatch: "Fjalëkalimet duhet të përputhen",
       passwordLength: "Fjalëkalimi duhet të ketë të paktën 8 karaktere.",
