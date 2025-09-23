@@ -587,7 +587,7 @@ const LessonBuilderPage = () => {
           </div>
         </section>
 
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] xl:items-start">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] lg:items-start">
           <div className="space-y-6">
             <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
               <div className="space-y-8">
@@ -644,7 +644,7 @@ const LessonBuilderPage = () => {
             </section>
           </div>
 
-          <div className="space-y-6 xl:sticky xl:top-6">
+          <div className="space-y-6 lg:sticky lg:top-6">
             <aside className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
               <h2 className="text-xl font-semibold text-foreground">Lesson overview preview</h2>
               <p className="mt-3 text-sm text-muted-foreground">
@@ -654,6 +654,20 @@ const LessonBuilderPage = () => {
                 <LessonPreviewPane meta={meta} profile={previewProfile} classes={classes} />
               </div>
             </aside>
+codex/fix-preview-position-in-lesson-builder
+
+            <div className="hidden lg:block">
+              <div className="sticky top-6">
+                <LessonPreview />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:hidden">
+          <Collapsible open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+            <CollapsibleTrigger asChild>
+
           </div>
         </div>
 
@@ -666,6 +680,7 @@ const LessonBuilderPage = () => {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+ main
               <Button
                 type="button"
                 variant="outline"
