@@ -26,7 +26,6 @@ import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
-import Builder from '@/pages/Builder';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminPage from '@/pages/admin/AdminPage';
 
@@ -71,7 +70,6 @@ export const LocalizedRoutes = () => {
       <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
-      <Route path="/builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
       <Route
         path="/lesson-builder"
         element={
@@ -150,7 +148,6 @@ export const LocalizedRoutes = () => {
         <Route path="builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
         <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
-        <Route path="builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
         <Route
           path="lesson-builder"
           element={
