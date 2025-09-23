@@ -5,10 +5,22 @@ import { Loader2 } from "lucide-react";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { useMyClasses } from "@/hooks/useMyClasses";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUBJECTS, type Subject } from "@/lib/constants/subjects";
+import { useToast } from "@/hooks/use-toast";
+import { downloadPlanExport } from "@/lib/downloadPlanExport";
+import { linkPlanToClass } from "@/lib/classes";
+import { logActivity } from "@/lib/activity-log";
 
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
@@ -44,11 +56,15 @@ const LessonBuilderPage = () => {
   const planParam = searchParams.get("id");
   const { t } = useLanguage();
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
-  const { classes } = useMyClasses();
+  const { classes, isLoading: areClassesLoading, error: classesError } = useMyClasses();
+  const { toast } = useToast();
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestMeta = useRef(meta);
   const skipNextAutosave = useRef(false);
   const isMounted = useRef(true);
+  const [activeExport, setActiveExport] = useState<"pdf" | "docx" | null>(null);
+  const [isLinkingToClass, setIsLinkingToClass] = useState(false);
+  const [selectedClassForSave, setSelectedClassForSave] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     latestMeta.current = meta;
@@ -187,6 +203,91 @@ const LessonBuilderPage = () => {
     setMeta(prev => ({ ...prev, successCriteria: value }));
   };
 
+  const normalizedTitle = useMemo(() => {
+    const trimmed = meta.title.trim();
+    return trimmed.length > 0 ? trimmed : "Untitled lesson";
+  }, [meta.title]);
+
+  const handleDownload = async (format: "pdf" | "docx") => {
+    if (!planId) {
+      toast({
+        title: "Lesson not ready",
+        description: "Please wait for the lesson plan to finish initialising before downloading.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setActiveExport(format);
+
+    try {
+      const record = await updateLessonPlan(planId, latestMeta.current);
+      const timestamp = record.lastSavedAt ?? record.updatedAt ?? new Date().toISOString();
+      setLastSavedAt(new Date(timestamp));
+      await downloadPlanExport(planId, format, normalizedTitle);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({
+        title: format === "pdf" ? "Unable to download PDF" : "Unable to download DOCX",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setActiveExport(null);
+    }
+  };
+
+  const handleSaveToClass = async (classId: string) => {
+    if (!planId) {
+      toast({
+        title: "Lesson not ready",
+        description: "Please wait for the lesson plan to finish initialising before saving to a class.",
+        variant: "destructive",
+      });
+      setSelectedClassForSave(undefined);
+      return;
+    }
+
+    setIsLinkingToClass(true);
+
+    try {
+      const record = await updateLessonPlan(planId, latestMeta.current);
+      const timestamp = record.lastSavedAt ?? record.updatedAt ?? new Date().toISOString();
+      setLastSavedAt(new Date(timestamp));
+
+      await linkPlanToClass(planId, classId);
+      const classSummary = classes.find(item => item.id === classId);
+      toast({
+        title: "Lesson linked",
+        description: classSummary
+          ? `Linked to ${classSummary.title}.`
+          : "Lesson linked to the selected class.",
+      });
+
+      logActivity(
+        "plan-saved",
+        `Linked “${normalizedTitle}” to ${classSummary ? `“${classSummary.title}”` : "a class"}.`,
+        {
+          planId,
+          planTitle: normalizedTitle,
+          classId,
+          classTitle: classSummary?.title ?? "",
+          lessonDate: latestMeta.current.date ?? "",
+        },
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({
+        title: "Unable to link lesson",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLinkingToClass(false);
+      setSelectedClassForSave(undefined);
+    }
+  };
+
   const previewProfile = useMemo(
     () => ({
       fullName,
@@ -227,6 +328,83 @@ const LessonBuilderPage = () => {
           <p className="mt-2 text-base text-slate-600">
             Draft your lesson on the left and preview the experience on the right.
           </p>
+        </div>
+
+        <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void handleDownload("pdf")}
+              disabled={Boolean(activeExport) || !planId || isLinkingToClass}
+            >
+              {activeExport === "pdf" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Download PDF
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void handleDownload("docx")}
+              disabled={Boolean(activeExport) || !planId || isLinkingToClass}
+            >
+              {activeExport === "docx" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Download DOCX
+            </Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-slate-700">Save to</span>
+            <Select
+              value={selectedClassForSave}
+              onValueChange={value => {
+                setSelectedClassForSave(value);
+                void handleSaveToClass(value);
+              }}
+              disabled={
+                isLinkingToClass ||
+                Boolean(activeExport) ||
+                !planId ||
+                areClassesLoading ||
+                Boolean(classesError) ||
+                classes.length === 0
+              }
+            >
+              <SelectTrigger className="w-[220px]">
+                <SelectValue
+                  placeholder={
+                    areClassesLoading
+                      ? "Loading classes..."
+                      : classesError
+                        ? "Unable to load classes"
+                        : classes.length === 0
+                          ? "No classes available"
+                          : "Select a class"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {areClassesLoading ? (
+                  <SelectItem value="__loading" disabled>
+                    Loading classes...
+                  </SelectItem>
+                ) : classesError ? (
+                  <SelectItem value="__error" disabled>
+                    {classesError.message}
+                  </SelectItem>
+                ) : classes.length === 0 ? (
+                  <SelectItem value="__empty" disabled>
+                    No classes available
+                  </SelectItem>
+                ) : (
+                  classes.map(classItem => (
+                    <SelectItem key={classItem.id} value={classItem.id}>
+                      {classItem.title}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {isLinkingToClass ? <Loader2 className="h-4 w-4 animate-spin text-slate-500" /> : null}
+          </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">

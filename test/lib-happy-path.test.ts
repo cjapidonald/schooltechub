@@ -93,6 +93,14 @@ function createSelectBuilder(
       filters[column] = value;
       return this;
     },
+    gte(column: string, value: unknown) {
+      filters[`${column}::gte`] = value;
+      return this;
+    },
+    lte(column: string, value: unknown) {
+      filters[`${column}::lte`] = value;
+      return this;
+    },
     order() {
       if (!handler.selectOrder) {
         throw new Error("selectOrder handler not provided");
@@ -277,11 +285,25 @@ describe("classes data helpers", () => {
         delete: () => Promise.resolve({ error: null }),
       },
       class_lesson_plans: {
-        selectOrder: () =>
-          Promise.resolve({
-            data: [classLessonPlanRow],
+        selectOrder: ({ filters }) => {
+          const gteValue =
+            typeof filters["lesson_plans.date::gte"] === "string"
+              ? (filters["lesson_plans.date::gte"] as string)
+              : null;
+          const lteValue =
+            typeof filters["lesson_plans.date::lte"] === "string"
+              ? (filters["lesson_plans.date::lte"] as string)
+              : null;
+
+          const dateValue = classLessonPlanRow.lesson_plans?.date ?? null;
+          const meetsLowerBound = gteValue ? dateValue >= gteValue : true;
+          const meetsUpperBound = lteValue ? dateValue <= lteValue : true;
+
+          return Promise.resolve({
+            data: meetsLowerBound && meetsUpperBound ? [classLessonPlanRow] : [],
             error: null,
-          }),
+          });
+        },
         insert: payload =>
           Promise.resolve({ data: { id: "link-1", ...payload }, error: null }),
         delete: () => Promise.resolve({ error: null }),
@@ -326,7 +348,7 @@ describe("classes data helpers", () => {
   });
 
   it("lists lesson plans linked to a class", async () => {
-    const plans = await listClassLessonPlans("class-1", baseClient);
+    const plans = await listClassLessonPlans("class-1", {}, baseClient);
     expect(plans).toHaveLength(1);
     expect(plans[0].title).toBe("Math Lesson");
     expect(plans[0].lessonPlanId).toBe("plan-1");
