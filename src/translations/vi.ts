@@ -1266,6 +1266,20 @@ export const vi = {
     },
     preview: {
       title: "Xem trước kế hoạch",
+      summary: {
+        teacherLabel: "Giáo viên",
+        classLabel: "Lớp học",
+        schoolLabel: "Trường học",
+        subjectLabel: "Môn học",
+        lessonLabel: "Bài học",
+        dateLabel: "Ngày",
+      },
+      sections: {
+        objectiveTitle: "Mục tiêu học tập",
+        objectivePlaceholder: "Thêm mục tiêu học tập để làm nổi bật điều học sinh sẽ đạt được.",
+        successCriteriaTitle: "Tiêu chí thành công",
+        successCriteriaPlaceholder: "Mô tả cách học sinh sẽ thể hiện việc nắm vững bài học này.",
+      },
     },
   },
   account: {
