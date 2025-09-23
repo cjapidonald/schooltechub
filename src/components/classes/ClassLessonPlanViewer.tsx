@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { format } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listClassLessonPlans,
   type ClassLessonPlanLinkSummary,
+  linkPlanToClass,
 } from "@/lib/classes";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +12,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, RotateCcw, Unlink } from "lucide-react";
+import { Loader2, PlusCircle, RotateCcw, Unlink } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { AttachLessonPlanDialog } from "@/components/classes/AttachLessonPlanDialog";
 
 const formatDateInputValue = (value: Date) => format(value, "yyyy-MM-dd");
 
@@ -46,10 +49,16 @@ export function ClassLessonPlanViewer({
     const today = formatDateInputValue(new Date());
     return { from: today, to: today };
   });
+  const [isAttachDialogOpen, setIsAttachDialogOpen] = useState(false);
+  const [linkingPlanId, setLinkingPlanId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     const today = formatDateInputValue(new Date());
     setDateRange({ from: today, to: today });
+    setIsAttachDialogOpen(false);
+    setLinkingPlanId(null);
   }, [classId]);
 
   const appliedFilters = useMemo(() => {
@@ -100,6 +109,42 @@ export function ClassLessonPlanViewer({
     setDateRange({ from: today, to: today });
   };
 
+  const linkPlanMutation = useMutation({
+    mutationFn: async (lessonPlanId: string) => {
+      await linkPlanToClass(lessonPlanId, classId);
+    },
+    onMutate: (lessonPlanId: string) => {
+      setLinkingPlanId(lessonPlanId);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Lesson plan linked",
+        description: "The lesson plan is now attached to this class.",
+      });
+      setIsAttachDialogOpen(false);
+      void refetch();
+      queryClient.invalidateQueries({ queryKey: ["class-lesson-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["my-classes"] });
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: "Unable to attach lesson plan",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setLinkingPlanId(null);
+    },
+  });
+
+  const handleAttachPlan = (lessonPlanId: string) => {
+    if (linkPlanMutation.isPending) {
+      return;
+    }
+    linkPlanMutation.mutate(lessonPlanId);
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-3">
@@ -126,15 +171,25 @@ export function ClassLessonPlanViewer({
               />
             </div>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="sm:w-auto"
-            onClick={handleResetFilters}
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Reset to today
-          </Button>
+          <div className="flex flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={handleResetFilters}
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset to today
+            </Button>
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={() => setIsAttachDialogOpen(true)}
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Attach existing plan
+            </Button>
+          </div>
         </div>
         {isRefetching ? (
           <p className="text-xs text-muted-foreground">Updating results…</p>
@@ -198,10 +253,20 @@ export function ClassLessonPlanViewer({
         ) : (
           <div className="rounded-lg border border-dashed bg-muted/40 p-8 text-center text-sm text-muted-foreground">
             <p>No lesson plans match the selected date range.</p>
-            <p className="mt-2">Adjust the dates or link new plans from the Lesson Builder.</p>
+            <p className="mt-2">
+              Adjust the dates or attach an existing plan using the button above.
+            </p>
           </div>
         )}
       </ScrollArea>
+      <AttachLessonPlanDialog
+        open={isAttachDialogOpen}
+        onOpenChange={setIsAttachDialogOpen}
+        onSelect={handleAttachPlan}
+        isLinking={linkPlanMutation.isPending}
+        linkingPlanId={linkingPlanId}
+        disabledPlanIds={plans.map(plan => plan.lessonPlanId)}
+      />
     </div>
   );
 }
