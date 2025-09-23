@@ -373,6 +373,9 @@ describe("LessonBuilder UI", () => {
       expect(fetchLinkStatusesMock).toHaveBeenCalledTimes(2);
     });
 
+    expect(fetchLinkStatusesMock.mock.calls[0]?.[0]).toEqual([firstUrl]);
+    expect(fetchLinkStatusesMock.mock.calls[1]?.[0]).toEqual([firstUrl, secondUrl]);
+
     const firstCard = await screen.findByTestId("resource-card-res-1");
     const secondCard = await screen.findByTestId("resource-card-res-2");
 
