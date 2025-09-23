@@ -383,29 +383,18 @@ export type Database = {
       }
       content_master: {
         Row: {
-          age_grade: string | null
-          audience: string | null
           author: Json | null
           author_image: string | null
           author_job_title: string | null
-          billing: Database["public"]["Enums"]["billing_enum"] | null
-          bloom_level: Database["public"]["Enums"]["bloom_enum"] | null
-          case_study_tags: string | null
           category: Database["public"]["Enums"]["category_enum"] | null
           content: Json | null
           content_type: Database["public"]["Enums"]["content_type_enum"]
           created_at: string | null
-          currency: string | null
-          curriculum_alignment: string | null
-          data_compliance: string | null
-          deliverables: string | null
+          deleted_at: string | null
           delivery_type:
             | Database["public"]["Enums"]["delivery_type_enum"]
             | null
-          device_os: string | null
-          diary_type: string | null
           end_datetime: string | null
-          engagement_features: string | null
           event_capacity: number | null
           event_certificate_pd: boolean | null
           event_duration: string | null
@@ -416,89 +405,50 @@ export type Database = {
             | Database["public"]["Enums"]["event_price_type_enum"]
             | null
           event_registered: number | null
-          event_status: Database["public"]["Enums"]["event_status_enum"] | null
           event_timezone: string | null
           event_type: Database["public"]["Enums"]["event_type_enum"] | null
           excerpt: string | null
-          faq_json: Json | null
           featured_image: string | null
-          file_format: string | null
           filter_type: Database["public"]["Enums"]["filter_type_enum"] | null
-          forum_category: string | null
-          guarantee: string | null
           id: string
-          idea_tips: string | null
           is_published: boolean | null
           keywords: string[] | null
           language: string | null
-          language_level:
-            | Database["public"]["Enums"]["language_level_enum"]
-            | null
-          learning_goals: string | null
-          license: string | null
-          login_method: string | null
-          materials_devices: string | null
           meta_description: string | null
           meta_title: string | null
-          mood: string | null
-          newsletter_segment: string | null
           page: Database["public"]["Enums"]["page_enum"]
           payment: Database["public"]["Enums"]["payment_enum"] | null
           platform: Database["public"]["Enums"]["platform_enum"] | null
-          prep_level: string | null
           price: number | null
           published_at: string | null
           read_time: number | null
           recording_url: string | null
           registration_url: string | null
-          research_question_tags: string | null
-          research_type: string | null
-          resource_type:
-            | Database["public"]["Enums"]["resource_type_enum"]
-            | null
-          service_model:
-            | Database["public"]["Enums"]["service_model_enum"]
-            | null
-          sla_tier: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug: string
           stage: Database["public"]["Enums"]["stage_enum"] | null
-          standards_other: string | null
           start_datetime: string | null
+          status: "draft" | "pending" | "approved" | "published"
           subject: Database["public"]["Enums"]["subject_enum"] | null
           subtitle: string | null
           tags: string[] | null
-          testimonials_json: Json | null
           time_required: string | null
           title: string
-          translation_of: string | null
           updated_at: string | null
           venue: string | null
-          view_count: number | null
         }
         Insert: {
-          age_grade?: string | null
-          audience?: string | null
           author?: Json | null
           author_image?: string | null
           author_job_title?: string | null
-          billing?: Database["public"]["Enums"]["billing_enum"] | null
-          bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
-          case_study_tags?: string | null
           category?: Database["public"]["Enums"]["category_enum"] | null
           content?: Json | null
           content_type: Database["public"]["Enums"]["content_type_enum"]
           created_at?: string | null
-          currency?: string | null
-          curriculum_alignment?: string | null
-          data_compliance?: string | null
-          deliverables?: string | null
+          deleted_at?: string | null
           delivery_type?:
             | Database["public"]["Enums"]["delivery_type_enum"]
             | null
-          device_os?: string | null
-          diary_type?: string | null
           end_datetime?: string | null
-          engagement_features?: string | null
           event_capacity?: number | null
           event_certificate_pd?: boolean | null
           event_duration?: string | null
@@ -509,89 +459,50 @@ export type Database = {
             | Database["public"]["Enums"]["event_price_type_enum"]
             | null
           event_registered?: number | null
-          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
           event_timezone?: string | null
           event_type?: Database["public"]["Enums"]["event_type_enum"] | null
           excerpt?: string | null
-          faq_json?: Json | null
           featured_image?: string | null
-          file_format?: string | null
           filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
-          forum_category?: string | null
-          guarantee?: string | null
           id?: string
-          idea_tips?: string | null
           is_published?: boolean | null
           keywords?: string[] | null
           language?: string | null
-          language_level?:
-            | Database["public"]["Enums"]["language_level_enum"]
-            | null
-          learning_goals?: string | null
-          license?: string | null
-          login_method?: string | null
-          materials_devices?: string | null
           meta_description?: string | null
           meta_title?: string | null
-          mood?: string | null
-          newsletter_segment?: string | null
           page: Database["public"]["Enums"]["page_enum"]
           payment?: Database["public"]["Enums"]["payment_enum"] | null
           platform?: Database["public"]["Enums"]["platform_enum"] | null
-          prep_level?: string | null
           price?: number | null
           published_at?: string | null
           read_time?: number | null
           recording_url?: string | null
           registration_url?: string | null
-          research_question_tags?: string | null
-          research_type?: string | null
-          resource_type?:
-            | Database["public"]["Enums"]["resource_type_enum"]
-            | null
-          service_model?:
-            | Database["public"]["Enums"]["service_model_enum"]
-            | null
-          sla_tier?: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug: string
           stage?: Database["public"]["Enums"]["stage_enum"] | null
-          standards_other?: string | null
           start_datetime?: string | null
+          status?: "draft" | "pending" | "approved" | "published"
           subject?: Database["public"]["Enums"]["subject_enum"] | null
           subtitle?: string | null
           tags?: string[] | null
-          testimonials_json?: Json | null
           time_required?: string | null
           title: string
-          translation_of?: string | null
           updated_at?: string | null
           venue?: string | null
-          view_count?: number | null
         }
         Update: {
-          age_grade?: string | null
-          audience?: string | null
           author?: Json | null
           author_image?: string | null
           author_job_title?: string | null
-          billing?: Database["public"]["Enums"]["billing_enum"] | null
-          bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
-          case_study_tags?: string | null
           category?: Database["public"]["Enums"]["category_enum"] | null
           content?: Json | null
           content_type?: Database["public"]["Enums"]["content_type_enum"]
           created_at?: string | null
-          currency?: string | null
-          curriculum_alignment?: string | null
-          data_compliance?: string | null
-          deliverables?: string | null
+          deleted_at?: string | null
           delivery_type?:
             | Database["public"]["Enums"]["delivery_type_enum"]
             | null
-          device_os?: string | null
-          diary_type?: string | null
           end_datetime?: string | null
-          engagement_features?: string | null
           event_capacity?: number | null
           event_certificate_pd?: boolean | null
           event_duration?: string | null
@@ -602,74 +513,38 @@ export type Database = {
             | Database["public"]["Enums"]["event_price_type_enum"]
             | null
           event_registered?: number | null
-          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
           event_timezone?: string | null
           event_type?: Database["public"]["Enums"]["event_type_enum"] | null
           excerpt?: string | null
-          faq_json?: Json | null
           featured_image?: string | null
-          file_format?: string | null
           filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
-          forum_category?: string | null
-          guarantee?: string | null
           id?: string
-          idea_tips?: string | null
           is_published?: boolean | null
           keywords?: string[] | null
           language?: string | null
-          language_level?:
-            | Database["public"]["Enums"]["language_level_enum"]
-            | null
-          learning_goals?: string | null
-          license?: string | null
-          login_method?: string | null
-          materials_devices?: string | null
           meta_description?: string | null
           meta_title?: string | null
-          mood?: string | null
-          newsletter_segment?: string | null
           page?: Database["public"]["Enums"]["page_enum"]
           payment?: Database["public"]["Enums"]["payment_enum"] | null
           platform?: Database["public"]["Enums"]["platform_enum"] | null
-          prep_level?: string | null
           price?: number | null
           published_at?: string | null
           read_time?: number | null
           recording_url?: string | null
           registration_url?: string | null
-          research_question_tags?: string | null
-          research_type?: string | null
-          resource_type?:
-            | Database["public"]["Enums"]["resource_type_enum"]
-            | null
-          service_model?:
-            | Database["public"]["Enums"]["service_model_enum"]
-            | null
-          sla_tier?: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug?: string
           stage?: Database["public"]["Enums"]["stage_enum"] | null
-          standards_other?: string | null
           start_datetime?: string | null
+          status?: "draft" | "pending" | "approved" | "published"
           subject?: Database["public"]["Enums"]["subject_enum"] | null
           subtitle?: string | null
           tags?: string[] | null
-          testimonials_json?: Json | null
           time_required?: string | null
           title?: string
-          translation_of?: string | null
           updated_at?: string | null
           venue?: string | null
-          view_count?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "content_master_translation_of_fkey"
-            columns: ["translation_of"]
-            isOneToOne: false
-            referencedRelation: "content_master"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       enrollments: {
         Row: {
