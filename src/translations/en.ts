@@ -896,6 +896,7 @@ export const en = {
     followUs: "Follow Us",
     newsletter: "Newsletter",
     newsletterText: "Subscribe to get the latest updates",
+    emailLabel: "Email address for newsletter",
     emailPlaceholder: "Your email",
     subscribe: "Subscribe",
     subscribing: "Subscribing...",

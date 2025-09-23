@@ -896,6 +896,7 @@ export const vi = {
     followUs: "Theo dõi chúng tôi",
     newsletter: "Bản tin",
     newsletterText: "Đăng ký để nhận các cập nhật mới nhất",
+    emailLabel: "Địa chỉ email nhận bản tin",
     emailPlaceholder: "Email của bạn",
     subscribe: "Đăng ký",
     subscribing: "Đang đăng ký...",

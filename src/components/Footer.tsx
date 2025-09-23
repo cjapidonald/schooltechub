@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { GraduationCap, Mail, Facebook, Instagram, Linkedin } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { t, language } = useLanguage();
+  const emailInputId = useId();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,9 +163,13 @@ const Footer = () => {
               {t.footer.newsletterText}
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
+              <label htmlFor={emailInputId} className="sr-only">
+                {t.footer.emailLabel ?? t.footer.emailPlaceholder}
+              </label>
               <Input
                 type="email"
                 placeholder={t.footer.emailPlaceholder}
+                id={emailInputId}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

@@ -896,6 +896,7 @@ export const sq = {
     followUs: "Na Ndiqni",
     newsletter: "Buletini",
     newsletterText: "Abonohuni për të marrë përditësimet më të fundit",
+    emailLabel: "Adresa e emailit për buletinin",
     emailPlaceholder: "Emaili juaj",
     subscribe: "Abonohu",
     subscribing: "Duke u abonuar...",
