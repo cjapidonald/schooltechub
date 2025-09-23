@@ -244,7 +244,11 @@ export const StepCard = ({
                 const health = healthLookup[resource.url];
                 const warning = health && !health.isHealthy;
                 return (
-                  <div key={resource.id} className="space-y-3 rounded-lg border border-border/60 p-4">
+                  <div
+                    key={resource.id}
+                    className="space-y-3 rounded-lg border border-border/60 p-4"
+                    data-testid={`resource-card-${resource.id}`}
+                  >
                     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
