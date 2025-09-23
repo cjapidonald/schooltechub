@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { FlaskConical, Lock, Plus } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,12 +9,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { listMyClasses } from "@/lib/classes";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const dashboardTabs = [
   { value: "overview", label: "Overview" },
@@ -23,13 +27,13 @@ const dashboardTabs = [
   { value: "lessonPlans", label: "Lesson Plans" },
   { value: "notifications", label: "Notifications" },
   { value: "savedPosts", label: "Saved Posts" },
-  { value: "research", label: "My Research (Applications & Submissions)" },
+  { value: "research", label: "My Research (Applications & Submissions)", disabled: true },
 ] as const;
 
 type DashboardTabValue = (typeof dashboardTabs)[number]["value"];
-type NonOverviewTab = Exclude<DashboardTabValue, "overview">;
+type SummaryTabValue = Exclude<DashboardTabValue, "overview" | "research">;
 
-type TabCounts = Record<NonOverviewTab, number>;
+type TabCounts = Record<SummaryTabValue, number>;
 
 const defaultCounts: TabCounts = {
   settings: 3,
@@ -37,7 +41,23 @@ const defaultCounts: TabCounts = {
   lessonPlans: 6,
   notifications: 5,
   savedPosts: 4,
-  research: 1,
+};
+
+const parseBooleanMetadata = (value: unknown): boolean => {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return ["true", "1", "yes", "on"].includes(normalized);
+  }
+
+  if (typeof value === "number") {
+    return value === 1;
+  }
+
+  return false;
 };
 
 const loadingSkeleton = (
@@ -54,9 +74,13 @@ const loadingSkeleton = (
 const AccountDashboard = () => {
   const { user, loading } = useRequireAuth();
   const { language } = useLanguage();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [counts, setCounts] = useState<TabCounts | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<DashboardTabValue>("overview");
+  const [notifyResearchUpdates, setNotifyResearchUpdates] = useState(false);
+  const [isUpdatingResearchPreference, setIsUpdatingResearchPreference] = useState(false);
 
   const classesQuery = useQuery({
     queryKey: ["my-classes"],
@@ -74,11 +98,21 @@ const AccountDashboard = () => {
     return () => clearTimeout(timeout);
   }, [user]);
 
+  useEffect(() => {
+    const metadata = user?.user_metadata as Record<string, unknown> | undefined;
+    if (!metadata) {
+      setNotifyResearchUpdates(false);
+      return;
+    }
+
+    setNotifyResearchUpdates(parseBooleanMetadata(metadata.notify_research_updates));
+  }, [user]);
+
   const summaryTabs = useMemo(
     () =>
       dashboardTabs
-        .filter(tab => tab.value !== "overview")
-        .map(tab => ({ value: tab.value as NonOverviewTab, label: tab.label })),
+        .filter(tab => tab.value !== "overview" && tab.value !== "research")
+        .map(tab => ({ value: tab.value as SummaryTabValue, label: tab.label })),
     []
   );
 
@@ -99,6 +133,45 @@ const AccountDashboard = () => {
     return <Navigate to={getLocalizedPath("/auth", language)} replace />;
   }
 
+  const handleResearchPreferenceChange = async (checked: boolean) => {
+    if (!user) {
+      return;
+    }
+
+    const previous = notifyResearchUpdates;
+    setNotifyResearchUpdates(checked);
+    setIsUpdatingResearchPreference(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          notify_research_updates: checked,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: checked ? "We'll keep you posted" : "Preference updated",
+        description: checked
+          ? "You'll receive an email when Research & Applications opens."
+          : "You won't receive launch updates about Research & Applications.",
+      });
+    } catch (error) {
+      console.error(error);
+      setNotifyResearchUpdates(previous);
+      toast({
+        title: "Couldn't update preference",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingResearchPreference(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/10 pb-16">
       <SEO
@@ -111,12 +184,32 @@ const AccountDashboard = () => {
           <h1 className="text-3xl font-bold tracking-tight">My Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {greetingName}.</p>
         </div>
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as DashboardTabValue)} className="space-y-6">
           <TabsList className="flex w-full flex-wrap gap-2">
             {dashboardTabs.map(tab => (
-              <TabsTrigger key={tab.value} value={tab.value} className="flex-1 whitespace-nowrap">
-                {tab.label}
-              </TabsTrigger>
+              <div
+                key={tab.value}
+                className="flex-1"
+                onClick={() => {
+                  if (tab.disabled) {
+                    setActiveTab(tab.value);
+                  }
+                }}
+              >
+                <TabsTrigger
+                  value={tab.value}
+                  className="flex w-full items-center justify-center gap-2 whitespace-nowrap"
+                  disabled={tab.disabled}
+                >
+                  <span>{tab.label}</span>
+                  {tab.value === "research" ? (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Lock className="h-3 w-3" />
+                      Soon
+                    </Badge>
+                  ) : null}
+                </TabsTrigger>
+              </div>
             ))}
           </TabsList>
           <TabsContent value="overview" className="space-y-6">
@@ -128,6 +221,38 @@ const AccountDashboard = () => {
                 <p className="text-muted-foreground">
                   Review your latest activity across the SchoolTech Hub community.
                 </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-2">
+                  <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+                    <FlaskConical className="h-5 w-5 text-primary" />
+                    Research &amp; Applications
+                  </CardTitle>
+                  <CardDescription>
+                    This feature will be available soon. You’ll be able to browse projects, apply, and submit artifacts from here.
+                  </CardDescription>
+                </div>
+                <Badge variant="secondary" className="self-start">
+                  Coming soon
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-4 rounded-lg border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Notify me about Research &amp; Applications updates</p>
+                    <p className="text-sm text-muted-foreground">
+                      We’ll email you when applications and submissions open.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notifyResearchUpdates}
+                    onCheckedChange={handleResearchPreferenceChange}
+                    disabled={isUpdatingResearchPreference}
+                    aria-label="Toggle Research & Applications launch notifications"
+                  />
+                </div>
               </CardContent>
             </Card>
             {counts ? (
@@ -146,7 +271,7 @@ const AccountDashboard = () => {
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, index) => (
+                {Array.from({ length: summaryTabs.length }).map((_, index) => (
                   <div key={index} className="h-24 animate-pulse rounded-md bg-muted" />
                 ))}
               </div>
@@ -302,13 +427,19 @@ const AccountDashboard = () => {
           </TabsContent>
           <TabsContent value="research">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">My Research</CardTitle>
+              <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <FlaskConical className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-xl font-semibold">Research &amp; Applications</CardTitle>
+                </div>
+                <Badge variant="secondary" className="self-start">
+                  Coming soon
+                </Badge>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Monitor your applications and submissions in progress. This space will highlight deadlines, statuses, and any
-                  feedback that requires your attention.
+                  We’re finalizing the Research &amp; Applications hub. Soon you’ll be able to discover opportunities, submit
+                  artifacts, and manage your research workflow right from here.
                 </p>
               </CardContent>
             </Card>
