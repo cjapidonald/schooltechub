@@ -7,6 +7,11 @@ export interface AdminRequestContext {
   user: User;
 }
 
+export interface AuthenticatedRequestContext {
+  supabase: SupabaseClient;
+  user: User;
+}
+
 export async function requireAdmin(
   request: Request
 ): Promise<AdminRequestContext | Response> {
@@ -25,6 +30,24 @@ export async function requireAdmin(
   const isAdminUser = await isAdmin(supabase, authData.user.id);
   if (!isAdminUser) {
     return errorResponse(403, "You do not have permission to perform this action");
+  }
+
+  return { supabase, user: authData.user };
+}
+
+export async function requireUser(
+  request: Request
+): Promise<AuthenticatedRequestContext | Response> {
+  const accessToken = extractAccessToken(request);
+  if (!accessToken) {
+    return errorResponse(401, "Authentication required");
+  }
+
+  const supabase = getSupabaseClient();
+  const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+
+  if (authError || !authData?.user) {
+    return errorResponse(401, "Authentication required");
   }
 
   return { supabase, user: authData.user };
@@ -55,7 +78,7 @@ function extractAccessToken(request: Request): string | null {
 
 async function isAdmin(supabase: SupabaseClient, userId: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase.rpc<boolean>("is_admin", { user_id: userId });
+    const { data, error } = await supabase.rpc<boolean>("is_admin", { check_user_id: userId });
     if (!error && typeof data === "boolean") {
       return data;
     }
@@ -74,7 +97,7 @@ async function isAdmin(supabase: SupabaseClient, userId: string): Promise<boolea
 
   try {
     const { data, error } = await supabase
-      .from<{ user_id: string }>("app_admins")
+      .from<{ user_id: string }>("admin_roles")
       .select("user_id")
       .eq("user_id", userId)
       .maybeSingle();

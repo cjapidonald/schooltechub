@@ -1,12 +1,9 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { format } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createClass,
-  listClassLessonPlans,
   listMyClassesWithPlanCount,
   unlinkPlanFromClass,
-  type ClassLessonPlanLinkSummary,
   type ClassWithPlanCount,
 } from "@/lib/classes";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +33,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,7 +45,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { BookOpen, Eye, Loader2, Plus, Unlink } from "lucide-react";
+import { BookOpen, Eye, Loader2, Plus } from "lucide-react";
+import { ClassLessonPlanViewer } from "@/components/classes/ClassLessonPlanViewer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const initialFormState = {
   title: "",
@@ -60,6 +58,7 @@ const initialFormState = {
 export const ClassManager = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formState, setFormState] = useState(initialFormState);
@@ -67,6 +66,7 @@ export const ClassManager = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [unlinkingPlanId, setUnlinkingPlanId] = useState<string | null>(null);
+  const [filteredPlanCount, setFilteredPlanCount] = useState<number | null>(null);
 
   const classesQuery = useQuery<ClassWithPlanCount[]>({
     queryKey: ["my-classes"],
@@ -79,17 +79,6 @@ export const ClassManager = () => {
     }
     return classesQuery.data.find(cls => cls.id === selectedClassId) ?? null;
   }, [classesQuery.data, selectedClassId]);
-
-  const classPlansQuery = useQuery<ClassLessonPlanLinkSummary[]>({
-    queryKey: ["class-lesson-plans", selectedClassId],
-    enabled: detailOpen && Boolean(selectedClassId),
-    queryFn: async () => {
-      if (!selectedClassId) {
-        return [];
-      }
-      return listClassLessonPlans(selectedClassId);
-    },
-  });
 
   const createClassMutation = useMutation({
     mutationFn: async (input: typeof initialFormState) => {
@@ -105,8 +94,8 @@ export const ClassManager = () => {
     },
     onSuccess: (createdClass) => {
       toast({
-        title: "Class created",
-        description: `“${createdClass.title}” is ready to use.`,
+        title: t.account.toast.classCreated,
+        description: t.account.toast.classCreatedDescription.replace("{title}", createdClass.title),
       });
       setIsDialogOpen(false);
       setFormState(initialFormState);
@@ -137,11 +126,7 @@ export const ClassManager = () => {
         title: "Lesson plan unlinked",
         description: "The lesson plan was removed from the class.",
       });
-      if (selectedClassId) {
-        queryClient.invalidateQueries({
-          queryKey: ["class-lesson-plans", selectedClassId],
-        });
-      }
+      queryClient.invalidateQueries({ queryKey: ["class-lesson-plans"] });
       queryClient.invalidateQueries({ queryKey: ["my-classes"] });
     },
     onError: (error) => {
@@ -184,10 +169,11 @@ export const ClassManager = () => {
     setDetailOpen(open);
     if (!open) {
       setSelectedClassId(null);
+      setFilteredPlanCount(null);
     }
   };
 
-  const currentPlanCount = classPlansQuery.data?.length ?? activeClass?.planCount ?? 0;
+  const currentPlanCount = filteredPlanCount ?? activeClass?.planCount ?? 0;
 
   return (
     <>
@@ -378,79 +364,17 @@ export const ClassManager = () => {
               <Skeleton className="h-20 w-full" />
             )}
 
-            <ScrollArea className="h-[60vh] pr-2">
-              {classPlansQuery.isPending ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-16 w-full" />
-                  <Skeleton className="h-16 w-full" />
-                </div>
-              ) : classPlansQuery.isError ? (
-                <Alert variant="destructive">
-                  <AlertTitle>Unable to load linked plans</AlertTitle>
-                  <AlertDescription>
-                    {classPlansQuery.error instanceof Error
-                      ? classPlansQuery.error.message
-                      : "An unexpected error occurred."}
-                    <div className="mt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => classPlansQuery.refetch()}
-                        size="sm"
-                      >
-                        Try again
-                      </Button>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              ) : classPlansQuery.data && classPlansQuery.data.length > 0 ? (
-                <div className="space-y-3">
-                  {classPlansQuery.data.map(plan => (
-                    <div key={plan.id} className="rounded-md border p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-medium">{plan.title}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {plan.date
-                              ? `Scheduled for ${format(new Date(plan.date), "PPP")}`
-                              : "No scheduled date"}
-                          </p>
-                          {plan.duration && (
-                            <p className="text-sm text-muted-foreground">Duration: {plan.duration}</p>
-                          )}
-                          {plan.addedAt && (
-                            <p className="text-xs text-muted-foreground/80 mt-2">
-                              Linked on {format(new Date(plan.addedAt), "PPP p")}
-                            </p>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => unlinkPlanMutation.mutate(plan.lessonPlanId)}
-                          disabled={unlinkPlanMutation.isPending && unlinkingPlanId === plan.lessonPlanId}
-                        >
-                          {unlinkPlanMutation.isPending && unlinkingPlanId === plan.lessonPlanId ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Unlink className="mr-2 h-4 w-4" />
-                              Unlink
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-lg border border-dashed bg-muted/40 p-8 text-center text-sm text-muted-foreground">
-                  <p>No lesson plans are currently linked to this class.</p>
-                  <p className="mt-2">
-                    Build a lesson plan and link it from the Lesson Plans area to see it here.
-                  </p>
-                </div>
-              )}
-            </ScrollArea>
+            {selectedClassId ? (
+              <ClassLessonPlanViewer
+                classId={selectedClassId}
+                onUnlink={lessonPlanId => unlinkPlanMutation.mutate(lessonPlanId)}
+                isUnlinking={unlinkPlanMutation.isPending}
+                unlinkingPlanId={unlinkingPlanId}
+                onPlanCountChange={count => setFilteredPlanCount(count)}
+              />
+            ) : (
+              <Skeleton className="h-[60vh] w-full" />
+            )}
           </div>
         </SheetContent>
       </Sheet>

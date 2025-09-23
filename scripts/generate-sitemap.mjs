@@ -36,16 +36,6 @@ const basePages = [
     priority: { en: "0.7", default: "0.6" },
   },
   {
-    path: "edutech",
-    changefreq: "weekly",
-    priority: { en: "0.7", default: "0.6" },
-  },
-  {
-    path: "teacher-diary",
-    changefreq: "weekly",
-    priority: { en: "0.6", default: "0.5" },
-  },
-  {
     path: "contact",
     changefreq: "monthly",
     priority: { en: "0.5", default: "0.4" },

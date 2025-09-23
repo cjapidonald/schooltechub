@@ -602,6 +602,7 @@ export const en = {
       resourceLink: "Open resource",
       empty: "Lesson details will be added soon.",
       download: "Download PDF",
+      downloadDocx: "Download Word doc",
       openFull: "Open full page",
       close: "Close",
     },
@@ -895,6 +896,7 @@ export const en = {
     followUs: "Follow Us",
     newsletter: "Newsletter",
     newsletterText: "Subscribe to get the latest updates",
+    emailLabel: "Email address for newsletter",
     emailPlaceholder: "Your email",
     subscribe: "Subscribe",
     subscribing: "Subscribing...",
@@ -1283,6 +1285,19 @@ export const en = {
       changeButton: "Change avatar",
       uploadButton: "Save new avatar"
     },
+    school: {
+      title: "School information",
+      description: "Share your school's details to personalise lesson previews and exports.",
+      nameLabel: "School name",
+      namePlaceholder: "e.g. Riverside Elementary",
+      logoLabel: "School logo",
+      logoAlt: "School logo",
+      logoPlaceholder: "No logo yet",
+      logoHelp: "Use a square image under 1MB for the best results.",
+      uploadButton: "Choose image",
+      removeButton: "Remove logo",
+      restoreButton: "Restore logo"
+    },
     actions: {
       backToHome: "Back to homepage"
     },
@@ -1322,7 +1337,15 @@ export const en = {
         system: "Match system",
         light: "Light",
         dark: "Dark"
-      }
+      },
+      saveButton: "Save preferences"
+    },
+    security: {
+      title: "Password",
+      description: "Update your password to keep your account secure.",
+      newPasswordLabel: "New password",
+      confirmPasswordLabel: "Confirm new password",
+      submitButton: "Update password"
     },
     notifications: {
       title: "Notifications",
@@ -1467,6 +1490,11 @@ export const en = {
       readPost: "Open article"
     },
     toast: {
+      classCreated: "Class created",
+      classCreatedDescription: "“{title}” has been added to your classes.",
+      attachedToClass: "Attached to class",
+      attachedToClassDescription: "The lesson plan is now linked to this class.",
+      schoolInfoSaved: "School info saved",
       profileUpdated: "Profile updated",
       passwordMismatch: "Passwords must match",
       passwordLength: "Passwords need to be at least 8 characters.",

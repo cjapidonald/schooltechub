@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   listMyClasses,
   listMyClassesWithPlanCount,
@@ -10,7 +10,14 @@ import {
   linkPlanToClass,
   unlinkPlanFromClass,
 } from "@/lib/classes";
-import { saveDraft, getMyPlans, getPlanWithSteps, exportPlanToDocx, exportPlanToPDF } from "@/lib/lessonPlans";
+import {
+  saveDraft,
+  getMyPlans,
+  getPlanWithSteps,
+  exportPlanToDocx,
+  exportPlanToPDF,
+  type LessonPlanDraft,
+} from "@/lib/lessonPlans";
 import { getMyNotifications, markRead, getPrefs, updatePrefs } from "@/lib/notifications";
 import {
   listProjects,
@@ -84,6 +91,14 @@ function createSelectBuilder(
   return {
     eq(column: string, value: unknown) {
       filters[column] = value;
+      return this;
+    },
+    gte(column: string, value: unknown) {
+      filters[`${column}::gte`] = value;
+      return this;
+    },
+    lte(column: string, value: unknown) {
+      filters[`${column}::lte`] = value;
       return this;
     },
     order() {
@@ -270,11 +285,25 @@ describe("classes data helpers", () => {
         delete: () => Promise.resolve({ error: null }),
       },
       class_lesson_plans: {
-        selectOrder: () =>
-          Promise.resolve({
-            data: [classLessonPlanRow],
+        selectOrder: ({ filters }) => {
+          const gteValue =
+            typeof filters["lesson_plans.date::gte"] === "string"
+              ? (filters["lesson_plans.date::gte"] as string)
+              : null;
+          const lteValue =
+            typeof filters["lesson_plans.date::lte"] === "string"
+              ? (filters["lesson_plans.date::lte"] as string)
+              : null;
+
+          const dateValue = classLessonPlanRow.lesson_plans?.date ?? null;
+          const meetsLowerBound = gteValue ? dateValue >= gteValue : true;
+          const meetsUpperBound = lteValue ? dateValue <= lteValue : true;
+
+          return Promise.resolve({
+            data: meetsLowerBound && meetsUpperBound ? [classLessonPlanRow] : [],
             error: null,
-          }),
+          });
+        },
         insert: payload =>
           Promise.resolve({ data: { id: "link-1", ...payload }, error: null }),
         delete: () => Promise.resolve({ error: null }),
@@ -319,7 +348,7 @@ describe("classes data helpers", () => {
   });
 
   it("lists lesson plans linked to a class", async () => {
-    const plans = await listClassLessonPlans("class-1", baseClient);
+    const plans = await listClassLessonPlans("class-1", {}, baseClient);
     expect(plans).toHaveLength(1);
     expect(plans[0].title).toBe("Math Lesson");
     expect(plans[0].lessonPlanId).toBe("plan-1");
@@ -333,7 +362,10 @@ describe("lesson plan helpers", () => {
     title: "Math Lesson",
     created_at: "2024-01-05T00:00:00Z",
     updated_at: "2024-01-05T00:00:00Z",
-    meta: {},
+    meta: {
+      school_name: "Snapshot Academy",
+      school_logo_url: "https://example.com/original-logo.png",
+    },
   };
 
   const stepRows = [
@@ -341,6 +373,12 @@ describe("lesson plan helpers", () => {
   ];
 
   let storedPlan = { ...planRow };
+  let profileSelectCount = 0;
+
+  beforeEach(() => {
+    storedPlan = { ...planRow };
+    profileSelectCount = 0;
+  });
 
   const client = createSupabaseClient({
     userId: "user-1",
@@ -360,6 +398,7 @@ describe("lesson plan helpers", () => {
               id: "plan-2",
               owner_id: payload.owner_id,
               title: payload.title,
+              meta: payload.meta ?? {},
             };
             return { data: storedPlan, error: null };
           }),
@@ -373,6 +412,21 @@ describe("lesson plan helpers", () => {
         selectOrder: () => Promise.resolve({ data: stepRows, error: null }),
         upsert: () => Promise.resolve({ data: stepRows, error: null }),
       },
+      profiles: {
+        selectMaybeSingle: ({ filters }) => {
+          profileSelectCount += 1;
+          if (filters.id === "user-1") {
+            return Promise.resolve({
+              data: {
+                school_name: "Profile School",
+                school_logo_url: "https://cdn.example.com/logo.png",
+              },
+              error: null,
+            });
+          }
+          return Promise.resolve({ data: null, error: null });
+        },
+      },
     },
   });
 
@@ -380,6 +434,25 @@ describe("lesson plan helpers", () => {
     const result = await saveDraft({ title: "New Lesson", steps: [{ title: "Intro" }] }, client);
     expect(result.plan.title).toBe("New Lesson");
     expect(result.steps[0].title).toBe("Warm up");
+    expect(profileSelectCount).toBe(1);
+    const meta = (result.plan.meta ?? {}) as {
+      school_name?: string;
+      school_logo_url?: string;
+    };
+    expect(meta.school_name).toBe("Profile School");
+    expect(meta.school_logo_url).toBe("https://cdn.example.com/logo.png");
+  });
+
+  it("updates an existing draft without overriding school metadata", async () => {
+    const result = await saveDraft({ id: "plan-1", title: "Updated Lesson" } as LessonPlanDraft, client);
+    expect(result.plan.title).toBe("Updated Lesson");
+    expect(profileSelectCount).toBe(0);
+    const meta = (storedPlan.meta ?? {}) as {
+      school_name?: string;
+      school_logo_url?: string;
+    };
+    expect(meta.school_name).toBe("Snapshot Academy");
+    expect(meta.school_logo_url).toBe("https://example.com/original-logo.png");
   });
 
   it("lists my plans", async () => {
@@ -419,6 +492,7 @@ describe("notification helpers", () => {
     resource_approved: true,
     blogpost_approved: true,
     research_application_approved: true,
+    research_submission_reviewed: true,
     comment_reply: true,
     updated_at: "2024-01-11T00:00:00Z",
   };
@@ -498,6 +572,7 @@ describe("research helpers", () => {
     status: "submitted",
     reviewed_by: null,
     reviewed_at: null,
+    review_note: null,
     submitted_at: "2024-02-04T00:00:00Z",
   };
 

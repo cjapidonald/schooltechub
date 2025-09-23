@@ -1,6 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Class, ClassStatus } from "@/types/platform";
+import { logActivity } from "@/lib/activity-log";
+
+// Re-export Class type so it can be imported from this module
+export type { Class, ClassStatus } from "@/types/platform";
 
 const CLASS_SELECT = "*";
 
@@ -227,7 +231,14 @@ export async function createClass(
     throw new ClassDataError("Unable to create the class.", { cause: error });
   }
 
-  return mapClass(data);
+  const result = mapClass(data);
+  const classTitle = result.title?.trim();
+  logActivity("class-created", classTitle ? `Created class “${classTitle}”.` : "Created a new class.", {
+    classId: result.id,
+    classTitle: classTitle ?? undefined,
+  });
+
+  return result;
 }
 
 export async function updateClass(
@@ -313,13 +324,21 @@ export async function unlinkPlanFromClass(
   }
 }
 
+export interface ClassLessonPlanFilterOptions {
+  from?: string;
+  to?: string;
+}
+
 export async function listClassLessonPlans(
   classId: string,
+  opts: ClassLessonPlanFilterOptions = {},
   client: Client = supabase,
 ): Promise<ClassLessonPlanLinkSummary[]> {
   await requireUserId(client, "view class lesson plans");
 
-  const { data, error } = await client
+  const { from, to } = opts ?? {};
+
+  let query = client
     .from("class_lesson_plans")
     .select(
       `
@@ -327,7 +346,7 @@ export async function listClassLessonPlans(
         class_id,
         lesson_plan_id,
         added_at,
-        lesson_plans (
+        lesson_plans!inner (
           id,
           title,
           date,
@@ -335,8 +354,21 @@ export async function listClassLessonPlans(
         )
       `,
     )
-    .eq("class_id", classId)
-    .order("added_at", { ascending: false });
+    .eq("class_id", classId);
+
+  if (from) {
+    query = query.gte("lesson_plans.date", from);
+  }
+
+  if (to) {
+    query = query.lte("lesson_plans.date", to);
+  }
+
+  const { data, error } = await query.order("date", {
+    ascending: false,
+    nullsLast: true,
+    foreignTable: "lesson_plans",
+  });
 
   if (error) {
     throw new ClassDataError("Failed to load lesson plans linked to the class.", {
@@ -348,23 +380,36 @@ export async function listClassLessonPlans(
     return [];
   }
 
-  return data.map(record => {
-    const lessonPlan = (record as Record<string, any>).lesson_plans ?? null;
-    const lessonPlanTitle =
-      lessonPlan && typeof lessonPlan.title === "string" && lessonPlan.title.length > 0
-        ? lessonPlan.title
-        : "Untitled lesson";
+  return data
+    .map(record => {
+      const lessonPlan = (record as Record<string, any>).lesson_plans ?? null;
+      const lessonPlanTitle =
+        lessonPlan && typeof lessonPlan.title === "string" && lessonPlan.title.length > 0
+          ? lessonPlan.title
+          : "Untitled lesson";
 
-    return {
-      id: String(record.id ?? ""),
-      classId: String(record.class_id ?? classId ?? ""),
-      lessonPlanId: String(
-        record.lesson_plan_id ?? (lessonPlan ? lessonPlan.id ?? "" : ""),
-      ),
-      title: lessonPlanTitle,
-      date: (lessonPlan?.date as string | null | undefined) ?? null,
-      duration: (lessonPlan?.duration as string | null | undefined) ?? null,
-      addedAt: (record.added_at as string | null | undefined) ?? null,
-    } satisfies ClassLessonPlanLinkSummary;
-  });
+      return {
+        id: String(record.id ?? ""),
+        classId: String(record.class_id ?? classId ?? ""),
+        lessonPlanId: String(
+          record.lesson_plan_id ?? (lessonPlan ? lessonPlan.id ?? "" : ""),
+        ),
+        title: lessonPlanTitle,
+        date: (lessonPlan?.date as string | null | undefined) ?? null,
+        duration: (lessonPlan?.duration as string | null | undefined) ?? null,
+        addedAt: (record.added_at as string | null | undefined) ?? null,
+      } satisfies ClassLessonPlanLinkSummary;
+    })
+    .sort((a, b) => {
+      const aDate = a.date ?? "";
+      const bDate = b.date ?? "";
+
+      if (aDate !== bDate) {
+        return aDate > bDate ? -1 : 1;
+      }
+
+      const aAdded = a.addedAt ?? "";
+      const bAdded = b.addedAt ?? "";
+      return aAdded > bAdded ? -1 : aAdded < bAdded ? 1 : 0;
+    });
 }

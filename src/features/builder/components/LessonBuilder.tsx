@@ -21,7 +21,7 @@ import { BuilderCommandPalette } from "./command/BuilderCommandPalette";
 import { ExportMenu } from "./export/ExportMenu";
 import { LessonPreview } from "./LessonPreview";
 
-const BuilderShell = () => {
+export const BuilderShell = () => {
   const { state, setState, addStep, duplicateStep, removeStep, reorderSteps } = useBuilder();
   const [activeActivity, setActiveActivity] = useState<BuilderActivitySummary | null>(null);
   const [linkLookup, setLinkLookup] = useState<Record<string, LinkHealthStatus>>({});
@@ -30,6 +30,7 @@ const BuilderShell = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const previewRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -77,6 +78,31 @@ const BuilderShell = () => {
     };
   }, [setState]);
 
+  const handlePrintPreview = () => {
+    if (typeof window === "undefined" || typeof window.print !== "function") {
+      return;
+    }
+
+    if (typeof document === "undefined" || !previewRef.current || !document.body) {
+      return;
+    }
+
+    const cleanup = () => {
+      document.body.classList.remove("printing-lesson-preview");
+      window.removeEventListener("afterprint", cleanup);
+    };
+
+    document.body.classList.add("printing-lesson-preview");
+    window.addEventListener("afterprint", cleanup);
+
+    try {
+      window.print();
+    } finally {
+      // Fallback cleanup for environments where afterprint doesn't fire
+      setTimeout(cleanup, 0);
+    }
+  };
+
   const lessonMetadata = useMemo(
     () => ({
       stage: state.stage,
@@ -88,6 +114,8 @@ const BuilderShell = () => {
   );
 
   useEffect(() => {
+    let cancelled = false;
+
     const urls = Array.from(
       new Set(
         state.steps
@@ -98,12 +126,22 @@ const BuilderShell = () => {
 
     if (!urls.length) {
       setLinkLookup({});
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     fetchLinkStatuses(urls)
-      .then(setLinkLookup)
+      .then(result => {
+        if (!cancelled) {
+          setLinkLookup(result);
+        }
+      })
       .catch(error => console.error("Failed to load link health", error));
+
+    return () => {
+      cancelled = true;
+    };
   }, [state.steps]);
 
   useAutosave(state, {
@@ -264,7 +302,7 @@ const BuilderShell = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <ExportMenu state={state} linkLookup={linkLookup} />
+                  <ExportMenu state={state} linkLookup={linkLookup} onPrint={handlePrintPreview} />
                   <span className="text-xs text-muted-foreground" data-testid="autosave-status">
                     {autosaveStatus === "saving" ? "Saving..." : autosaveStatus === "saved" ? "Saved" : "Auto-save ready"}
                   </span>
@@ -416,8 +454,8 @@ const BuilderShell = () => {
             </div>
           </div>
 
-          <div className="hidden lg:block">
-            <div className="sticky top-24">
+          <div className="hidden print:block lg:block">
+            <div className="sticky top-24" ref={previewRef} data-print-section="lesson-preview">
               <LessonPreview />
             </div>
           </div>

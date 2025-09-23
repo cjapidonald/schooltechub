@@ -38,7 +38,7 @@ function mapActivity(record: Record<string, unknown>) {
   const durationMinutes = typeof record.read_time === "number" ? record.read_time : null;
   const tags = ensureArray(record.activity_type ?? record.activityTypes ?? record.tags);
   const slug = typeof record.slug === "string" ? record.slug : null;
-  const sourceUrl = slug ? `/edutech/${slug}` : null;
+  const sourceUrl = slug ? `/blog/${slug}` : null;
 
   return mergeActivityValues({
     id: typeof record.id === "string" ? record.id : cryptoRandomId("activity"),

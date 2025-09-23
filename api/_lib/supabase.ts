@@ -1,8 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const FALLBACK_URL = "https://ruybexkjupmannggnstn.supabase.co";
-const FALLBACK_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1eWJleGtqdXBtYW5uZ2duc3RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyNTk3MTYsImV4cCI6MjA3MjgzNTcxNn0.n2MlQf65ggrUVW1nSXKMvoSsyBe9cxY_ElOHvMD5Das";
 
 let cachedClient: SupabaseClient | null = null;
 
@@ -12,11 +10,14 @@ export function getSupabaseClient(): SupabaseClient {
   }
 
   const url = process.env.SUPABASE_URL ?? FALLBACK_URL;
-  const key =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_ANON_KEY ??
-    process.env.VITE_SUPABASE_ANON_KEY ??
-    FALLBACK_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!key) {
+    const hint =
+      "Missing SUPABASE_SERVICE_ROLE_KEY. Generate a service role key from Supabase project settings, expose it only to server environments, and see SUPABASE_SETUP.md for details.";
+    console.error(`[supabase] ${hint}`);
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY environment variable is required");
+  }
 
   cachedClient = createClient(url, key, {
     auth: {

@@ -14,68 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      audit_logs: {
+      admin_roles: {
         Row: {
-          action: string
-          actor_id: string | null
-          created_at: string
-          details: Json
-          id: number
-          ip: string | null
-          target_id: string
-          target_type: string
-          user_agent: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: string
+          user_id: string
         }
         Insert: {
-          action: string
-          actor_id?: string | null
-          created_at?: string
-          details?: Json
-          id?: number
-          ip?: string | null
-          target_id: string
-          target_type: string
-          user_agent?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: string
+          user_id: string
         }
         Update: {
-          action?: string
-          actor_id?: string | null
-          created_at?: string
-          details?: Json
-          id?: number
-          ip?: string | null
-          target_id?: string
-          target_type?: string
-          user_agent?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: string
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "audit_logs_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       builder_activity_favorites: {
         Row: {
-          activity_slug: string
-          anon_user_id: string
-          created_at: string
+          activity_slug: string | null
+          anon_user_id: string | null
+          created_at: string | null
           id: string
+          user_id: string | null
         }
         Insert: {
-          activity_slug: string
-          anon_user_id: string
-          created_at?: string
+          activity_slug?: string | null
+          anon_user_id?: string | null
+          created_at?: string | null
           id?: string
+          user_id?: string | null
         }
         Update: {
-          activity_slug?: string
-          anon_user_id?: string
-          created_at?: string
+          activity_slug?: string | null
+          anon_user_id?: string | null
+          created_at?: string | null
           id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -89,25 +72,28 @@ export type Database = {
       }
       builder_activity_recents: {
         Row: {
-          activity_slug: string
-          anon_user_id: string
+          activity_slug: string | null
+          anon_user_id: string | null
           id: string
-          last_viewed: string
+          last_viewed: string | null
           metadata: Json | null
+          user_id: string | null
         }
         Insert: {
-          activity_slug: string
-          anon_user_id: string
+          activity_slug?: string | null
+          anon_user_id?: string | null
           id?: string
-          last_viewed?: string
+          last_viewed?: string | null
           metadata?: Json | null
+          user_id?: string | null
         }
         Update: {
-          activity_slug?: string
-          anon_user_id?: string
+          activity_slug?: string | null
+          anon_user_id?: string | null
           id?: string
-          last_viewed?: string
+          last_viewed?: string | null
           metadata?: Json | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -119,48 +105,27 @@ export type Database = {
           },
         ]
       }
-      builder_collections: {
-        Row: {
-          anon_user_id: string
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-        }
-        Insert: {
-          anon_user_id: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-        }
-        Update: {
-          anon_user_id?: string
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
       builder_collection_items: {
         Row: {
-          activity_slug: string
-          collection_id: string
-          created_at: string
+          activity_slug: string | null
+          collection_id: string | null
+          created_at: string | null
           id: string
+          position: number | null
         }
         Insert: {
-          activity_slug: string
-          collection_id: string
-          created_at?: string
+          activity_slug?: string | null
+          collection_id?: string | null
+          created_at?: string | null
           id?: string
+          position?: number | null
         }
         Update: {
-          activity_slug?: string
-          collection_id?: string
-          created_at?: string
+          activity_slug?: string | null
+          collection_id?: string | null
+          created_at?: string | null
           id?: string
+          position?: number | null
         }
         Relationships: [
           {
@@ -179,100 +144,134 @@ export type Database = {
           },
         ]
       }
-      builder_drafts: {
+      builder_collections: {
+        Row: {
+          anon_user_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anon_user_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anon_user_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      builder_lesson_plans: {
         Row: {
           anon_user_id: string
-          data: Json
+          created_at: string | null
+          data: Json | null
           id: string
-          title: string
-          updated_at: string
+          title: string | null
+          updated_at: string | null
         }
         Insert: {
           anon_user_id: string
-          data?: Json
+          created_at?: string | null
+          data?: Json | null
           id?: string
-          title?: string
-          updated_at?: string
+          title?: string | null
+          updated_at?: string | null
         }
         Update: {
           anon_user_id?: string
-          data?: Json
+          created_at?: string | null
+          data?: Json | null
           id?: string
-          title?: string
-          updated_at?: string
+          title?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
       builder_link_health_reports: {
         Row: {
-          failure_count: number
+          created_at: string | null
           id: string
-          is_healthy: boolean
-          last_checked: string
+          is_healthy: boolean | null
+          last_checked: string | null
           last_error: string | null
           status_code: number | null
           status_text: string | null
+          updated_at: string | null
           url: string
         }
         Insert: {
-          failure_count?: number
+          created_at?: string | null
           id?: string
-          is_healthy?: boolean
-          last_checked?: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
           last_error?: string | null
           status_code?: number | null
           status_text?: string | null
+          updated_at?: string | null
           url: string
         }
         Update: {
-          failure_count?: number
+          created_at?: string | null
           id?: string
-          is_healthy?: boolean
-          last_checked?: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
           last_error?: string | null
           status_code?: number | null
           status_text?: string | null
+          updated_at?: string | null
           url?: string
         }
         Relationships: []
       }
       builder_resource_links: {
         Row: {
-          draft_id: string
+          created_at: string | null
           id: string
-          label: string
-          last_synced: string
-          resource_id: string | null
-          step_id: string
+          is_healthy: boolean | null
+          last_checked: string | null
+          last_error: string | null
+          status_code: number | null
+          status_text: string | null
+          updated_at: string | null
           url: string
         }
         Insert: {
-          draft_id: string
+          created_at?: string | null
           id?: string
-          label: string
-          last_synced?: string
-          resource_id?: string | null
-          step_id: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          updated_at?: string | null
           url: string
         }
         Update: {
-          draft_id?: string
+          created_at?: string | null
           id?: string
-          label?: string
-          last_synced?: string
-          resource_id?: string | null
-          step_id?: string
+          is_healthy?: boolean | null
+          last_checked?: string | null
+          last_error?: string | null
+          status_code?: number | null
+          status_text?: string | null
+          updated_at?: string | null
           url?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "builder_resource_links_draft_id_fkey"
-            columns: ["draft_id"]
-            isOneToOne: false
-            referencedRelation: "builder_drafts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       classes: {
         Row: {
@@ -384,29 +383,18 @@ export type Database = {
       }
       content_master: {
         Row: {
-          age_grade: string | null
-          audience: string | null
           author: Json | null
           author_image: string | null
           author_job_title: string | null
-          billing: Database["public"]["Enums"]["billing_enum"] | null
-          bloom_level: Database["public"]["Enums"]["bloom_enum"] | null
-          case_study_tags: string | null
           category: Database["public"]["Enums"]["category_enum"] | null
           content: Json | null
           content_type: Database["public"]["Enums"]["content_type_enum"]
           created_at: string | null
-          currency: string | null
-          curriculum_alignment: string | null
-          data_compliance: string | null
-          deliverables: string | null
+          deleted_at: string | null
           delivery_type:
             | Database["public"]["Enums"]["delivery_type_enum"]
             | null
-          device_os: string | null
-          diary_type: string | null
           end_datetime: string | null
-          engagement_features: string | null
           event_capacity: number | null
           event_certificate_pd: boolean | null
           event_duration: string | null
@@ -417,89 +405,50 @@ export type Database = {
             | Database["public"]["Enums"]["event_price_type_enum"]
             | null
           event_registered: number | null
-          event_status: Database["public"]["Enums"]["event_status_enum"] | null
           event_timezone: string | null
           event_type: Database["public"]["Enums"]["event_type_enum"] | null
           excerpt: string | null
-          faq_json: Json | null
           featured_image: string | null
-          file_format: string | null
           filter_type: Database["public"]["Enums"]["filter_type_enum"] | null
-          forum_category: string | null
-          guarantee: string | null
           id: string
-          idea_tips: string | null
           is_published: boolean | null
           keywords: string[] | null
           language: string | null
-          language_level:
-            | Database["public"]["Enums"]["language_level_enum"]
-            | null
-          learning_goals: string | null
-          license: string | null
-          login_method: string | null
-          materials_devices: string | null
           meta_description: string | null
           meta_title: string | null
-          mood: string | null
-          newsletter_segment: string | null
           page: Database["public"]["Enums"]["page_enum"]
           payment: Database["public"]["Enums"]["payment_enum"] | null
           platform: Database["public"]["Enums"]["platform_enum"] | null
-          prep_level: string | null
           price: number | null
           published_at: string | null
           read_time: number | null
           recording_url: string | null
           registration_url: string | null
-          research_question_tags: string | null
-          research_type: string | null
-          resource_type:
-            | Database["public"]["Enums"]["resource_type_enum"]
-            | null
-          service_model:
-            | Database["public"]["Enums"]["service_model_enum"]
-            | null
-          sla_tier: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug: string
           stage: Database["public"]["Enums"]["stage_enum"] | null
-          standards_other: string | null
           start_datetime: string | null
+          status: "draft" | "pending" | "approved" | "published"
           subject: Database["public"]["Enums"]["subject_enum"] | null
           subtitle: string | null
           tags: string[] | null
-          testimonials_json: Json | null
           time_required: string | null
           title: string
-          translation_of: string | null
           updated_at: string | null
           venue: string | null
-          view_count: number | null
         }
         Insert: {
-          age_grade?: string | null
-          audience?: string | null
           author?: Json | null
           author_image?: string | null
           author_job_title?: string | null
-          billing?: Database["public"]["Enums"]["billing_enum"] | null
-          bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
-          case_study_tags?: string | null
           category?: Database["public"]["Enums"]["category_enum"] | null
           content?: Json | null
           content_type: Database["public"]["Enums"]["content_type_enum"]
           created_at?: string | null
-          currency?: string | null
-          curriculum_alignment?: string | null
-          data_compliance?: string | null
-          deliverables?: string | null
+          deleted_at?: string | null
           delivery_type?:
             | Database["public"]["Enums"]["delivery_type_enum"]
             | null
-          device_os?: string | null
-          diary_type?: string | null
           end_datetime?: string | null
-          engagement_features?: string | null
           event_capacity?: number | null
           event_certificate_pd?: boolean | null
           event_duration?: string | null
@@ -510,89 +459,50 @@ export type Database = {
             | Database["public"]["Enums"]["event_price_type_enum"]
             | null
           event_registered?: number | null
-          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
           event_timezone?: string | null
           event_type?: Database["public"]["Enums"]["event_type_enum"] | null
           excerpt?: string | null
-          faq_json?: Json | null
           featured_image?: string | null
-          file_format?: string | null
           filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
-          forum_category?: string | null
-          guarantee?: string | null
           id?: string
-          idea_tips?: string | null
           is_published?: boolean | null
           keywords?: string[] | null
           language?: string | null
-          language_level?:
-            | Database["public"]["Enums"]["language_level_enum"]
-            | null
-          learning_goals?: string | null
-          license?: string | null
-          login_method?: string | null
-          materials_devices?: string | null
           meta_description?: string | null
           meta_title?: string | null
-          mood?: string | null
-          newsletter_segment?: string | null
           page: Database["public"]["Enums"]["page_enum"]
           payment?: Database["public"]["Enums"]["payment_enum"] | null
           platform?: Database["public"]["Enums"]["platform_enum"] | null
-          prep_level?: string | null
           price?: number | null
           published_at?: string | null
           read_time?: number | null
           recording_url?: string | null
           registration_url?: string | null
-          research_question_tags?: string | null
-          research_type?: string | null
-          resource_type?:
-            | Database["public"]["Enums"]["resource_type_enum"]
-            | null
-          service_model?:
-            | Database["public"]["Enums"]["service_model_enum"]
-            | null
-          sla_tier?: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug: string
           stage?: Database["public"]["Enums"]["stage_enum"] | null
-          standards_other?: string | null
           start_datetime?: string | null
+          status?: "draft" | "pending" | "approved" | "published"
           subject?: Database["public"]["Enums"]["subject_enum"] | null
           subtitle?: string | null
           tags?: string[] | null
-          testimonials_json?: Json | null
           time_required?: string | null
           title: string
-          translation_of?: string | null
           updated_at?: string | null
           venue?: string | null
-          view_count?: number | null
         }
         Update: {
-          age_grade?: string | null
-          audience?: string | null
           author?: Json | null
           author_image?: string | null
           author_job_title?: string | null
-          billing?: Database["public"]["Enums"]["billing_enum"] | null
-          bloom_level?: Database["public"]["Enums"]["bloom_enum"] | null
-          case_study_tags?: string | null
           category?: Database["public"]["Enums"]["category_enum"] | null
           content?: Json | null
           content_type?: Database["public"]["Enums"]["content_type_enum"]
           created_at?: string | null
-          currency?: string | null
-          curriculum_alignment?: string | null
-          data_compliance?: string | null
-          deliverables?: string | null
+          deleted_at?: string | null
           delivery_type?:
             | Database["public"]["Enums"]["delivery_type_enum"]
             | null
-          device_os?: string | null
-          diary_type?: string | null
           end_datetime?: string | null
-          engagement_features?: string | null
           event_capacity?: number | null
           event_certificate_pd?: boolean | null
           event_duration?: string | null
@@ -603,159 +513,36 @@ export type Database = {
             | Database["public"]["Enums"]["event_price_type_enum"]
             | null
           event_registered?: number | null
-          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
           event_timezone?: string | null
           event_type?: Database["public"]["Enums"]["event_type_enum"] | null
           excerpt?: string | null
-          faq_json?: Json | null
           featured_image?: string | null
-          file_format?: string | null
           filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
-          forum_category?: string | null
-          guarantee?: string | null
           id?: string
-          idea_tips?: string | null
           is_published?: boolean | null
           keywords?: string[] | null
           language?: string | null
-          language_level?:
-            | Database["public"]["Enums"]["language_level_enum"]
-            | null
-          learning_goals?: string | null
-          license?: string | null
-          login_method?: string | null
-          materials_devices?: string | null
           meta_description?: string | null
           meta_title?: string | null
-          mood?: string | null
-          newsletter_segment?: string | null
           page?: Database["public"]["Enums"]["page_enum"]
           payment?: Database["public"]["Enums"]["payment_enum"] | null
           platform?: Database["public"]["Enums"]["platform_enum"] | null
-          prep_level?: string | null
           price?: number | null
           published_at?: string | null
           read_time?: number | null
           recording_url?: string | null
           registration_url?: string | null
-          research_question_tags?: string | null
-          research_type?: string | null
-          resource_type?:
-            | Database["public"]["Enums"]["resource_type_enum"]
-            | null
-          service_model?:
-            | Database["public"]["Enums"]["service_model_enum"]
-            | null
-          sla_tier?: Database["public"]["Enums"]["sla_tier_enum"] | null
           slug?: string
           stage?: Database["public"]["Enums"]["stage_enum"] | null
-          standards_other?: string | null
           start_datetime?: string | null
+          status?: "draft" | "pending" | "approved" | "published"
           subject?: Database["public"]["Enums"]["subject_enum"] | null
           subtitle?: string | null
           tags?: string[] | null
-          testimonials_json?: Json | null
           time_required?: string | null
           title?: string
-          translation_of?: string | null
           updated_at?: string | null
           venue?: string | null
-          view_count?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "content_master_translation_of_fkey"
-            columns: ["translation_of"]
-            isOneToOne: false
-            referencedRelation: "content_master"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tools_activities: {
-        Row: {
-          accessibility_notes: string | null
-          activity_types: string[] | null
-          best_for: string | null
-          classroom_flow: string | null
-          cost: string
-          created_at: string
-          description: string | null
-          devices: string[] | null
-          external_link: string | null
-          featured_image_url: string | null
-          free_tier_limits: string | null
-          group_sizes: string[] | null
-          id: string
-          is_featured: boolean | null
-          is_published: boolean | null
-          lesson_idea: string | null
-          name: string
-          offline_option: boolean | null
-          privacy_security_notes: string | null
-          quick_start_steps: Json | null
-          school_stages: string[] | null
-          setup_time: string | null
-          slug: string
-          subjects: string[] | null
-          updated_at: string
-          video_url?: never
-        }
-        Insert: {
-          accessibility_notes?: string | null
-          activity_types?: string[] | null
-          best_for?: string | null
-          classroom_flow?: string | null
-          cost?: string
-          created_at?: string
-          description?: string | null
-          devices?: string[] | null
-          external_link?: string | null
-          featured_image_url?: string | null
-          free_tier_limits?: string | null
-          group_sizes?: string[] | null
-          id?: string
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          lesson_idea?: string | null
-          name: string
-          offline_option?: boolean | null
-          privacy_security_notes?: string | null
-          quick_start_steps?: Json | null
-          school_stages?: string[] | null
-          setup_time?: string | null
-          slug: string
-          subjects?: string[] | null
-          updated_at?: string
-          video_url?: never
-        }
-        Update: {
-          accessibility_notes?: string | null
-          activity_types?: string[] | null
-          best_for?: string | null
-          classroom_flow?: string | null
-          cost?: string
-          created_at?: string
-          description?: string | null
-          devices?: string[] | null
-          external_link?: string | null
-          featured_image_url?: string | null
-          free_tier_limits?: string | null
-          group_sizes?: string[] | null
-          id?: string
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          lesson_idea?: string | null
-          name?: string
-          offline_option?: boolean | null
-          privacy_security_notes?: string | null
-          quick_start_steps?: Json | null
-          school_stages?: string[] | null
-          setup_time?: string | null
-          slug?: string
-          subjects?: string[] | null
-          updated_at?: string
-          video_url?: never
         }
         Relationships: []
       }
@@ -842,178 +629,6 @@ export type Database = {
         }
         Relationships: []
       }
-      lesson_plans: {
-        Row: {
-          activities: Json
-          created_at: string
-          duration_minutes: number | null
-          grade_levels: string[]
-          id: string
-          lesson_date: string | null
-          materials: string[]
-          objectives: string[]
-          owner_id: string | null
-          search_vector: unknown
-          school_logo_url: string | null
-          slug: string
-          standards: string[]
-          status: string
-          subject: string | null
-          summary: string | null
-          tags: string[]
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          activities?: Json
-          created_at?: string
-          duration_minutes?: number | null
-          grade_levels?: string[]
-          id?: string
-          lesson_date?: string | null
-          materials?: string[]
-          objectives?: string[]
-          owner_id?: string | null
-          search_vector?: unknown
-          school_logo_url?: string | null
-          slug: string
-          standards?: string[]
-          status?: string
-          subject?: string | null
-          summary?: string | null
-          tags?: string[]
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          activities?: Json
-          created_at?: string
-          duration_minutes?: number | null
-          grade_levels?: string[]
-          id?: string
-          lesson_date?: string | null
-          materials?: string[]
-          objectives?: string[]
-          owner_id?: string | null
-          search_vector?: unknown
-          school_logo_url?: string | null
-          slug?: string
-          standards?: string[]
-          status?: string
-          subject?: string | null
-          summary?: string | null
-          tags?: string[]
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      lesson_plan_steps: {
-        Row: {
-          created_at: string
-          delivery_mode: "offline" | "blended" | "online" | null
-          duration_minutes: number | null
-          id: string
-          learning_goals: string | null
-          lesson_plan_id: string
-          notes: string | null
-          position: number | null
-          resources: Json | null
-          title: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          delivery_mode?: "offline" | "blended" | "online" | null
-          duration_minutes?: number | null
-          id?: string
-          learning_goals?: string | null
-          lesson_plan_id: string
-          notes?: string | null
-          position?: number | null
-          resources?: Json | null
-          title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          delivery_mode?: "offline" | "blended" | "online" | null
-          duration_minutes?: number | null
-          id?: string
-          learning_goals?: string | null
-          lesson_plan_id?: string
-          notes?: string | null
-          position?: number | null
-          resources?: Json | null
-          title?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_plan_steps_lesson_plan_id_fkey"
-            columns: ["lesson_plan_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      resources: {
-        Row: {
-          created_at: string
-          creator_id: string | null
-          description: string | null
-          format: string | null
-          grade_level: string | null
-          id: string
-          instructional_notes: string | null
-          resource_type: string | null
-          subject: string | null
-          tags: string[] | null
-          title: string
-          updated_at: string
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          creator_id?: string | null
-          description?: string | null
-          format?: string | null
-          grade_level?: string | null
-          id?: string
-          instructional_notes?: string | null
-          resource_type?: string | null
-          subject?: string | null
-          tags?: string[] | null
-          title: string
-          updated_at?: string
-          url: string
-        }
-        Update: {
-          created_at?: string
-          creator_id?: string | null
-          description?: string | null
-          format?: string | null
-          grade_level?: string | null
-          id?: string
-          instructional_notes?: string | null
-          resource_type?: string | null
-          subject?: string | null
-          tags?: string[] | null
-          title?: string
-          updated_at?: string
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "resources_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       newsletter_subscribers: {
         Row: {
           audience: string | null
@@ -1065,9 +680,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
-          school_logo_url: string | null
           role: Database["public"]["Enums"]["user_role_enum"] | null
-          school_logo_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1075,9 +688,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
-          school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
-          school_logo_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1085,31 +696,83 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
-          school_logo_url?: string | null
           role?: Database["public"]["Enums"]["user_role_enum"] | null
-          school_logo_url?: string | null
           updated_at?: string | null
         }
         Relationships: []
       }
-      saved_posts: {
+      resources: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          creator_id: string | null
+          description: string | null
+          format: string | null
+          grade_level: string | null
           id: string
-          post_id: string
-          saved_at: string
-          user_id: string
+          instructional_notes: string | null
+          is_active: boolean | null
+          resource_type: string | null
+          stage: string | null
+          status: string | null
+          storage_path: string | null
+          subject: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          type: string | null
+          updated_at: string | null
+          url: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          creator_id?: string | null
+          description?: string | null
+          format?: string | null
+          grade_level?: string | null
           id?: string
-          post_id: string
-          saved_at?: string
-          user_id: string
+          instructional_notes?: string | null
+          is_active?: boolean | null
+          resource_type?: string | null
+          stage?: string | null
+          status?: string | null
+          storage_path?: string | null
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          type?: string | null
+          updated_at?: string | null
+          url?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          creator_id?: string | null
+          description?: string | null
+          format?: string | null
+          grade_level?: string | null
           id?: string
-          post_id?: string
-          saved_at?: string
-          user_id?: string
+          instructional_notes?: string | null
+          is_active?: boolean | null
+          resource_type?: string | null
+          stage?: string | null
+          status?: string | null
+          storage_path?: string | null
+          subject?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          type?: string | null
+          updated_at?: string | null
+          url?: string | null
         }
         Relationships: []
       }
@@ -1169,6 +832,51 @@ export type Database = {
           },
         ]
       }
+      tools_activities: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          grade_levels: string[] | null
+          instructions: string | null
+          learning_objectives: string[] | null
+          materials: string[] | null
+          name: string
+          slug: string
+          subjects: string[] | null
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          grade_levels?: string[] | null
+          instructions?: string | null
+          learning_objectives?: string[] | null
+          materials?: string[] | null
+          name: string
+          slug: string
+          subjects?: string[] | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          grade_levels?: string[] | null
+          instructions?: string | null
+          learning_objectives?: string[] | null
+          materials?: string[] | null
+          name?: string
+          slug?: string
+          subjects?: string[] | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1177,6 +885,10 @@ export type Database = {
       get_newsletter_subscriber_count: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      is_admin: {
+        Args: { check_user_id?: string }
+        Returns: boolean
       }
       is_email_subscribed: {
         Args: { check_email: string }

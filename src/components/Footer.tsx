@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { GraduationCap, Mail, Facebook, Instagram, Linkedin } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { t, language } = useLanguage();
+  const emailInputId = useId();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,26 +84,26 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to={getLocalizedPath("/edutech", language)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {t.nav.edutech}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={getLocalizedPath("/teacher-diary", language)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {t.nav.teacherDiary}
-                </Link>
-              </li>
-              <li>
-                <Link
                   to={getLocalizedPath("/blog", language)}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   {t.nav.blog}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={getLocalizedPath("/events", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {t.nav.events}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={getLocalizedPath("/lesson-builder", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {t.nav.builder}
                 </Link>
               </li>
               <li>
@@ -162,9 +163,13 @@ const Footer = () => {
               {t.footer.newsletterText}
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
+              <label htmlFor={emailInputId} className="sr-only">
+                {t.footer.emailLabel ?? t.footer.emailPlaceholder}
+              </label>
               <Input
                 type="email"
                 placeholder={t.footer.emailPlaceholder}
+                id={emailInputId}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

@@ -34,8 +34,6 @@ const createStaticRoutes = (dictionary: TranslationDictionary): RouteLink[] => [
   { title: dictionary.nav.services, url: "/services" },
   { title: dictionary.nav.blog, url: "/blog" },
   { title: dictionary.nav.events, url: "/events" },
-  { title: dictionary.nav.edutech, url: "/edutech" },
-  { title: dictionary.nav.teacherDiary, url: "/teacher-diary" },
   { title: dictionary.nav.contact, url: "/contact" },
   { title: dictionary.nav.faq, url: "/faq" },
   { title: dictionary.sitemap.links.authPortal, url: "/auth" },
@@ -91,21 +89,6 @@ const Sitemap = () => {
     }
   });
 
-  const { data: diaryEntries = [] } = useQuery({
-    queryKey: ["sitemap-teacher-diary"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("content_master")
-        .select("slug, title, updated_at, published_at, language")
-        .eq("page", "teacher_diary")
-        .eq("is_published", true)
-        .order("published_at", { ascending: false });
-
-      if (error) throw error;
-      return data ?? [];
-    }
-  });
-
   const staticSections = supportedLanguages.map((lang) => {
     const links = createStaticRoutes(lang.dictionary).map((route) => ({
       title: route.title,
@@ -148,15 +131,6 @@ const Sitemap = () => {
         url: getLocalizedPath(`/events/${event.slug}`, event.language || "en"),
         updatedAt: formatUpdatedAt(event.updated_at ?? event.start_datetime ?? undefined),
         language: event.language || "en"
-      }))
-    },
-    {
-      title: t.sitemap.sections.teacherDiaryEntries,
-      links: diaryEntries.map((entry) => ({
-        title: entry.title || entry.slug,
-        url: getLocalizedPath(`/teacher-diary/${entry.slug}`, entry.language || "en"),
-        updatedAt: formatUpdatedAt(entry.updated_at ?? entry.published_at ?? undefined),
-        language: entry.language || "en"
       }))
     }
   ].map((section) => ({

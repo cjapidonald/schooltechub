@@ -11,6 +11,7 @@ import type {
   ResearchSubmission,
   ResearchSubmissionStatus,
 } from "@/types/platform";
+import { logActivity } from "@/lib/activity-log";
 
 const PROJECT_SELECT = "*";
 const DOCUMENT_SELECT = "*";
@@ -207,6 +208,7 @@ function mapSubmission(record: Record<string, any>): ResearchSubmission {
     status: (record.status as ResearchSubmissionStatus | undefined) ?? "submitted",
     reviewedBy: record.reviewed_by ?? null,
     reviewedAt: record.reviewed_at ?? null,
+    reviewNote: record.review_note ?? record.reviewNote ?? null,
     submittedAt: record.submitted_at ?? record.created_at ?? null,
   } satisfies ResearchSubmission;
 }
@@ -554,7 +556,15 @@ export async function uploadSubmission(
     throw new ResearchDataError("Failed to record the submission.", { cause: error });
   }
 
-  return mapSubmission(data);
+  const result = mapSubmission(data);
+  const submissionTitle = result.title?.trim();
+  logActivity("research-submitted", `Submitted research ${submissionTitle ? `“${submissionTitle}”` : "work"}.`, {
+    submissionId: result.id,
+    projectId: result.projectId,
+    submissionTitle: submissionTitle ?? undefined,
+  });
+
+  return result;
 }
 
 export async function listMySubmissions(

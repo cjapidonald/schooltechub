@@ -77,25 +77,74 @@ describe("lesson plan creation", () => {
 describe("lesson plan detail", () => {
   it("returns read-only plan when share access is viewer", async () => {
     stub.setResponses([
-      { data: { id: "plan-1", title: "Plan", share_access: "viewer" } },
+      {
+        data: {
+          id: "plan-1",
+          title: "Plan",
+          share_access: "viewer",
+          owner_id: "owner-1",
+        },
+      },
       { data: [{ id: "step-1", title: "Intro" }] },
     ]);
 
     const response = await detailHandler(
-      new Request("http://localhost/api/lesson-plans/plan-1")
+      new Request("http://localhost/api/lesson-plans/plan-1", {
+        headers: { Authorization: "Bearer token" },
+      })
     );
 
     const body = await response.json();
+    expect(response.status).toBe(200);
     expect(body.plan.readOnly).toBe(true);
     expect(body.steps).toHaveLength(1);
   });
 
+  it("requires authentication to view a plan", async () => {
+    const response = await detailHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1")
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when requesting a private plan owned by another user", async () => {
+    stub.setAuthResponses([
+      { data: { user: { id: "viewer-1" } }, error: null },
+    ]);
+    stub.setResponses([
+      { data: { id: "plan-1", share_access: "owner", owner_id: "owner-1" } },
+    ]);
+
+    const response = await detailHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1", {
+        headers: { Authorization: "Bearer token" },
+      })
+    );
+
+    expect(response.status).toBe(403);
+  });
+
   it("updates plan and snapshots activity resources", async () => {
     const responses: SupabaseResponse[] = [
-      { data: { id: "plan-1", share_access: "owner" } },
-      { data: { id: "plan-1", title: "Updated title", share_access: "owner" } },
+      { data: { id: "plan-1", share_access: "owner", owner_id: "teacher-1" } },
+      {
+        data: {
+          id: "plan-1",
+          title: "Updated title",
+          share_access: "owner",
+          owner_id: "teacher-1",
+        },
+      },
       { data: [] },
-      { data: { id: "plan-1", title: "Updated title", share_access: "owner" } },
+      {
+        data: {
+          id: "plan-1",
+          title: "Updated title",
+          share_access: "owner",
+          owner_id: "teacher-1",
+        },
+      },
       {
         data: [
           {
@@ -114,11 +163,15 @@ describe("lesson plan detail", () => {
         ],
       },
     ];
+    stub.setAuthResponses([
+      { data: { user: { id: "teacher-1" } }, error: null },
+    ]);
     stub.setResponses(responses);
 
     const response = await detailHandler(
       new Request("http://localhost/api/lesson-plans/plan-1", {
         method: "PATCH",
+        headers: { Authorization: "Bearer token" },
         body: JSON.stringify({
           plan: { title: "Updated title" },
           steps: [
@@ -154,10 +207,43 @@ describe("lesson plan detail", () => {
     expect(stepPayload.title).toBe("Activity Title");
     expect(stepPayload.duration_minutes).toBe(15);
   });
+
+  it("requires authentication to update a lesson plan", async () => {
+    const response = await detailHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1", {
+        method: "PATCH",
+        body: JSON.stringify({ plan: { title: "Updated" } }),
+      })
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when updating a plan without edit access", async () => {
+    stub.setAuthResponses([
+      { data: { user: { id: "teacher-1" } }, error: null },
+    ]);
+    stub.setResponses([
+      { data: { id: "plan-1", share_access: "viewer", owner_id: "teacher-2" } },
+    ]);
+
+    const response = await detailHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1", {
+        method: "PATCH",
+        headers: { Authorization: "Bearer token" },
+        body: JSON.stringify({ plan: { title: "Updated" } }),
+      })
+    );
+
+    expect(response.status).toBe(403);
+  });
 });
 
 describe("lesson plan duplication", () => {
   it("duplicates plan and steps", async () => {
+    stub.setAuthResponses([
+      { data: { user: { id: "teacher-1" } }, error: null },
+    ]);
     stub.setResponses([
       {
         data: {
@@ -165,6 +251,7 @@ describe("lesson plan duplication", () => {
           title: "Original",
           share_access: "owner",
           summary: "Summary",
+          owner_id: "teacher-1",
         },
       },
       {
@@ -178,7 +265,12 @@ describe("lesson plan duplication", () => {
         ],
       },
       {
-        data: { id: "plan-2", title: "Original (Copy)", share_access: "owner" },
+        data: {
+          id: "plan-2",
+          title: "Original (Copy)",
+          share_access: "owner",
+          owner_id: "teacher-1",
+        },
       },
       { data: [] },
     ]);
@@ -186,7 +278,8 @@ describe("lesson plan duplication", () => {
     const response = await duplicateHandler(
       new Request("http://localhost/api/lesson-plans/plan-1/duplicate", {
         method: "POST",
-        body: JSON.stringify({ userId: "teacher-1" }),
+        headers: { Authorization: "Bearer token" },
+        body: JSON.stringify({}),
       })
     );
 
@@ -199,6 +292,35 @@ describe("lesson plan duplication", () => {
       lesson_plan_id: "plan-2",
       title: "Intro",
     });
+  });
+
+  it("requires authentication to duplicate a lesson plan", async () => {
+    const response = await duplicateHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1/duplicate", {
+        method: "POST",
+      })
+    );
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 403 when duplicating a plan without editor access", async () => {
+    stub.setAuthResponses([
+      { data: { user: { id: "viewer-1" } }, error: null },
+    ]);
+    stub.setResponses([
+      { data: { id: "plan-1", share_access: "viewer", owner_id: "owner-1" } },
+    ]);
+
+    const response = await duplicateHandler(
+      new Request("http://localhost/api/lesson-plans/plan-1/duplicate", {
+        method: "POST",
+        headers: { Authorization: "Bearer token" },
+        body: JSON.stringify({}),
+      })
+    );
+
+    expect(response.status).toBe(403);
   });
 });
 

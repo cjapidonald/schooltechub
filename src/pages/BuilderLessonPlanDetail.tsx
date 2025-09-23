@@ -22,6 +22,9 @@ import {
   fetchLessonBuilderHistory,
   fetchLessonBuilderPlan,
 } from "@/lib/builder-api";
+import { logActivity } from "@/lib/activity-log";
+import { useMyClasses } from "@/hooks/useMyClasses";
+import { linkPlanToClass } from "@/lib/classes";
 import type {
   LessonBuilderPlan,
   LessonBuilderVersionEntry,
@@ -58,6 +61,9 @@ const BuilderLessonPlanDetail = () => {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [profileLogoUrl, setProfileLogoUrl] = useState<string | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
+  const [selectedClassId, setSelectedClassId] = useState<string | undefined>(undefined);
+  const [isLinkingClass, setIsLinkingClass] = useState(false);
 
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestPlan = useRef<LessonBuilderPlan | null>(null);
@@ -175,6 +181,12 @@ const BuilderLessonPlanDetail = () => {
       setPlan(updated);
       queryClient.setQueryData(["builder-plan", id], updated);
       queryClient.setQueryData(["builder-plan-history", id], updated.history);
+
+      const planTitle = updated.title?.trim();
+      logActivity("plan-saved", `Saved lesson plan ${planTitle ? `“${planTitle}”` : "updates"}.`, {
+        planId: updated.id,
+        planTitle: planTitle ?? undefined,
+      });
     },
   });
 
@@ -193,6 +205,47 @@ const BuilderLessonPlanDetail = () => {
       }, AUTOSAVE_DELAY);
     },
     [autosaveMutation]
+  );
+
+  const handleSelectClass = useCallback(
+    async (classId: string) => {
+      if (!plan) {
+        return;
+      }
+
+      setSelectedClassId(classId);
+      setIsLinkingClass(true);
+
+      const classTitle = classes.find(cls => cls.id === classId)?.title?.trim() ?? "";
+      const planTitle = plan.title?.trim() ?? "";
+      const planLabel = planTitle.length > 0 ? `“${planTitle}”` : "lesson plan";
+      const classLabel = classTitle.length > 0 ? `class “${classTitle}”` : "your class";
+
+      try {
+        await linkPlanToClass(plan.id, classId);
+        toast({
+          title: "Lesson linked",
+          description: `Added ${planLabel} to ${classLabel}.`,
+        });
+        logActivity("plan-saved", `Linked ${planLabel} to ${classLabel}.`, {
+          planId: plan.id,
+          planTitle: planTitle || undefined,
+          classId,
+          classTitle: classTitle || undefined,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to link lesson plan to the class.";
+        toast({
+          title: "Unable to link lesson",
+          description: message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLinkingClass(false);
+        setSelectedClassId(undefined);
+      }
+    },
+    [plan, classes, toast]
   );
 
   const updatePlan = useCallback(
@@ -415,6 +468,7 @@ const BuilderLessonPlanDetail = () => {
       noResourcesLabel: t.lessonPlans.modal.empty,
       errorLabel: t.lessonPlans.states.error,
       downloadLabel: t.lessonPlans.modal.download,
+      downloadDocxLabel: t.lessonPlans.modal.downloadDocx,
       openFullLabel: t.lessonPlans.modal.openFull,
       closeLabel: t.lessonPlans.modal.close,
       loadingLabel: t.lessonPlans.states.loading,
@@ -435,6 +489,12 @@ const BuilderLessonPlanDetail = () => {
           isSaving={false}
           onPreview={() => undefined}
           copy={t.lessonBuilder.toolbar}
+          classes={classes}
+          selectedClassId={selectedClassId}
+          isLoadingClasses={isLoadingClasses}
+          isLinkingClass={isLinkingClass}
+          classError={classesError ? classesError.message || "Unable to load classes." : null}
+          onSelectClass={handleSelectClass}
         />
         <Card>
           <CardContent className="flex items-center gap-3 p-6 text-muted-foreground">
@@ -471,6 +531,12 @@ const BuilderLessonPlanDetail = () => {
         isSaving={isSaving}
         onPreview={() => setIsPreviewOpen(true)}
         copy={t.lessonBuilder.toolbar}
+        classes={classes}
+        selectedClassId={selectedClassId}
+        isLoadingClasses={isLoadingClasses}
+        isLinkingClass={isLinkingClass}
+        classError={classesError ? classesError.message || "Unable to load classes." : null}
+        onSelectClass={handleSelectClass}
       />
       <div className="grid gap-6 lg:grid-cols-[280px,1fr]">
         <div className="space-y-6">

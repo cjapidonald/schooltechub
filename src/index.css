@@ -146,3 +146,43 @@ All colors MUST be HSL.
   position: relative;
   z-index: 1;
 }
+
+@keyframes nav-liquid {
+  0% {
+    transform: translate(-65%, -50%) scale(0.85);
+    opacity: 0;
+  }
+
+  45% {
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translate(65%, -50%) scale(1.05);
+    opacity: 0;
+  }
+}
+
+@media print {
+  body.printing-lesson-preview {
+    background: hsl(0 0% 100%) !important;
+    color: hsl(0 0% 0%);
+    margin: 0;
+  }
+
+  body.printing-lesson-preview * {
+    visibility: hidden !important;
+  }
+
+  body.printing-lesson-preview [data-print-section="lesson-preview"],
+  body.printing-lesson-preview [data-print-section="lesson-preview"] * {
+    visibility: visible !important;
+  }
+
+  body.printing-lesson-preview [data-print-section="lesson-preview"] {
+    position: static !important;
+    display: block !important;
+    overflow: visible !important;
+    max-width: none !important;
+  }
+}

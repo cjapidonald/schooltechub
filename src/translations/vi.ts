@@ -606,6 +606,7 @@ export const vi = {
       resourceLink: "Mở tài nguyên",
       empty: "Chi tiết bài học sẽ được cập nhật sớm.",
       download: "Tải PDF",
+      downloadDocx: "Tải DOCX",
       openFull: "Mở trang đầy đủ",
       close: "Đóng",
     },
@@ -895,6 +896,7 @@ export const vi = {
     followUs: "Theo dõi chúng tôi",
     newsletter: "Bản tin",
     newsletterText: "Đăng ký để nhận các cập nhật mới nhất",
+    emailLabel: "Địa chỉ email nhận bản tin",
     emailPlaceholder: "Email của bạn",
     subscribe: "Đăng ký",
     subscribing: "Đang đăng ký...",
@@ -1283,6 +1285,19 @@ export const vi = {
       changeButton: "Thay đổi ảnh",
       uploadButton: "Lưu ảnh đại diện"
     },
+    school: {
+      title: "Thông tin trường học",
+      description: "Chia sẻ thông tin trường của bạn để cá nhân hóa bản xem trước và tài liệu bài học.",
+      nameLabel: "Tên trường",
+      namePlaceholder: "vd. Trường Tiểu học Trần Phú",
+      logoLabel: "Logo trường",
+      logoAlt: "Logo trường",
+      logoPlaceholder: "Chưa có logo",
+      logoHelp: "Tải hình vuông dưới 1MB để đạt kết quả tốt nhất.",
+      uploadButton: "Chọn hình ảnh",
+      removeButton: "Xóa logo",
+      restoreButton: "Khôi phục logo"
+    },
     actions: {
       backToHome: "Quay về trang chủ"
     },
@@ -1322,7 +1337,15 @@ export const vi = {
         system: "Theo hệ thống",
         light: "Sáng",
         dark: "Tối"
-      }
+      },
+      saveButton: "Lưu tùy chọn"
+    },
+    security: {
+      title: "Mật khẩu",
+      description: "Cập nhật mật khẩu để bảo vệ tài khoản của bạn.",
+      newPasswordLabel: "Mật khẩu mới",
+      confirmPasswordLabel: "Xác nhận mật khẩu",
+      submitButton: "Cập nhật mật khẩu"
     },
     notifications: {
       title: "Thông báo",
@@ -1467,6 +1490,7 @@ export const vi = {
       readPost: "Mở bài viết"
     },
     toast: {
+      schoolInfoSaved: "Đã lưu thông tin trường học",
       profileUpdated: "Đã cập nhật hồ sơ",
       passwordMismatch: "Mật khẩu nhập lại chưa khớp",
       passwordLength: "Mật khẩu cần ít nhất 8 ký tự.",

@@ -40,3 +40,54 @@ export interface Resource {
   /** Indicates whether the resource is currently visible to users. */
   is_active: boolean;
 }
+
+/**
+ * Resource card used in account/user resources
+ */
+export interface ResourceCard {
+  id: string;
+  title: string;
+  description: string | null;
+  url: string | null;
+  tags: string[];
+  resourceType: string | null;
+  subject: string | null;
+  gradeLevel: string | null;
+  format: string | null;
+  instructionalNotes: string | null;
+  creatorId: string | null;
+  creatorName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Resource record from database
+ */
+export interface ResourceRecord {
+  id: string;
+  title: string;
+  url: string | null;
+  description: string | null;
+  tags: string[] | null;
+  resource_type: string | null;
+  subject: string | null;
+  grade_level: string | null;
+  format: string | null;
+  instructional_notes: string | null;
+  creator_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Resource list response
+ */
+export interface ResourceListResponse {
+  items: ResourceCard[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+  nextPage: number | null;
+}

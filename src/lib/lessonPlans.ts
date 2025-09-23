@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LessonPlan, LessonStep } from "@/types/platform";
+import { logActivity } from "@/lib/activity-log";
 
 const LESSON_PLAN_SELECT = "*";
 const LESSON_STEP_SELECT = "*";
@@ -47,6 +48,15 @@ export interface LessonPlanDraft {
 export interface LessonPlanWithSteps {
   plan: LessonPlan;
   steps: LessonStep[];
+}
+
+export interface UpcomingLessonPlanSummary {
+  id: string;
+  classId: string;
+  classTitle: string;
+  lessonPlanId: string;
+  lessonTitle: string;
+  date: string | null;
 }
 
 async function requireUserId(client: Client, action: string): Promise<string> {
@@ -166,6 +176,75 @@ function mapLessonStep(record: Record<string, any>): LessonStep {
   } satisfies LessonStep;
 }
 
+function normaliseMetaString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function cloneMeta(meta: Record<string, unknown> | null | undefined): Record<string, unknown> {
+  if (!meta || typeof meta !== "object") {
+    return {};
+  }
+
+  return { ...(meta as Record<string, unknown>) };
+}
+
+async function applyMetaDefaults(
+  meta: Record<string, unknown> | null | undefined,
+  client: Client,
+  userId: string,
+): Promise<Record<string, unknown> | undefined> {
+  const draftMeta = cloneMeta(meta);
+
+  const existingSchoolName = normaliseMetaString(draftMeta.school_name);
+  const existingSchoolLogo = normaliseMetaString(draftMeta.school_logo_url);
+
+  if (existingSchoolName) {
+    draftMeta.school_name = existingSchoolName;
+  } else {
+    delete draftMeta.school_name;
+  }
+
+  if (existingSchoolLogo) {
+    draftMeta.school_logo_url = existingSchoolLogo;
+  } else {
+    delete draftMeta.school_logo_url;
+  }
+
+  const needsSchoolName = !existingSchoolName;
+  const needsSchoolLogo = !existingSchoolLogo;
+
+  if (needsSchoolName || needsSchoolLogo) {
+    const { data, error } = await client
+      .from("profiles")
+      .select("school_name, school_logo_url")
+      .eq("id", userId)
+      .maybeSingle<{ school_name: string | null; school_logo_url: string | null }>();
+
+    if (!error && data) {
+      if (needsSchoolName) {
+        const profileSchoolName = normaliseMetaString(data.school_name);
+        if (profileSchoolName) {
+          draftMeta.school_name = profileSchoolName;
+        }
+      }
+
+      if (needsSchoolLogo) {
+        const profileSchoolLogo = normaliseMetaString(data.school_logo_url);
+        if (profileSchoolLogo) {
+          draftMeta.school_logo_url = profileSchoolLogo;
+        }
+      }
+    }
+  }
+
+  return Object.keys(draftMeta).length > 0 ? draftMeta : undefined;
+}
+
 function buildPlanPayload(
   draft: LessonPlanDraft,
   ownerId?: string,
@@ -222,7 +301,16 @@ export async function saveDraft(
   client: Client = supabase,
 ): Promise<LessonPlanWithSteps> {
   const userId = await requireUserId(client, "save lesson plans");
-  const payload = buildPlanPayload(draft, draft.id ? undefined : userId);
+  let draftWithMeta = draft;
+
+  if (!draft.id) {
+    const populatedMeta = await applyMetaDefaults(draft.meta, client, userId);
+    if (populatedMeta !== undefined) {
+      draftWithMeta = { ...draft, meta: populatedMeta };
+    }
+  }
+
+  const payload = buildPlanPayload(draftWithMeta, draft.id ? undefined : userId);
 
   let planId = draft.id ?? null;
 
@@ -274,6 +362,12 @@ export async function saveDraft(
     throw new LessonPlanDataError("Lesson plan could not be reloaded after saving.");
   }
 
+  const planTitle = result.plan.title?.trim();
+  logActivity("plan-saved", `Saved lesson plan ${planTitle ? `“${planTitle}”` : "updates"}.`, {
+    planId: result.plan.id,
+    planTitle: planTitle ?? undefined,
+  });
+
   return result;
 }
 
@@ -293,6 +387,74 @@ export async function getMyPlans(
   }
 
   return Array.isArray(data) ? data.map(mapLessonPlan) : [];
+}
+
+export async function listUpcomingLessonPlans(
+  limit = 5,
+  client: Client = supabase,
+): Promise<UpcomingLessonPlanSummary[]> {
+  await requireUserId(client, "view upcoming lesson plans");
+
+  const today = new Date().toISOString().slice(0, 10);
+  const requestedLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 5;
+  const safeLimit = Math.min(Math.max(requestedLimit, 1), 20);
+
+  const { data, error } = await client
+    .from("class_lesson_plans")
+    .select(
+      `
+        id,
+        class_id,
+        lesson_plan_id,
+        lesson_plans!inner (
+          id,
+          title,
+          date
+        ),
+        classes!inner (
+          id,
+          title
+        )
+      `,
+    )
+    .gte("lesson_plans.date", today)
+    .order("date", { ascending: true, nullsFirst: false, foreignTable: "lesson_plans" })
+    .limit(safeLimit);
+
+  if (error) {
+    throw new LessonPlanDataError("Failed to load upcoming lesson plans.", { cause: error });
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data.map(record => {
+    const lessonPlan = (record as Record<string, any>).lesson_plans ?? null;
+    const classRecord = (record as Record<string, any>).classes ?? null;
+
+    const lessonTitle =
+      lessonPlan && typeof lessonPlan.title === "string" && lessonPlan.title.trim().length > 0
+        ? lessonPlan.title.trim()
+        : "Untitled lesson";
+    const classTitle =
+      classRecord && typeof classRecord.title === "string" && classRecord.title.trim().length > 0
+        ? classRecord.title.trim()
+        : "Untitled class";
+
+    const rawDate = lessonPlan?.date;
+    const formattedDate =
+      typeof rawDate === "string" && rawDate.trim().length > 0 ? rawDate.trim() : null;
+
+    return {
+      id: String(record.id ?? ""),
+      classId: String(record.class_id ?? classRecord?.id ?? ""),
+      lessonPlanId: String(record.lesson_plan_id ?? lessonPlan?.id ?? ""),
+      classTitle,
+      lessonTitle,
+      date: formattedDate,
+    } satisfies UpcomingLessonPlanSummary;
+  });
 }
 
 export async function getPlanWithSteps(
