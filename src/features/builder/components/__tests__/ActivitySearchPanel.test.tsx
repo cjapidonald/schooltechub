@@ -138,9 +138,11 @@ describe("ActivitySearchPanel favorites", () => {
 
   it("removes an activity from the favorites tab immediately after unfavoriting", async () => {
     mocks.fetchActivities.mockResolvedValue([sampleActivity, anotherActivity]);
-    mocks.fetchFavorites.mockResolvedValue([
-      { summary: anotherActivity, createdAt: "2024-01-01T00:00:00.000Z" },
-    ]);
+    mocks.fetchFavorites
+      .mockResolvedValueOnce([
+        { summary: anotherActivity, createdAt: "2024-01-01T00:00:00.000Z" },
+      ])
+      .mockResolvedValueOnce([]);
     mocks.toggleFavorite.mockResolvedValue(false);
 
     render(<ActivitySearchPanel activeActivitySlug={null} onSelectActivity={vi.fn()} />);
@@ -159,6 +161,10 @@ describe("ActivitySearchPanel favorites", () => {
 
     await waitFor(() => {
       expect(within(favoritesPanel).queryByText(anotherActivity.name)).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(mocks.fetchFavorites).toHaveBeenCalledTimes(2);
     });
   });
 });
