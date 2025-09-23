@@ -1323,7 +1323,15 @@ export const vi = {
         system: "Theo hệ thống",
         light: "Sáng",
         dark: "Tối"
-      }
+      },
+      saveButton: "Lưu tùy chọn"
+    },
+    security: {
+      title: "Mật khẩu",
+      description: "Cập nhật mật khẩu để bảo vệ tài khoản của bạn.",
+      newPasswordLabel: "Mật khẩu mới",
+      confirmPasswordLabel: "Xác nhận mật khẩu",
+      submitButton: "Cập nhật mật khẩu"
     },
     notifications: {
       title: "Thông báo",

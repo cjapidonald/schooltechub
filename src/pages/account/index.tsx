@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { SettingsPanel } from "./components/SettingsPanel";
 
 const dashboardTabs = [
   { value: "overview", label: "Overview" },
@@ -137,17 +138,7 @@ const AccountDashboard = () => {
             )}
           </TabsContent>
           <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Manage your profile details, privacy preferences, and account configuration. This section will soon include
-                  interactive forms for updating your information.
-                </p>
-              </CardContent>
-            </Card>
+            <SettingsPanel user={user} />
           </TabsContent>
           <TabsContent value="classes">
             <Card>
