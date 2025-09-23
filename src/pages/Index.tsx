@@ -204,7 +204,7 @@ const Index = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Button>
               </Link>
-              <Link to={getLocalizedPath("/edutech", language)}>
+              <Link to={getLocalizedPath("/services", language)}>
                 <Button
                   size="lg"
                   variant="outline"
@@ -272,7 +272,7 @@ const Index = () => {
                 color: "secondary"
               }
             ].map((feature, index) => (
-              <Link to={getLocalizedPath("/edutech", language)} key={index} className="block">
+              <Link to={getLocalizedPath("/services", language)} key={index} className="block">
                 <Card
                   className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.2)] cursor-pointer h-full"
                 >

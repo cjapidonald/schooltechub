@@ -84,26 +84,26 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  to={getLocalizedPath("/edutech", language)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {t.nav.edutech}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to={getLocalizedPath("/teacher-diary", language)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {t.nav.teacherDiary}
-                </Link>
-              </li>
-              <li>
-                <Link
                   to={getLocalizedPath("/blog", language)}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   {t.nav.blog}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={getLocalizedPath("/events", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {t.nav.events}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to={getLocalizedPath("/builder", language)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {t.nav.builder}
                 </Link>
               </li>
               <li>

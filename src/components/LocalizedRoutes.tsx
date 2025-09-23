@@ -10,9 +10,6 @@ import Events from '@/pages/Events';
 import EventDetail from '@/pages/EventDetail';
 import Contact from '@/pages/Contact';
 import FAQ from '@/pages/FAQ';
-import Edutech from '@/pages/Edutech';
-import TeacherDiary from '@/pages/TeacherDiary';
-import TeacherDiaryEntry from '@/pages/TeacherDiaryEntry';
 import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
@@ -87,9 +84,6 @@ export const LocalizedRoutes = () => {
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
-      <Route path="/edutech" element={<RouteWrapper><Edutech /></RouteWrapper>} />
-      <Route path="/teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
-      <Route path="/teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route
         path="/account"
@@ -166,9 +160,6 @@ export const LocalizedRoutes = () => {
         <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
         <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
         <Route path="faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
-        <Route path="edutech" element={<RouteWrapper><Edutech /></RouteWrapper>} />
-        <Route path="teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
-        <Route path="teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
         <Route path="auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
         <Route
           path="account"
