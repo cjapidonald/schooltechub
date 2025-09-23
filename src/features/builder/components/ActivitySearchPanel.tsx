@@ -217,6 +217,23 @@ export const ActivitySearchPanel = ({ activeActivitySlug, onSelectActivity }: Ac
         }
         return next;
       });
+      setFavorites(prev => {
+        if (nextState) {
+          if (prev.some(item => item.summary.slug === activity.slug)) {
+            return prev.map(item =>
+              item.summary.slug === activity.slug ? { ...item, summary: activity } : item,
+            );
+          }
+          return [
+            {
+              summary: activity,
+              createdAt: new Date().toISOString(),
+            },
+            ...prev,
+          ];
+        }
+        return prev.filter(item => item.summary.slug !== activity.slug);
+      });
     } catch (error) {
       console.error("Unable to toggle favorite", error);
     }
