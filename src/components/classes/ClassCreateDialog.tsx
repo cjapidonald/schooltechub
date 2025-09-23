@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type ClassFormState = {
   title: string;
@@ -48,6 +49,7 @@ export interface ClassCreateDialogProps {
 
 export function ClassCreateDialog({ open, onOpenChange, onCreated }: ClassCreateDialogProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [formState, setFormState] = useState<ClassFormState>(initialFormState);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -79,8 +81,8 @@ export function ClassCreateDialog({ open, onOpenChange, onCreated }: ClassCreate
     },
     onSuccess: created => {
       toast({
-        title: "Class created",
-        description: `“${created.title}” has been added to your classes.`,
+        title: t.account.toast.classCreated,
+        description: t.account.toast.classCreatedDescription.replace("{title}", created.title),
       });
       setFormState(initialFormState);
       setFormError(null);

@@ -47,6 +47,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { BookOpen, Eye, Loader2, Plus } from "lucide-react";
 import { ClassLessonPlanViewer } from "@/components/classes/ClassLessonPlanViewer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const initialFormState = {
   title: "",
@@ -57,6 +58,7 @@ const initialFormState = {
 export const ClassManager = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formState, setFormState] = useState(initialFormState);
@@ -92,8 +94,8 @@ export const ClassManager = () => {
     },
     onSuccess: (createdClass) => {
       toast({
-        title: "Class created",
-        description: `“${createdClass.title}” is ready to use.`,
+        title: t.account.toast.classCreated,
+        description: t.account.toast.classCreatedDescription.replace("{title}", createdClass.title),
       });
       setIsDialogOpen(false);
       setFormState(initialFormState);

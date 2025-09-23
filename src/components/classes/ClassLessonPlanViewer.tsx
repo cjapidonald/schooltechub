@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, PlusCircle, RotateCcw, Unlink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AttachLessonPlanDialog } from "@/components/classes/AttachLessonPlanDialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const formatDateInputValue = (value: Date) => format(value, "yyyy-MM-dd");
 
@@ -53,6 +54,7 @@ export function ClassLessonPlanViewer({
   const [linkingPlanId, setLinkingPlanId] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const today = formatDateInputValue(new Date());
@@ -118,8 +120,8 @@ export function ClassLessonPlanViewer({
     },
     onSuccess: () => {
       toast({
-        title: "Lesson plan linked",
-        description: "The lesson plan is now attached to this class.",
+        title: t.account.toast.attachedToClass,
+        description: t.account.toast.attachedToClassDescription,
       });
       setIsAttachDialogOpen(false);
       void refetch();
