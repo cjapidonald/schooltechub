@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
-import { Plus } from "lucide-react";
+import {
+  Bell,
+  Bookmark,
+  Building2,
+  FlaskConical,
+  GraduationCap,
+  Plus,
+  Settings,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -40,6 +52,15 @@ const defaultCounts: TabCounts = {
   notifications: 5,
   savedPosts: 4,
   research: 1,
+};
+
+const summaryTabDetails: Record<NonOverviewTab, { icon: LucideIcon; label: string }> = {
+  settings: { icon: Settings, label: "Review your preferences" },
+  classes: { icon: GraduationCap, label: "Classes awaiting updates" },
+  lessonPlans: { icon: UserRound, label: "Lesson plans needing attention" },
+  notifications: { icon: Bell, label: "Notifications to review" },
+  savedPosts: { icon: Bookmark, label: "Saved posts to revisit" },
+  research: { icon: FlaskConical, label: "Research tasks pending" },
 };
 
 const loadingSkeleton = (
@@ -104,6 +125,20 @@ const AccountDashboard = () => {
     return <Navigate to={getLocalizedPath("/auth", language)} replace />;
   }
 
+  const avatarUrl =
+    typeof user.user_metadata?.avatar_url === "string" && user.user_metadata.avatar_url.trim().length > 0
+      ? user.user_metadata.avatar_url
+      : null;
+
+  const fallbackName = "Mr Donald";
+  const fullDisplayName =
+    profileFullName?.trim() ||
+    (typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "") ||
+    greetingName ||
+    fallbackName;
+  const welcomeDisplayName = fullDisplayName || fallbackName;
+  const primaryInitial = welcomeDisplayName.charAt(0).toUpperCase();
+
   return (
     <div className="min-h-screen bg-muted/10 pb-16">
       <SEO
@@ -112,30 +147,11 @@ const AccountDashboard = () => {
         canonicalUrl="https://schooltechhub.com/account"
       />
       <div className="container space-y-8 py-10">
-        <div className="space-y-1">
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">My Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {greetingName}.</p>
-          {schoolName || schoolLogoUrl ? (
-            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-background/80 p-3 sm:mt-3">
-              {schoolLogoUrl ? (
-                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-md border border-border/50 bg-white">
-                  <img
-                    src={schoolLogoUrl}
-                    alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-              ) : null}
-              {schoolName ? (
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {t.account.school.nameLabel}
-                  </p>
-                  <p className="text-sm font-semibold text-foreground">{schoolName}</p>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+          <p className="text-muted-foreground">
+            Here&apos;s a personalized snapshot of your SchoolTech Hub activity and upcoming lessons.
+          </p>
         </div>
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="flex w-full flex-wrap gap-2">
@@ -146,40 +162,120 @@ const AccountDashboard = () => {
             ))}
           </TabsList>
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 lg:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">At a glance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Review your latest activity across the SchoolTech Hub community.
-                  </p>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_1fr]">
+              <Card className="relative overflow-hidden border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)]">
+                <CardContent className="flex h-full flex-col justify-between gap-6 p-6">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-20 w-20 border-2 border-primary/40 shadow-[0_0_25px_hsl(var(--glow-primary)/0.35)]">
+                      {avatarUrl ? (
+                        <AvatarImage src={avatarUrl} alt={`${welcomeDisplayName} avatar`} />
+                      ) : (
+                        <AvatarFallback className="text-2xl font-semibold text-primary">
+                          {primaryInitial || "S"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                        Welcome back
+                      </p>
+                      <h2 className="text-2xl font-semibold text-foreground">{welcomeDisplayName}</h2>
+                      <p className="text-sm text-muted-foreground">
+                        We&apos;re glad to see you, {greetingName || fallbackName}.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.25)]">
+                        <Building2 className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />
+                      </span>
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {t.account.school.nameLabel}
+                        </p>
+                        <p className="text-sm font-medium text-foreground">
+                          {schoolName?.trim() || "Your school"}
+                        </p>
+                      </div>
+                    </div>
+                    {schoolLogoUrl ? (
+                      <div className="mt-4 flex items-center gap-3 rounded-md border border-border/50 bg-background/80 p-3">
+                        <div className="h-12 w-12 overflow-hidden rounded-md border border-primary/30 bg-white">
+                          <img
+                            src={schoolLogoUrl}
+                            alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
+                            className="h-full w-full object-contain"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-wide text-muted-foreground">Official logo</p>
+                          <p className="text-sm font-medium text-foreground">{schoolName?.trim() || "Your school"}</p>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
                 </CardContent>
               </Card>
-              <UpcomingLessonsCard isEnabled={Boolean(user)} />
-            </div>
-            {counts ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {summaryTabs.map(tab => (
-                  <Card key={tab.value}>
-                    <CardHeader>
-                      <CardTitle className="text-sm font-medium text-muted-foreground">{tab.label}</CardTitle>
+              <div className="space-y-6">
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
+                    <CardHeader className="flex flex-row items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <CardTitle className="text-xl font-semibold">At a glance</CardTitle>
+                        <CardDescription>
+                          Review your latest activity across the SchoolTech Hub community.
+                        </CardDescription>
+                      </div>
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_25px_hsl(var(--glow-primary)/0.2)]">
+                        <Sparkles className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />
+                      </span>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">{counts?.[tab.value] ?? 0}</div>
-                      <p className="text-sm text-muted-foreground">Items awaiting your attention</p>
+                      <p className="text-sm text-muted-foreground">
+                        Stay informed with a quick overview of what&apos;s new since your last visit.
+                      </p>
                     </CardContent>
                   </Card>
-                ))}
+                  <UpcomingLessonsCard isEnabled={Boolean(user)} />
+                </div>
+                {counts ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {summaryTabs.map(tab => {
+                      const details = summaryTabDetails[tab.value];
+                      const Icon = details.icon;
+
+                      return (
+                        <Card
+                          key={tab.value}
+                          className="border border-primary/20 bg-background/80 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] transition hover:border-primary/40 hover:shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)]"
+                        >
+                          <CardHeader className="flex flex-row items-start justify-between gap-4">
+                            <div className="space-y-1">
+                              <CardTitle className="text-sm font-medium text-muted-foreground">{tab.label}</CardTitle>
+                              <p className="text-xs text-muted-foreground">{details.label}</p>
+                            </div>
+                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.2)]">
+                              <Icon className="h-4 w-4 animate-pulse-glow" aria-hidden="true" />
+                            </span>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-3xl font-bold">{counts?.[tab.value] ?? 0}</div>
+                            <p className="text-sm text-muted-foreground">Items awaiting your attention</p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={index} className="h-24 animate-pulse rounded-md bg-muted/60" />
+                    ))}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="h-24 animate-pulse rounded-md bg-muted" />
-                ))}
-              </div>
-            )}
+            </div>
           </TabsContent>
           <TabsContent value="settings">
             <SettingsPanel user={user} />

@@ -1,21 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
-import { LessonDraftToolbar } from "@/components/lesson-draft/LessonDraftToolbar";
-import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
 import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -39,6 +32,8 @@ import {
   setActiveLessonDraftId,
   subscribeToResourceAttachments,
 } from "@/lib/lesson-draft-bridge";
+import { supabase } from "@/integrations/supabase/client";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
@@ -72,7 +67,7 @@ const LessonBuilderPage = () => {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [searchParams] = useSearchParams();
   const planParam = searchParams.get("id");
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
   const { classes, isLoading: areClassesLoading, error: classesError } = useMyClasses();
   const { toast } = useToast();
@@ -83,19 +78,54 @@ const LessonBuilderPage = () => {
   const [activeExport, setActiveExport] = useState<"pdf" | "docx" | null>(null);
   const [isLinkingToClass, setIsLinkingToClass] = useState(false);
   const [selectedClassForSave, setSelectedClassForSave] = useState<string | undefined>(undefined);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const draftId = useLessonDraftStore(state => state.draft.id);
   const steps = useLessonDraftStore(state => state.draft.steps);
   const attachResource = useLessonDraftStore(state => state.attachResource);
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
   const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
-  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
-  const stepSummaryLabel =
-    steps.length === 0 ? "No steps yet" : `${steps.length} step${steps.length === 1 ? "" : "s"}`;
+  const authPath = useMemo(() => getLocalizedPath("/auth", language), [language]);
 
   useEffect(() => {
     latestMeta.current = meta;
   }, [meta]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadSession = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!active) {
+          return;
+        }
+        setIsAuthenticated(Boolean(data.session));
+      } catch (error) {
+        if (active) {
+          console.error("Failed to check authentication status", error);
+          setIsAuthenticated(false);
+        }
+      }
+    };
+
+    void loadSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session));
+    });
+
+    return () => {
+      active = false;
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSelectedClassForSave(undefined);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     return () => {
@@ -108,6 +138,13 @@ const LessonBuilderPage = () => {
   }, []);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setPlanId(null);
+      setLastSavedAt(null);
+      skipNextAutosave.current = false;
+      return;
+    }
+
     let active = true;
 
     const initialise = async () => {
@@ -152,10 +189,10 @@ const LessonBuilderPage = () => {
     return () => {
       active = false;
     };
-  }, [planParam]);
+  }, [planParam, isAuthenticated]);
 
   useEffect(() => {
-    if (!planId) {
+    if (!planId || !isAuthenticated) {
       return;
     }
 
@@ -200,7 +237,7 @@ const LessonBuilderPage = () => {
         autosaveTimer.current = null;
       }
     };
-  }, [meta, planId]);
+  }, [meta, planId, isAuthenticated]);
 
   const metaFormValue = useMemo<LessonMetaFormValue>(
     () => ({
@@ -236,6 +273,14 @@ const LessonBuilderPage = () => {
   }, [meta.title]);
 
   const handleDownload = async (format: "pdf" | "docx") => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in to download",
+        description: "Create a free account to export this lesson plan as a PDF or DOCX.",
+      });
+      return;
+    }
+
     if (!planId) {
       toast({
         title: "Lesson not ready",
@@ -265,6 +310,15 @@ const LessonBuilderPage = () => {
   };
 
   const handleSaveToClass = async (classId: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Create a free account to save this lesson to one of your classes.",
+      });
+      setSelectedClassForSave(undefined);
+      return;
+    }
+
     if (!planId) {
       toast({
         title: "Lesson not ready",
@@ -362,26 +416,6 @@ const LessonBuilderPage = () => {
   }, [draftId]);
 
   useEffect(() => {
-    if (!isMobilePreviewOpen) {
-      return;
-    }
-
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsMobilePreviewOpen(false);
-      }
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isMobilePreviewOpen]);
-
-  useEffect(() => {
     if (!draftId) {
       return;
     }
@@ -455,88 +489,103 @@ const LessonBuilderPage = () => {
             ) : null}
           </div>
           <p className="text-base text-muted-foreground">
-            Draft lesson details, attach resources, and watch both previews update in real time.
+            Draft lesson details, attach resources, and keep everything organised from a single workspace.
           </p>
         </header>
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-background p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void handleDownload("pdf")}
-              disabled={Boolean(activeExport) || !planId || isLinkingToClass}
-            >
-              {activeExport === "pdf" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Download PDF
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void handleDownload("docx")}
-              disabled={Boolean(activeExport) || !planId || isLinkingToClass}
-            >
-              {activeExport === "docx" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Download DOCX
-            </Button>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Save to</span>
-            <Select
-              value={selectedClassForSave}
-              onValueChange={value => {
-                setSelectedClassForSave(value);
-                void handleSaveToClass(value);
-              }}
-              disabled={
-                isLinkingToClass ||
-                Boolean(activeExport) ||
-                !planId ||
-                areClassesLoading ||
-                Boolean(classesError) ||
-                classes.length === 0
-              }
-            >
-              <SelectTrigger className="w-[220px]">
-                <SelectValue
-                  placeholder={
-                    areClassesLoading
-                      ? "Loading classes..."
-                      : classesError
-                        ? "Unable to load classes"
-                        : classes.length === 0
-                          ? "No classes available"
-                          : "Select a class"
+        <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+          <div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-foreground">Save to a class</h2>
+              <p className="text-sm text-muted-foreground">
+                Link this lesson to one of your classes when you're ready to teach it.
+              </p>
+            </div>
+            {isAuthenticated ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Select
+                  value={selectedClassForSave}
+                  onValueChange={value => {
+                    setSelectedClassForSave(value);
+                  }}
+                  disabled={
+                    isLinkingToClass ||
+                    Boolean(activeExport) ||
+                    !planId ||
+                    areClassesLoading ||
+                    Boolean(classesError) ||
+                    classes.length === 0
                   }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {areClassesLoading ? (
-                  <SelectItem value="__loading" disabled>
-                    Loading classes...
-                  </SelectItem>
-                ) : classesError ? (
-                  <SelectItem value="__error" disabled>
-                    {classesError.message}
-                  </SelectItem>
-                ) : classes.length === 0 ? (
-                  <SelectItem value="__empty" disabled>
-                    No classes available
-                  </SelectItem>
-                ) : (
-                  classes.map(classItem => (
-                    <SelectItem key={classItem.id} value={classItem.id}>
-                      {classItem.title}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            {isLinkingToClass ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
+                >
+                  <SelectTrigger className="w-[220px]">
+                    <SelectValue
+                      placeholder={
+                        areClassesLoading
+                          ? "Loading classes..."
+                          : classesError
+                            ? classesError.message
+                            : classes.length === 0
+                              ? "No classes available"
+                              : "Select a class"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {areClassesLoading ? (
+                      <SelectItem value="__loading" disabled>
+                        Loading classes...
+                      </SelectItem>
+                    ) : classesError ? (
+                      <SelectItem value="__error" disabled>
+                        {classesError.message}
+                      </SelectItem>
+                    ) : classes.length === 0 ? (
+                      <SelectItem value="__empty" disabled>
+                        No classes available
+                      </SelectItem>
+                    ) : (
+                      classes.map(classItem => (
+                        <SelectItem key={classItem.id} value={classItem.id}>
+                          {classItem.title}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (selectedClassForSave) {
+                      void handleSaveToClass(selectedClassForSave);
+                    }
+                  }}
+                  disabled={!selectedClassForSave || isLinkingToClass}
+                >
+                  {isLinkingToClass ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Save lesson
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-start gap-3 text-left md:items-end md:text-right">
+                <p className="text-sm text-muted-foreground">
+                  Sign in to save this lesson to a class.
+                </p>
+                <Button type="button" asChild>
+                  <Link to={authPath}>Sign in</Link>
+                </Button>
+              </div>
+            )}
+            {isAuthenticated && classesError ? (
+              <p className="text-sm text-destructive">{classesError.message}</p>
+            ) : null}
+            {isAuthenticated && !areClassesLoading && !classesError && classes.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                You don't have any classes yet. Create one from your account dashboard to link this lesson.
+              </p>
+            ) : null}
           </div>
-        </div>
-
-        <LessonDraftToolbar />
+        </section>
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] lg:items-start">
           <div className="space-y-6">
@@ -584,7 +633,7 @@ const LessonBuilderPage = () => {
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">Lesson steps</h2>
                 <p className="text-sm text-muted-foreground">
-                  Outline each instructional moment, capture facilitation notes, and attach resources students will need.
+                  Add learning resources to each step so everything you need for class is in one place.
                 </p>
               </div>
               <StepEditor
@@ -605,6 +654,7 @@ const LessonBuilderPage = () => {
                 <LessonPreviewPane meta={meta} profile={previewProfile} classes={classes} />
               </div>
             </aside>
+codex/fix-preview-position-in-lesson-builder
 
             <div className="hidden lg:block">
               <div className="sticky top-6">
@@ -617,26 +667,49 @@ const LessonBuilderPage = () => {
         <div className="lg:hidden">
           <Collapsible open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
             <CollapsibleTrigger asChild>
-              <Button
-                variant="outline"
-                className="flex w-full items-center justify-between"
-                aria-expanded={isMobilePreviewOpen}
-                aria-controls="lesson-preview-collapsible"
-              >
-                <span>{isMobilePreviewOpen ? "Hide live preview" : "Show live preview"}</span>
-                <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {stepSummaryLabel}
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${isMobilePreviewOpen ? "rotate-180" : "rotate-0"}`}
-                  />
-                </span>
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent id="lesson-preview-collapsible" className="mt-4">
-              <LessonPreview />
-            </CollapsibleContent>
-          </Collapsible>
+
+          </div>
         </div>
+
+        <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+          <div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-foreground">Export your lesson</h2>
+              <p className="text-sm text-muted-foreground">
+                Download a copy of this plan to share or print.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+ main
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleDownload("pdf")}
+                disabled={!isAuthenticated || Boolean(activeExport) || !planId}
+              >
+                {activeExport === "pdf" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Download PDF
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleDownload("docx")}
+                disabled={!isAuthenticated || Boolean(activeExport) || !planId}
+              >
+                {activeExport === "docx" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Download DOCX
+              </Button>
+            </div>
+          </div>
+          {!isAuthenticated ? (
+            <div className="mt-4 rounded-lg border border-dashed border-border/60 bg-muted/30 p-4 text-sm text-muted-foreground">
+              <p>Sign in to download your lesson plan.</p>
+              <Button type="button" variant="secondary" className="mt-3" asChild>
+                <Link to={authPath}>Sign in</Link>
+              </Button>
+            </div>
+          ) : null}
+        </section>
       </main>
 
       <ResourceSearchModal

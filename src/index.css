@@ -147,6 +147,22 @@ All colors MUST be HSL.
   z-index: 1;
 }
 
+@keyframes nav-liquid {
+  0% {
+    transform: translate(-65%, -50%) scale(0.85);
+    opacity: 0;
+  }
+
+  45% {
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translate(65%, -50%) scale(1.05);
+    opacity: 0;
+  }
+}
+
 @media print {
   body.printing-lesson-preview {
     background: hsl(0 0% 100%) !important;
