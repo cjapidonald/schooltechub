@@ -100,7 +100,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  to={getLocalizedPath("/builder", language)}
+                  to={getLocalizedPath("/lesson-builder", language)}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   {t.nav.builder}
