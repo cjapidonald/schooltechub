@@ -15,6 +15,7 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { listMyClasses } from "@/lib/classes";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { UpcomingLessonsCard } from "./components/UpcomingLessonsCard";
 
 const dashboardTabs = [
   { value: "overview", label: "Overview" },
@@ -120,16 +121,19 @@ const AccountDashboard = () => {
             ))}
           </TabsList>
           <TabsContent value="overview" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">At a glance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Review your latest activity across the SchoolTech Hub community.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold">At a glance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Review your latest activity across the SchoolTech Hub community.
+                  </p>
+                </CardContent>
+              </Card>
+              <UpcomingLessonsCard isEnabled={Boolean(user)} />
+            </div>
             {counts ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {summaryTabs.map(tab => (
