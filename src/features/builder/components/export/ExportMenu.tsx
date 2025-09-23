@@ -1,4 +1,4 @@
-import { Download } from "lucide-react";
+import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,9 +16,10 @@ import { downloadText, generateStudentExport, generateTeacherExport } from "../.
 interface ExportMenuProps {
   state: BuilderState;
   linkLookup: Record<string, LinkHealthStatus>;
+  onPrint?: () => void;
 }
 
-export const ExportMenu = ({ state, linkLookup }: ExportMenuProps) => {
+export const ExportMenu = ({ state, linkLookup, onPrint }: ExportMenuProps) => {
   const handleTeacherExport = () => {
     const content = generateTeacherExport(state, linkLookup);
     downloadText(`${state.title || "lesson"}-teacher.txt`, content);
@@ -33,12 +34,15 @@ export const ExportMenu = ({ state, linkLookup }: ExportMenuProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="default" className="inline-flex items-center gap-2" data-testid="export-menu-trigger">
-          <Download className="h-4 w-4" />
-          Export
+          <Printer className="h-4 w-4" />
+          Print / Export
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56" data-testid="export-menu">
-        <DropdownMenuLabel>Export lesson</DropdownMenuLabel>
+        <DropdownMenuLabel>Print &amp; export</DropdownMenuLabel>
+        <DropdownMenuItem onSelect={() => onPrint?.()} data-testid="print-preview">
+          Print preview
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={handleTeacherExport} data-testid="export-teacher">
           Teacher planning file
