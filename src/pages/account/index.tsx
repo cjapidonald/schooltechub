@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Navigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { listMyClasses } from "@/lib/classes";
 import { SettingsPanel } from "./components/SettingsPanel";
 
 const dashboardTabs = [
@@ -47,7 +54,15 @@ const loadingSkeleton = (
 const AccountDashboard = () => {
   const { user, loading } = useRequireAuth();
   const { language } = useLanguage();
+  const queryClient = useQueryClient();
   const [counts, setCounts] = useState<TabCounts | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  const classesQuery = useQuery({
+    queryKey: ["my-classes"],
+    queryFn: () => listMyClasses(),
+    enabled: Boolean(user),
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -142,15 +157,109 @@ const AccountDashboard = () => {
           </TabsContent>
           <TabsContent value="classes">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">Classes</CardTitle>
+              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-xl font-semibold">Classes</CardTitle>
+                  <CardDescription>
+                    Track the classes you lead and keep their key details up to date.
+                  </CardDescription>
+                </div>
+                <Button className="w-full sm:w-auto" onClick={() => setIsCreateDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Class
+                </Button>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Track the classes you are part of and monitor upcoming sessions. Class rosters and schedules will appear here.
-                </p>
+                {classesQuery.isPending ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : classesQuery.isError ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>Unable to load classes</AlertTitle>
+                    <AlertDescription>
+                      {classesQuery.error instanceof Error
+                        ? classesQuery.error.message
+                        : "Please try again later."}
+                      <div className="mt-4">
+                        <Button variant="outline" onClick={() => classesQuery.refetch()} size="sm">
+                          Try again
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                ) : classesQuery.data && classesQuery.data.length > 0 ? (
+                  <div className="space-y-4">
+                    {classesQuery.data.map(classItem => (
+                      <div key={classItem.id} className="rounded-lg border bg-card p-4 shadow-sm">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <h3 className="text-base font-semibold text-foreground">{classItem.title}</h3>
+                            {classItem.summary && (
+                              <p className="mt-1 text-sm text-muted-foreground">{classItem.summary}</p>
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            <p>
+                              <span className="font-medium text-foreground">Starts:</span> {classItem.startDate ?? "—"}
+                            </p>
+                            <p>
+                              <span className="font-medium text-foreground">Ends:</span> {classItem.endDate ?? "—"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="mt-4 grid gap-3 text-sm md:grid-cols-2">
+                          <div>
+                            <p className="text-muted-foreground">Subject</p>
+                            <p className="font-medium text-foreground">{classItem.subject ?? "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Stage</p>
+                            <p className="font-medium text-foreground">{classItem.stage ?? "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Meeting schedule</p>
+                            <p className="font-medium text-foreground">{classItem.meetingSchedule ?? "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Max capacity</p>
+                            <p className="font-medium text-foreground">
+                              {typeof classItem.maxCapacity === "number" ? classItem.maxCapacity : "—"}
+                            </p>
+                          </div>
+                        </div>
+                        {classItem.meetingLink && (
+                          <p className="mt-4 text-sm">
+                            <a
+                              href={classItem.meetingLink}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="text-primary underline"
+                            >
+                              Join meeting
+                            </a>
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed bg-muted/50 p-8 text-center text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground">You haven't created any classes yet.</p>
+                    <p className="mt-2">Use the Add Class button above to get started.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
+            <ClassCreateDialog
+              open={isCreateDialogOpen}
+              onOpenChange={setIsCreateDialogOpen}
+              onCreated={() => {
+                queryClient.invalidateQueries({ queryKey: ["my-classes"] });
+              }}
+            />
           </TabsContent>
           <TabsContent value="lessonPlans">
             <Card>
