@@ -91,10 +91,46 @@ export const LocalizedRoutes = () => {
       <Route path="/teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
       <Route path="/teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
-      <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
-      <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
-      <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
-      <Route path="/account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
+      <Route
+        path="/account"
+        element={
+          <RouteWrapper>
+            <AuthGuard>
+              <Account />
+            </AuthGuard>
+          </RouteWrapper>
+        }
+      />
+      <Route
+        path="/account/resources"
+        element={
+          <RouteWrapper>
+            <AuthGuard>
+              <AccountResources />
+            </AuthGuard>
+          </RouteWrapper>
+        }
+      />
+      <Route
+        path="/account/resources/new"
+        element={
+          <RouteWrapper>
+            <AuthGuard>
+              <AccountResourceNew />
+            </AuthGuard>
+          </RouteWrapper>
+        }
+      />
+      <Route
+        path="/account/resources/:id"
+        element={
+          <RouteWrapper>
+            <AuthGuard>
+              <AccountResourceEdit />
+            </AuthGuard>
+          </RouteWrapper>
+        }
+      />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminPage />} />
@@ -134,10 +170,46 @@ export const LocalizedRoutes = () => {
         <Route path="teacher-diary" element={<RouteWrapper><TeacherDiary /></RouteWrapper>} />
         <Route path="teacher-diary/:slug" element={<RouteWrapper><TeacherDiaryEntry /></RouteWrapper>} />
         <Route path="auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
-        <Route path="account" element={<RouteWrapper><Account /></RouteWrapper>} />
-        <Route path="account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
-        <Route path="account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
-        <Route path="account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
+        <Route
+          path="account"
+          element={
+            <RouteWrapper>
+              <AuthGuard>
+                <Account />
+              </AuthGuard>
+            </RouteWrapper>
+          }
+        />
+        <Route
+          path="account/resources"
+          element={
+            <RouteWrapper>
+              <AuthGuard>
+                <AccountResources />
+              </AuthGuard>
+            </RouteWrapper>
+          }
+        />
+        <Route
+          path="account/resources/new"
+          element={
+            <RouteWrapper>
+              <AuthGuard>
+                <AccountResourceNew />
+              </AuthGuard>
+            </RouteWrapper>
+          }
+        />
+        <Route
+          path="account/resources/:id"
+          element={
+            <RouteWrapper>
+              <AuthGuard>
+                <AccountResourceEdit />
+              </AuthGuard>
+            </RouteWrapper>
+          }
+        />
         <Route path="sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       </Route>
       

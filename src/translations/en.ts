@@ -1476,6 +1476,11 @@ export const en = {
       readPost: "Open article"
     },
     toast: {
+      classCreated: "Class created",
+      classCreatedDescription: "“{title}” has been added to your classes.",
+      attachedToClass: "Attached to class",
+      attachedToClassDescription: "The lesson plan is now linked to this class.",
+      schoolInfoSaved: "School info saved",
       profileUpdated: "Profile updated",
       passwordMismatch: "Passwords must match",
       passwordLength: "Passwords need to be at least 8 characters.",
