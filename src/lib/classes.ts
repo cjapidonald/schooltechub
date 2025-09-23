@@ -3,6 +3,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Class, ClassStatus } from "@/types/platform";
 import { logActivity } from "@/lib/activity-log";
 
+// Re-export Class type so it can be imported from this module
+export type { Class, ClassStatus } from "@/types/platform";
+
 const CLASS_SELECT = "*";
 
 type Client = SupabaseClient;
