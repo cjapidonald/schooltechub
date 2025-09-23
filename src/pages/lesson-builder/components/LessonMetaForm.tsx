@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
@@ -17,10 +18,12 @@ import {
 import { useMyClasses } from "@/hooks/useMyClasses";
 import { SUBJECTS, type Subject } from "@/lib/constants/subjects";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const STORAGE_DATE_FORMAT = "yyyy-MM-dd";
 const DISPLAY_DATE_FORMAT = "PPP";
-const EMPTY_SUBJECT_VALUE = "__no_subject__";
+const NO_SUBJECT_VALUE = "__no_subject__";
 const EMPTY_CLASS_VALUE = "__no_class__";
 
 export interface LessonMetaFormValue {
@@ -53,6 +56,11 @@ function parseStoredDate(value: string | null): Date | undefined {
 export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: LessonMetaFormProps) {
   const [isDateOpen, setIsDateOpen] = useState(false);
   const { classes, isLoading, error } = useMyClasses();
+  const { language } = useLanguage();
+  const accountClassesPath = useMemo(
+    () => getLocalizedPath("/account?tab=classes", language),
+    [language],
+  );
 
   useEffect(() => {
     if (value.date) {
@@ -75,7 +83,7 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
   };
 
   const handleSubjectChange = (subjectValue: string) => {
-    const nextSubject = subjectValue === EMPTY_SUBJECT_VALUE ? null : (subjectValue as Subject);
+    const nextSubject = subjectValue === NO_SUBJECT_VALUE ? null : (subjectValue as Subject);
     onChange({ ...value, subject: nextSubject });
   };
 
@@ -121,12 +129,12 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="lesson-meta-subject">Subject</Label>
-          <Select value={value.subject ?? EMPTY_SUBJECT_VALUE} onValueChange={handleSubjectChange}>
+          <Select value={value.subject ?? undefined} onValueChange={handleSubjectChange}>
             <SelectTrigger id="lesson-meta-subject">
-              <SelectValue placeholder="Select a subject" />
+              <SelectValue placeholder="Choose a subject" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={EMPTY_SUBJECT_VALUE}>No subject</SelectItem>
+              <SelectItem value={NO_SUBJECT_VALUE}>No subject</SelectItem>
               {SUBJECTS.map(subject => (
                 <SelectItem key={subject} value={subject}>
                   {subject}
@@ -155,7 +163,16 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
             <p className="text-sm text-destructive">{error.message}</p>
           ) : null}
           {!isLoading && !error && classes.length === 0 ? (
-            <p className="text-sm text-muted-foreground">You haven't created any classes yet.</p>
+            <p className="text-sm text-muted-foreground">
+              You haven't created any classes yet.{' '}
+              <Link
+                to={accountClassesPath}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Go to your account's Classes tab
+              </Link>{' '}
+              to create one.
+            </p>
           ) : null}
         </div>
       </div>
