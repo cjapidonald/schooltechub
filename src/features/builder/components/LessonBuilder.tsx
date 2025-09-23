@@ -21,7 +21,7 @@ import { BuilderCommandPalette } from "./command/BuilderCommandPalette";
 import { ExportMenu } from "./export/ExportMenu";
 import { LessonPreview } from "./LessonPreview";
 
-const BuilderShell = () => {
+export const BuilderShell = () => {
   const { state, setState, addStep, duplicateStep, removeStep, reorderSteps } = useBuilder();
   const [activeActivity, setActiveActivity] = useState<BuilderActivitySummary | null>(null);
   const [linkLookup, setLinkLookup] = useState<Record<string, LinkHealthStatus>>({});
@@ -114,6 +114,8 @@ const BuilderShell = () => {
   );
 
   useEffect(() => {
+    let cancelled = false;
+
     const urls = Array.from(
       new Set(
         state.steps
@@ -124,12 +126,22 @@ const BuilderShell = () => {
 
     if (!urls.length) {
       setLinkLookup({});
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     fetchLinkStatuses(urls)
-      .then(setLinkLookup)
+      .then(result => {
+        if (!cancelled) {
+          setLinkLookup(result);
+        }
+      })
       .catch(error => console.error("Failed to load link health", error));
+
+    return () => {
+      cancelled = true;
+    };
   }, [state.steps]);
 
   useAutosave(state, {

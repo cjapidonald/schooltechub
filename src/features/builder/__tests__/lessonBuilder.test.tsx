@@ -1,4 +1,4 @@
-import { cleanup, render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent, waitFor, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   describe,
@@ -10,9 +10,14 @@ import {
   afterEach,
   afterAll,
 } from "vitest";
+import { useEffect } from "react";
 
-import LessonBuilder from "@/features/builder/components/LessonBuilder";
+import LessonBuilder, { BuilderShell } from "@/features/builder/components/LessonBuilder";
+import { BuilderProvider, useBuilder } from "@/features/builder/context/BuilderContext";
+import { fetchLinkStatuses } from "@/features/builder/api/linkHealth";
 import type { BuilderActivitySummary } from "@/features/builder/types";
+import type { BuilderResourceLink, BuilderState } from "@/features/builder/types";
+import type { LinkHealthStatus } from "@/features/builder/api/linkHealth";
 
 const { sampleActivity } = vi.hoisted(() => {
   const activity: BuilderActivitySummary = {
@@ -231,5 +236,158 @@ describe("LessonBuilder UI", () => {
     expect(studentContent).not.toContain("Offline fallback");
 
     downloadSpy.mockRestore();
+  });
+
+  it("keeps the latest link lookup when resources update rapidly", async () => {
+    const fetchLinkStatusesMock = vi.mocked(fetchLinkStatuses);
+    const firstUrl = "https://example.com/resource-1";
+    const secondUrl = "https://example.com/resource-2";
+
+    let resolveFirst: (() => void) | undefined;
+    const staleLookup: Record<string, LinkHealthStatus> = {
+      [firstUrl]: {
+        url: firstUrl,
+        isHealthy: false,
+        statusCode: 500,
+        statusText: "Stale failure",
+        lastChecked: null,
+        lastError: "Server error",
+      },
+    };
+    const latestLookup: Record<string, LinkHealthStatus> = {
+      [firstUrl]: {
+        url: firstUrl,
+        isHealthy: true,
+        statusCode: 200,
+        statusText: "Recovered",
+        lastChecked: null,
+        lastError: null,
+      },
+      [secondUrl]: {
+        url: secondUrl,
+        isHealthy: false,
+        statusCode: 500,
+        statusText: "Latest failure",
+        lastChecked: null,
+        lastError: "Server error",
+      },
+    };
+
+    fetchLinkStatusesMock
+      .mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            resolveFirst = () => resolve(staleLookup);
+          }),
+      )
+      .mockImplementationOnce(() => Promise.resolve(latestLookup));
+
+    const firstResource: BuilderResourceLink = {
+      id: "res-1",
+      resourceId: "res-1",
+      title: "Resource 1",
+      url: firstUrl,
+      description: null,
+      tags: [],
+      resourceType: null,
+      subject: null,
+      gradeLevel: null,
+      format: null,
+      instructionalNotes: null,
+      creatorId: null,
+      creatorName: null,
+    };
+    const secondResource: BuilderResourceLink = {
+      id: "res-2",
+      resourceId: "res-2",
+      title: "Resource 2",
+      url: secondUrl,
+      description: null,
+      tags: [],
+      resourceType: null,
+      subject: null,
+      gradeLevel: null,
+      format: null,
+      instructionalNotes: null,
+      creatorId: null,
+      creatorName: null,
+    };
+
+    let updateState: ((updater: (prev: BuilderState) => BuilderState) => void) | undefined;
+    const StateDriver = ({
+      onReady,
+    }: {
+      onReady: (setter: (updater: (prev: BuilderState) => BuilderState) => void) => void;
+    }) => {
+      const { setState } = useBuilder();
+      useEffect(() => {
+        onReady(setState);
+      }, [onReady, setState]);
+      return null;
+    };
+
+    render(
+      <BuilderProvider>
+        <BuilderShell />
+        <StateDriver
+          onReady={setter => {
+            updateState = setter;
+          }}
+        />
+      </BuilderProvider>,
+    );
+
+    await waitFor(() => {
+      expect(typeof updateState).toBe("function");
+    });
+
+    act(() => {
+      updateState?.(prev => ({
+        ...prev,
+        steps: prev.steps.map((step, index) =>
+          index === 0
+            ? {
+                ...step,
+                resources: [firstResource],
+              }
+            : step,
+        ),
+      }));
+    });
+
+    act(() => {
+      updateState?.(prev => ({
+        ...prev,
+        steps: prev.steps.map((step, index) =>
+          index === 0
+            ? {
+                ...step,
+                resources: [firstResource, secondResource],
+              }
+            : step,
+        ),
+      }));
+    });
+
+    await waitFor(() => {
+      expect(fetchLinkStatusesMock).toHaveBeenCalledTimes(2);
+    });
+
+    const firstCard = await screen.findByTestId("resource-card-res-1");
+    const secondCard = await screen.findByTestId("resource-card-res-2");
+
+    await waitFor(() => {
+      expect(within(secondCard).queryByText("Check link")).toBeTruthy();
+    });
+    expect(within(firstCard).queryByText("Check link")).toBeNull();
+
+    act(() => {
+      resolveFirst?.();
+    });
+
+    await waitFor(() => {
+      expect(within(secondCard).queryByText("Check link")).toBeTruthy();
+    });
+    expect(within(firstCard).queryByText("Check link")).toBeNull();
   });
 });
