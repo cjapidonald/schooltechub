@@ -39,6 +39,24 @@ const formatPreviewDate = (value: string | null | undefined) => {
   }).format(target);
 };
 
+const renderRow = (label: string, value?: string | null) => {
+  const trimmedValue = value?.trim();
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  return (
+    <div
+      key={label}
+      className="grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm"
+    >
+      <dt className="font-medium text-slate-500">{label}</dt>
+      <dd className="text-slate-900">{trimmedValue}</dd>
+    </div>
+  );
+};
+
 export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneProps) {
   const teacherName = normalizeText(profile.fullName);
   const schoolName = normalizeText(profile.schoolName);
@@ -59,7 +77,9 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
     { label: "Subject", value: subject },
     { label: "Lesson", value: lessonTitle },
     { label: "Date", value: formatPreviewDate(meta.date) },
-  ].filter(row => Boolean(row.value));
+  ];
+  const summaryRowElements = summaryRows.map(row => renderRow(row.label, row.value));
+  const hasSummaryRows = summaryRowElements.some(row => row !== null);
 
   const showSchoolHeader = Boolean(schoolLogoUrl || schoolName);
 
@@ -81,19 +101,9 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
         </div>
       ) : null}
 
-      {summaryRows.length ? (
-        <dl className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          {summaryRows.map((row, index) => (
-            <div
-              key={row.label}
-              className={`grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm ${
-                index > 0 ? "border-t border-slate-200/80" : ""
-              }`}
-            >
-              <dt className="font-medium text-slate-500">{row.label}</dt>
-              <dd className="text-slate-900">{row.value}</dd>
-            </div>
-          ))}
+      {hasSummaryRows ? (
+        <dl className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-200/80">
+          {summaryRowElements}
         </dl>
       ) : null}
 
