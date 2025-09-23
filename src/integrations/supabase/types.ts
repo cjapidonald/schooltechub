@@ -806,6 +806,8 @@ export type Database = {
           full_name: string | null
           id: string
           role: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url: string | null
+          school_name: string | null
           updated_at: string | null
         }
         Insert: {
@@ -814,6 +816,8 @@ export type Database = {
           full_name?: string | null
           id: string
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
+          school_name?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -822,6 +826,8 @@ export type Database = {
           full_name?: string | null
           id?: string
           role?: Database["public"]["Enums"]["user_role_enum"] | null
+          school_logo_url?: string | null
+          school_name?: string | null
           updated_at?: string | null
         }
         Relationships: []
