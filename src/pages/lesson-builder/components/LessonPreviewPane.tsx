@@ -39,7 +39,7 @@ const formatPreviewDate = (value: string | null | undefined) => {
   }).format(target);
 };
 
-const renderRow = (label: string, value?: string | null) => {
+const renderRow = (label: string, value?: string | null, valueClassName = "") => {
   const trimmedValue = value?.trim();
 
   if (!trimmedValue) {
@@ -52,7 +52,7 @@ const renderRow = (label: string, value?: string | null) => {
       className="grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm"
     >
       <dt className="font-medium text-slate-500">{label}</dt>
-      <dd className="text-slate-900">{trimmedValue}</dd>
+      <dd className={`text-slate-900 ${valueClassName}`.trim()}>{trimmedValue}</dd>
     </div>
   );
 };
@@ -70,16 +70,23 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
     meta.classId ? classes.find(classItem => classItem.id === meta.classId)?.title : null,
   );
 
-  const summaryRows = [
+  const leftSummaryRows = [
     { label: "Teacher", value: teacherName },
-    { label: "Class", value: classTitle },
     { label: "School", value: schoolName },
-    { label: "Subject", value: subject },
     { label: "Lesson", value: lessonTitle },
     { label: "Date", value: formatPreviewDate(meta.date) },
   ];
-  const summaryRowElements = summaryRows.map(row => renderRow(row.label, row.value));
-  const hasSummaryRows = summaryRowElements.some(row => row !== null);
+  const rightSummaryRows = [
+    { label: "Class", value: classTitle },
+    { label: "Subject", value: subject },
+  ];
+
+  const leftSummaryElements = leftSummaryRows.map(row => renderRow(row.label, row.value));
+  const rightSummaryElements = rightSummaryRows.map(row =>
+    renderRow(row.label, row.value, "text-right")
+  );
+  const hasSummaryRows =
+    leftSummaryElements.some(row => row !== null) || rightSummaryElements.some(row => row !== null);
 
   const showSchoolHeader = Boolean(schoolLogoUrl || schoolName);
 
@@ -102,25 +109,19 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
       ) : null}
 
       {hasSummaryRows ? (
-        <dl className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm divide-y divide-slate-200/80">
-          {summaryRowElements}
-        </dl>
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="grid divide-y divide-slate-200/80 md:grid-cols-2 md:divide-x">
+            <dl className="divide-y divide-slate-200/80">
+              {leftSummaryElements}
+            </dl>
+            <dl className="divide-y divide-slate-200/80">
+              {rightSummaryElements}
+            </dl>
+          </div>
+        </div>
       ) : null}
 
-      <div className="space-y-4">
-        <section>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Learning Objective</h3>
-          {objective ? (
-            <p className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-200 bg-white/80 p-4 text-sm text-slate-800">
-              {objective}
-            </p>
-          ) : (
-            <p className="mt-2 rounded-lg border border-dashed border-slate-200 bg-white/60 p-4 text-sm text-slate-500">
-              Add a learning objective to highlight what students will achieve.
-            </p>
-          )}
-        </section>
-
+      <div className="grid gap-4 md:grid-cols-2">
         <section>
           <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Success Criteria</h3>
           {successCriteria ? (
@@ -130,6 +131,19 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
           ) : (
             <p className="mt-2 rounded-lg border border-dashed border-slate-200 bg-white/60 p-4 text-sm text-slate-500">
               Outline how students will demonstrate mastery in this lesson.
+            </p>
+          )}
+        </section>
+
+        <section>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Learning Objective</h3>
+          {objective ? (
+            <p className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-200 bg-white/80 p-4 text-sm text-slate-800">
+              {objective}
+            </p>
+          ) : (
+            <p className="mt-2 rounded-lg border border-dashed border-slate-200 bg-white/60 p-4 text-sm text-slate-500">
+              Add a learning objective to highlight what students will achieve.
             </p>
           )}
         </section>
