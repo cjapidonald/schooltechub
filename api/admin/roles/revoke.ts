@@ -64,3 +64,9 @@ export default async function handler(request: Request): Promise<Response> {
     details: {
       role: "admin",
       ...(resolvedEmail ? { email: resolvedEmail } : {}),
+    },
+    ...auditContext,
+  });
+
+  return jsonResponse({ success: true });
+}

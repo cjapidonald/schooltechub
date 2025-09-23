@@ -20,6 +20,7 @@ import Account from '@/pages/account';
 import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
 import AccountResourceEdit from '@/pages/AccountResourceEdit';
+import LessonBuilderPage from '@/pages/lesson-builder/LessonBuilderPage';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
@@ -70,6 +71,7 @@ export const LocalizedRoutes = () => {
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
+      <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
       <Route path="/resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
@@ -103,6 +105,7 @@ export const LocalizedRoutes = () => {
         <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="builder" element={<RouteWrapper><Builder /></RouteWrapper>} />
+        <Route path="lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
         <Route path="resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
         <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
         <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
