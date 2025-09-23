@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 import { useBuilder } from "../context/BuilderContext";
 import { isBlank } from "../utils/isBlank";
@@ -40,7 +41,11 @@ const collectUniqueValues = (values: string[], { omit }: { omit?: string[] } = {
   ).join(", ");
 };
 
-export const LessonPreview = () => {
+export type LessonPreviewProps = {
+  className?: string;
+};
+
+export const LessonPreview = ({ className }: LessonPreviewProps = {}) => {
   const { state } = useBuilder();
 
   const formattedDate = useMemo(() => formatDate(state.lessonDate), [state.lessonDate]);
@@ -85,7 +90,7 @@ export const LessonPreview = () => {
   const hasContent = showTitle || showObjective || showLogo || metadata.length > 0 || previewSteps.length > 0;
 
   return (
-    <Card className="border-border/70 bg-background">
+    <Card className={cn("border-border/70 bg-background", className)}>
       <CardHeader className="space-y-2">
         <CardTitle className="text-xl font-semibold">Live lesson preview</CardTitle>
         <p className="text-sm text-muted-foreground">
