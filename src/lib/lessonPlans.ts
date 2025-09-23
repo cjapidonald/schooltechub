@@ -167,6 +167,75 @@ function mapLessonStep(record: Record<string, any>): LessonStep {
   } satisfies LessonStep;
 }
 
+function normaliseMetaString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function cloneMeta(meta: Record<string, unknown> | null | undefined): Record<string, unknown> {
+  if (!meta || typeof meta !== "object") {
+    return {};
+  }
+
+  return { ...(meta as Record<string, unknown>) };
+}
+
+async function applyMetaDefaults(
+  meta: Record<string, unknown> | null | undefined,
+  client: Client,
+  userId: string,
+): Promise<Record<string, unknown> | undefined> {
+  const draftMeta = cloneMeta(meta);
+
+  const existingSchoolName = normaliseMetaString(draftMeta.school_name);
+  const existingSchoolLogo = normaliseMetaString(draftMeta.school_logo_url);
+
+  if (existingSchoolName) {
+    draftMeta.school_name = existingSchoolName;
+  } else {
+    delete draftMeta.school_name;
+  }
+
+  if (existingSchoolLogo) {
+    draftMeta.school_logo_url = existingSchoolLogo;
+  } else {
+    delete draftMeta.school_logo_url;
+  }
+
+  const needsSchoolName = !existingSchoolName;
+  const needsSchoolLogo = !existingSchoolLogo;
+
+  if (needsSchoolName || needsSchoolLogo) {
+    const { data, error } = await client
+      .from("profiles")
+      .select("school_name, school_logo_url")
+      .eq("id", userId)
+      .maybeSingle<{ school_name: string | null; school_logo_url: string | null }>();
+
+    if (!error && data) {
+      if (needsSchoolName) {
+        const profileSchoolName = normaliseMetaString(data.school_name);
+        if (profileSchoolName) {
+          draftMeta.school_name = profileSchoolName;
+        }
+      }
+
+      if (needsSchoolLogo) {
+        const profileSchoolLogo = normaliseMetaString(data.school_logo_url);
+        if (profileSchoolLogo) {
+          draftMeta.school_logo_url = profileSchoolLogo;
+        }
+      }
+    }
+  }
+
+  return Object.keys(draftMeta).length > 0 ? draftMeta : undefined;
+}
+
 function buildPlanPayload(
   draft: LessonPlanDraft,
   ownerId?: string,
@@ -223,7 +292,16 @@ export async function saveDraft(
   client: Client = supabase,
 ): Promise<LessonPlanWithSteps> {
   const userId = await requireUserId(client, "save lesson plans");
-  const payload = buildPlanPayload(draft, draft.id ? undefined : userId);
+  let draftWithMeta = draft;
+
+  if (!draft.id) {
+    const populatedMeta = await applyMetaDefaults(draft.meta, client, userId);
+    if (populatedMeta !== undefined) {
+      draftWithMeta = { ...draft, meta: populatedMeta };
+    }
+  }
+
+  const payload = buildPlanPayload(draftWithMeta, draft.id ? undefined : userId);
 
   let planId = draft.id ?? null;
 
