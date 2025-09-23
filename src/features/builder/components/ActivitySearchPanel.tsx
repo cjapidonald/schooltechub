@@ -189,20 +189,25 @@ export const ActivitySearchPanel = ({ activeActivitySlug, onSelectActivity }: Ac
     };
   }, [filterPayload]);
 
+  const refreshFavorites = useCallback(async () => {
+    try {
+      const result = await fetchFavorites();
+      setFavorites(result);
+      setFavoriteSlugs(new Set(result.map(item => item.summary.slug)));
+    } catch (error) {
+      console.error("Failed to fetch favorites", error);
+    }
+  }, []);
+
   useEffect(() => {
     if (tab === "recents") {
       fetchRecents().then(result => setRecents(result)).catch(err => console.error(err));
     } else if (tab === "favorites") {
-      fetchFavorites()
-        .then(result => {
-          setFavorites(result);
-          setFavoriteSlugs(new Set(result.map(item => item.summary.slug)));
-        })
-        .catch(err => console.error(err));
+      refreshFavorites();
     } else if (tab === "collections") {
       fetchCollections().then(result => setCollections(result)).catch(err => console.error(err));
     }
-  }, [tab]);
+  }, [tab, refreshFavorites]);
 
   const handleToggleFavorite = async (activity: BuilderActivitySummary) => {
     try {
@@ -234,6 +239,9 @@ export const ActivitySearchPanel = ({ activeActivitySlug, onSelectActivity }: Ac
         }
         return prev.filter(item => item.summary.slug !== activity.slug);
       });
+      if (tab === "favorites") {
+        await refreshFavorites();
+      }
     } catch (error) {
       console.error("Unable to toggle favorite", error);
     }
