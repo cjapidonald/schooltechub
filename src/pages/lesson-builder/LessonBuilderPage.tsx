@@ -1,11 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 
+import { SEO } from "@/components/SEO";
+import { LessonDraftToolbar } from "@/components/lesson-draft/LessonDraftToolbar";
+import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
+import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
+import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -21,6 +31,14 @@ import { useToast } from "@/hooks/use-toast";
 import { downloadPlanExport } from "@/lib/downloadPlanExport";
 import { linkPlanToClass } from "@/lib/classes";
 import { logActivity } from "@/lib/activity-log";
+import { useLessonDraftStore } from "@/stores/lessonDraft";
+import {
+  clearLessonDraftContext,
+  getStoredActiveStepId,
+  persistActiveStepId,
+  setActiveLessonDraftId,
+  subscribeToResourceAttachments,
+} from "@/lib/lesson-draft-bridge";
 
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
@@ -65,6 +83,15 @@ const LessonBuilderPage = () => {
   const [activeExport, setActiveExport] = useState<"pdf" | "docx" | null>(null);
   const [isLinkingToClass, setIsLinkingToClass] = useState(false);
   const [selectedClassForSave, setSelectedClassForSave] = useState<string | undefined>(undefined);
+  const draftId = useLessonDraftStore(state => state.draft.id);
+  const steps = useLessonDraftStore(state => state.draft.steps);
+  const attachResource = useLessonDraftStore(state => state.attachResource);
+  const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
+  const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
+  const [activeStepId, setActiveStepId] = useState<string | null>(null);
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
+  const stepSummaryLabel =
+    steps.length === 0 ? "No steps yet" : `${steps.length} step${steps.length === 1 ? "" : "s"}`;
 
   useEffect(() => {
     latestMeta.current = meta;
@@ -297,6 +324,19 @@ const LessonBuilderPage = () => {
     [fullName, schoolName, schoolLogoUrl],
   );
 
+  const handleRequestResourceSearch = useCallback((stepId: string) => {
+    setActiveStepId(stepId);
+    setResourceSearchStepId(stepId);
+    setIsResourceSearchOpen(true);
+  }, []);
+
+  const handleResourceDialogChange = useCallback((open: boolean) => {
+    setIsResourceSearchOpen(open);
+    if (!open) {
+      setResourceSearchStepId(null);
+    }
+  }, []);
+
   const savingCopy = t.lessonBuilder.toolbar;
   const lastSavedLabel = useMemo(() => {
     if (!lastSavedAt) {
@@ -310,12 +350,101 @@ const LessonBuilderPage = () => {
     }
   }, [lastSavedAt, savingCopy.lastSavedPrefix]);
 
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    setActiveLessonDraftId(draftId);
+    return () => {
+      clearLessonDraftContext(draftId);
+    };
+  }, [draftId]);
+
+  useEffect(() => {
+    if (!isMobilePreviewOpen) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobilePreviewOpen(false);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMobilePreviewOpen]);
+
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    setActiveStepId(prev => {
+      if (steps.length === 0) {
+        return prev === null ? prev : null;
+      }
+
+      if (prev && steps.some(step => step.id === prev)) {
+        return prev;
+      }
+
+      const stored = getStoredActiveStepId(draftId);
+      if (stored && steps.some(step => step.id === stored)) {
+        return stored;
+      }
+
+      return steps[0].id;
+    });
+  }, [draftId, steps]);
+
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    persistActiveStepId(draftId, activeStepId);
+  }, [draftId, activeStepId]);
+
+  useEffect(() => {
+    if (!draftId) {
+      return;
+    }
+
+    const unsubscribe = subscribeToResourceAttachments(({ draftId: targetDraftId, stepId, resourceId }) => {
+      if (targetDraftId !== draftId) {
+        return;
+      }
+
+      const state = useLessonDraftStore.getState();
+      const stepExists = state.draft.steps.some(step => step.id === stepId);
+      if (!stepExists) {
+        return;
+      }
+
+      attachResource(stepId, resourceId);
+      setActiveStepId(stepId);
+    });
+
+    return unsubscribe;
+  }, [attachResource, draftId]);
+
   return (
-    <main className="bg-slate-50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-semibold text-slate-900">Lesson Builder</h1>
-          <div className="mt-2 flex justify-center text-sm text-slate-600">
+    <div className="min-h-screen bg-muted/20 py-10">
+      <SEO
+        title="Lesson Builder"
+        description="Plan lesson logistics and craft each instructional step from a single workspace."
+      />
+      <main className="container mx-auto space-y-10 px-4">
+        <header className="mx-auto max-w-3xl space-y-3 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Lesson Builder</h1>
+          <div className="flex justify-center text-sm text-muted-foreground">
             {isSaving ? (
               <span className="inline-flex items-center gap-2" role="status">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -325,12 +454,12 @@ const LessonBuilderPage = () => {
               <span>{lastSavedLabel}</span>
             ) : null}
           </div>
-          <p className="mt-2 text-base text-slate-600">
-            Draft your lesson on the left and preview the experience on the right.
+          <p className="text-base text-muted-foreground">
+            Draft lesson details, attach resources, and watch both previews update in real time.
           </p>
-        </div>
+        </header>
 
-        <div className="mb-8 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-background p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
@@ -352,7 +481,7 @@ const LessonBuilderPage = () => {
             </Button>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-slate-700">Save to</span>
+            <span className="text-sm font-medium text-muted-foreground">Save to</span>
             <Select
               value={selectedClassForSave}
               onValueChange={value => {
@@ -403,63 +532,119 @@ const LessonBuilderPage = () => {
                 )}
               </SelectContent>
             </Select>
-            {isLinkingToClass ? <Loader2 className="h-4 w-4 animate-spin text-slate-500" /> : null}
+            {isLinkingToClass ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900">Lesson details</h2>
-                <p className="mt-3 text-sm text-slate-600">
-                  Adjust your lesson title, subject, class, and supporting details. Updates appear in the preview instantly.
+        <LessonDraftToolbar />
+
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] xl:items-start">
+          <div className="space-y-6">
+            <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+              <div className="space-y-8">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">Lesson details</h2>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Adjust your lesson title, subject, class, and supporting details. Updates appear in the preview instantly.
+                  </p>
+                </div>
+
+                <LessonMetaForm value={metaFormValue} onChange={handleMetaChange} />
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="lesson-objective" className="text-sm font-medium text-foreground">
+                      Learning objective
+                    </Label>
+                    <Textarea
+                      id="lesson-objective"
+                      rows={5}
+                      value={meta.objective}
+                      onChange={event => handleObjectiveChange(event.target.value)}
+                      placeholder="What knowledge or skills will students gain?"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lesson-success-criteria" className="text-sm font-medium text-foreground">
+                      Success criteria
+                    </Label>
+                    <Textarea
+                      id="lesson-success-criteria"
+                      rows={5}
+                      value={meta.successCriteria}
+                      onChange={event => handleSuccessCriteriaChange(event.target.value)}
+                      placeholder="How will students demonstrate mastery?"
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-6 rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+              <div className="space-y-2">
+                <h2 className="text-xl font-semibold text-foreground">Lesson steps</h2>
+                <p className="text-sm text-muted-foreground">
+                  Outline each instructional moment, capture facilitation notes, and attach resources students will need.
                 </p>
               </div>
+              <StepEditor
+                onRequestResourceSearch={handleRequestResourceSearch}
+                activeResourceStepId={resourceSearchStepId}
+                isResourceSearchOpen={isResourceSearchOpen}
+              />
+            </section>
+          </div>
 
-              <LessonMetaForm value={metaFormValue} onChange={handleMetaChange} />
+          <div className="space-y-6 xl:sticky xl:top-6">
+            <aside className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+              <h2 className="text-xl font-semibold text-foreground">Lesson overview preview</h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                This pane mirrors what teachers see. As you update details, the summary refreshes automatically.
+              </p>
+              <div className="mt-6">
+                <LessonPreviewPane meta={meta} profile={previewProfile} classes={classes} />
+              </div>
+            </aside>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="lesson-objective" className="text-sm font-medium text-slate-700">
-                    Learning objective
-                  </Label>
-                  <Textarea
-                    id="lesson-objective"
-                    rows={5}
-                    value={meta.objective}
-                    onChange={event => handleObjectiveChange(event.target.value)}
-                    placeholder="What knowledge or skills will students gain?"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lesson-success-criteria" className="text-sm font-medium text-slate-700">
-                    Success criteria
-                  </Label>
-                  <Textarea
-                    id="lesson-success-criteria"
-                    rows={5}
-                    value={meta.successCriteria}
-                    onChange={event => handleSuccessCriteriaChange(event.target.value)}
-                    placeholder="How will students demonstrate mastery?"
-                  />
-                </div>
+            <div className="hidden xl:block">
+              <div className="sticky top-6">
+                <LessonPreview />
               </div>
             </div>
-          </section>
-
-          <aside className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-24">
-            <h2 className="text-xl font-semibold text-slate-900">Preview</h2>
-            <p className="mt-3 text-sm text-slate-600">
-              This pane mirrors what teachers see. As you update details, the summary refreshes automatically.
-            </p>
-            <div className="mt-6">
-              <LessonPreviewPane meta={meta} profile={previewProfile} classes={classes} />
-            </div>
-          </aside>
+          </div>
         </div>
-      </div>
-    </main>
+
+        <div className="xl:hidden">
+          <Collapsible open={isMobilePreviewOpen} onOpenChange={setIsMobilePreviewOpen}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex w-full items-center justify-between"
+                aria-expanded={isMobilePreviewOpen}
+                aria-controls="lesson-preview-collapsible"
+              >
+                <span>{isMobilePreviewOpen ? "Hide live preview" : "Show live preview"}</span>
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  {stepSummaryLabel}
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${isMobilePreviewOpen ? "rotate-180" : "rotate-0"}`}
+                  />
+                </span>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent id="lesson-preview-collapsible" className="mt-4">
+              <LessonPreview />
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      </main>
+
+      <ResourceSearchModal
+        open={isResourceSearchOpen}
+        onOpenChange={handleResourceDialogChange}
+        activeStepId={resourceSearchStepId}
+      />
+    </div>
   );
 };
 

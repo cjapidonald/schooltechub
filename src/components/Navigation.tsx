@@ -40,7 +40,7 @@ const Navigation = () => {
   const navItems = [
     { name: t.nav.home, path: "/" },
     { name: t.nav.blog, path: "/blog" },
-    { name: t.nav.builder, path: "/builder" },
+    { name: t.nav.builder, path: "/lesson-builder" },
     { name: t.nav.events, path: "/events" },
     { name: t.nav.services, path: "/services" },
     { name: t.nav.about, path: "/about" },
