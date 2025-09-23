@@ -1323,7 +1323,15 @@ export const en = {
         system: "Match system",
         light: "Light",
         dark: "Dark"
-      }
+      },
+      saveButton: "Save preferences"
+    },
+    security: {
+      title: "Password",
+      description: "Update your password to keep your account secure.",
+      newPasswordLabel: "New password",
+      confirmPasswordLabel: "Confirm new password",
+      submitButton: "Update password"
     },
     notifications: {
       title: "Notifications",

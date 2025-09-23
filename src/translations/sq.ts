@@ -1323,7 +1323,15 @@ export const sq = {
         system: "Si sistemi",
         light: "E çelët",
         dark: "E errët"
-      }
+      },
+      saveButton: "Ruaj preferencat"
+    },
+    security: {
+      title: "Fjalëkalimi",
+      description: "Përditëso fjalëkalimin për të mbrojtur llogarinë tuaj.",
+      newPasswordLabel: "Fjalëkalimi i ri",
+      confirmPasswordLabel: "Konfirmo fjalëkalimin",
+      submitButton: "Përditëso fjalëkalimin"
     },
     notifications: {
       title: "Njoftimet",
