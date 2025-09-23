@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useMyProfile } from "@/hooks/useMyProfile";
 import { supabase } from "@/integrations/supabase/client";
 
 type ThemePreference = "system" | "light" | "dark";
@@ -72,6 +73,28 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const { toast } = useToast();
   const { t, language: activeLanguage, setLanguage } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const metadata = user.user_metadata as Record<string, unknown> | undefined;
+  const initialSchoolName =
+    typeof metadata?.school_name === "string" && metadata.school_name.trim().length > 0
+      ? metadata.school_name.trim()
+      : "";
+  const initialSchoolLogoUrl =
+    typeof metadata?.school_logo_url === "string" && metadata.school_logo_url.trim().length > 0
+      ? metadata.school_logo_url.trim()
+      : null;
+  const {
+    schoolName: profileSchoolName,
+    schoolLogoUrl: profileSchoolLogoUrl,
+    refresh: refreshProfile,
+    isLoading: isProfileLoading,
+  } = useMyProfile();
+  const [schoolName, setSchoolName] = useState<string>(initialSchoolName);
+  const [storedSchoolLogoUrl, setStoredSchoolLogoUrl] = useState<string | null>(initialSchoolLogoUrl);
+  const [schoolLogoFile, setSchoolLogoFile] = useState<File | null>(null);
+  const [schoolLogoPreviewUrl, setSchoolLogoPreviewUrl] = useState<string | null>(null);
+  const [isLogoRemoved, setIsLogoRemoved] = useState(false);
+  const [isSavingSchoolInfo, setIsSavingSchoolInfo] = useState(false);
+  const schoolLogoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(() =>
     getAvatarUrlFromMetadata(user.user_metadata as Record<string, unknown> | undefined)
@@ -125,12 +148,49 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   }, [user]);
 
   useEffect(() => {
+    if (isProfileLoading) {
+      return;
+    }
+
+    setSchoolName(previous => {
+      const next = profileSchoolName ?? "";
+      return previous === next ? previous : next;
+    });
+
+    setStoredSchoolLogoUrl(previous => {
+      const next = profileSchoolLogoUrl ?? null;
+      return previous === next ? previous : next;
+    });
+
+    setIsLogoRemoved(false);
+    setSchoolLogoFile(null);
+    setSchoolLogoPreviewUrl(previous => {
+      if (previous && previous.startsWith("blob:")) {
+        URL.revokeObjectURL(previous);
+      }
+      return null;
+    });
+
+    if (schoolLogoInputRef.current) {
+      schoolLogoInputRef.current.value = "";
+    }
+  }, [isProfileLoading, profileSchoolName, profileSchoolLogoUrl]);
+
+  useEffect(() => {
     return () => {
       if (avatarPreviewUrl && avatarPreviewUrl.startsWith("blob:")) {
         URL.revokeObjectURL(avatarPreviewUrl);
       }
     };
   }, [avatarPreviewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (schoolLogoPreviewUrl && schoolLogoPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(schoolLogoPreviewUrl);
+      }
+    };
+  }, [schoolLogoPreviewUrl]);
 
   const displayedAvatarUrl = avatarPreviewUrl ?? currentAvatarUrl ?? undefined;
   const avatarFallback = useMemo(() => {
@@ -139,6 +199,132 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     const source = fullName.trim() || email.trim();
     return source ? source.charAt(0).toUpperCase() : "?";
   }, [user]);
+  const displayedSchoolLogo = schoolLogoPreviewUrl ?? (isLogoRemoved ? null : storedSchoolLogoUrl);
+
+  const handleSchoolLogoFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (schoolLogoPreviewUrl && schoolLogoPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(schoolLogoPreviewUrl);
+    }
+
+    setSchoolLogoFile(file);
+    setSchoolLogoPreviewUrl(URL.createObjectURL(file));
+    setIsLogoRemoved(false);
+  };
+
+  const handleSchoolLogoToggle = () => {
+    if (schoolLogoPreviewUrl && schoolLogoPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(schoolLogoPreviewUrl);
+    }
+
+    if (schoolLogoPreviewUrl) {
+      setSchoolLogoPreviewUrl(null);
+      setSchoolLogoFile(null);
+      setIsLogoRemoved(!storedSchoolLogoUrl);
+    } else {
+      setIsLogoRemoved(previous => !previous);
+    }
+
+    if (schoolLogoInputRef.current) {
+      schoolLogoInputRef.current.value = "";
+    }
+  };
+
+  const handleSchoolInfoSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSavingSchoolInfo) {
+      return;
+    }
+
+    setIsSavingSchoolInfo(true);
+
+    try {
+      let nextLogoUrl = storedSchoolLogoUrl;
+
+      if (schoolLogoFile) {
+        const fileExtension = schoolLogoFile.name.split(".").pop();
+        const safeExtension = fileExtension ? fileExtension.toLowerCase() : "png";
+        const filePath = `${user.id}/school-logos/${createFileIdentifier()}.${safeExtension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("profile-images")
+          .upload(filePath, schoolLogoFile, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("profile-images").getPublicUrl(filePath);
+
+        nextLogoUrl = publicUrl;
+      } else if (isLogoRemoved) {
+        nextLogoUrl = null;
+      }
+
+      const trimmedSchoolName = schoolName.trim();
+      const normalizedSchoolName = trimmedSchoolName.length > 0 ? trimmedSchoolName : null;
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          { id: user.id, school_name: normalizedSchoolName, school_logo_url: nextLogoUrl },
+          { onConflict: "id" },
+        );
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          school_name: normalizedSchoolName,
+          school_logo_url: nextLogoUrl,
+        },
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      setSchoolName(normalizedSchoolName ?? "");
+      setStoredSchoolLogoUrl(nextLogoUrl ?? null);
+      setIsLogoRemoved(false);
+      setSchoolLogoFile(null);
+      setSchoolLogoPreviewUrl(previous => {
+        if (previous && previous.startsWith("blob:")) {
+          URL.revokeObjectURL(previous);
+        }
+        return null;
+      });
+      if (schoolLogoInputRef.current) {
+        schoolLogoInputRef.current.value = "";
+      }
+
+      toast({
+        title: t.account.toast.schoolInfoSaved,
+      });
+
+      void refreshProfile();
+    } catch (error) {
+      console.error("Failed to save school info", error);
+      toast({
+        variant: "destructive",
+        title: t.common.error,
+        description: t.common.tryAgain,
+      });
+    } finally {
+      setIsSavingSchoolInfo(false);
+    }
+  };
 
   const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -358,6 +544,84 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
             </div>
           </div>
         </CardContent>
+      </Card>
+
+      <Card>
+        <form onSubmit={handleSchoolInfoSubmit} className="space-y-0">
+          <CardHeader>
+            <CardTitle>{t.account.school.title}</CardTitle>
+            <CardDescription>{t.account.school.description}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="school-name">{t.account.school.nameLabel}</Label>
+              <Input
+                id="school-name"
+                value={schoolName}
+                onChange={event => setSchoolName(event.target.value)}
+                placeholder={t.account.school.namePlaceholder}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t.account.school.logoLabel}</Label>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border border-border/70 bg-muted/40">
+                  {displayedSchoolLogo ? (
+                    <img
+                      src={displayedSchoolLogo}
+                      alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <span className="px-2 text-center text-xs text-muted-foreground">
+                      {t.account.school.logoPlaceholder}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    ref={schoolLogoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleSchoolLogoFileChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => schoolLogoInputRef.current?.click()}
+                    disabled={isSavingSchoolInfo}
+                  >
+                    {t.account.school.uploadButton}
+                  </Button>
+                  {(storedSchoolLogoUrl || schoolLogoPreviewUrl || isLogoRemoved) ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={handleSchoolLogoToggle}
+                      disabled={isSavingSchoolInfo}
+                    >
+                      {isLogoRemoved ? t.account.school.restoreButton : t.account.school.removeButton}
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">{t.account.school.logoHelp}</p>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isSavingSchoolInfo}>
+              {isSavingSchoolInfo ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t.common.loading}
+                </>
+              ) : (
+                t.common.save
+              )}
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
 
       <Card>

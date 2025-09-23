@@ -1285,6 +1285,19 @@ export const vi = {
       changeButton: "Thay đổi ảnh",
       uploadButton: "Lưu ảnh đại diện"
     },
+    school: {
+      title: "Thông tin trường học",
+      description: "Chia sẻ thông tin trường của bạn để cá nhân hóa bản xem trước và tài liệu bài học.",
+      nameLabel: "Tên trường",
+      namePlaceholder: "vd. Trường Tiểu học Trần Phú",
+      logoLabel: "Logo trường",
+      logoAlt: "Logo trường",
+      logoPlaceholder: "Chưa có logo",
+      logoHelp: "Tải hình vuông dưới 1MB để đạt kết quả tốt nhất.",
+      uploadButton: "Chọn hình ảnh",
+      removeButton: "Xóa logo",
+      restoreButton: "Khôi phục logo"
+    },
     actions: {
       backToHome: "Quay về trang chủ"
     },
@@ -1477,6 +1490,7 @@ export const vi = {
       readPost: "Mở bài viết"
     },
     toast: {
+      schoolInfoSaved: "Đã lưu thông tin trường học",
       profileUpdated: "Đã cập nhật hồ sơ",
       passwordMismatch: "Mật khẩu nhập lại chưa khớp",
       passwordLength: "Mật khẩu cần ít nhất 8 ký tự.",

@@ -1285,6 +1285,19 @@ export const en = {
       changeButton: "Change avatar",
       uploadButton: "Save new avatar"
     },
+    school: {
+      title: "School information",
+      description: "Share your school's details to personalise lesson previews and exports.",
+      nameLabel: "School name",
+      namePlaceholder: "e.g. Riverside Elementary",
+      logoLabel: "School logo",
+      logoAlt: "School logo",
+      logoPlaceholder: "No logo yet",
+      logoHelp: "Use a square image under 1MB for the best results.",
+      uploadButton: "Choose image",
+      removeButton: "Remove logo",
+      restoreButton: "Restore logo"
+    },
     actions: {
       backToHome: "Back to homepage"
     },
