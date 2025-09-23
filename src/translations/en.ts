@@ -1267,6 +1267,20 @@ export const en = {
     },
     preview: {
       title: "Lesson preview",
+      summary: {
+        teacherLabel: "Teacher",
+        classLabel: "Class",
+        schoolLabel: "School",
+        subjectLabel: "Subject",
+        lessonLabel: "Lesson",
+        dateLabel: "Date",
+      },
+      sections: {
+        objectiveTitle: "Learning objective",
+        objectivePlaceholder: "Add a learning objective to highlight what students will achieve.",
+        successCriteriaTitle: "Success criteria",
+        successCriteriaPlaceholder: "Outline how students will demonstrate mastery in this lesson.",
+      },
     },
   },
   account: {

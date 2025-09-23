@@ -1267,6 +1267,20 @@ export const sq = {
     },
     preview: {
       title: "Pamje paraprake e planit",
+      summary: {
+        teacherLabel: "Mësuesi",
+        classLabel: "Klasa",
+        schoolLabel: "Shkolla",
+        subjectLabel: "Lënda",
+        lessonLabel: "Mësimi",
+        dateLabel: "Data",
+      },
+      sections: {
+        objectiveTitle: "Objektivi i të nxënit",
+        objectivePlaceholder: "Shtoni një objektiv të të nxënit për të theksuar çfarë do të arrijnë nxënësit.",
+        successCriteriaTitle: "Kriteret e suksesit",
+        successCriteriaPlaceholder: "Përshkruani si do të demonstrojnë nxënësit zotërimin në këtë mësim.",
+      },
     },
   },
   account: {

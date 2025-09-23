@@ -1,3 +1,8 @@
+import { format, isValid, parseISO } from "date-fns";
+import type { Locale } from "date-fns";
+import { enUS, sq, vi } from "date-fns/locale";
+
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { LessonPlanMetaDraft } from "../types";
 import type { MyClassSummary } from "@/hooks/useMyClasses";
 
@@ -19,24 +24,40 @@ const normalizeText = (value: string | null | undefined) => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-const formatPreviewDate = (value: string | null | undefined) => {
+const PREVIEW_DATE_FORMAT = "PPP";
+
+const LOCALE_MAP: Record<string, Locale> = {
+  en: enUS,
+  sq,
+  vi,
+};
+
+const formatPreviewDate = (
+  value: string | null | undefined,
+  locale: Locale,
+) => {
   const today = new Date();
-  if (!value) {
-    return new Intl.DateTimeFormat(undefined, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(today);
+  let target = today;
+
+  if (value) {
+    const isoCandidate = parseISO(value);
+
+    if (isValid(isoCandidate)) {
+      target = isoCandidate;
+    } else {
+      const fallbackCandidate = new Date(value);
+      if (isValid(fallbackCandidate)) {
+        target = fallbackCandidate;
+      }
+    }
   }
 
-  const parsed = new Date(value);
-  const target = Number.isNaN(parsed.getTime()) ? today : parsed;
-
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(target);
+  try {
+    return format(target, PREVIEW_DATE_FORMAT, { locale });
+  } catch (error) {
+    console.error("Failed to format preview date", error);
+    return format(today, PREVIEW_DATE_FORMAT, { locale });
+  }
 };
 
 const renderRow = (label: string, value?: string | null) => {
@@ -58,6 +79,11 @@ const renderRow = (label: string, value?: string | null) => {
 };
 
 export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneProps) {
+  const { t, language } = useLanguage();
+  const previewCopy = t.lessonBuilder.preview;
+  const metaCopy = t.lessonBuilder.meta;
+  const locale = LOCALE_MAP[language] ?? enUS;
+
   const teacherName = normalizeText(profile.fullName);
   const schoolName = normalizeText(profile.schoolName);
   const schoolLogoUrl = normalizeText(profile.schoolLogoUrl);
@@ -70,14 +96,18 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
     meta.classId ? classes.find(classItem => classItem.id === meta.classId)?.title : null,
   );
 
+  const summaryCopy = previewCopy.summary;
+  const sectionsCopy = previewCopy.sections;
+
   const summaryRows = [
-    { label: "Teacher", value: teacherName },
-    { label: "Class", value: classTitle },
-    { label: "School", value: schoolName },
-    { label: "Subject", value: subject },
-    { label: "Lesson", value: lessonTitle },
-    { label: "Date", value: formatPreviewDate(meta.date) },
-  ];
+    { label: summaryCopy.teacherLabel, value: teacherName },
+    { label: summaryCopy.classLabel, value: classTitle },
+    { label: summaryCopy.schoolLabel, value: schoolName },
+    { label: summaryCopy.subjectLabel, value: subject },
+    { label: summaryCopy.lessonLabel, value: lessonTitle },
+    { label: summaryCopy.dateLabel, value: formatPreviewDate(meta.date, locale) },
+  ].filter(row => Boolean(row.value));
+
   const summaryRowElements = summaryRows.map(row => renderRow(row.label, row.value));
   const hasSummaryRows = summaryRowElements.some(row => row !== null);
 
@@ -89,12 +119,14 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
         <div className="flex items-center gap-4">
           {schoolLogoUrl ? (
             <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
-              <img src={schoolLogoUrl} alt="School logo" className="h-full w-full object-contain" />
+              <img src={schoolLogoUrl} alt={metaCopy.logoAlt} className="h-full w-full object-contain" />
             </div>
           ) : null}
           {schoolName ? (
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">School</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                {summaryCopy.schoolLabel}
+              </p>
               <p className="text-lg font-semibold text-slate-900">{schoolName}</p>
             </div>
           ) : null}
@@ -109,27 +141,31 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
 
       <div className="space-y-4">
         <section>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Learning Objective</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            {sectionsCopy.objectiveTitle}
+          </h3>
           {objective ? (
             <p className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-200 bg-white/80 p-4 text-sm text-slate-800">
               {objective}
             </p>
           ) : (
             <p className="mt-2 rounded-lg border border-dashed border-slate-200 bg-white/60 p-4 text-sm text-slate-500">
-              Add a learning objective to highlight what students will achieve.
+              {sectionsCopy.objectivePlaceholder}
             </p>
           )}
         </section>
 
         <section>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Success Criteria</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            {sectionsCopy.successCriteriaTitle}
+          </h3>
           {successCriteria ? (
             <p className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-200 bg-white/80 p-4 text-sm text-slate-800">
               {successCriteria}
             </p>
           ) : (
             <p className="mt-2 rounded-lg border border-dashed border-slate-200 bg-white/60 p-4 text-sm text-slate-500">
-              Outline how students will demonstrate mastery in this lesson.
+              {sectionsCopy.successCriteriaPlaceholder}
             </p>
           )}
         </section>
