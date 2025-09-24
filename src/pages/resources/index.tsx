@@ -196,7 +196,7 @@ const MultiSelectFilter = ({ label, options, selected, onChange }: MultiSelectFi
             );
           })}
           {options.length === 0 ? (
-            <p className="px-2 py-4 text-sm text-muted-foreground">No options available.</p>
+            <p className="px-2 py-4 text-sm text-white">No options available.</p>
           ) : null}
         </div>
       </PopoverContent>
@@ -282,7 +282,7 @@ const ResourceCardView = ({
         </Button>
       ) : null}
       {resource.created_at ? (
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-white">
           Added {new Date(resource.created_at).toLocaleDateString()}
         </span>
       ) : null}
@@ -594,7 +594,7 @@ const ResourcesPage = () => {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="space-y-3">
                   <h1 className="text-3xl font-bold tracking-tight">Resource library</h1>
-                  <p className="text-muted-foreground">
+                  <p className="text-white">
                     Explore ready-to-use learning materials shared by the SchoolTechHub community. Use filters to match your
                     classroom needs.
                   </p>
@@ -607,11 +607,11 @@ const ResourcesPage = () => {
 
             <div className="space-y-4 rounded-3xl border bg-card p-6 shadow-sm">
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="resource-search">
+                <label className="text-xs font-semibold uppercase text-white" htmlFor="resource-search">
                   Search
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white" />
                   <Input
                     id="resource-search"
                     type="search"
@@ -647,7 +647,7 @@ const ResourcesPage = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase text-muted-foreground" htmlFor="resource-tags">
+                <label className="text-xs font-semibold uppercase text-white" htmlFor="resource-tags">
                   Tags
                 </label>
                 <Input
@@ -657,7 +657,7 @@ const ResourcesPage = () => {
                   onKeyDown={handleTagInputKeyDown}
                   placeholder="Add a tag and press enter"
                 />
-                <p className="text-xs text-muted-foreground">Resources must include at least one of the tags you add.</p>
+                <p className="text-xs text-white">Resources must include at least one of the tags you add.</p>
               </div>
 
               {filters.tags.length > 0 ? (
@@ -667,7 +667,7 @@ const ResourcesPage = () => {
                       <span>#{tag}</span>
                       <button
                         type="button"
-                        className="text-xs text-muted-foreground transition hover:text-foreground"
+                        className="text-xs text-white transition hover:text-primary"
                         onClick={() => removeTag(tag)}
                         aria-label={`Remove tag ${tag}`}
                       >
@@ -679,7 +679,7 @@ const ResourcesPage = () => {
               ) : null}
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase text-muted-foreground">Sort</label>
+                <label className="text-xs font-semibold uppercase text-white">Sort</label>
                 <Select value={sort} onValueChange={value => setSort(value as SortOption)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sort resources" />
@@ -709,7 +709,7 @@ const ResourcesPage = () => {
           <section className="space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
+                <p className="text-sm text-white" role="status" aria-live="polite">
                   Showing {sortedResources.length} resource{sortedResources.length === 1 ? "" : "s"}
                   {data?.pages?.[0]?.total ? ` of ${data.pages[0].total}` : ""}
                 </p>
@@ -778,7 +778,7 @@ const ResourcesPage = () => {
                 aria-live="polite"
               >
                 <p className="text-lg font-semibold">No resources match your filters yet.</p>
-                <p className="max-w-md text-sm text-muted-foreground">
+                <p className="max-w-md text-sm text-white">
                   Try removing some filters or searching for a different keyword to explore more of the library.
                 </p>
                 <Button type="button" variant="outline" onClick={clearFilters}>

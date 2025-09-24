@@ -41,7 +41,7 @@ const About = () => {
         <div className="container mx-auto">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">{t.about.hero.title}</h1>
-            <p className="text-xl text-muted-foreground">{t.about.hero.subtitle}</p>
+            <p className="text-xl text-white">{t.about.hero.subtitle}</p>
           </div>
         </div>
       </section>
@@ -52,7 +52,7 @@ const About = () => {
           <div className="max-w-3xl mx-auto">
             <Card className={cn("p-8 bg-gradient-to-br from-card to-primary/5", accentCardClass)}>
               <h2 className="text-2xl font-bold mb-6">{t.about.story.title}</h2>
-              <div className="space-y-4 text-muted-foreground">
+              <div className="space-y-4 text-white">
                 {storyParagraphs.map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
@@ -66,7 +66,7 @@ const About = () => {
                     className="w-48 h-48 rounded-lg object-cover shadow-lg md:w-64 md:h-64"
                   />
                   <div className="flex-1">
-                    <p className="text-muted-foreground leading-relaxed">{t.about.story.ceo.message}</p>
+                    <p className="text-white leading-relaxed">{t.about.story.ceo.message}</p>
                     {t.about.story.ceo.signature && (
                       <p className="font-semibold mt-4">{t.about.story.ceo.signature}</p>
                     )}
@@ -75,7 +75,7 @@ const About = () => {
               </div>
               <div className="mt-6 pt-6 border-t">
                 <h3 className="text-xl font-bold mb-4">{t.about.story.mission.title}</h3>
-                <p className="text-muted-foreground">{t.about.story.mission.description}</p>
+                <p className="text-white">{t.about.story.mission.description}</p>
               </div>
             </Card>
           </div>
@@ -93,7 +93,7 @@ const About = () => {
                   <item.icon className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
+                <p className="text-sm text-white">{item.description}</p>
               </Card>
             ))}
           </div>
@@ -107,7 +107,7 @@ const About = () => {
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <p className="text-4xl font-bold text-primary mb-2">{stat.number}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-sm text-white">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -149,7 +149,7 @@ const About = () => {
 
                 <div>
                   <h3 className="font-semibold mb-3">{t.about.credentials.partnerships.title}</h3>
-                  <p className="text-muted-foreground mb-4">{t.about.credentials.partnerships.description}</p>
+                  <p className="text-white mb-4">{t.about.credentials.partnerships.description}</p>
                   <Button variant="outline">
                     <Users className="mr-2 h-4 w-4" />
                     {t.about.credentials.partnerships.cta}
@@ -167,7 +167,7 @@ const About = () => {
             >
               <Award className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-2xl font-bold mb-4">{t.about.cta.title}</h3>
-              <p className="text-muted-foreground mb-6">{t.about.cta.description}</p>
+              <p className="text-white mb-6">{t.about.cta.description}</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to={getLocalizedPath("/services", language)}>
                   <Button size="lg">{t.about.cta.primary}</Button>
@@ -206,9 +206,9 @@ const About = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className={cn("p-6", accentCardClass)}>
-                <p className="text-muted-foreground mb-4 italic">“{testimonial.quote}”</p>
+                <p className="text-white mb-4 italic">“{testimonial.quote}”</p>
                 <p className="font-semibold">{testimonial.name}</p>
-                <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                <p className="text-sm text-white">{testimonial.role}</p>
               </Card>
             ))}
           </div>
@@ -223,7 +223,7 @@ const About = () => {
             {faqs.map((faq, index) => (
               <Card key={index} className={cn("p-6", accentCardClass)}>
                 <h3 className="font-semibold mb-2">{faq.question}</h3>
-                <p className="text-muted-foreground">{faq.answer}</p>
+                <p className="text-white">{faq.answer}</p>
               </Card>
             ))}
           </div>

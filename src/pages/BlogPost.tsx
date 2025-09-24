@@ -334,7 +334,7 @@ export default function BlogPost() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 text-center">
           <h1 className="text-2xl font-bold mb-4">{t.blogPost.notFound.title}</h1>
-          <p className="text-muted-foreground mb-6">{t.blogPost.notFound.description}</p>
+          <p className="text-white mb-6">{t.blogPost.notFound.description}</p>
           <Button onClick={() => navigate(getLocalizedPath("/blog", language))}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t.blogPost.backToBlog}
@@ -379,7 +379,7 @@ export default function BlogPost() {
                 <p className="font-medium text-sm">
                   {comment.profiles?.full_name || "Anonymous"}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white">
                   {format(new Date(comment.created_at), "MMM d, yyyy 'at' h:mm a")}
                 </p>
               </div>
@@ -508,10 +508,10 @@ export default function BlogPost() {
             <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
             
             {post.subtitle && (
-              <p className="text-xl text-muted-foreground mb-4">{post.subtitle}</p>
+              <p className="text-xl text-white mb-4">{post.subtitle}</p>
             )}
 
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-white">
               {(post.author || post.author_image || post.author_job_title) && (
                 <div className="flex items-center gap-2">
                   {post.author_image ? (
@@ -530,7 +530,7 @@ export default function BlogPost() {
                       {typeof post.author === 'object' ? (post.author as any).name : "SchoolTechHub Team"}
                     </span>
                     {post.author_job_title && (
-                      <span className="text-xs text-muted-foreground ml-2">• {post.author_job_title}</span>
+                      <span className="text-xs text-white ml-2">• {post.author_job_title}</span>
                     )}
                   </div>
                 </div>
@@ -599,7 +599,7 @@ export default function BlogPost() {
               </Card>
             ) : (
               <Card className="p-4 mb-6 text-center">
-                <p className="text-muted-foreground mb-4">
+                <p className="text-white mb-4">
                   {t.blogPost.loginPrompt}
                 </p>
                 <Button onClick={() => navigate(getLocalizedPath("/auth", language))}>
@@ -616,8 +616,8 @@ export default function BlogPost() {
               
               {comments.length === 0 && (
                 <Card className="p-8 text-center">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-white" />
+                  <p className="text-white">
                     {t.blogPost.emptyState}
                   </p>
                 </Card>

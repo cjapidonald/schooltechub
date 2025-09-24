@@ -338,7 +338,7 @@ const Blog = () => {
         <div className="container py-12">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">{t.blog.hero.title}</h1>
-            <p className="text-muted-foreground">{t.blog.hero.subtitle}</p>
+            <p className="text-white">{t.blog.hero.subtitle}</p>
           </div>
 
           <div className="grid lg:grid-cols-4 gap-8">
@@ -485,7 +485,7 @@ const Blog = () => {
             <div className="lg:col-span-3 space-y-8">
               {loading ? (
                 <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">{t.blog.states.loading}</p>
+                  <p className="text-white">{t.blog.states.loading}</p>
                 </div>
               ) : (
                 <>
@@ -520,7 +520,7 @@ const Blog = () => {
                                 </Badge>
                               ))}
                             </div>
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-white">
                               {featuredPost.published_at && (
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
@@ -544,7 +544,7 @@ const Blog = () => {
                             </Link>
                           </h2>
                           {featuredPost.subtitle && (
-                            <p className="text-muted-foreground">{featuredPost.subtitle}</p>
+                            <p className="text-white">{featuredPost.subtitle}</p>
                           )}
                         </div>
                       </div>
@@ -554,7 +554,7 @@ const Blog = () => {
                   {/* Blog Posts Grid */}
                   {blogPosts.length === 0 && !featuredPost ? (
                     <div className="text-center py-12">
-                      <p className="text-muted-foreground">{t.blog.states.empty}</p>
+                      <p className="text-white">{t.blog.states.empty}</p>
                     </div>
                   ) : (
                     <div className="grid gap-6">
@@ -586,7 +586,7 @@ const Blog = () => {
                                   </div>
                                 )}
 
-                                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-white">
                                   {post.published_at && (
                                     <div className="flex items-center gap-1">
                                       <Calendar className="h-4 w-4" />
@@ -609,7 +609,7 @@ const Blog = () => {
                               </h3>
 
                               {post.excerpt && (
-                                <p className="text-muted-foreground mb-4">{post.excerpt}</p>
+                                <p className="text-white mb-4">{post.excerpt}</p>
                               )}
 
                               {(post.author || post.author_image || post.author_job_title) && (
@@ -630,7 +630,7 @@ const Blog = () => {
                                       {typeof post.author === 'object' ? post.author.name : t.blog.author.default}
                                     </p>
                                     {post.author_job_title && (
-                                      <p className="text-muted-foreground">{post.author_job_title}</p>
+                                      <p className="text-white">{post.author_job_title}</p>
                                     )}
                                   </div>
                                 </div>
@@ -658,7 +658,7 @@ const Blog = () => {
                     </CardHeader>
                     <CardContent>
                       {t.blog.newsletter.description && (
-                        <p className="text-sm text-muted-foreground mb-4">
+                        <p className="text-sm text-white mb-4">
                           {t.blog.newsletter.description}
                         </p>
                       )}
