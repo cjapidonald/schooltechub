@@ -121,6 +121,9 @@ type ResourceCardViewProps = {
   addButtonTooltip?: string;
 };
 
+const resourceCardAccentClass =
+  "border-2 border-primary/40 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)] transition-colors duration-300 hover:border-primary/80";
+
 const useDebouncedValue = <T,>(value: T, delay = 300) => {
   const [debounced, setDebounced] = useState(value);
 
@@ -287,7 +290,7 @@ const ResourceCardView = ({
   );
 
   return (
-    <Card className="overflow-hidden border shadow-sm">
+    <Card className={cn("overflow-hidden", resourceCardAccentClass)}>
       <CardContent className={view === "list" ? "space-y-3 p-6" : "space-y-3 p-4"}>
         <LessonDraftResourceCard
           resource={resource}
