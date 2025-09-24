@@ -82,7 +82,7 @@ const FAQ = () => {
                 <HelpCircle className="h-8 w-8 text-primary" />
               </div>
               <h1 className="text-4xl font-bold mb-4">{t.faq.hero.title}</h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-white">
                 {t.faq.hero.subtitle}
               </p>
             </div>
@@ -91,7 +91,7 @@ const FAQ = () => {
               <div className="text-center py-8">{t.faq.loading}</div>
             ) : Object.keys(groupedFAQs).length === 0 ? (
               <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
+                <CardContent className="py-8 text-center text-white">
                   {t.faq.empty}
                 </CardContent>
               </Card>
@@ -124,7 +124,7 @@ const FAQ = () => {
             <Card className="mt-12">
               <CardContent className="py-6 text-center">
                 <h3 className="text-lg font-semibold mb-2">{t.faq.cta.title}</h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-white mb-4">
                   {t.faq.cta.subtitle}
                 </p>
                 <a

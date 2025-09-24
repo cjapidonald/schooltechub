@@ -61,7 +61,7 @@ const Services = () => {
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{pageContent.header.title}</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-white max-w-2xl mx-auto">
             {pageContent.header.subtitle}
           </p>
         </div>
@@ -86,13 +86,13 @@ const Services = () => {
                   <div className="flex items-baseline gap-2 mb-1">
                     <span className="text-3xl font-bold text-primary">{service.price}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 text-sm text-white">
                     <Clock className="h-4 w-4" />
                     <span>{service.duration}</span>
                   </div>
                 </div>
 
-                <p className="text-muted-foreground mb-6">{service.description}</p>
+                <p className="text-white mb-6">{service.description}</p>
 
                 <ul className="space-y-3 mb-6">
                   {service.features.map((feature, index) => (
@@ -125,7 +125,7 @@ const Services = () => {
           >
             <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
             <h3 className="text-2xl font-bold mb-4">{guarantee.title}</h3>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-white max-w-2xl mx-auto">
               {guarantee.description}
             </p>
           </Card>
@@ -161,7 +161,7 @@ const Services = () => {
                             <div>
                               <p className="font-medium">{item.title}</p>
                               {item.description && (
-                                <p className="text-sm text-muted-foreground">{item.description}</p>
+                                <p className="text-sm text-white">{item.description}</p>
                               )}
                             </div>
                           ) : (
@@ -186,7 +186,7 @@ const Services = () => {
             {faqs.items.map((faq, index) => (
               <Card key={index} className={cn("p-6", accentCardClass)}>
                 <h3 className="font-semibold mb-2">{faq.question}</h3>
-                <p className="text-muted-foreground">{faq.answer}</p>
+                <p className="text-white">{faq.answer}</p>
               </Card>
             ))}
           </div>
@@ -198,7 +198,7 @@ const Services = () => {
                 <Calendar className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <p className="text-sm text-muted-foreground mt-4">
+            <p className="text-sm text-white mt-4">
               {faqs.cta.note} <a className="underline" href={`mailto:${faqs.cta.email}`}>{faqs.cta.email}</a>
             </p>
           </div>

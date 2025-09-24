@@ -287,13 +287,13 @@ function TokenField({ label, placeholder, value, onChange, suggestions = [] }: T
         />
       </div>
       {suggestions.length > 0 && (
-        <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-wrap gap-2 text-sm text-primary">
           {suggestions.map(suggestion => (
             <button
               key={suggestion}
               type="button"
               onClick={() => handleAdd(suggestion)}
-              className="rounded-full border border-dashed border-input px-3 py-1 hover:border-primary hover:text-primary"
+              className="rounded-full border border-dashed border-primary/70 px-3 py-1 text-primary hover:border-primary hover:bg-primary/10"
             >
               {suggestion}
             </button>
@@ -319,14 +319,14 @@ function SuggestionInput({ label, placeholder, suggestions, value, onSelect, chi
       <Label>{label}</Label>
       {children}
       {suggestions.length > 0 && (
-        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-2 text-xs text-primary">
           {suggestions.map(option => (
             <button
               key={option}
               type="button"
               onClick={() => onSelect(option)}
-              className={`rounded-full border border-dashed border-input px-3 py-1 hover:border-primary hover:text-primary ${
-                option === value ? "border-primary text-primary" : ""
+              className={`rounded-full border border-dashed border-primary/70 px-3 py-1 text-primary hover:border-primary hover:bg-primary/10 ${
+                option === value ? "border-primary bg-primary/10" : ""
               }`}
             >
               {option}
