@@ -38,6 +38,72 @@ export type Database = {
         }
         Relationships: []
       }
+      blogs: {
+        Row: {
+          author: Json | null
+          author_image: string | null
+          category: string | null
+          content: Json | null
+          created_at: string | null
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          is_published: boolean | null
+          keywords: string[] | null
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          read_time: number | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          author?: Json | null
+          author_image?: string | null
+          category?: string | null
+          content?: Json | null
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          read_time?: number | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          author?: Json | null
+          author_image?: string | null
+          category?: string | null
+          content?: Json | null
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          keywords?: string[] | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          read_time?: number | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       builder_activity_favorites: {
         Row: {
           activity_slug: string | null
@@ -338,27 +404,30 @@ export type Database = {
       }
       comments: {
         Row: {
+          blog_id: string | null
           content: string
-          content_id: string | null
           created_at: string | null
+          event_id: string | null
           id: string
           parent_id: string | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          blog_id?: string | null
           content: string
-          content_id?: string | null
           created_at?: string | null
+          event_id?: string | null
           id?: string
           parent_id?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          blog_id?: string | null
           content?: string
-          content_id?: string | null
           created_at?: string | null
+          event_id?: string | null
           id?: string
           parent_id?: string | null
           updated_at?: string | null
@@ -366,10 +435,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "comments_content_id_fkey"
-            columns: ["content_id"]
+            foreignKeyName: "comments_blog_id_fkey"
+            columns: ["blog_id"]
             isOneToOne: false
-            referencedRelation: "content_master"
+            referencedRelation: "blogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -380,171 +456,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      content_master: {
-        Row: {
-          author: Json | null
-          author_image: string | null
-          author_job_title: string | null
-          category: Database["public"]["Enums"]["category_enum"] | null
-          content: Json | null
-          content_type: Database["public"]["Enums"]["content_type_enum"]
-          created_at: string | null
-          deleted_at: string | null
-          delivery_type:
-            | Database["public"]["Enums"]["delivery_type_enum"]
-            | null
-          end_datetime: string | null
-          event_capacity: number | null
-          event_certificate_pd: boolean | null
-          event_duration: string | null
-          event_host: string | null
-          event_language: string | null
-          event_mode: Database["public"]["Enums"]["event_mode_enum"] | null
-          event_price_type:
-            | Database["public"]["Enums"]["event_price_type_enum"]
-            | null
-          event_registered: number | null
-          event_timezone: string | null
-          event_type: Database["public"]["Enums"]["event_type_enum"] | null
-          excerpt: string | null
-          featured_image: string | null
-          filter_type: Database["public"]["Enums"]["filter_type_enum"] | null
-          id: string
-          is_published: boolean | null
-          keywords: string[] | null
-          language: string | null
-          meta_description: string | null
-          meta_title: string | null
-          page: Database["public"]["Enums"]["page_enum"]
-          payment: Database["public"]["Enums"]["payment_enum"] | null
-          platform: Database["public"]["Enums"]["platform_enum"] | null
-          price: number | null
-          published_at: string | null
-          read_time: number | null
-          recording_url: string | null
-          registration_url: string | null
-          slug: string
-          stage: Database["public"]["Enums"]["stage_enum"] | null
-          start_datetime: string | null
-          status: "draft" | "pending" | "approved" | "published"
-          subject: Database["public"]["Enums"]["subject_enum"] | null
-          subtitle: string | null
-          tags: string[] | null
-          time_required: string | null
-          title: string
-          updated_at: string | null
-          venue: string | null
-        }
-        Insert: {
-          author?: Json | null
-          author_image?: string | null
-          author_job_title?: string | null
-          category?: Database["public"]["Enums"]["category_enum"] | null
-          content?: Json | null
-          content_type: Database["public"]["Enums"]["content_type_enum"]
-          created_at?: string | null
-          deleted_at?: string | null
-          delivery_type?:
-            | Database["public"]["Enums"]["delivery_type_enum"]
-            | null
-          end_datetime?: string | null
-          event_capacity?: number | null
-          event_certificate_pd?: boolean | null
-          event_duration?: string | null
-          event_host?: string | null
-          event_language?: string | null
-          event_mode?: Database["public"]["Enums"]["event_mode_enum"] | null
-          event_price_type?:
-            | Database["public"]["Enums"]["event_price_type_enum"]
-            | null
-          event_registered?: number | null
-          event_timezone?: string | null
-          event_type?: Database["public"]["Enums"]["event_type_enum"] | null
-          excerpt?: string | null
-          featured_image?: string | null
-          filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
-          id?: string
-          is_published?: boolean | null
-          keywords?: string[] | null
-          language?: string | null
-          meta_description?: string | null
-          meta_title?: string | null
-          page: Database["public"]["Enums"]["page_enum"]
-          payment?: Database["public"]["Enums"]["payment_enum"] | null
-          platform?: Database["public"]["Enums"]["platform_enum"] | null
-          price?: number | null
-          published_at?: string | null
-          read_time?: number | null
-          recording_url?: string | null
-          registration_url?: string | null
-          slug: string
-          stage?: Database["public"]["Enums"]["stage_enum"] | null
-          start_datetime?: string | null
-          status?: "draft" | "pending" | "approved" | "published"
-          subject?: Database["public"]["Enums"]["subject_enum"] | null
-          subtitle?: string | null
-          tags?: string[] | null
-          time_required?: string | null
-          title: string
-          updated_at?: string | null
-          venue?: string | null
-        }
-        Update: {
-          author?: Json | null
-          author_image?: string | null
-          author_job_title?: string | null
-          category?: Database["public"]["Enums"]["category_enum"] | null
-          content?: Json | null
-          content_type?: Database["public"]["Enums"]["content_type_enum"]
-          created_at?: string | null
-          deleted_at?: string | null
-          delivery_type?:
-            | Database["public"]["Enums"]["delivery_type_enum"]
-            | null
-          end_datetime?: string | null
-          event_capacity?: number | null
-          event_certificate_pd?: boolean | null
-          event_duration?: string | null
-          event_host?: string | null
-          event_language?: string | null
-          event_mode?: Database["public"]["Enums"]["event_mode_enum"] | null
-          event_price_type?:
-            | Database["public"]["Enums"]["event_price_type_enum"]
-            | null
-          event_registered?: number | null
-          event_timezone?: string | null
-          event_type?: Database["public"]["Enums"]["event_type_enum"] | null
-          excerpt?: string | null
-          featured_image?: string | null
-          filter_type?: Database["public"]["Enums"]["filter_type_enum"] | null
-          id?: string
-          is_published?: boolean | null
-          keywords?: string[] | null
-          language?: string | null
-          meta_description?: string | null
-          meta_title?: string | null
-          page?: Database["public"]["Enums"]["page_enum"]
-          payment?: Database["public"]["Enums"]["payment_enum"] | null
-          platform?: Database["public"]["Enums"]["platform_enum"] | null
-          price?: number | null
-          published_at?: string | null
-          read_time?: number | null
-          recording_url?: string | null
-          registration_url?: string | null
-          slug?: string
-          stage?: Database["public"]["Enums"]["stage_enum"] | null
-          start_datetime?: string | null
-          status?: "draft" | "pending" | "approved" | "published"
-          subject?: Database["public"]["Enums"]["subject_enum"] | null
-          subtitle?: string | null
-          tags?: string[] | null
-          time_required?: string | null
-          title?: string
-          updated_at?: string | null
-          venue?: string | null
-        }
-        Relationships: []
       }
       enrollments: {
         Row: {
@@ -592,6 +503,111 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      events: {
+        Row: {
+          content: Json | null
+          created_at: string | null
+          currency: string | null
+          end_datetime: string | null
+          event_capacity: number | null
+          event_host: string | null
+          event_language: string | null
+          event_mode: Database["public"]["Enums"]["event_mode_enum"] | null
+          event_price_type:
+            | Database["public"]["Enums"]["event_price_type_enum"]
+            | null
+          event_registered: number | null
+          event_status: Database["public"]["Enums"]["event_status_enum"] | null
+          event_timezone: string | null
+          event_type: Database["public"]["Enums"]["event_type_enum"] | null
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          is_published: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          price: number | null
+          published_at: string | null
+          recording_url: string | null
+          registration_url: string | null
+          slug: string
+          start_datetime: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          venue: string | null
+          view_count: number | null
+        }
+        Insert: {
+          content?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          end_datetime?: string | null
+          event_capacity?: number | null
+          event_host?: string | null
+          event_language?: string | null
+          event_mode?: Database["public"]["Enums"]["event_mode_enum"] | null
+          event_price_type?:
+            | Database["public"]["Enums"]["event_price_type_enum"]
+            | null
+          event_registered?: number | null
+          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
+          event_timezone?: string | null
+          event_type?: Database["public"]["Enums"]["event_type_enum"] | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          price?: number | null
+          published_at?: string | null
+          recording_url?: string | null
+          registration_url?: string | null
+          slug: string
+          start_datetime?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          venue?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          content?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          end_datetime?: string | null
+          event_capacity?: number | null
+          event_host?: string | null
+          event_language?: string | null
+          event_mode?: Database["public"]["Enums"]["event_mode_enum"] | null
+          event_price_type?:
+            | Database["public"]["Enums"]["event_price_type_enum"]
+            | null
+          event_registered?: number | null
+          event_status?: Database["public"]["Enums"]["event_status_enum"] | null
+          event_timezone?: string | null
+          event_type?: Database["public"]["Enums"]["event_type_enum"] | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          price?: number | null
+          published_at?: string | null
+          recording_url?: string | null
+          registration_url?: string | null
+          slug?: string
+          start_datetime?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          venue?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
       }
       faq: {
         Row: {
@@ -822,15 +838,7 @@ export type Database = {
           related_content_id?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "testimonials_related_content_id_fkey"
-            columns: ["related_content_id"]
-            isOneToOne: false
-            referencedRelation: "content_master"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tools_activities: {
         Row: {
