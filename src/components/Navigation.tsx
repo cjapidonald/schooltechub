@@ -109,17 +109,14 @@ const Navigation = () => {
                   to={localizedPath}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "group relative inline-flex items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-foreground/90 transition-all duration-300 ease-out [text-shadow:0_0_10px_hsla(215,28%,17%,0.08)]",
-                    "bg-gradient-to-r from-white/10 via-white/5 to-white/10 backdrop-blur-xl",
-                    "hover:border-white/30 hover:bg-white/10 hover:text-foreground hover:brightness-125 hover:scale-[1.02]",
-                    "transform-gpu",
-                    "before:pointer-events-none before:absolute before:inset-0 before:top-1/2 before:left-1/2 before:h-[180%] before:w-[160%] before:-translate-x-1/2 before:-translate-y-1/2 before:scale-95 before:rounded-full before:bg-[radial-gradient(45%_45%_at_50%_50%,hsla(0,0%,100%,0.45),hsla(198,100%,50%,0)_70%)] before:opacity-0 before:blur-2xl before:content-[''] before:transition-opacity before:duration-300 before:will-change-[transform,opacity]",
-                    "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:border after:border-white/20 after:opacity-0 after:content-[''] after:transition-opacity after:duration-300",
-                    "group-hover:before:opacity-80 group-hover:before:animate-[nav-liquid_900ms_ease-out] group-hover:after:opacity-100",
-                    "aria-[current=page]:border-white/40 aria-[current=page]:bg-white/15 aria-[current=page]:text-foreground aria-[current=page]:brightness-125 aria-[current=page]:scale-[1.02] aria-[current=page]:shadow-[0_0_25px_hsla(0,0%,100%,0.15)] aria-[current=page]:after:opacity-100 aria-[current=page]:before:opacity-90"
+                    "rounded-full px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap",
+                    "border border-transparent hover:border-primary/40 hover:bg-primary/5 hover:text-primary",
+                    isActive
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "text-muted-foreground"
                   )}
                 >
-                  <span className="relative z-10">{item.name}</span>
+                  {item.name}
                 </Link>
               );
             })}
@@ -217,17 +214,13 @@ const Navigation = () => {
                       aria-current={isActive ? "page" : undefined}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        "group relative flex w-full items-center justify-start overflow-hidden rounded-2xl border border-white/15 px-4 py-3 text-lg font-medium text-foreground/90 transition-all duration-300 ease-out",
-                        "bg-gradient-to-r from-white/10 via-white/5 to-white/10 backdrop-blur-xl",
-                        "hover:border-white/30 hover:bg-white/15 hover:text-foreground hover:brightness-125 hover:scale-[1.01]",
-                        "transform-gpu",
-                        "before:pointer-events-none before:absolute before:inset-0 before:top-1/2 before:left-1/2 before:h-[220%] before:w-[200%] before:-translate-x-1/2 before:-translate-y-1/2 before:scale-95 before:rounded-[32px] before:bg-[radial-gradient(48%_48%_at_50%_50%,hsla(0,0%,100%,0.4),hsla(198,100%,50%,0)_70%)] before:opacity-0 before:blur-3xl before:content-[''] before:transition-opacity before:duration-300 before:will-change-[transform,opacity]",
-                        "after:pointer-events-none after:absolute after:inset-0 after:rounded-[32px] after:border after:border-white/20 after:opacity-0 after:content-[''] after:transition-opacity after:duration-300",
-                        "group-hover:before:opacity-80 group-hover:before:animate-[nav-liquid_900ms_ease-out] group-hover:after:opacity-100",
-                        "aria-[current=page]:border-white/40 aria-[current=page]:bg-white/20 aria-[current=page]:text-foreground aria-[current=page]:brightness-125 aria-[current=page]:scale-[1.02] aria-[current=page]:shadow-[0_0_25px_hsla(0,0%,100%,0.18)] aria-[current=page]:after:opacity-100 aria-[current=page]:before:opacity-90"
+                        "py-2 text-lg font-medium transition-colors",
+                        isActive
+                          ? "text-primary"
+                          : "text-muted-foreground hover:text-primary"
                       )}
                     >
-                      <span className="relative z-10">{item.name}</span>
+                      {item.name}
                     </Link>
                   );
                 })}
