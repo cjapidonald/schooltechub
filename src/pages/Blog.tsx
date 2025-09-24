@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { cn } from "@/lib/utils";
 
 const extractTags = (tags: string[] | string | null | undefined) => {
   if (Array.isArray(tags)) {
@@ -42,6 +43,9 @@ const Blog = () => {
   const [newsletterRole, setNewsletterRole] = useState<NewsletterRole>("Teacher");
   const { toast } = useToast();
   const { language, t } = useLanguage();
+
+  const accentCardClass =
+    "border-2 border-primary/35 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)] transition-colors duration-300 hover:border-primary/75";
   
   const [filters, setFilters] = useState({
     filterType: searchParams.getAll("filterType") || [],
@@ -340,7 +344,7 @@ const Blog = () => {
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Left Sidebar - Filters */}
             <div className="lg:col-span-1">
-              <Card>
+              <Card className={accentCardClass}>
                 <CardHeader>
                   <CardTitle>{t.blog.filters.title}</CardTitle>
                 </CardHeader>
@@ -487,7 +491,7 @@ const Blog = () => {
                 <>
                   {/* Featured Post */}
                   {featuredPost && (
-                    <Card className="overflow-hidden">
+                    <Card className={cn("overflow-hidden", accentCardClass)}>
                       <div className="relative h-64 bg-gradient-to-br from-primary/10 to-primary/5">
                         {featuredPost.featured_image && (
                           <img
@@ -559,7 +563,7 @@ const Blog = () => {
                         const readTimeLabel = getReadTimeLabel(post.read_time, post.time_required);
 
                         return (
-                          <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                          <Card key={post.id} className={cn("transition-shadow hover:shadow-lg", accentCardClass)}>
                             <CardContent className="p-6">
                               <div className="flex flex-col gap-3 mb-4">
                                 <div className="flex flex-wrap items-center gap-2">
@@ -648,7 +652,7 @@ const Blog = () => {
                   )}
 
                   {/* Newsletter Signup */}
-                  <Card>
+                  <Card className={accentCardClass}>
                     <CardHeader>
                       <CardTitle>{t.blog.newsletter.title}</CardTitle>
                     </CardHeader>

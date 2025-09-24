@@ -8,6 +8,7 @@ import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { cn } from "@/lib/utils";
 // Import removed - useContent hook no longer exists
 
 const Services = () => {
@@ -18,6 +19,9 @@ const Services = () => {
   const guarantee = t.services.guarantee;
   const steps = t.services.steps;
   const faqs = t.services.faq;
+
+  const accentCardClass =
+    "border-2 border-primary/40 shadow-[0_0_22px_hsl(var(--glow-primary)/0.08)] transition-colors duration-300 hover:border-primary/80";
 
   const iconMap = {
     target: Target,
@@ -68,7 +72,10 @@ const Services = () => {
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             {services.map((service) => (
-              <Card key={service.id} className="p-6 hover:shadow-large transition-shadow relative">
+              <Card
+                key={service.id}
+                className={cn("relative p-6 transition-shadow hover:shadow-large", accentCardClass)}
+              >
                 {service.highlight && (
                   <Badge className="absolute -top-3 -right-3" variant="default">
                     {pageContent.badge}
@@ -110,7 +117,12 @@ const Services = () => {
           </div>
 
           {/* Guarantee */}
-          <Card className="p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5">
+          <Card
+            className={cn(
+              "p-8 text-center bg-gradient-to-r from-primary/5 to-secondary/5",
+              accentCardClass,
+            )}
+          >
             <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
             <h3 className="text-2xl font-bold mb-4">{guarantee.title}</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -136,7 +148,7 @@ const Services = () => {
 
             {steps.tabs.map((tab) => (
               <TabsContent key={tab.value} value={tab.value} className="mt-8">
-                <Card className="p-6">
+                <Card className={cn("p-6", accentCardClass)}>
                   <h3 className="text-xl font-semibold mb-4">{tab.title}</h3>
                   <ul className="space-y-3">
                     {tab.items.map((item, index) => {
@@ -172,7 +184,7 @@ const Services = () => {
           <h2 className="text-3xl font-bold text-center mb-12">{faqs.title}</h2>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {faqs.items.map((faq, index) => (
-              <Card key={index} className="p-6">
+              <Card key={index} className={cn("p-6", accentCardClass)}>
                 <h3 className="font-semibold mb-2">{faq.question}</h3>
                 <p className="text-muted-foreground">{faq.answer}</p>
               </Card>
