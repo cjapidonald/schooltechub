@@ -172,10 +172,8 @@ const Index = () => {
               <span className="text-sm font-medium text-primary">{t.hero.subtitle}</span>
             </div>
             
-            <h1 className="mb-6 font-orbitron text-6xl font-bold tracking-tight text-foreground sm:text-7xl lg:text-8xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                {t.hero.title}
-              </span>
+            <h1 className="mb-6 font-orbitron text-6xl font-bold tracking-tight text-white sm:text-7xl lg:text-8xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
+              {t.hero.title}
             </h1>
             
             <p className="mb-8 text-xl text-muted-foreground font-space animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-150">
