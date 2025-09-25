@@ -50,7 +50,7 @@ export const UpcomingLessonsCard = ({ isEnabled, className }: UpcomingLessonsCar
 
   const query = useQuery({
     queryKey: ["upcoming-lesson-plans"],
-    queryFn: () => listUpcomingLessonPlans(),
+    queryFn: () => listUpcomingLessonPlans(5),
     enabled: isEnabled,
     staleTime: 1000 * 60 * 5,
   });
