@@ -5,12 +5,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { LessonPreviewPane } from "../LessonPreviewPane";
 import type { LessonPlanMetaDraft } from "../../types";
-import type { MyClassSummary } from "@/hooks/useMyClasses";
 
 const baseMeta: LessonPlanMetaDraft = {
   title: "",
   subject: null,
-  classId: null,
   date: null,
   objective: "",
   successCriteria: "",
@@ -21,11 +19,6 @@ const baseProfile = {
   schoolName: null,
   schoolLogoUrl: null,
 };
-
-const classes: MyClassSummary[] = [
-  { id: "class-1", title: "Algebra I" },
-  { id: "class-2", title: "World History" },
-];
 
 afterEach(() => {
   vi.useRealTimers();
@@ -39,7 +32,6 @@ describe("LessonPreviewPane", () => {
           ...baseMeta,
           title: "   ",
           subject: null,
-          classId: null,
           date: null,
           objective: "",
           successCriteria: "",
@@ -49,12 +41,10 @@ describe("LessonPreviewPane", () => {
           fullName: "   ",
           schoolName: "",
         }}
-        classes={classes}
       />
     );
 
     expect(screen.queryByText("Teacher")).not.toBeInTheDocument();
-    expect(screen.queryByText("Class")).not.toBeInTheDocument();
 
     const today = new Intl.DateTimeFormat(undefined, {
       year: "numeric",
@@ -69,9 +59,7 @@ describe("LessonPreviewPane", () => {
     const fixedNow = new Date("2025-01-15T12:00:00.000Z");
     vi.setSystemTime(fixedNow);
 
-    render(
-      <LessonPreviewPane meta={{ ...baseMeta, date: null }} profile={baseProfile} classes={classes} />
-    );
+    render(<LessonPreviewPane meta={{ ...baseMeta, date: null }} profile={baseProfile} />);
 
     const expectedDate = new Intl.DateTimeFormat(undefined, {
       year: "numeric",
@@ -82,22 +70,15 @@ describe("LessonPreviewPane", () => {
     expect(screen.getByText(expectedDate)).toBeInTheDocument();
   });
 
-  it("updates the class preview when a class is selected", () => {
-    const { rerender } = render(
-      <LessonPreviewPane meta={baseMeta} profile={baseProfile} classes={classes} />
-    );
-
-    expect(screen.queryByText("Class")).not.toBeInTheDocument();
-
-    rerender(
+  it("shows the subject when provided", () => {
+    render(
       <LessonPreviewPane
-        meta={{ ...baseMeta, classId: "class-2" }}
+        meta={{ ...baseMeta, subject: "Science" }}
         profile={baseProfile}
-        classes={classes}
       />
     );
 
-    expect(screen.getByText("Class")).toBeInTheDocument();
-    expect(screen.getByText("World History")).toBeInTheDocument();
+    expect(screen.getByText("Subject")).toBeInTheDocument();
+    expect(screen.getByText("Science")).toBeInTheDocument();
   });
 });
