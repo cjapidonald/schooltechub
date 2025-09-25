@@ -16,9 +16,9 @@ import {
 } from "@/lib/data/lesson-plans";
 import { cn } from "@/lib/utils";
 
-const formatLessonDate = (value: string | null): string => {
+const formatLessonDate = (value: string | null, fallback: string): string => {
   if (!value) {
-    return "Date TBD";
+    return fallback;
   }
 
   try {
@@ -32,8 +32,11 @@ const formatLessonDate = (value: string | null): string => {
   }
 };
 
-const createLessonSummary = (lesson: UpcomingLessonPlanListItem): string[] => {
-  const date = formatLessonDate(lesson.date);
+const createLessonSummary = (
+  lesson: UpcomingLessonPlanListItem,
+  fallbackDateLabel: string,
+): string[] => {
+  const date = formatLessonDate(lesson.date, fallbackDateLabel);
   const classTitle = lesson.classTitle.trim();
   const lessonTitle = lesson.lessonTitle.trim();
 
@@ -46,7 +49,7 @@ export type UpcomingLessonsCardProps = {
 };
 
 export const UpcomingLessonsCard = ({ isEnabled, className }: UpcomingLessonsCardProps) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const query = useQuery({
     queryKey: ["upcoming-lesson-plans"],
@@ -76,28 +79,33 @@ export const UpcomingLessonsCard = ({ isEnabled, className }: UpcomingLessonsCar
     );
   } else if (query.isError) {
     const message =
-      query.error instanceof Error ? query.error.message : "Unable to load upcoming lessons.";
+      query.error instanceof Error
+        ? query.error.message
+        : t.account.overview.upcoming.errorDescription;
 
     content = (
       <Alert variant="destructive">
-        <AlertTitle>Unable to load upcoming lessons</AlertTitle>
+        <AlertTitle>{t.account.overview.upcoming.errorTitle}</AlertTitle>
         <AlertDescription>
           {message}
           <div className="mt-4">
             <Button size="sm" variant="outline" onClick={handleRetry}>
-              Try again
+              {t.account.overview.upcoming.retry}
             </Button>
           </div>
         </AlertDescription>
       </Alert>
     );
   } else if (lessons.length === 0) {
-    content = <p className="text-sm text-muted-foreground">No upcoming lessons scheduled.</p>;
+    content = (
+      <p className="text-sm text-muted-foreground">{t.account.overview.upcoming.empty}</p>
+    );
   } else {
+    const fallbackDateLabel = t.account.overview.upcoming.dateTbd;
     content = (
       <ul className="space-y-2">
         {lessons.map(lesson => {
-          const summarySegments = createLessonSummary(lesson);
+          const summarySegments = createLessonSummary(lesson, fallbackDateLabel);
           const lessonBuilderPath = getLocalizedPath(
             `/lesson-builder?id=${encodeURIComponent(lesson.lessonId)}`,
             language,
@@ -149,8 +157,8 @@ export const UpcomingLessonsCard = ({ isEnabled, className }: UpcomingLessonsCar
     >
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div className="space-y-1">
-          <CardTitle className="text-xl font-semibold">Upcoming lessons</CardTitle>
-          <CardDescription>Stay ready for what&apos;s next on your teaching calendar.</CardDescription>
+          <CardTitle className="text-xl font-semibold">{t.account.overview.upcoming.title}</CardTitle>
+          <CardDescription>{t.account.overview.upcoming.description}</CardDescription>
         </div>
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_25px_hsl(var(--glow-primary)/0.2)]">
           <CalendarDays className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />

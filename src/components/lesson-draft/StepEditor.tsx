@@ -21,6 +21,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { LessonStep } from "@/stores/lessonDraft";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
 import { getResourcesByIds } from "@/lib/resources";
@@ -42,6 +45,8 @@ interface StepFormProps {
   resources: Resource[];
   pendingResourceIds: string[];
   missingResourceIds: string[];
+  onTitleChange: (stepId: string, title: string) => void;
+  onNotesChange: (stepId: string, notes: string) => void;
 }
 
 const StepForm = ({
@@ -54,11 +59,35 @@ const StepForm = ({
   resources,
   pendingResourceIds,
   missingResourceIds,
+  onTitleChange,
+  onNotesChange,
 }: StepFormProps) => {
+  const titleFieldId = `lesson-step-${step.id}-title`;
+  const notesFieldId = `lesson-step-${step.id}-notes`;
+  const helperId = `${titleFieldId}-helper`;
+  const trimmedTitle = step.title.trim();
+  const isTitleEmpty = trimmedTitle.length === 0;
+  const displayTitle = trimmedTitle.length > 0 ? step.title : "New step";
+  const notesValue = step.notes ?? "";
+
   const handleResourceClick = () => {
     if (!isResourceSearchOpen || !isResourceSearchOpenForStep) {
       onRequestResources(step.id);
     }
+  };
+
+  const handleTitleChange = (value: string) => {
+    onTitleChange(step.id, value);
+  };
+
+  const handleTitleBlur = () => {
+    if (step.title.trim().length === 0) {
+      onTitleChange(step.id, "New step");
+    }
+  };
+
+  const handleNotesChange = (value: string) => {
+    onNotesChange(step.id, value);
   };
 
   const resourceCount = step.resourceIds.length;
@@ -80,7 +109,8 @@ const StepForm = ({
           >
             Step {index + 1}
           </p>
-          <p className="text-base font-semibold text-foreground">{resourceSummary}</p>
+          <p className="text-base font-semibold text-foreground">{displayTitle}</p>
+          <p className="text-sm text-muted-foreground">{resourceSummary}</p>
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -109,12 +139,44 @@ const StepForm = ({
       </div>
 
       <div className="space-y-3">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor={titleFieldId}>Step {index + 1} title</Label>
+            <Input
+              id={titleFieldId}
+              value={step.title}
+              onChange={event => handleTitleChange(event.target.value)}
+              onBlur={handleTitleBlur}
+              aria-invalid={isTitleEmpty}
+              aria-describedby={isTitleEmpty ? helperId : undefined}
+              placeholder="Name this step"
+            />
+            {isTitleEmpty ? (
+              <p id={helperId} className="text-xs text-destructive">
+                Each step needs a title. We'll restore the default name if you leave it blank.
+              </p>
+            ) : null}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={notesFieldId}>Step {index + 1} notes</Label>
+            <Textarea
+              id={notesFieldId}
+              rows={5}
+              value={notesValue}
+              onChange={event => handleNotesChange(event.target.value)}
+              placeholder="Describe what happens during this part of the lesson."
+            />
+          </div>
+        </div>
+
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
             onClick={handleResourceClick}
+            onFocus={handleResourceClick}
             aria-expanded={isResourceSearchOpenForStep}
             aria-controls="lesson-draft-resource-search"
+            aria-label={`Step ${index + 1} resources`}
           >
             {resourceCount > 0 ? "Add more resources" : "Add resources"}
           </Button>
@@ -173,11 +235,12 @@ export const StepEditor = ({
   const steps = useLessonDraftStore(state => state.draft.steps);
   const addStep = useLessonDraftStore(state => state.addStep);
   const removeStep = useLessonDraftStore(state => state.removeStep);
+  const renameStep = useLessonDraftStore(state => state.renameStep);
+  const setStepNotes = useLessonDraftStore(state => state.setStepNotes);
   const [resourcesById, setResourcesById] = useState<Record<string, Resource | null>>({});
 
   const handleAddStep = () => {
-    const step = addStep();
-    onRequestResourceSearch(step.id);
+    addStep();
   };
 
   const orderedSteps = useMemo(() => steps.map((step, index) => ({ step, index })), [steps]);
@@ -287,7 +350,7 @@ export const StepEditor = ({
       <CardContent className="space-y-6">
         {orderedSteps.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border/80 bg-muted/40 p-6 text-sm text-muted-foreground">
-            No steps yet. Use the “Add step” button to begin attaching resources for your lesson.
+            No steps yet. Use the “Add step” button to start outlining your lesson.
           </p>
         ) : (
           <div className="space-y-6">
@@ -305,6 +368,8 @@ export const StepEditor = ({
                   .filter((resource): resource is Resource => Boolean(resource))}
                 pendingResourceIds={step.resourceIds.filter(id => resourcesById[id] === undefined)}
                 missingResourceIds={step.resourceIds.filter(id => resourcesById[id] === null)}
+                onTitleChange={renameStep}
+                onNotesChange={setStepNotes}
               />
             ))}
           </div>

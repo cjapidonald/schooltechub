@@ -1253,6 +1253,14 @@ export const en = {
       errorDescription: "Please try again in a moment.",
       retryLabel: "Try again",
     },
+    classLinking: {
+      ariaLabel: "Link lesson plan to a class",
+      placeholder: "Link to class",
+      loading: "Loading classes...",
+      noClasses: "No classes available",
+      signedInHelp: "Linking a class adds this lesson to their schedule.",
+      signedOutHelp: "Sign in to link this lesson to one of your classes.",
+    },
     activities: {
       title: "Find activities",
       placeholder: "Search by topic, tool, or outcome",
@@ -1308,7 +1316,44 @@ export const en = {
       savedPosts: "Saved Posts",
       activity: "Activity",
       security: "Security",
-      settings: "Settings"
+      settings: "Settings",
+      research: "Research"
+    },
+    overview: {
+      title: "My Dashboard",
+      subtitle: "Here’s a personalized snapshot of your SchoolTech Hub activity and upcoming lessons.",
+      ctas: {
+        postBlog: "Post a blog",
+        askQuestion: "Ask a question",
+      },
+      upcoming: {
+        title: "Upcoming lessons",
+        description: "Stay ready for what's next on your teaching calendar.",
+        empty: "No upcoming lessons scheduled.",
+        errorTitle: "Unable to load upcoming lessons",
+        errorDescription: "Please try again in a moment.",
+        retry: "Try again",
+        dateTbd: "Date TBD",
+      },
+    },
+    research: {
+      badge: "Coming soon",
+      cardTitle: "Research & Applications",
+      cardDescription: "Preview our upcoming research hub for educators and partners.",
+      cardBody:
+        "Opt in to hear about pilot opportunities, classroom research, and application windows as soon as they open.",
+      toggleLabel: "Notify me when applications open",
+      toggleDescription: "We'll send an email when new research projects accept participants.",
+      toggleAria: "Toggle research application notifications",
+      notificationsEnabledTitle: "Notifications enabled",
+      notificationsEnabledDescription: "We'll let you know as soon as new research applications open.",
+      notificationsDisabledTitle: "Notifications updated",
+      notificationsDisabledDescription: "You won't receive updates about new research opportunities.",
+      errorTitle: "Unable to update preference",
+      errorDescription: "Please try again in a moment.",
+      tabTitle: "Research workspace",
+      tabDescription: "We're preparing a dedicated space for research collaboration and applications.",
+      tabHelper: "Check back soon for project listings and application tools.",
     },
     profile: {
       title: "Profile details",
@@ -1464,6 +1509,24 @@ export const en = {
         "Review your account activity regularly for unfamiliar changes.",
         "Sign out on shared devices after each session."
       ]
+    },
+    classes: {
+      viewer: {
+        calendarHelper: "Select a date to filter plans.",
+        showAll: "Show all plans",
+        attachExisting: "Attach existing plan",
+        updating: "Updating results…",
+        errorTitle: "Unable to load linked plans",
+        errorDescription: "Please try again in a moment.",
+        retry: "Try again",
+        noScheduledDate: "No scheduled date",
+        scheduledFor: "Scheduled for {date}",
+        durationLabel: "Duration: {duration}",
+        linkedOn: "Linked on {date}",
+        unlink: "Unlink",
+        emptyTitle: "No lesson plans match the current date filter.",
+        emptyDescription: "Clear the filter or attach an existing plan using the button above.",
+      },
     },
     savedPosts: {
       title: "Saved posts",

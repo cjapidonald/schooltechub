@@ -63,15 +63,35 @@ export const LocalizedRoutes = () => {
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-      <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
-      <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
+      <Route
+        path="/builder/lesson-plans"
+        element={
+          <RouteWrapper>
+            <AuthGuard>
+              <BuilderLessonPlan />
+            </AuthGuard>
+          </RouteWrapper>
+        }
+      />
+      <Route
+        path="/builder/lesson-plans/:id"
+        element={
+          <RouteWrapper>
+            <AuthGuard>
+              <BuilderLessonPlanDetail />
+            </AuthGuard>
+          </RouteWrapper>
+        }
+      />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route
         path="/lesson-builder"
         element={
           <RouteWrapper>
-            <LessonBuilderPage />
+            <AuthGuard>
+              <LessonBuilderPage />
+            </AuthGuard>
           </RouteWrapper>
         }
       />
@@ -136,15 +156,35 @@ export const LocalizedRoutes = () => {
         <Route path="services" element={<RouteWrapper><Services /></RouteWrapper>} />
         <Route path="blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
         <Route path="blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-        <Route path="builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
-        <Route path="builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
+        <Route
+          path="builder/lesson-plans"
+          element={
+            <RouteWrapper>
+              <AuthGuard>
+                <BuilderLessonPlan />
+              </AuthGuard>
+            </RouteWrapper>
+          }
+        />
+        <Route
+          path="builder/lesson-plans/:id"
+          element={
+            <RouteWrapper>
+              <AuthGuard>
+                <BuilderLessonPlanDetail />
+              </AuthGuard>
+            </RouteWrapper>
+          }
+        />
         <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
         <Route
           path="lesson-builder"
           element={
             <RouteWrapper>
-              <LessonBuilderPage />
+              <AuthGuard>
+                <LessonBuilderPage />
+              </AuthGuard>
             </RouteWrapper>
           }
         />
