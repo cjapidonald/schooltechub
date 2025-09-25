@@ -328,8 +328,44 @@ export async function unlinkPlanFromClass(
 }
 
 export interface ClassLessonPlanFilterOptions {
-  from?: string;
-  to?: string;
+  from?: string | Date | null;
+  to?: string | Date | null;
+}
+
+function normalizeFilterDate(value?: string | Date | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    const timestamp = value.getTime();
+    if (Number.isNaN(timestamp)) {
+      return null;
+    }
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+    return trimmed.slice(0, 10);
+  }
+
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export async function listClassLessonPlans(
@@ -339,7 +375,8 @@ export async function listClassLessonPlans(
 ): Promise<ClassLessonPlanLinkSummary[]> {
   await requireUserId(client, "view class lesson plans");
 
-  const { from, to } = opts ?? {};
+  const normalizedFrom = normalizeFilterDate(opts.from);
+  const normalizedTo = normalizeFilterDate(opts.to);
 
   let query = client
     .from("class_lesson_plans")
@@ -357,12 +394,12 @@ export async function listClassLessonPlans(
     )
     .eq("class_id", classId);
 
-  if (from) {
-    query = query.gte("lesson_plans.date", from);
+  if (normalizedFrom) {
+    query = query.gte("lesson_plans.date", normalizedFrom);
   }
 
-  if (to) {
-    query = query.lte("lesson_plans.date", to);
+  if (normalizedTo) {
+    query = query.lte("lesson_plans.date", normalizedTo);
   }
 
   const { data, error } = await query.order("date", {

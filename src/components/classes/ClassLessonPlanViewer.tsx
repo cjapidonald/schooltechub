@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
-import { format } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
+import { format, isSameDay, parseISO, isValid } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   listClassLessonPlans,
@@ -10,14 +10,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2, PlusCircle, RotateCcw, Unlink } from "lucide-react";
+import { Loader2, PlusCircle, Unlink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AttachLessonPlanDialog } from "@/components/classes/AttachLessonPlanDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const formatDateInputValue = (value: Date) => format(value, "yyyy-MM-dd");
+import { Calendar } from "@/components/ui/calendar";
 
 const formatDisplayDate = (value: string | null) => {
   if (!value) {
@@ -25,7 +22,11 @@ const formatDisplayDate = (value: string | null) => {
   }
 
   try {
-    return `Scheduled for ${format(new Date(value), "PPP")}`;
+    const parsed = parseISO(value);
+    if (!isValid(parsed)) {
+      return "No scheduled date";
+    }
+    return `Scheduled for ${format(parsed, "PPP")}`;
   } catch {
     return "No scheduled date";
   }
@@ -46,10 +47,8 @@ export function ClassLessonPlanViewer({
   unlinkingPlanId = null,
   onPlanCountChange,
 }: ClassLessonPlanViewerProps) {
-  const [dateRange, setDateRange] = useState(() => {
-    const today = formatDateInputValue(new Date());
-    return { from: today, to: today };
-  });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [calendarDateStrings, setCalendarDateStrings] = useState<string[]>([]);
   const [isAttachDialogOpen, setIsAttachDialogOpen] = useState(false);
   const [linkingPlanId, setLinkingPlanId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -57,18 +56,20 @@ export function ClassLessonPlanViewer({
   const { t } = useLanguage();
 
   useEffect(() => {
-    const today = formatDateInputValue(new Date());
-    setDateRange({ from: today, to: today });
+    setSelectedDate(undefined);
+    setCalendarDateStrings([]);
     setIsAttachDialogOpen(false);
     setLinkingPlanId(null);
   }, [classId]);
 
   const appliedFilters = useMemo(() => {
-    return {
-      from: dateRange.from && dateRange.from.length > 0 ? dateRange.from : undefined,
-      to: dateRange.to && dateRange.to.length > 0 ? dateRange.to : undefined,
-    };
-  }, [dateRange.from, dateRange.to]);
+    if (!selectedDate) {
+      return {};
+    }
+
+    const formatted = format(selectedDate, "yyyy-MM-dd");
+    return { from: formatted, to: formatted };
+  }, [selectedDate]);
 
   const { data, error, isPending, isFetching, refetch } = useQuery<
     ClassLessonPlanLinkSummary[],
@@ -77,20 +78,25 @@ export function ClassLessonPlanViewer({
     queryKey: ["class-lesson-plans", classId, appliedFilters.from ?? null, appliedFilters.to ?? null],
     enabled: Boolean(classId),
     queryFn: async () => {
-      const filters: { from?: string; to?: string } = {};
-      if (appliedFilters.from) {
-        filters.from = appliedFilters.from;
-      }
-      if (appliedFilters.to) {
-        filters.to = appliedFilters.to;
-      }
-      return listClassLessonPlans(classId, filters);
+      return listClassLessonPlans(classId, appliedFilters);
     },
     keepPreviousData: true,
     staleTime: 30_000,
   });
 
   const plans = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+
+  useEffect(() => {
+    setCalendarDateStrings(prev => {
+      const next = new Set(prev);
+      plans.forEach(plan => {
+        if (plan.date) {
+          next.add(plan.date.slice(0, 10));
+        }
+      });
+      return Array.from(next).sort();
+    });
+  }, [plans]);
 
   useEffect(() => {
     if (!onPlanCountChange) {
@@ -101,14 +107,22 @@ export function ClassLessonPlanViewer({
   }, [plans, onPlanCountChange]);
   const isRefetching = isFetching && !isPending;
 
-  const handleDateChange = (key: "from" | "to") => (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setDateRange(prev => ({ ...prev, [key]: value.length > 0 ? value : null }));
+  const handleCalendarSelect = (date?: Date) => {
+    if (!date) {
+      setSelectedDate(undefined);
+      return;
+    }
+
+    if (selectedDate && isSameDay(selectedDate, date)) {
+      setSelectedDate(undefined);
+      return;
+    }
+
+    setSelectedDate(date);
   };
 
-  const handleResetFilters = () => {
-    const today = formatDateInputValue(new Date());
-    setDateRange({ from: today, to: today });
+  const handleClearFilter = () => {
+    setSelectedDate(undefined);
   };
 
   const linkPlanMutation = useMutation({
@@ -147,56 +161,55 @@ export function ClassLessonPlanViewer({
     linkPlanMutation.mutate(lessonPlanId);
   };
 
+  const highlightedDates = useMemo(() => {
+    return calendarDateStrings
+      .map(dateString => {
+        try {
+          const parsed = parseISO(dateString);
+          return isValid(parsed) ? parsed : null;
+        } catch {
+          return null;
+        }
+      })
+      .filter((value): value is Date => value !== null);
+  }, [calendarDateStrings]);
+
   return (
     <div className="space-y-4">
-      <div className="space-y-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="grid flex-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="class-plan-filter-from">From date</Label>
-              <Input
-                id="class-plan-filter-from"
-                type="date"
-                value={dateRange.from ?? ""}
-                onChange={handleDateChange("from")}
-                max={dateRange.to ?? undefined}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="class-plan-filter-to">To date</Label>
-              <Input
-                id="class-plan-filter-to"
-                type="date"
-                value={dateRange.to ?? ""}
-                onChange={handleDateChange("to")}
-                min={dateRange.from ?? undefined}
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-2 sm:w-auto sm:flex-row">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={handleResetFilters}
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Reset to today
-            </Button>
-            <Button
-              type="button"
-              className="w-full sm:w-auto"
-              onClick={() => setIsAttachDialogOpen(true)}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Attach existing plan
-            </Button>
-          </div>
+      <div className="rounded-lg border bg-background/80 p-4 shadow-sm">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={handleCalendarSelect}
+          modifiers={{ hasPlan: highlightedDates }}
+          modifiersClassNames={{
+            hasPlan:
+              "relative after:absolute after:-bottom-1 after:left-1/2 after:h-1.5 after:w-1.5 after:-translate-x-1/2 after:rounded-full after:bg-primary after:content-['']",
+          }}
+          className="mx-auto"
+        />
+        <p className="mt-3 text-center text-xs text-muted-foreground">Select a date to filter plans.</p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={handleClearFilter}
+            disabled={!selectedDate}
+          >
+            Show all plans
+          </Button>
+          <Button
+            type="button"
+            className="w-full sm:w-auto"
+            onClick={() => setIsAttachDialogOpen(true)}
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Attach existing plan
+          </Button>
         </div>
-        {isRefetching ? (
-          <p className="text-xs text-muted-foreground">Updating results…</p>
-        ) : null}
       </div>
+      {isRefetching ? <p className="text-xs text-muted-foreground">Updating results…</p> : null}
 
       <ScrollArea className="h-[60vh] pr-2">
         {isPending ? (
@@ -254,10 +267,8 @@ export function ClassLessonPlanViewer({
           </div>
         ) : (
           <div className="rounded-lg border border-dashed bg-muted/40 p-8 text-center text-sm text-muted-foreground">
-            <p>No lesson plans match the selected date range.</p>
-            <p className="mt-2">
-              Adjust the dates or attach an existing plan using the button above.
-            </p>
+            <p>No lesson plans match the current date filter.</p>
+            <p className="mt-2">Clear the filter or attach an existing plan using the button above.</p>
           </div>
         )}
       </ScrollArea>
