@@ -1556,6 +1556,10 @@ export const sq = {
       readPost: "Hap artikullin"
     },
     toast: {
+      classCreated: "Klasa u krijua",
+      classCreatedDescription: "\"{title}\" u shtua te klasat tuaja.",
+      attachedToClass: "U bashkëngjit te klasa",
+      attachedToClassDescription: "Plani i mësimit tani është i lidhur me këtë klasë.",
       schoolInfoSaved: "Të dhënat e shkollës u ruajtën",
       profileUpdated: "Profili u përditësua",
       passwordMismatch: "Fjalëkalimet duhet të përputhen",

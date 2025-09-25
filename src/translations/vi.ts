@@ -1556,6 +1556,10 @@ export const vi = {
       readPost: "Mở bài viết"
     },
     toast: {
+      classCreated: "Đã tạo lớp học",
+      classCreatedDescription: "\"{title}\" đã được thêm vào lớp học của bạn.",
+      attachedToClass: "Đã gắn vào lớp học",
+      attachedToClassDescription: "Kế hoạch bài học đã được liên kết với lớp học này.",
       schoolInfoSaved: "Đã lưu thông tin trường học",
       profileUpdated: "Đã cập nhật hồ sơ",
       passwordMismatch: "Mật khẩu nhập lại chưa khớp",

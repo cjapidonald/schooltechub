@@ -248,6 +248,7 @@ export type Database = {
           id: string
           title: string | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           anon_user_id: string
@@ -256,6 +257,7 @@ export type Database = {
           id?: string
           title?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           anon_user_id?: string
@@ -264,6 +266,7 @@ export type Database = {
           id?: string
           title?: string | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -401,45 +404,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      class_lesson_plans: {
-        Row: {
-          added_at: string | null
-          added_by: string | null
-          class_id: string
-          id: string
-          lesson_plan_id: string
-        }
-        Insert: {
-          added_at?: string | null
-          added_by?: string | null
-          class_id: string
-          id?: string
-          lesson_plan_id: string
-        }
-        Update: {
-          added_at?: string | null
-          added_by?: string | null
-          class_id?: string
-          id?: string
-          lesson_plan_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "class_lesson_plans_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_lesson_plans_lesson_plan_id_fkey"
-            columns: ["lesson_plan_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_plans"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       comments: {
         Row: {
@@ -645,92 +609,6 @@ export type Database = {
           updated_at?: string | null
           venue?: string | null
           view_count?: number | null
-        }
-        Relationships: []
-      }
-      lesson_plan_steps: {
-        Row: {
-          id: string
-          lesson_plan_id: string
-          notes: string | null
-          position: number | null
-          resource_ids: string[]
-          title: string | null
-        }
-        Insert: {
-          id?: string
-          lesson_plan_id: string
-          notes?: string | null
-          position?: number | null
-          resource_ids?: string[]
-          title?: string | null
-        }
-        Update: {
-          id?: string
-          lesson_plan_id?: string
-          notes?: string | null
-          position?: number | null
-          resource_ids?: string[]
-          title?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_plan_steps_lesson_plan_id_fkey"
-            columns: ["lesson_plan_id"]
-            isOneToOne: false
-            referencedRelation: "lesson_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lesson_plans: {
-        Row: {
-          created_at: string | null
-          date: string | null
-          delivery_mode: string | null
-          duration: string | null
-          grouping: string | null
-          id: string
-          logo_url: string | null
-          meta: Json
-          objective: string | null
-          owner_id: string
-          subject: string | null
-          success_criteria: string | null
-          title: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          date?: string | null
-          delivery_mode?: string | null
-          duration?: string | null
-          grouping?: string | null
-          id?: string
-          logo_url?: string | null
-          meta?: Json
-          objective?: string | null
-          owner_id: string
-          subject?: string | null
-          success_criteria?: string | null
-          title: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          date?: string | null
-          delivery_mode?: string | null
-          duration?: string | null
-          grouping?: string | null
-          id?: string
-          logo_url?: string | null
-          meta?: Json
-          objective?: string | null
-          owner_id?: string
-          subject?: string | null
-          success_criteria?: string | null
-          title?: string
-          updated_at?: string | null
         }
         Relationships: []
       }

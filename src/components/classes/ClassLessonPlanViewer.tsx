@@ -84,7 +84,7 @@ export function ClassLessonPlanViewer({
     queryFn: async () => {
       return listClassLessonPlans(classId, appliedFilters);
     },
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
     staleTime: 30_000,
   });
 
