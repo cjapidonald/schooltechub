@@ -16,22 +16,6 @@ import { AttachLessonPlanDialog } from "@/components/classes/AttachLessonPlanDia
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Calendar } from "@/components/ui/calendar";
 
-const formatDisplayDate = (value: string | null) => {
-  if (!value) {
-    return "No scheduled date";
-  }
-
-  try {
-    const parsed = parseISO(value);
-    if (!isValid(parsed)) {
-      return "No scheduled date";
-    }
-    return `Scheduled for ${format(parsed, "PPP")}`;
-  } catch {
-    return "No scheduled date";
-  }
-};
-
 export interface ClassLessonPlanViewerProps {
   classId: string;
   onUnlink: (lessonPlanId: string) => void;
@@ -54,6 +38,26 @@ export function ClassLessonPlanViewer({
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { t } = useLanguage();
+
+  const formatPlanDate = (value: string | null) => {
+    if (!value) {
+      return t.account.classes.viewer.noScheduledDate;
+    }
+
+    try {
+      const parsed = parseISO(value);
+      if (!isValid(parsed)) {
+        return t.account.classes.viewer.noScheduledDate;
+      }
+
+      return t.account.classes.viewer.scheduledFor.replace(
+        "{date}",
+        format(parsed, "PPP"),
+      );
+    } catch {
+      return t.account.classes.viewer.noScheduledDate;
+    }
+  };
 
   useEffect(() => {
     setSelectedDate(undefined);
@@ -188,7 +192,9 @@ export function ClassLessonPlanViewer({
           }}
           className="mx-auto"
         />
-        <p className="mt-3 text-center text-xs text-muted-foreground">Select a date to filter plans.</p>
+        <p className="mt-3 text-center text-xs text-muted-foreground">
+          {t.account.classes.viewer.calendarHelper}
+        </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Button
             type="button"
@@ -197,7 +203,7 @@ export function ClassLessonPlanViewer({
             onClick={handleClearFilter}
             disabled={!selectedDate}
           >
-            Show all plans
+            {t.account.classes.viewer.showAll}
           </Button>
           <Button
             type="button"
@@ -205,11 +211,13 @@ export function ClassLessonPlanViewer({
             onClick={() => setIsAttachDialogOpen(true)}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
-            Attach existing plan
+            {t.account.classes.viewer.attachExisting}
           </Button>
         </div>
       </div>
-      {isRefetching ? <p className="text-xs text-muted-foreground">Updating results…</p> : null}
+      {isRefetching ? (
+        <p className="text-xs text-muted-foreground">{t.account.classes.viewer.updating}</p>
+      ) : null}
 
       <ScrollArea className="h-[60vh] pr-2">
         {isPending ? (
@@ -219,12 +227,12 @@ export function ClassLessonPlanViewer({
           </div>
         ) : error ? (
           <Alert variant="destructive">
-            <AlertTitle>Unable to load linked plans</AlertTitle>
+            <AlertTitle>{t.account.classes.viewer.errorTitle}</AlertTitle>
             <AlertDescription>
-              {error.message}
+              {error.message || t.account.classes.viewer.errorDescription}
               <div className="mt-4">
                 <Button variant="outline" size="sm" onClick={() => refetch()}>
-                  Try again
+                  {t.account.classes.viewer.retry}
                 </Button>
               </div>
             </AlertDescription>
@@ -236,13 +244,18 @@ export function ClassLessonPlanViewer({
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{plan.title}</p>
-                    <p className="text-sm text-muted-foreground">{formatDisplayDate(plan.date)}</p>
+                    <p className="text-sm text-muted-foreground">{formatPlanDate(plan.date)}</p>
                     {plan.duration ? (
-                      <p className="text-sm text-muted-foreground">Duration: {plan.duration}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t.account.classes.viewer.durationLabel.replace("{duration}", plan.duration)}
+                      </p>
                     ) : null}
                     {plan.addedAt ? (
                       <p className="mt-2 text-xs text-muted-foreground/80">
-                        Linked on {format(new Date(plan.addedAt), "PPP p")}
+                        {t.account.classes.viewer.linkedOn.replace(
+                          "{date}",
+                          format(new Date(plan.addedAt), "PPP p"),
+                        )}
                       </p>
                     ) : null}
                   </div>
@@ -251,15 +264,15 @@ export function ClassLessonPlanViewer({
                     size="sm"
                     onClick={() => onUnlink(plan.id)}
                     disabled={isUnlinking && unlinkingPlanId === plan.id}
-                  >
-                    {isUnlinking && unlinkingPlanId === plan.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Unlink className="mr-2 h-4 w-4" />
-                        Unlink
-                      </>
-                    )}
+                    >
+                      {isUnlinking && unlinkingPlanId === plan.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Unlink className="mr-2 h-4 w-4" />
+                          {t.account.classes.viewer.unlink}
+                        </>
+                      )}
                   </Button>
                 </div>
               </div>
@@ -267,8 +280,8 @@ export function ClassLessonPlanViewer({
           </div>
         ) : (
           <div className="rounded-lg border border-dashed bg-muted/40 p-8 text-center text-sm text-muted-foreground">
-            <p>No lesson plans match the current date filter.</p>
-            <p className="mt-2">Clear the filter or attach an existing plan using the button above.</p>
+            <p>{t.account.classes.viewer.emptyTitle}</p>
+            <p className="mt-2">{t.account.classes.viewer.emptyDescription}</p>
           </div>
         )}
       </ScrollArea>

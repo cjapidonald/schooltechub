@@ -1253,6 +1253,14 @@ export const vi = {
       errorDescription: "Vui lòng thử lại sau.",
       retryLabel: "Thử lại",
     },
+    classLinking: {
+      ariaLabel: "Link lesson plan to a class",
+      placeholder: "Link to class",
+      loading: "Loading classes...",
+      noClasses: "No classes available",
+      signedInHelp: "Linking a class adds this lesson to their schedule.",
+      signedOutHelp: "Sign in to link this lesson to one of your classes.",
+    },
     activities: {
       title: "Tìm hoạt động",
       placeholder: "Tìm theo chủ đề, công cụ hoặc kết quả",
@@ -1308,7 +1316,44 @@ export const vi = {
       savedPosts: "Bài viết đã lưu",
       activity: "Hoạt động",
       security: "Bảo mật",
-      settings: "Cài đặt"
+      settings: "Cài đặt",
+      research: "Nghiên cứu"
+    },
+    overview: {
+      title: "My Dashboard",
+      subtitle: "Here’s a personalized snapshot of your SchoolTech Hub activity and upcoming lessons.",
+      ctas: {
+        postBlog: "Post a blog",
+        askQuestion: "Ask a question",
+      },
+      upcoming: {
+        title: "Upcoming lessons",
+        description: "Stay ready for what's next on your teaching calendar.",
+        empty: "No upcoming lessons scheduled.",
+        errorTitle: "Unable to load upcoming lessons",
+        errorDescription: "Please try again in a moment.",
+        retry: "Try again",
+        dateTbd: "Date TBD",
+      },
+    },
+    research: {
+      badge: "Coming soon",
+      cardTitle: "Research & Applications",
+      cardDescription: "Preview our upcoming research hub for educators and partners.",
+      cardBody:
+        "Opt in to hear about pilot opportunities, classroom research, and application windows as soon as they open.",
+      toggleLabel: "Notify me when applications open",
+      toggleDescription: "We'll send an email when new research projects accept participants.",
+      toggleAria: "Toggle research application notifications",
+      notificationsEnabledTitle: "Notifications enabled",
+      notificationsEnabledDescription: "We'll let you know as soon as new research applications open.",
+      notificationsDisabledTitle: "Notifications updated",
+      notificationsDisabledDescription: "You won't receive updates about new research opportunities.",
+      errorTitle: "Unable to update preference",
+      errorDescription: "Please try again in a moment.",
+      tabTitle: "Research workspace",
+      tabDescription: "We're preparing a dedicated space for research collaboration and applications.",
+      tabHelper: "Check back soon for project listings and application tools.",
     },
     profile: {
       title: "Thông tin hồ sơ",
@@ -1464,6 +1509,24 @@ export const vi = {
         "Kiểm tra hoạt động tài khoản thường xuyên để phát hiện bất thường.",
         "Đăng xuất khỏi thiết bị dùng chung sau khi sử dụng."
       ]
+    },
+    classes: {
+      viewer: {
+        calendarHelper: "Select a date to filter plans.",
+        showAll: "Show all plans",
+        attachExisting: "Attach existing plan",
+        updating: "Updating results…",
+        errorTitle: "Unable to load linked plans",
+        errorDescription: "Please try again in a moment.",
+        retry: "Try again",
+        noScheduledDate: "No scheduled date",
+        scheduledFor: "Scheduled for {date}",
+        durationLabel: "Duration: {duration}",
+        linkedOn: "Linked on {date}",
+        unlink: "Unlink",
+        emptyTitle: "No lesson plans match the current date filter.",
+        emptyDescription: "Clear the filter or attach an existing plan using the button above.",
+      },
     },
     savedPosts: {
       title: "Bài viết đã lưu",

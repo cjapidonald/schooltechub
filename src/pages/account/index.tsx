@@ -18,8 +18,10 @@ import type { LucideIcon } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,33 +29,42 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useMyProfile } from "@/hooks/useMyProfile";
+import { useToast } from "@/hooks/use-toast";
 import { listMyClasses } from "@/lib/classes";
 import {
   createProfileImageSignedUrl,
   resolveAvatarReference,
   isHttpUrl,
 } from "@/lib/avatar";
+import { supabase } from "@/integrations/supabase/client";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { UpcomingLessonsCard } from "./components/UpcomingLessonsCard";
 
-const dashboardTabs = [
-  { value: "overview", label: "Overview" },
-  { value: "classes", label: "Classes" },
-  { value: "lessonPlans", label: "Lesson Plans" },
-  { value: "savedPosts", label: "Saved Posts" },
-  { value: "activity", label: "Activity" },
-  { value: "security", label: "Security" },
-  { value: "settings", label: "Settings" },
+const dashboardTabValues = [
+  "overview",
+  "classes",
+  "lessonPlans",
+  "savedPosts",
+  "activity",
+  "security",
+  "settings",
+  "research",
 ] as const;
 
-type DashboardTabValue = (typeof dashboardTabs)[number]["value"];
-type NonOverviewTab = Exclude<DashboardTabValue, "overview">;
+type DashboardTabValue = (typeof dashboardTabValues)[number];
 
-const dashboardTabValues = dashboardTabs.map(tab => tab.value) as DashboardTabValue[];
+const summaryTabValues = [
+  "classes",
+  "lessonPlans",
+  "savedPosts",
+  "activity",
+  "security",
+  "settings",
+] as const;
 
-type TabCounts = Record<NonOverviewTab, number>;
+type SummaryTabValue = (typeof summaryTabValues)[number];
 
-const defaultCounts: TabCounts = {
+const defaultCounts: Record<SummaryTabValue, number> = {
   classes: 2,
   lessonPlans: 6,
   savedPosts: 4,
@@ -62,7 +73,7 @@ const defaultCounts: TabCounts = {
   settings: 3,
 };
 
-const summaryTabDetails: Record<NonOverviewTab, { icon: LucideIcon; label: string }> = {
+const summaryTabDetails: Record<SummaryTabValue, { icon: LucideIcon; label: string }> = {
   classes: { icon: GraduationCap, label: "Classes awaiting updates" },
   lessonPlans: { icon: SquarePen, label: "Lesson plans needing attention" },
   savedPosts: { icon: Bookmark, label: "Saved posts to revisit" },
@@ -70,6 +81,8 @@ const summaryTabDetails: Record<NonOverviewTab, { icon: LucideIcon; label: strin
   security: { icon: ShieldCheck, label: "Security checks to complete" },
   settings: { icon: Settings, label: "Review your preferences" },
 };
+
+const RESEARCH_NOTIFICATION_KEY = "research_notifications_opt_in";
 
 const ISO_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_ONLY = /^\d{2}:\d{2}/;
@@ -133,13 +146,16 @@ const loadingSkeleton = (
 const AccountDashboard = () => {
   const { user, loading } = useRequireAuth();
   const { language, t } = useLanguage();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [counts, setCounts] = useState<TabCounts | null>(null);
+  const [counts, setCounts] = useState<Record<SummaryTabValue, number> | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { fullName: profileFullName, schoolName, schoolLogoUrl } = useMyProfile();
   const [avatarReference, setAvatarReference] = useState<string | null>(null);
   const [resolvedAvatarUrl, setResolvedAvatarUrl] = useState<string | null>(null);
+  const [isResearchNotificationsEnabled, setIsResearchNotificationsEnabled] = useState(false);
+  const [isResearchToggleSaving, setIsResearchToggleSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<DashboardTabValue>(() => {
     const initial = searchParams.get("tab");
     return isDashboardTabValue(initial) ? initial : "overview";
@@ -159,6 +175,24 @@ const AccountDashboard = () => {
     }, 300);
 
     return () => clearTimeout(timeout);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setIsResearchNotificationsEnabled(false);
+      return;
+    }
+
+    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const stored = metadata[RESEARCH_NOTIFICATION_KEY];
+    const normalized =
+      typeof stored === "boolean"
+        ? stored
+        : typeof stored === "string"
+        ? stored.toLowerCase() === "true"
+        : false;
+
+    setIsResearchNotificationsEnabled(normalized);
   }, [user]);
 
   useEffect(() => {
@@ -212,12 +246,26 @@ const AccountDashboard = () => {
     };
   }, [avatarReference]);
 
+  const dashboardTabs = useMemo(
+    () => {
+      const labels = (t.account.tabs ?? {}) as Record<string, string>;
+      return dashboardTabValues.map(value => ({
+        value,
+        label: labels[value] ?? value,
+      }));
+    },
+    [t.account.tabs],
+  );
+
   const summaryTabs = useMemo(
-    () =>
-      dashboardTabs
-        .filter(tab => tab.value !== "overview")
-        .map(tab => ({ value: tab.value as NonOverviewTab, label: tab.label })),
-    []
+    () => {
+      const labels = (t.account.tabs ?? {}) as Record<string, string>;
+      return summaryTabValues.map(value => ({
+        value,
+        label: labels[value] ?? value,
+      }));
+    },
+    [t.account.tabs],
   );
 
   const handleTabChange = (value: string) => {
@@ -284,6 +332,47 @@ const AccountDashboard = () => {
       .join(" ");
   }, [t.account.profile.rolePlaceholder, t.account.profile.roles, user]);
 
+  const handleResearchNotificationChange = async (checked: boolean) => {
+    if (!user || isResearchToggleSaving) {
+      return;
+    }
+
+    const previous = isResearchNotificationsEnabled;
+    setIsResearchNotificationsEnabled(checked);
+    setIsResearchToggleSaving(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { [RESEARCH_NOTIFICATION_KEY]: checked },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: checked
+          ? t.account.research.notificationsEnabledTitle
+          : t.account.research.notificationsDisabledTitle,
+        description: checked
+          ? t.account.research.notificationsEnabledDescription
+          : t.account.research.notificationsDisabledDescription,
+      });
+    } catch (error) {
+      setIsResearchNotificationsEnabled(previous);
+      toast({
+        title: t.account.research.errorTitle,
+        description:
+          error instanceof Error
+            ? error.message
+            : t.account.research.errorDescription,
+        variant: "destructive",
+      });
+    } finally {
+      setIsResearchToggleSaving(false);
+    }
+  };
+
   if (loading) {
     return loadingSkeleton;
   }
@@ -312,15 +401,18 @@ const AccountDashboard = () => {
       />
       <div className="container space-y-8 py-10">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">My Dashboard</h1>
-          <p className="text-muted-foreground">
-            Here&apos;s a personalized snapshot of your SchoolTech Hub activity and upcoming lessons.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t.account.overview.title}</h1>
+          <p className="text-muted-foreground">{t.account.overview.subtitle}</p>
         </div>
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="flex w-full flex-wrap gap-2 border-none bg-transparent p-0 shadow-none h-auto backdrop-blur-0">
             {dashboardTabs.map(tab => (
-              <TabsTrigger key={tab.value} value={tab.value} className="flex-1 whitespace-nowrap">
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="flex-1 whitespace-nowrap"
+                disabled={tab.value === "research"}
+              >
                 {tab.label}
               </TabsTrigger>
             ))}
@@ -348,6 +440,40 @@ const AccountDashboard = () => {
                     </CardContent>
                   </Card>
                   <UpcomingLessonsCard isEnabled={Boolean(user)} />
+                  <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
+                    <CardHeader className="flex flex-row items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <CardTitle className="text-xl font-semibold">
+                          {t.account.research.cardTitle}
+                        </CardTitle>
+                        <CardDescription>{t.account.research.cardDescription}</CardDescription>
+                      </div>
+                      <Badge variant="outline" className="border-primary/40 bg-primary/5 text-primary">
+                        {t.account.research.badge}
+                      </Badge>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        {t.account.research.cardBody}
+                      </p>
+                      <div className="flex items-start justify-between gap-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium text-foreground">
+                            {t.account.research.toggleLabel}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {t.account.research.toggleDescription}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={isResearchNotificationsEnabled}
+                          onCheckedChange={handleResearchNotificationChange}
+                          disabled={isResearchToggleSaving}
+                          aria-label={t.account.research.toggleAria}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
                 {counts ? (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -454,6 +580,16 @@ const AccountDashboard = () => {
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleTabChange("classes")}>
                       {t.account.tabs.classes}
+                    </Button>
+                    <Button asChild size="sm">
+                      <Link to={getLocalizedPath("/blog/new", language)}>
+                        {t.account.overview.ctas.postBlog}
+                      </Link>
+                    </Button>
+                    <Button asChild size="sm" variant="outline">
+                      <Link to={getLocalizedPath("/forum/new", language)}>
+                        {t.account.overview.ctas.askQuestion}
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
@@ -643,6 +779,22 @@ const AccountDashboard = () => {
           </TabsContent>
           <TabsContent value="settings">
             <SettingsPanel user={user} />
+          </TabsContent>
+          <TabsContent value="research">
+            <Card>
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-xl font-semibold">{t.account.research.tabTitle}</CardTitle>
+                <CardDescription>{t.account.research.tabDescription}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Badge variant="outline" className="border-primary/40 bg-primary/5 text-primary">
+                    {t.account.research.badge}
+                  </Badge>
+                  <span>{t.account.research.tabHelper}</span>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

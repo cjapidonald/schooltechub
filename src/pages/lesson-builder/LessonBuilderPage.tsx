@@ -29,6 +29,7 @@ import { useMyClasses } from "@/hooks/useMyClasses";
 import { linkPlanToClass } from "@/lib/classes";
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
+import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import type { LessonPlanMetaDraft } from "./types";
 import { createLessonPlan, getLessonPlan, updateLessonPlan } from "./api";
 
@@ -533,8 +534,9 @@ const LessonBuilderPage = () => {
               <p className="mt-3 text-sm text-muted-foreground">
                 This pane mirrors what teachers see. As you update details, the summary refreshes automatically.
               </p>
-              <div className="mt-6">
+              <div className="mt-6 space-y-6">
                 <LessonPreviewPane meta={meta} profile={previewProfile} />
+                <LessonPreview />
               </div>
             </aside>
           </div>
@@ -585,17 +587,21 @@ const LessonBuilderPage = () => {
                   classes.length === 0
                 }
               >
-                <SelectTrigger aria-label="Link lesson plan to a class">
+                <SelectTrigger aria-label={t.lessonBuilder.classLinking.ariaLabel}>
                   <SelectValue
                     placeholder={
-                      isLoadingClasses ? "Loading classes..." : "Link to class"
+                      isLoadingClasses
+                        ? t.lessonBuilder.classLinking.loading
+                        : t.lessonBuilder.classLinking.placeholder
                     }
                   />
                 </SelectTrigger>
                 <SelectContent>
                   {classes.length === 0 ? (
                     <SelectItem value="no-classes" disabled>
-                      {isLoadingClasses ? "Loading classes..." : "No classes available"}
+                      {isLoadingClasses
+                        ? t.lessonBuilder.classLinking.loading
+                        : t.lessonBuilder.classLinking.noClasses}
                     </SelectItem>
                   ) : (
                     classes.map(classItem => (
@@ -608,8 +614,8 @@ const LessonBuilderPage = () => {
               </Select>
               <p className="mt-2 text-xs text-muted-foreground">
                 {isAuthenticated
-                  ? "Linking a class adds this lesson to their schedule."
-                  : "Sign in to link this lesson to one of your classes."}
+                  ? t.lessonBuilder.classLinking.signedInHelp
+                  : t.lessonBuilder.classLinking.signedOutHelp}
               </p>
             </div>
             <p className="text-xs text-muted-foreground">
