@@ -23,22 +23,23 @@ export async function downloadPlanExport(
     return;
   }
 
-  const { data, error } = await supabase.auth.getSession();
-  if (error) {
-    throw new Error("Unable to verify your session. Please sign in again.");
-  }
-
-  const accessToken = data.session?.access_token;
-  if (!accessToken) {
-    throw new Error("You must be signed in to download this lesson plan.");
+  let accessToken: string | null = null;
+  try {
+    const { data } = await supabase.auth.getSession();
+    accessToken = data.session?.access_token ?? null;
+  } catch (error) {
+    console.warn("Unable to verify Supabase session before download", error);
   }
 
   const fileNameBase = slugify(title) || "lesson-plan";
+  const headers: Record<string, string> = {};
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
   const response = await fetch(`/api/lesson-plans/${planId}/export.${FORMAT_EXTENSION[format]}`, {
     credentials: "include",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers,
   });
 
   if (!response.ok) {

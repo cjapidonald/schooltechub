@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 
@@ -23,8 +23,10 @@ import {
   subscribeToResourceAttachments,
 } from "@/lib/lesson-draft-bridge";
 import { supabase } from "@/integrations/supabase/client";
-import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useMyClasses } from "@/hooks/useMyClasses";
+import { linkPlanToClass } from "@/lib/classes";
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
 import type { LessonPlanMetaDraft } from "./types";
@@ -71,7 +73,9 @@ const LessonBuilderPage = () => {
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
   const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
-  const authPath = useMemo(() => getLocalizedPath("/auth", language), [language]);
+  const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
+  const [isLinkingClass, setIsLinkingClass] = useState(false);
+  const [selectedClassId, setSelectedClassId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     latestMeta.current = meta;
@@ -116,6 +120,18 @@ const LessonBuilderPage = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!classesError || !isAuthenticated) {
+      return;
+    }
+
+    toast({
+      title: "Unable to load classes",
+      description: classesError.message,
+      variant: "destructive",
+    });
+  }, [classesError, isAuthenticated, toast]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -249,31 +265,75 @@ const LessonBuilderPage = () => {
     return trimmed.length > 0 ? trimmed : "Untitled lesson";
   }, [meta.title]);
 
+  const handleClassSelection = useCallback(
+    async (classId: string) => {
+      if (!planId) {
+        toast({
+          title: "Lesson not ready",
+          description: "Save or export your lesson before linking it to a class.",
+        });
+        setSelectedClassId(undefined);
+        return;
+      }
+
+      setIsLinkingClass(true);
+
+      try {
+        await linkPlanToClass(planId, classId);
+        toast({
+          title: "Lesson linked",
+          description: "This lesson plan is now available in the selected class.",
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Please try again.";
+        toast({
+          title: "Unable to link lesson", 
+          description: message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLinkingClass(false);
+        setSelectedClassId(undefined);
+      }
+    },
+    [planId, toast],
+  );
+
   const handleDownload = async (format: "pdf" | "docx") => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Sign in to download",
-        description: "Create a free account to export this lesson plan as a PDF or DOCX.",
-      });
-      return;
-    }
-
-    if (!planId) {
-      toast({
-        title: "Lesson not ready",
-        description: "Please wait for the lesson plan to finish initialising before downloading.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setActiveExport(format);
 
     try {
-      const record = await updateLessonPlan(planId, latestMeta.current);
-      const timestamp = record.lastSavedAt ?? record.updatedAt ?? new Date().toISOString();
-      setLastSavedAt(new Date(timestamp));
-      await downloadPlanExport(planId, format, normalizedTitle);
+      let targetPlanId = planId;
+      let recordTimestamp: string | null = null;
+
+      if (!targetPlanId) {
+        const record = await createLessonPlan(latestMeta.current);
+        targetPlanId = record.id;
+        setPlanId(record.id);
+        recordTimestamp = record.lastSavedAt ?? record.updatedAt ?? new Date().toISOString();
+      } else {
+        try {
+          const record = await updateLessonPlan(targetPlanId, latestMeta.current);
+          recordTimestamp = record.lastSavedAt ?? record.updatedAt ?? new Date().toISOString();
+        } catch (error) {
+          if (isAuthenticated) {
+            throw error;
+          }
+          // Anonymous users may not be able to persist updates; fall back to
+          // using the existing draft without blocking the download.
+          recordTimestamp = new Date().toISOString();
+        }
+      }
+
+      if (recordTimestamp) {
+        setLastSavedAt(new Date(recordTimestamp));
+      }
+
+      if (!targetPlanId) {
+        throw new Error("Lesson plan could not be prepared for download.");
+      }
+
+      await downloadPlanExport(targetPlanId, format, normalizedTitle);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Please try again.";
       toast({
@@ -493,7 +553,7 @@ const LessonBuilderPage = () => {
                 type="button"
                 variant="outline"
                 onClick={() => void handleDownload("pdf")}
-                disabled={!isAuthenticated || Boolean(activeExport) || !planId}
+                disabled={Boolean(activeExport)}
               >
                 {activeExport === "pdf" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Download PDF
@@ -502,21 +562,60 @@ const LessonBuilderPage = () => {
                 type="button"
                 variant="outline"
                 onClick={() => void handleDownload("docx")}
-                disabled={!isAuthenticated || Boolean(activeExport) || !planId}
+                disabled={Boolean(activeExport)}
               >
                 {activeExport === "docx" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Download DOCX
               </Button>
             </div>
           </div>
-          {!isAuthenticated ? (
-            <div className="mt-4 rounded-lg border border-dashed border-border/60 bg-muted/30 p-4 text-sm text-muted-foreground">
-              <p>Sign in to download your lesson plan.</p>
-              <Button type="button" variant="secondary" className="mt-3" asChild>
-                <Link to={authPath}>Sign in</Link>
-              </Button>
+          <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="md:w-72">
+              <Select
+                value={selectedClassId}
+                onValueChange={value => {
+                  setSelectedClassId(value);
+                  void handleClassSelection(value);
+                }}
+                disabled={
+                  !isAuthenticated ||
+                  !planId ||
+                  isLinkingClass ||
+                  isLoadingClasses ||
+                  classes.length === 0
+                }
+              >
+                <SelectTrigger aria-label="Link lesson plan to a class">
+                  <SelectValue
+                    placeholder={
+                      isLoadingClasses ? "Loading classes..." : "Link to class"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.length === 0 ? (
+                    <SelectItem value="no-classes" disabled>
+                      {isLoadingClasses ? "Loading classes..." : "No classes available"}
+                    </SelectItem>
+                  ) : (
+                    classes.map(classItem => (
+                      <SelectItem key={classItem.id} value={classItem.id}>
+                        {classItem.title}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {isAuthenticated
+                  ? "Linking a class adds this lesson to their schedule."
+                  : "Sign in to link this lesson to one of your classes."}
+              </p>
             </div>
-          ) : null}
+            <p className="text-xs text-muted-foreground">
+              Downloads are not saved to your account. Save or share the file once it finishes downloading.
+            </p>
+          </div>
         </section>
       </main>
 
