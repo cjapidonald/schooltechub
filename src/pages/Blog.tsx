@@ -176,40 +176,17 @@ const Blog = () => {
     try {
       setLoading(true);
       let query = supabase
-        .from("content_master")
+        .from("blogs")
         .select("*")
-        .in("page", ["research_blog", "edutech", "teacher_diary"])
-        .eq("is_published", true)
-        .eq("status", "published")
-        .is("deleted_at", null)
-        .eq("language", language);
+        .eq("is_published", true);
 
       if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,subtitle.ilike.%${searchTerm}%,excerpt.ilike.%${searchTerm}%`);
+        query = query.or(`title.ilike.%${searchTerm}%,excerpt.ilike.%${searchTerm}%`);
       }
 
+      // For now, we'll filter by category which exists in the blogs table
       if (filters.filterType.length > 0) {
-        query = query.in("filter_type", filters.filterType as any);
-      }
-
-      if (filters.stage.length > 0) {
-        query = query.in("stage", filters.stage as any);
-      }
-
-      if (filters.subject.length > 0) {
-        query = query.in("subject", filters.subject as any);
-      }
-
-      if (filters.delivery.length > 0) {
-        query = query.in("delivery_type", filters.delivery as any);
-      }
-
-      if (filters.payment.length > 0) {
-        query = query.in("payment", filters.payment as any);
-      }
-
-      if (filters.platform.length > 0) {
-        query = query.in("platform", filters.platform as any);
+        query = query.in("category", filters.filterType as any);
       }
 
       const { data, error } = await query.order("published_at", { ascending: false });
