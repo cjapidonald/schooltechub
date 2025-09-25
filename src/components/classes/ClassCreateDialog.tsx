@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { format, parse } from "date-fns";
 import { createClass, type Class } from "@/lib/classes";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -14,7 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 type ClassFormState = {
@@ -64,16 +68,33 @@ export function ClassCreateDialog({ open, onOpenChange, onCreated }: ClassCreate
     mutationFn: async (values: ClassFormState) => {
       const parsedCapacity = values.maxCapacity.trim();
       const maxCapacity = parsedCapacity.length > 0 ? Number.parseInt(parsedCapacity, 10) : null;
+      const trimmedTitle = values.title.trim();
+      const trimmedSummary = values.summary.trim();
+      const trimmedSubject = values.subject.trim();
+      const trimmedStage = values.stage.trim();
+      const trimmedMeetingTime = values.meetingSchedule.trim();
+      const trimmedMeetingLink = values.meetingLink.trim();
+
+      let startDateIso: string | null = null;
+      const trimmedStartDate = values.startDate.trim();
+
+      if (trimmedStartDate) {
+        const source = trimmedMeetingTime
+          ? `${trimmedStartDate}T${trimmedMeetingTime}:00`
+          : `${trimmedStartDate}T00:00:00`;
+        const composed = new Date(source);
+        startDateIso = Number.isNaN(composed.getTime()) ? null : composed.toISOString();
+      }
 
       const payload = {
-        title: values.title.trim(),
-        summary: values.summary.trim() || null,
-        subject: values.subject.trim() || null,
-        stage: values.stage.trim() || null,
-        startDate: values.startDate || null,
+        title: trimmedTitle,
+        summary: trimmedSummary || null,
+        subject: trimmedSubject || null,
+        stage: trimmedStage || null,
+        startDate: startDateIso,
         endDate: values.endDate || null,
-        meetingSchedule: values.meetingSchedule.trim() || null,
-        meetingLink: values.meetingLink.trim() || null,
+        meetingSchedule: trimmedMeetingTime.length > 0 ? trimmedMeetingTime : null,
+        meetingLink: trimmedMeetingLink || null,
         maxCapacity: Number.isNaN(maxCapacity) ? null : maxCapacity,
       };
 
@@ -119,7 +140,19 @@ export function ClassCreateDialog({ open, onOpenChange, onCreated }: ClassCreate
       }
     };
 
+  const handleStartDateSelect = (date: Date | undefined) => {
+    if (!date) {
+      return;
+    }
+
+    setFormState(prev => ({ ...prev, startDate: format(date, "yyyy-MM-dd") }));
+    if (formError) {
+      setFormError(null);
+    }
+  };
+
   const isSubmitting = createClassMutation.isPending;
+  const startDateValue = formState.startDate ? parse(formState.startDate, "yyyy-MM-dd", new Date()) : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -179,13 +212,31 @@ export function ClassCreateDialog({ open, onOpenChange, onCreated }: ClassCreate
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="class-start-date">Start date</Label>
-              <Input
-                id="class-start-date"
-                type="date"
-                value={formState.startDate}
-                onChange={handleChange("startDate")}
-                disabled={isSubmitting}
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="class-start-date"
+                    type="button"
+                    variant="outline"
+                    disabled={isSubmitting}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDateValue && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDateValue ? format(startDateValue, "PPP") : <span>Select a start date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDateValue ?? undefined}
+                    onSelect={handleStartDateSelect}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="space-y-2">
               <Label htmlFor="class-end-date">End date</Label>
@@ -199,12 +250,12 @@ export function ClassCreateDialog({ open, onOpenChange, onCreated }: ClassCreate
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="class-meeting-schedule">Meeting schedule</Label>
+            <Label htmlFor="class-meeting-schedule">Meeting time</Label>
             <Input
               id="class-meeting-schedule"
+              type="time"
               value={formState.meetingSchedule}
               onChange={handleChange("meetingSchedule")}
-              placeholder="e.g. Mondays at 3:30 PM"
               disabled={isSubmitting}
             />
           </div>

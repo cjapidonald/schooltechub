@@ -15,7 +15,7 @@ export const en = {
     signIn: "Sign In",
     signUp: "Sign Up",
     signOut: "Sign Out",
-    profile: "Profile"
+    profile: "My Dashboard"
   },
   hero: {
     title: "Empowering Education Through Innovation",
@@ -1303,9 +1303,12 @@ export const en = {
     },
     tabs: {
       overview: "Overview",
-      savedPosts: "Saved posts",
+      classes: "Classes",
+      lessonPlans: "Lesson Plans",
+      savedPosts: "Saved Posts",
+      activity: "Activity",
       security: "Security",
-      activity: "Activity"
+      settings: "Settings"
     },
     profile: {
       title: "Profile details",

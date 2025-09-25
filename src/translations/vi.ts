@@ -15,7 +15,7 @@ export const vi = {
     signIn: "Đăng nhập",
     signUp: "Đăng ký",
     signOut: "Đăng xuất",
-    profile: "Hồ sơ"
+    profile: "Bảng điều khiển của tôi"
   },
   hero: {
     title: "Trao quyền cho giáo dục thông qua đổi mới",
@@ -1303,9 +1303,12 @@ export const vi = {
     },
     tabs: {
       overview: "Tổng quan",
+      classes: "Lớp học",
+      lessonPlans: "Kế hoạch bài học",
       savedPosts: "Bài viết đã lưu",
+      activity: "Hoạt động",
       security: "Bảo mật",
-      activity: "Hoạt động"
+      settings: "Cài đặt"
     },
     profile: {
       title: "Thông tin hồ sơ",
