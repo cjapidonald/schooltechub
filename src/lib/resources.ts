@@ -1,8 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Resource } from "@/types/resources";
+import type { Resource, ResourceDetail } from "@/types/resources";
 
 const RESOURCE_SELECT =
   "id,title,description,url,storage_path,type,subject,stage,tags,thumbnail_url,created_by,status,approved_by,approved_at,is_active,created_at";
+
+const RESOURCE_DETAIL_SELECT =
+  "id,title,description,url,storage_path,type,subject,stage,grade_level,format,tags,thumbnail_url,created_by,status,approved_by,approved_at,is_active,created_at,instructional_notes";
 const DEFAULT_PAGE_SIZE = 20;
 
 /**
@@ -118,6 +121,23 @@ function mapResource(record: Partial<Resource>): Resource {
   } satisfies Resource;
 }
 
+type ResourceDetailRecord = {
+  grade_level: string | null;
+  format: string | null;
+  instructional_notes: string | null;
+} & Partial<Resource>;
+
+function mapResourceDetail(record: ResourceDetailRecord): ResourceDetail {
+  const base = mapResource(record);
+
+  return {
+    ...base,
+    gradeLevel: record.grade_level ?? null,
+    format: record.format ?? null,
+    instructionalNotes: record.instructional_notes ?? null,
+  } satisfies ResourceDetail;
+}
+
 /**
  * Performs a paginated query against the `resources` table, applying optional filters.
  *
@@ -209,6 +229,24 @@ export async function searchResources(
     items,
     total: count ?? items.length,
   };
+}
+
+export async function fetchResourceById(id: string): Promise<ResourceDetail> {
+  const { data, error } = await supabase
+    .from("resources")
+    .select<ResourceDetailRecord>(RESOURCE_DETAIL_SELECT)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new ResourceDataError("Unable to load resource details.", { cause: error });
+  }
+
+  if (!data) {
+    throw new ResourceDataError("Resource not found.");
+  }
+
+  return mapResourceDetail(data);
 }
 
 /**
