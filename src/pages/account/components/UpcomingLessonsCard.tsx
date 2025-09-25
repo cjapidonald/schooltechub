@@ -10,7 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { listUpcomingLessonPlans, type UpcomingLessonPlanSummary } from "@/lib/lessonPlans";
+import {
+  listUpcomingLessonPlans,
+  type UpcomingLessonPlanListItem,
+} from "@/lib/data/lesson-plans";
 import { cn } from "@/lib/utils";
 
 const formatLessonDate = (value: string | null): string => {
@@ -29,7 +32,7 @@ const formatLessonDate = (value: string | null): string => {
   }
 };
 
-const createLessonSummary = (lesson: UpcomingLessonPlanSummary): string[] => {
+const createLessonSummary = (lesson: UpcomingLessonPlanListItem): string[] => {
   const date = formatLessonDate(lesson.date);
   const classTitle = lesson.classTitle.trim();
   const lessonTitle = lesson.lessonTitle.trim();
@@ -96,12 +99,12 @@ export const UpcomingLessonsCard = ({ isEnabled, className }: UpcomingLessonsCar
         {lessons.map(lesson => {
           const summarySegments = createLessonSummary(lesson);
           const lessonBuilderPath = getLocalizedPath(
-            `/lesson-builder?id=${encodeURIComponent(lesson.lessonPlanId)}`,
+            `/lesson-builder?id=${encodeURIComponent(lesson.lessonId)}`,
             language,
           );
 
           return (
-            <li key={lesson.id}>
+            <li key={`${lesson.lessonId}-${lesson.date ?? "no-date"}`}>
               <Link
                 to={lessonBuilderPath}
                 className="group flex items-center gap-3 rounded-md border border-transparent p-3 transition hover:border-border hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
