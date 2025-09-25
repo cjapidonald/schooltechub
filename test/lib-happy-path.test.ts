@@ -18,6 +18,7 @@ import {
   exportPlanToPDF,
   type LessonPlanDraft,
 } from "@/lib/lessonPlans";
+import { listUpcomingLessonPlans as listUpcomingLessonPlansData } from "@/lib/data/lesson-plans";
 import { getMyNotifications, markRead, getPrefs, updatePrefs } from "@/lib/notifications";
 import {
   listProjects,
@@ -261,8 +262,12 @@ describe("classes data helpers", () => {
     lesson_plans: {
       id: "plan-1",
       title: "Math Lesson",
-      date: "2024-01-10",
+      date: "2099-01-10",
       duration: "45 minutes",
+    },
+    classes: {
+      id: "class-1",
+      title: "STEM Club",
     },
   };
 
@@ -351,7 +356,14 @@ describe("classes data helpers", () => {
     const plans = await listClassLessonPlans("class-1", {}, baseClient);
     expect(plans).toHaveLength(1);
     expect(plans[0].title).toBe("Math Lesson");
-    expect(plans[0].lessonPlanId).toBe("plan-1");
+    expect(plans[0].id).toBe("plan-1");
+  });
+
+  it("lists upcoming lesson plans", async () => {
+    const upcoming = await listUpcomingLessonPlansData(3, baseClient);
+    expect(upcoming).toHaveLength(1);
+    expect(upcoming[0].lessonId).toBe("plan-1");
+    expect(upcoming[0].classTitle).toBe("STEM Club");
   });
 });
 

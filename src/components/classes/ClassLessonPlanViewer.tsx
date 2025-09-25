@@ -236,10 +236,10 @@ export function ClassLessonPlanViewer({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onUnlink(plan.lessonPlanId)}
-                    disabled={isUnlinking && unlinkingPlanId === plan.lessonPlanId}
+                    onClick={() => onUnlink(plan.id)}
+                    disabled={isUnlinking && unlinkingPlanId === plan.id}
                   >
-                    {isUnlinking && unlinkingPlanId === plan.lessonPlanId ? (
+                    {isUnlinking && unlinkingPlanId === plan.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <>
@@ -267,7 +267,7 @@ export function ClassLessonPlanViewer({
         onSelect={handleAttachPlan}
         isLinking={linkPlanMutation.isPending}
         linkingPlanId={linkingPlanId}
-        disabledPlanIds={plans.map(plan => plan.lessonPlanId)}
+        disabledPlanIds={plans.map(plan => plan.id)}
       />
     </div>
   );
