@@ -14,6 +14,7 @@ import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
 import Account from '@/pages/account';
+import ClassDashboard from '@/pages/account/ClassDashboard';
 import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
 import AccountResourceEdit from '@/pages/AccountResourceEdit';
@@ -112,6 +113,16 @@ export const LocalizedRoutes = () => {
         }
       />
       <Route
+        path="/account/classes/:id"
+        element={
+          <RouteWrapper>
+            <AuthGuard>
+              <ClassDashboard />
+            </AuthGuard>
+          </RouteWrapper>
+        }
+      />
+      <Route
         path="/account/resources"
         element={
           <RouteWrapper>
@@ -200,6 +211,16 @@ export const LocalizedRoutes = () => {
             <RouteWrapper>
               <AuthGuard>
                 <Account />
+              </AuthGuard>
+            </RouteWrapper>
+          }
+        />
+        <Route
+          path="account/classes/:id"
+          element={
+            <RouteWrapper>
+              <AuthGuard>
+                <ClassDashboard />
               </AuthGuard>
             </RouteWrapper>
           }

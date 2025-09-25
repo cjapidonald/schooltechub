@@ -16,12 +16,15 @@ import { AttachLessonPlanDialog } from "@/components/classes/AttachLessonPlanDia
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Calendar } from "@/components/ui/calendar";
 
+const EMPTY_HIGHLIGHT_DATES: string[] = [];
+
 export interface ClassLessonPlanViewerProps {
   classId: string;
   onUnlink: (lessonPlanId: string) => void;
   isUnlinking?: boolean;
   unlinkingPlanId?: string | null;
   onPlanCountChange?: (count: number) => void;
+  additionalHighlightedDates?: string[];
 }
 
 export function ClassLessonPlanViewer({
@@ -30,6 +33,7 @@ export function ClassLessonPlanViewer({
   isUnlinking = false,
   unlinkingPlanId = null,
   onPlanCountChange,
+  additionalHighlightedDates = EMPTY_HIGHLIGHT_DATES,
 }: ClassLessonPlanViewerProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [calendarDateStrings, setCalendarDateStrings] = useState<string[]>([]);
@@ -59,12 +63,25 @@ export function ClassLessonPlanViewer({
     }
   };
 
+  const normalizedAdditionalDates = useMemo(() => {
+    return additionalHighlightedDates
+      .map(dateString => {
+        if (!dateString) {
+          return null;
+        }
+
+        const trimmed = dateString.slice(0, 10);
+        return trimmed.length === 10 ? trimmed : null;
+      })
+      .filter((value): value is string => value !== null);
+  }, [additionalHighlightedDates]);
+
   useEffect(() => {
     setSelectedDate(undefined);
-    setCalendarDateStrings([]);
+    setCalendarDateStrings(normalizedAdditionalDates);
     setIsAttachDialogOpen(false);
     setLinkingPlanId(null);
-  }, [classId]);
+  }, [classId, normalizedAdditionalDates]);
 
   const appliedFilters = useMemo(() => {
     if (!selectedDate) {
@@ -92,15 +109,22 @@ export function ClassLessonPlanViewer({
 
   useEffect(() => {
     setCalendarDateStrings(prev => {
-      const next = new Set(prev);
+      const next = new Set(normalizedAdditionalDates);
+
       plans.forEach(plan => {
         if (plan.date) {
           next.add(plan.date.slice(0, 10));
         }
       });
-      return Array.from(next).sort();
+
+      const nextArray = Array.from(next).sort();
+      if (prev.length === nextArray.length && prev.every((value, index) => value === nextArray[index])) {
+        return prev;
+      }
+
+      return nextArray;
     });
-  }, [plans]);
+  }, [plans, normalizedAdditionalDates]);
 
   useEffect(() => {
     if (!onPlanCountChange) {
