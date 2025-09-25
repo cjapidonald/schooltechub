@@ -1,0 +1,31 @@
+/* Letter reveal fallback animation */
+.letter-appear {
+  animation: letterIn 420ms ease-out;
+  transform-origin: left bottom;
+}
+
+@keyframes letterIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(6px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter-appear {
+    animation-duration: 1ms;
+    animation-iteration-count: 1;
+    animation-name: none;
+    transform: none;
+  }
+}
+
+/* Styling hook when SVG handwriting animation is active */
+.letter-handwriting svg path {
+  transition: stroke-dashoffset 420ms ease-out;
+}
