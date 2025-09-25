@@ -41,6 +41,12 @@ export interface Resource {
   is_active: boolean;
 }
 
+export interface ResourceDetail extends Resource {
+  gradeLevel: string | null;
+  format: string | null;
+  instructionalNotes: string | null;
+}
+
 /**
  * Resource card used in account/user resources
  */

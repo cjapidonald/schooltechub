@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import type { MutableRefObject } from "react";
 import { Loader2, Search } from "lucide-react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 
-import { searchResources } from "@/lib/resources";
+import { fetchResourceById, searchResources } from "@/lib/resources";
 import { logActivity } from "@/lib/activity-log";
-import type { Resource } from "@/types/resources";
+import type { Resource, ResourceDetail } from "@/types/resources";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
 import {
   Dialog,
@@ -24,6 +24,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const TYPE_OPTIONS = [
@@ -64,6 +72,176 @@ type FilterState = {
   subjects: string[];
   stages: string[];
   tags: string[];
+};
+
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg"];
+const VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
+const DOCUMENT_EMBED_EXTENSIONS = [".pdf"];
+
+const getFileExtension = (value: string) => {
+  try {
+    const url = new URL(value);
+    const segments = url.pathname.split("/");
+    const lastSegment = segments[segments.length - 1] ?? "";
+    return (lastSegment.split(".").pop() ?? "").toLowerCase();
+  } catch {
+    const cleanValue = value.split(/[?#]/)[0] ?? value;
+    return (cleanValue.split(".").pop() ?? "").toLowerCase();
+  }
+};
+
+const getYouTubeEmbedUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "");
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      const videoId = url.searchParams.get("v");
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+      const pathParts = url.pathname.split("/").filter(Boolean);
+      if (pathParts[0] === "embed" && pathParts[1]) {
+        return `https://www.youtube.com/embed/${pathParts[1]}`;
+      }
+    }
+    if (host === "youtu.be") {
+      const id = url.pathname.replace(/\//g, "");
+      if (id) {
+        return `https://www.youtube.com/embed/${id}`;
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+};
+
+const getVimeoEmbedUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "");
+    if (host === "vimeo.com") {
+      const id = url.pathname.split("/").filter(Boolean)[0];
+      if (id) {
+        return `https://player.vimeo.com/video/${id}`;
+      }
+    }
+  } catch {
+    return null;
+  }
+  return null;
+};
+
+const isImageUrl = (value: string) => {
+  const ext = `.${getFileExtension(value)}`;
+  return IMAGE_EXTENSIONS.includes(ext);
+};
+
+const isVideoFileUrl = (value: string) => {
+  const ext = `.${getFileExtension(value)}`;
+  return VIDEO_EXTENSIONS.includes(ext);
+};
+
+const isEmbeddableDocumentUrl = (value: string) => {
+  const ext = `.${getFileExtension(value)}`;
+  return DOCUMENT_EMBED_EXTENSIONS.includes(ext);
+};
+
+const renderResourcePreview = (resource: ResourceDetail) => {
+  const url = resource.url ?? undefined;
+  const thumbnail = resource.thumbnail_url ?? undefined;
+  const type = resource.type?.toLowerCase() ?? "";
+
+  if (type.includes("video")) {
+    if (url) {
+      const youtubeEmbed = getYouTubeEmbedUrl(url);
+      if (youtubeEmbed) {
+        return (
+          <div className="aspect-video w-full">
+            <iframe
+              src={youtubeEmbed}
+              title={`${resource.title} video preview`}
+              className="h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        );
+      }
+
+      const vimeoEmbed = getVimeoEmbedUrl(url);
+      if (vimeoEmbed) {
+        return (
+          <div className="aspect-video w-full">
+            <iframe
+              src={vimeoEmbed}
+              title={`${resource.title} video preview`}
+              className="h-full w-full"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        );
+      }
+
+      if (isVideoFileUrl(url)) {
+        return (
+          <div className="aspect-video w-full">
+            <video controls className="h-full w-full rounded-md bg-black">
+              <source src={url} />
+              Your browser does not support embedded videos.
+            </video>
+          </div>
+        );
+      }
+    }
+
+    if (thumbnail) {
+      return (
+        <div className="aspect-video w-full overflow-hidden rounded-md bg-black/80">
+          <img src={thumbnail} alt="" className="h-full w-full object-cover" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
+        Video preview unavailable. Open the resource in a new tab to view it.
+      </div>
+    );
+  }
+
+  if (url && isImageUrl(url)) {
+    return (
+      <div className="flex max-h-[420px] w-full items-center justify-center overflow-hidden bg-background">
+        <img src={url} alt="" className="h-full max-h-[420px] w-full object-contain" />
+      </div>
+    );
+  }
+
+  if (url && isEmbeddableDocumentUrl(url)) {
+    return (
+      <iframe
+        src={url}
+        className="h-[480px] w-full"
+        title={`${resource.title} document preview`}
+      />
+    );
+  }
+
+  if (thumbnail) {
+    return (
+      <div className="flex max-h-[420px] w-full items-center justify-center overflow-hidden rounded-md bg-background">
+        <img src={thumbnail} alt="" className="h-full max-h-[420px] w-full object-contain" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
+      Preview unavailable. Use the link below to open this resource.
+    </div>
+  );
 };
 
 const DEFAULT_FILTER_STATE: FilterState = {
@@ -183,6 +361,7 @@ type ResourceGridProps = {
   virtualizer: Virtualizer<HTMLDivElement, Element>;
   onToggleSelection: (resourceId: string) => void;
   onAddSingle: (resourceId: string) => void;
+  onViewDetails: (resourceId: string) => void;
   selectedIds: Set<string>;
   scrollContainerRef: MutableRefObject<HTMLDivElement | null>;
   loadMoreRef: MutableRefObject<HTMLDivElement | null>;
@@ -196,6 +375,7 @@ const ResourceGrid = ({
   virtualizer,
   onToggleSelection,
   onAddSingle,
+  onViewDetails,
   selectedIds,
   scrollContainerRef,
   loadMoreRef,
@@ -219,7 +399,7 @@ const ResourceGrid = ({
   return (
     <div
       ref={scrollContainerRef}
-      className="h-[480px] overflow-y-auto rounded-lg border border-border/60 bg-background/60"
+      className="h-[420px] overflow-y-auto rounded-lg border border-border/60 bg-background/60 sm:h-[480px] lg:h-[600px]"
       aria-busy={isFetchingNextPage}
       aria-label="Resource results"
     >
@@ -285,6 +465,7 @@ const ResourceGrid = ({
                       <Checkbox
                         checked={isSelected}
                         onCheckedChange={() => onToggleSelection(resource.id)}
+                        onClick={event => event.stopPropagation()}
                         aria-label={isSelected ? "Deselect resource" : "Select resource"}
                       />
                       <div className="flex-1 space-y-2">
@@ -321,6 +502,15 @@ const ResourceGrid = ({
                         ) : null}
                       </div>
                     </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-full justify-start px-2 text-xs font-medium text-primary"
+                      onClick={() => onViewDetails(resource.id)}
+                    >
+                      Expand details
+                    </Button>
                   </article>
                 );
               })}
@@ -354,6 +544,8 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
   const [tagInput, setTagInput] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [columnCount, setColumnCount] = useState(1);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailResourceId, setDetailResourceId] = useState<string | null>(null);
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -368,8 +560,19 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
     } else {
       setSelectedIds([]);
       setTagInput("");
+      setDetailsOpen(false);
+      setDetailResourceId(null);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!detailsOpen) {
+      return;
+    }
+    if (!detailResourceId) {
+      setDetailsOpen(false);
+    }
+  }, [detailsOpen, detailResourceId]);
 
   useEffect(() => {
     if (!open) {
@@ -427,6 +630,25 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
   });
 
   const { data, fetchNextPage, hasNextPage, isError, isFetchingNextPage, isPending, refetch } = resourceQuery;
+
+  const detailQuery = useQuery({
+    queryKey: ["lesson-draft-resource-detail", detailResourceId],
+    enabled: detailsOpen && Boolean(detailResourceId),
+    staleTime: 1000 * 60 * 5,
+    queryFn: async () => {
+      if (!detailResourceId) {
+        throw new Error("Missing resource id");
+      }
+      return fetchResourceById(detailResourceId);
+    },
+  });
+
+  const detailResource = detailQuery.data;
+  const isDetailLoading = detailQuery.isPending;
+  const isDetailFetching = detailQuery.isFetching;
+  const detailError = detailQuery.error;
+  const isDetailBusy = isDetailLoading || isDetailFetching;
+  const refetchDetail = detailQuery.refetch;
 
   const resources = useMemo(() => data?.pages.flatMap(page => page.items) ?? [], [data?.pages]);
 
@@ -565,6 +787,25 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
     onOpenChange(false);
   };
 
+  const handleViewDetails = (resourceId: string) => {
+    setDetailResourceId(resourceId);
+    setDetailsOpen(true);
+  };
+
+  const closeDetails = () => {
+    setDetailsOpen(false);
+    setDetailResourceId(null);
+  };
+
+  const handleAddFromDetails = () => {
+    if (!activeStepId || !detailResourceId) {
+      return;
+    }
+    attachResources([detailResourceId]);
+    closeDetails();
+    onOpenChange(false);
+  };
+
   const handleTagInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" || event.key === ",") {
       event.preventDefault();
@@ -600,7 +841,7 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         id="lesson-draft-resource-search"
-        className="max-w-5xl"
+        className="max-w-5xl sm:max-h-[90vh]"
         onOpenAutoFocus={event => {
           event.preventDefault();
           searchInputRef.current?.focus();
@@ -735,6 +976,7 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
               virtualizer={virtualizer}
               onToggleSelection={toggleSelection}
               onAddSingle={handleAddSingle}
+              onViewDetails={handleViewDetails}
               selectedIds={new Set(selectedIds)}
               scrollContainerRef={scrollContainerRef}
               loadMoreRef={loadMoreRef}
@@ -761,6 +1003,154 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
             </Button>
           </div>
         </DialogFooter>
+
+        <Sheet
+          open={detailsOpen}
+          onOpenChange={nextOpen => {
+            if (!nextOpen) {
+              closeDetails();
+            } else {
+              setDetailsOpen(true);
+            }
+          }}
+        >
+          <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl">
+            <SheetHeader className="px-4 pb-4 pt-6 sm:px-6">
+              <SheetTitle>{detailResource?.title ?? "Resource details"}</SheetTitle>
+              <SheetDescription>
+                Review instructions, preview the resource, and add it directly to your lesson plan.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="space-y-6 px-4 pb-6 sm:px-6">
+              {isDetailBusy ? (
+                <div className="flex h-48 flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Loading resource…
+                </div>
+              ) : detailError ? (
+                <div className="space-y-3 rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+                  <p className="font-medium">We couldn&apos;t load this resource.</p>
+                  <p>Check your connection and try again.</p>
+                  <Button type="button" variant="outline" onClick={() => refetchDetail()} className="w-full sm:w-auto">
+                    Try again
+                  </Button>
+                </div>
+              ) : detailResource ? (
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      {detailResource.type ? (
+                        <Badge variant="outline" className="rounded-full px-2 text-xs">
+                          {detailResource.type}
+                        </Badge>
+                      ) : null}
+                      {detailResource.subject ? (
+                        <Badge variant="outline" className="rounded-full px-2 text-xs">
+                          {detailResource.subject}
+                        </Badge>
+                      ) : null}
+                      {detailResource.stage ? (
+                        <Badge variant="outline" className="rounded-full px-2 text-xs">
+                          {detailResource.stage}
+                        </Badge>
+                      ) : null}
+                      {detailResource.gradeLevel ? (
+                        <Badge variant="outline" className="rounded-full px-2 text-xs">
+                          {detailResource.gradeLevel}
+                        </Badge>
+                      ) : null}
+                      {detailResource.format ? (
+                        <Badge variant="outline" className="rounded-full px-2 text-xs">
+                          {detailResource.format}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    {detailResource.tags?.length ? (
+                      <div className="flex flex-wrap gap-2">
+                        {detailResource.tags.map(tag => (
+                          <Badge key={tag} variant="secondary" className="rounded-full px-3 text-xs">
+                            #{tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {detailResource.description ? (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-foreground">Description</h3>
+                      <p className="whitespace-pre-line text-sm text-muted-foreground">
+                        {detailResource.description}
+                      </p>
+                    </div>
+                  ) : null}
+
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">Teaching instructions</h3>
+                    {detailResource.instructionalNotes ? (
+                      <p className="whitespace-pre-line text-sm text-muted-foreground">
+                        {detailResource.instructionalNotes}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No additional instructions were provided for this resource.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold text-foreground">Preview</h3>
+                    <div className="overflow-hidden rounded-md border border-border/60 bg-background/80">
+                      {renderResourcePreview(detailResource)}
+                    </div>
+                    {detailResource.url ? (
+                      <Button type="button" variant="outline" className="w-full justify-start" asChild>
+                        <a href={detailResource.url} target="_blank" rel="noopener noreferrer">
+                          Open resource in new tab
+                        </a>
+                      </Button>
+                    ) : null}
+                  </div>
+
+                  {detailResource.storage_path ? (
+                    <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-sm text-primary">
+                      Offline fallback available. Download or save this resource ahead of class in case internet access is limited.
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Select a resource to view full details.</p>
+              )}
+            </div>
+            <SheetFooter className="border-t border-border/60 bg-muted/30 px-4 py-4 sm:px-6">
+              <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {activeStepId
+                    ? "Attach this resource directly to the active lesson step."
+                    : "Choose a lesson step to enable attaching resources."}
+                </p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={closeDetails}
+                    className="w-full sm:w-auto"
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleAddFromDetails}
+                    disabled={!activeStepId || !detailResource || isDetailBusy}
+                    className="w-full sm:w-auto"
+                  >
+                    Add to step
+                  </Button>
+                </div>
+              </div>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       </DialogContent>
     </Dialog>
   );
