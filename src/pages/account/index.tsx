@@ -634,7 +634,11 @@ const AccountDashboard = () => {
                 ) : classesQuery.data && classesQuery.data.length > 0 ? (
                   <div className="space-y-4">
                     {classesQuery.data.map(classItem => (
-                      <div key={classItem.id} className="rounded-lg border bg-card p-4 shadow-sm">
+                      <Link
+                        key={classItem.id}
+                        to={getLocalizedPath(`/account/classes/${classItem.id}`, language)}
+                        className="block rounded-lg border bg-card p-4 shadow-sm transition hover:border-primary/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      >
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
                             <h3 className="text-base font-semibold text-foreground">{classItem.title}</h3>
@@ -680,12 +684,14 @@ const AccountDashboard = () => {
                               target="_blank"
                               rel="noreferrer noopener"
                               className="text-primary underline"
+                              onClick={event => event.stopPropagation()}
+                              onMouseDown={event => event.stopPropagation()}
                             >
                               Join meeting
                             </a>
                           </p>
                         )}
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (

@@ -59,6 +59,7 @@ const LessonBuilderPage = () => {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [searchParams] = useSearchParams();
   const planParam = searchParams.get("id");
+  const initialClassParam = searchParams.get("classId");
   const { language, t } = useLanguage();
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
   const { toast } = useToast();
@@ -76,6 +77,7 @@ const LessonBuilderPage = () => {
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
   const [isLinkingClass, setIsLinkingClass] = useState(false);
+  const [preselectedClassId] = useState<string | undefined>(initialClassParam ?? undefined);
   const [selectedClassId, setSelectedClassId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -133,6 +135,20 @@ const LessonBuilderPage = () => {
       variant: "destructive",
     });
   }, [classesError, isAuthenticated, toast]);
+
+  useEffect(() => {
+    if (!preselectedClassId) {
+      return;
+    }
+
+    if (selectedClassId) {
+      return;
+    }
+
+    if (classes.some(classItem => classItem.id === preselectedClassId)) {
+      setSelectedClassId(preselectedClassId);
+    }
+  }, [classes, preselectedClassId, selectedClassId]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -273,7 +289,7 @@ const LessonBuilderPage = () => {
           title: "Lesson not ready",
           description: "Save or export your lesson before linking it to a class.",
         });
-        setSelectedClassId(undefined);
+        setSelectedClassId(classId);
         return;
       }
 
@@ -288,13 +304,13 @@ const LessonBuilderPage = () => {
       } catch (error) {
         const message = error instanceof Error ? error.message : "Please try again.";
         toast({
-          title: "Unable to link lesson", 
+          title: "Unable to link lesson",
           description: message,
           variant: "destructive",
         });
       } finally {
         setIsLinkingClass(false);
-        setSelectedClassId(undefined);
+        setSelectedClassId(classId);
       }
     },
     [planId, toast],
