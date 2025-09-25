@@ -157,9 +157,6 @@ function buildPlanUpdate(meta: Partial<LessonPlanMetaDraft>): Record<string, unk
   if (meta.subject !== undefined) {
     payload.subject = meta.subject ?? null;
   }
-  if (meta.classId !== undefined) {
-    payload.class_id = meta.classId && meta.classId.trim().length > 0 ? meta.classId.trim() : null;
-  }
   if (meta.date !== undefined) {
     payload.lesson_date = meta.date && meta.date.trim().length > 0 ? meta.date.trim() : null;
   }

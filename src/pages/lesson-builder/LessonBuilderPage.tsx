@@ -9,21 +9,11 @@ import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useMyProfile } from "@/hooks/useMyProfile";
-import { useMyClasses } from "@/hooks/useMyClasses";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUBJECTS, type Subject } from "@/lib/constants/subjects";
 import { useToast } from "@/hooks/use-toast";
 import { downloadPlanExport } from "@/lib/downloadPlanExport";
-import { linkPlanToClass } from "@/lib/classes";
-import { logActivity } from "@/lib/activity-log";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
 import {
   clearLessonDraftContext,
@@ -45,7 +35,6 @@ const AUTOSAVE_DELAY = 800;
 const createInitialMeta = (): LessonPlanMetaDraft => ({
   title: "",
   subject: null,
-  classId: null,
   date: null,
   objective: "",
   successCriteria: "",
@@ -69,15 +58,12 @@ const LessonBuilderPage = () => {
   const planParam = searchParams.get("id");
   const { language, t } = useLanguage();
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
-  const { classes, isLoading: areClassesLoading, error: classesError } = useMyClasses();
   const { toast } = useToast();
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestMeta = useRef(meta);
   const skipNextAutosave = useRef(false);
   const isMounted = useRef(true);
   const [activeExport, setActiveExport] = useState<"pdf" | "docx" | null>(null);
-  const [isLinkingToClass, setIsLinkingToClass] = useState(false);
-  const [selectedClassForSave, setSelectedClassForSave] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const draftId = useLessonDraftStore(state => state.draft.id);
   const steps = useLessonDraftStore(state => state.draft.steps);
@@ -122,12 +108,6 @@ const LessonBuilderPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setSelectedClassForSave(undefined);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
     return () => {
       isMounted.current = false;
       if (autosaveTimer.current) {
@@ -159,7 +139,6 @@ const LessonBuilderPage = () => {
           setMeta({
             title: record.title,
             subject: mapSubject(record.subject),
-            classId: record.classId,
             date: record.date,
             objective: record.objective,
             successCriteria: record.successCriteria,
@@ -243,10 +222,9 @@ const LessonBuilderPage = () => {
     () => ({
       title: meta.title,
       subject: meta.subject,
-      classId: meta.classId,
       date: meta.date,
     }),
-    [meta.title, meta.subject, meta.classId, meta.date],
+    [meta.title, meta.subject, meta.date],
   );
 
   const handleMetaChange = (value: LessonMetaFormValue) => {
@@ -254,7 +232,6 @@ const LessonBuilderPage = () => {
       ...prev,
       title: value.title,
       subject: value.subject,
-      classId: value.classId,
       date: value.date,
     }));
   };
@@ -306,66 +283,6 @@ const LessonBuilderPage = () => {
       });
     } finally {
       setActiveExport(null);
-    }
-  };
-
-  const handleSaveToClass = async (classId: string) => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Sign in required",
-        description: "Create a free account to save this lesson to one of your classes.",
-      });
-      setSelectedClassForSave(undefined);
-      return;
-    }
-
-    if (!planId) {
-      toast({
-        title: "Lesson not ready",
-        description: "Please wait for the lesson plan to finish initialising before saving to a class.",
-        variant: "destructive",
-      });
-      setSelectedClassForSave(undefined);
-      return;
-    }
-
-    setIsLinkingToClass(true);
-
-    try {
-      const record = await updateLessonPlan(planId, latestMeta.current);
-      const timestamp = record.lastSavedAt ?? record.updatedAt ?? new Date().toISOString();
-      setLastSavedAt(new Date(timestamp));
-
-      await linkPlanToClass(planId, classId);
-      const classSummary = classes.find(item => item.id === classId);
-      toast({
-        title: "Lesson linked",
-        description: classSummary
-          ? `Linked to ${classSummary.title}.`
-          : "Lesson linked to the selected class.",
-      });
-
-      logActivity(
-        "plan-saved",
-        `Linked “${normalizedTitle}” to ${classSummary ? `“${classSummary.title}”` : "a class"}.`,
-        {
-          planId,
-          planTitle: normalizedTitle,
-          classId,
-          classTitle: classSummary?.title ?? "",
-          lessonDate: latestMeta.current.date ?? "",
-        },
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Please try again.";
-      toast({
-        title: "Unable to link lesson",
-        description: message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLinkingToClass(false);
-      setSelectedClassForSave(undefined);
     }
   };
 
@@ -493,100 +410,6 @@ const LessonBuilderPage = () => {
           </p>
         </header>
 
-        <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
-          <div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-foreground">Save to a class</h2>
-              <p className="text-sm text-muted-foreground">
-                Link this lesson to one of your classes when you're ready to teach it.
-              </p>
-            </div>
-            {isAuthenticated ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <Select
-                  value={selectedClassForSave}
-                  onValueChange={value => {
-                    setSelectedClassForSave(value);
-                  }}
-                  disabled={
-                    isLinkingToClass ||
-                    Boolean(activeExport) ||
-                    !planId ||
-                    areClassesLoading ||
-                    Boolean(classesError) ||
-                    classes.length === 0
-                  }
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue
-                      placeholder={
-                        areClassesLoading
-                          ? "Loading classes..."
-                          : classesError
-                            ? classesError.message
-                            : classes.length === 0
-                              ? "No classes available"
-                              : "Select a class"
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {areClassesLoading ? (
-                      <SelectItem value="__loading" disabled>
-                        Loading classes...
-                      </SelectItem>
-                    ) : classesError ? (
-                      <SelectItem value="__error" disabled>
-                        {classesError.message}
-                      </SelectItem>
-                    ) : classes.length === 0 ? (
-                      <SelectItem value="__empty" disabled>
-                        No classes available
-                      </SelectItem>
-                    ) : (
-                      classes.map(classItem => (
-                        <SelectItem key={classItem.id} value={classItem.id}>
-                          {classItem.title}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    if (selectedClassForSave) {
-                      void handleSaveToClass(selectedClassForSave);
-                    }
-                  }}
-                  disabled={!selectedClassForSave || isLinkingToClass}
-                >
-                  {isLinkingToClass ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Save lesson
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-start gap-3 text-left md:items-end md:text-right">
-                <p className="text-sm text-muted-foreground">
-                  Sign in to save this lesson to a class.
-                </p>
-                <Button type="button" asChild>
-                  <Link to={authPath}>Sign in</Link>
-                </Button>
-              </div>
-            )}
-            {isAuthenticated && classesError ? (
-              <p className="text-sm text-destructive">{classesError.message}</p>
-            ) : null}
-            {isAuthenticated && !areClassesLoading && !classesError && classes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                You don't have any classes yet. Create one from your account dashboard to link this lesson.
-              </p>
-            ) : null}
-          </div>
-        </section>
-
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] xl:items-start">
           <div className="space-y-6">
             <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
@@ -594,7 +417,7 @@ const LessonBuilderPage = () => {
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Lesson details</h2>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Adjust your lesson title, subject, class, and supporting details. Updates appear in the preview instantly.
+                    Adjust your lesson title, subject, and supporting details. Updates appear in the preview instantly.
                   </p>
                 </div>
 
@@ -651,7 +474,7 @@ const LessonBuilderPage = () => {
                 This pane mirrors what teachers see. As you update details, the summary refreshes automatically.
               </p>
               <div className="mt-6">
-                <LessonPreviewPane meta={meta} profile={previewProfile} classes={classes} />
+                <LessonPreviewPane meta={meta} profile={previewProfile} />
               </div>
             </aside>
           </div>

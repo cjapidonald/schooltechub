@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 const FORMAT_EXTENSION: Record<"pdf" | "docx", string> = {
   pdf: "pdf",
   docx: "docx",
@@ -21,9 +23,22 @@ export async function downloadPlanExport(
     return;
   }
 
+  const { data, error } = await supabase.auth.getSession();
+  if (error) {
+    throw new Error("Unable to verify your session. Please sign in again.");
+  }
+
+  const accessToken = data.session?.access_token;
+  if (!accessToken) {
+    throw new Error("You must be signed in to download this lesson plan.");
+  }
+
   const fileNameBase = slugify(title) || "lesson-plan";
   const response = await fetch(`/api/lesson-plans/${planId}/export.${FORMAT_EXTENSION[format]}`, {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
 
   if (!response.ok) {

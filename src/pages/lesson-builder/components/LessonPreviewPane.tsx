@@ -1,5 +1,4 @@
 import type { LessonPlanMetaDraft } from "../types";
-import type { MyClassSummary } from "@/hooks/useMyClasses";
 
 interface LessonPreviewPaneProps {
   meta: LessonPlanMetaDraft;
@@ -8,7 +7,6 @@ interface LessonPreviewPaneProps {
     schoolName: string | null | undefined;
     schoolLogoUrl: string | null | undefined;
   };
-  classes: MyClassSummary[];
 }
 
 const normalizeText = (value: string | null | undefined) => {
@@ -57,7 +55,7 @@ const renderRow = (label: string, value?: string | null, valueClassName = "") =>
   );
 };
 
-export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneProps) {
+export function LessonPreviewPane({ meta, profile }: LessonPreviewPaneProps) {
   const teacherName = normalizeText(profile.fullName);
   const schoolName = normalizeText(profile.schoolName);
   const schoolLogoUrl = normalizeText(profile.schoolLogoUrl);
@@ -66,10 +64,6 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
   const objective = normalizeText(meta.objective);
   const successCriteria = normalizeText(meta.successCriteria);
 
-  const classTitle = normalizeText(
-    meta.classId ? classes.find(classItem => classItem.id === meta.classId)?.title : null,
-  );
-
   const leftSummaryRows = [
     { label: "Teacher", value: teacherName },
     { label: "School", value: schoolName },
@@ -77,7 +71,6 @@ export function LessonPreviewPane({ meta, profile, classes }: LessonPreviewPaneP
     { label: "Date", value: formatPreviewDate(meta.date) },
   ];
   const rightSummaryRows = [
-    { label: "Class", value: classTitle },
     { label: "Subject", value: subject },
   ];
 

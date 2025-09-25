@@ -1,5 +1,4 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
@@ -8,28 +7,17 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useMyClasses } from "@/hooks/useMyClasses";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SUBJECTS, type Subject } from "@/lib/constants/subjects";
 import { cn } from "@/lib/utils";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const STORAGE_DATE_FORMAT = "yyyy-MM-dd";
 const DISPLAY_DATE_FORMAT = "PPP";
 const NO_SUBJECT_VALUE = "__no_subject__";
-const EMPTY_CLASS_VALUE = "__no_class__";
 
 export interface LessonMetaFormValue {
   title: string;
   subject: Subject | null;
-  classId: string | null;
   date: string | null;
 }
 
@@ -55,12 +43,6 @@ function parseStoredDate(value: string | null): Date | undefined {
 
 export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: LessonMetaFormProps) {
   const [isDateOpen, setIsDateOpen] = useState(false);
-  const { classes, isLoading, error } = useMyClasses();
-  const { language } = useLanguage();
-  const accountClassesPath = useMemo(
-    () => getLocalizedPath("/account?tab=classes", language),
-    [language],
-  );
 
   useEffect(() => {
     if (value.date) {
@@ -85,11 +67,6 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
   const handleSubjectChange = (subjectValue: string) => {
     const nextSubject = subjectValue === NO_SUBJECT_VALUE ? null : (subjectValue as Subject);
     onChange({ ...value, subject: nextSubject });
-  };
-
-  const handleClassChange = (classValue: string) => {
-    const nextClassId = classValue === EMPTY_CLASS_VALUE ? null : classValue;
-    onChange({ ...value, classId: nextClassId });
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -142,38 +119,6 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
               ))}
             </SelectContent>
           </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="lesson-meta-class">Class</Label>
-          <Select value={value.classId ?? EMPTY_CLASS_VALUE} onValueChange={handleClassChange}>
-            <SelectTrigger id="lesson-meta-class" disabled={isLoading}>
-              <SelectValue placeholder={isLoading ? "Loading classes…" : "Select a class"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={EMPTY_CLASS_VALUE}>No class</SelectItem>
-              {classes.map(classItem => (
-                <SelectItem key={classItem.id} value={classItem.id}>
-                  {classItem.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {error ? (
-            <p className="text-sm text-destructive">{error.message}</p>
-          ) : null}
-          {!isLoading && !error && classes.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              You haven't created any classes yet.{' '}
-              <Link
-                to={accountClassesPath}
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Go to your account's Classes tab
-              </Link>{' '}
-              to create one.
-            </p>
-          ) : null}
         </div>
       </div>
 
