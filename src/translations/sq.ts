@@ -15,7 +15,7 @@ export const sq = {
     signIn: "Hyr",
     signUp: "Regjistrohu",
     signOut: "Dil",
-    profile: "Profili"
+    profile: "Pulti Im"
   },
   hero: {
     title: "Fuqizimi i Arsimit përmes Inovacionit",
@@ -1303,9 +1303,12 @@ export const sq = {
     },
     tabs: {
       overview: "Përmbledhje",
+      classes: "Klasat",
+      lessonPlans: "Planet e mësimit",
       savedPosts: "Postimet e ruajtura",
+      activity: "Aktiviteti",
       security: "Siguria",
-      activity: "Aktiviteti"
+      settings: "Cilësimet"
     },
     profile: {
       title: "Detajet e profilit",

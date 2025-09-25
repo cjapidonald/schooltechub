@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import {
-  Bell,
+  Activity,
   Bookmark,
   Building2,
-  FlaskConical,
   GraduationCap,
   Plus,
   Settings,
+  ShieldCheck,
   Sparkles,
-  UserRound,
+  SquarePen,
 } from "lucide-react";
+import { format, isValid, parse, parseISO } from "date-fns";
 import type { LucideIcon } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
@@ -37,36 +38,86 @@ import { UpcomingLessonsCard } from "./components/UpcomingLessonsCard";
 
 const dashboardTabs = [
   { value: "overview", label: "Overview" },
-  { value: "settings", label: "Settings" },
   { value: "classes", label: "Classes" },
   { value: "lessonPlans", label: "Lesson Plans" },
-  { value: "notifications", label: "Notifications" },
   { value: "savedPosts", label: "Saved Posts" },
-  { value: "research", label: "My Research (Applications & Submissions)" },
+  { value: "activity", label: "Activity" },
+  { value: "security", label: "Security" },
+  { value: "settings", label: "Settings" },
 ] as const;
 
 type DashboardTabValue = (typeof dashboardTabs)[number]["value"];
 type NonOverviewTab = Exclude<DashboardTabValue, "overview">;
 
+const dashboardTabValues = dashboardTabs.map(tab => tab.value) as DashboardTabValue[];
+
 type TabCounts = Record<NonOverviewTab, number>;
 
 const defaultCounts: TabCounts = {
-  settings: 3,
   classes: 2,
   lessonPlans: 6,
-  notifications: 5,
   savedPosts: 4,
-  research: 1,
+  activity: 5,
+  security: 2,
+  settings: 3,
 };
 
 const summaryTabDetails: Record<NonOverviewTab, { icon: LucideIcon; label: string }> = {
-  settings: { icon: Settings, label: "Review your preferences" },
   classes: { icon: GraduationCap, label: "Classes awaiting updates" },
-  lessonPlans: { icon: UserRound, label: "Lesson plans needing attention" },
-  notifications: { icon: Bell, label: "Notifications to review" },
+  lessonPlans: { icon: SquarePen, label: "Lesson plans needing attention" },
   savedPosts: { icon: Bookmark, label: "Saved posts to revisit" },
-  research: { icon: FlaskConical, label: "Research tasks pending" },
+  activity: { icon: Activity, label: "Recent interactions to review" },
+  security: { icon: ShieldCheck, label: "Security checks to complete" },
+  settings: { icon: Settings, label: "Review your preferences" },
 };
+
+const ISO_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_ONLY = /^\d{2}:\d{2}/;
+
+function isDashboardTabValue(value: string | null): value is DashboardTabValue {
+  return value !== null && (dashboardTabValues as readonly string[]).includes(value);
+}
+
+function parseDateValue(value: string): Date | null {
+  const trimmed = value.trim();
+
+  if (ISO_DATE_ONLY.test(trimmed)) {
+    const parsed = parse(trimmed, "yyyy-MM-dd", new Date());
+    return isValid(parsed) ? parsed : null;
+  }
+
+  try {
+    const parsed = parseISO(trimmed);
+    return isValid(parsed) ? parsed : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function formatDateForDisplay(value: string | null): string {
+  if (!value) {
+    return "—";
+  }
+
+  const parsed = parseDateValue(value);
+  return parsed ? format(parsed, "PPP") : value;
+}
+
+function formatTimeForDisplay(value: string | null): string {
+  if (!value) {
+    return "—";
+  }
+
+  const trimmed = value.trim();
+
+  if (TIME_ONLY.test(trimmed)) {
+    const parsed = parse(trimmed, "HH:mm", new Date());
+    return isValid(parsed) ? format(parsed, "p") : trimmed;
+  }
+
+  const parsed = parseDateValue(trimmed);
+  return parsed ? format(parsed, "p") : trimmed;
+}
 
 const loadingSkeleton = (
   <div className="container space-y-6 py-10">
@@ -83,11 +134,16 @@ const AccountDashboard = () => {
   const { user, loading } = useRequireAuth();
   const { language, t } = useLanguage();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [counts, setCounts] = useState<TabCounts | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { fullName: profileFullName, schoolName, schoolLogoUrl } = useMyProfile();
   const [avatarReference, setAvatarReference] = useState<string | null>(null);
   const [resolvedAvatarUrl, setResolvedAvatarUrl] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<DashboardTabValue>(() => {
+    const initial = searchParams.get("tab");
+    return isDashboardTabValue(initial) ? initial : "overview";
+  });
 
   const classesQuery = useQuery({
     queryKey: ["my-classes"],
@@ -118,6 +174,15 @@ const AccountDashboard = () => {
     setAvatarReference(reference);
     setResolvedAvatarUrl(url);
   }, [user]);
+
+  useEffect(() => {
+    const param = searchParams.get("tab");
+    const normalized = isDashboardTabValue(param) ? param : "overview";
+
+    if (normalized !== activeTab) {
+      setActiveTab(normalized);
+    }
+  }, [activeTab, searchParams]);
 
   useEffect(() => {
     if (!avatarReference || isHttpUrl(avatarReference)) {
@@ -155,6 +220,28 @@ const AccountDashboard = () => {
     []
   );
 
+  const handleTabChange = (value: string) => {
+    if (!isDashboardTabValue(value)) {
+      return;
+    }
+
+    const nextValue = value as DashboardTabValue;
+
+    if (nextValue !== activeTab) {
+      setActiveTab(nextValue);
+    }
+
+    const params = new URLSearchParams(searchParams);
+
+    if (nextValue === "overview") {
+      params.delete("tab");
+    } else {
+      params.set("tab", nextValue);
+    }
+
+    setSearchParams(params, { replace: true });
+  };
+
   const greetingName = useMemo(() => {
     if (!user) return "";
     const metadataName =
@@ -165,6 +252,37 @@ const AccountDashboard = () => {
     }
     return user.email ?? "there";
   }, [profileFullName, user]);
+
+  const roleDisplay = useMemo(() => {
+    const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
+    const metadataRole = typeof metadata.role === "string" ? metadata.role : null;
+
+    const appMetadata = (user?.app_metadata ?? {}) as Record<string, unknown>;
+    const appRole = typeof appMetadata.role === "string" ? (appMetadata.role as string) : null;
+
+    const authRole = typeof user?.role === "string" ? user.role : null;
+    const selectedRole = metadataRole ?? appRole ?? authRole;
+
+    if (!selectedRole) {
+      return t.account.profile.rolePlaceholder;
+    }
+
+    const normalized = selectedRole.toString().trim();
+    const roleTranslations = (t.account.profile.roles ?? {}) as Record<string, string>;
+    const match = Object.entries(roleTranslations).find(
+      ([key]) => key.toLowerCase() === normalized.toLowerCase()
+    );
+
+    if (match) {
+      return match[1];
+    }
+
+    return normalized
+      .split(/[\s_]+/)
+      .filter(Boolean)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+  }, [t.account.profile.rolePlaceholder, t.account.profile.roles, user]);
 
   if (loading) {
     return loadingSkeleton;
@@ -199,8 +317,8 @@ const AccountDashboard = () => {
             Here&apos;s a personalized snapshot of your SchoolTech Hub activity and upcoming lessons.
           </p>
         </div>
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="flex w-full flex-wrap gap-2">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+          <TabsList className="flex w-full flex-wrap gap-2 border-none bg-transparent p-0 shadow-none h-auto backdrop-blur-0">
             {dashboardTabs.map(tab => (
               <TabsTrigger key={tab.value} value={tab.value} className="flex-1 whitespace-nowrap">
                 {tab.label}
@@ -208,61 +326,7 @@ const AccountDashboard = () => {
             ))}
           </TabsList>
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,320px)_1fr]">
-              <Card className="relative overflow-hidden border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)]">
-                <CardContent className="flex h-full flex-col justify-between gap-6 p-6">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-20 w-20 border-2 border-primary/40 shadow-[0_0_25px_hsl(var(--glow-primary)/0.35)]">
-                      {avatarUrl ? (
-                        <AvatarImage src={avatarUrl} alt={`${welcomeDisplayName} avatar`} />
-                      ) : (
-                        <AvatarFallback className="text-2xl font-semibold text-primary">
-                          {primaryInitial || "S"}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                        Welcome back
-                      </p>
-                      <h2 className="text-2xl font-semibold text-foreground">{welcomeDisplayName}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        We&apos;re glad to see you, {greetingName || fallbackName}.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.25)]">
-                        <Building2 className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />
-                      </span>
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                          {t.account.school.nameLabel}
-                        </p>
-                        <p className="text-sm font-medium text-foreground">
-                          {schoolName?.trim() || "Your school"}
-                        </p>
-                      </div>
-                    </div>
-                    {schoolLogoUrl ? (
-                      <div className="mt-4 flex items-center gap-3 rounded-md border border-border/50 bg-background/80 p-3">
-                        <div className="h-12 w-12 overflow-hidden rounded-md border border-primary/30 bg-white">
-                          <img
-                            src={schoolLogoUrl}
-                            alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
-                            className="h-full w-full object-contain"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-muted-foreground">Official logo</p>
-                          <p className="text-sm font-medium text-foreground">{schoolName?.trim() || "Your school"}</p>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div className="space-y-6">
                 <div className="grid gap-4 lg:grid-cols-2">
                   <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
@@ -321,10 +385,80 @@ const AccountDashboard = () => {
                   </div>
                 )}
               </div>
+              <Card className="relative overflow-hidden border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)] lg:order-last lg:justify-self-end">
+                <CardContent className="flex h-full flex-col gap-6 p-6">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-20 w-20 border-2 border-primary/40 shadow-[0_0_25px_hsl(var(--glow-primary)/0.35)]">
+                      {avatarUrl ? (
+                        <AvatarImage src={avatarUrl} alt={`${welcomeDisplayName} avatar`} />
+                      ) : (
+                        <AvatarFallback className="text-2xl font-semibold text-primary">
+                          {primaryInitial || "S"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Welcome back
+                      </p>
+                      <h2 className="text-2xl font-semibold text-foreground">{welcomeDisplayName}</h2>
+                      <p className="text-sm text-muted-foreground">{roleDisplay}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4 text-sm">
+                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.25)]">
+                          <Building2 className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            {t.account.school.nameLabel}
+                          </p>
+                          <p className="text-sm font-medium text-foreground">
+                            {schoolName?.trim() || t.account.school.namePlaceholder}
+                          </p>
+                        </div>
+                      </div>
+                      {schoolLogoUrl ? (
+                        <div className="mt-4 flex items-center gap-3 rounded-md border border-border/50 bg-background/80 p-3">
+                          <div className="h-12 w-12 overflow-hidden rounded-md border border-primary/30 bg-white">
+                            <img
+                              src={schoolLogoUrl}
+                              alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Official logo</p>
+                            <p className="text-sm font-medium text-foreground">
+                              {schoolName?.trim() || t.account.school.namePlaceholder}
+                            </p>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t.account.profile.roleLabel}
+                      </p>
+                      <p className="text-sm font-medium text-foreground">{roleDisplay}</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      We&apos;re glad to see you, {greetingName || fallbackName}.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button asChild size="sm" variant="secondary">
+                      <Link to={getLocalizedPath("/lesson-builder", language)}>{t.nav.builder}</Link>
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleTabChange("classes")}>
+                      {t.account.tabs.classes}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </TabsContent>
-          <TabsContent value="settings">
-            <SettingsPanel user={user} />
           </TabsContent>
           <TabsContent value="classes">
             <Card>
@@ -374,10 +508,12 @@ const AccountDashboard = () => {
                           </div>
                           <div className="text-sm text-muted-foreground">
                             <p>
-                              <span className="font-medium text-foreground">Starts:</span> {classItem.startDate ?? "—"}
+                              <span className="font-medium text-foreground">Starts:</span>{" "}
+                              {formatDateForDisplay(classItem.startDate)}
                             </p>
                             <p>
-                              <span className="font-medium text-foreground">Ends:</span> {classItem.endDate ?? "—"}
+                              <span className="font-medium text-foreground">Ends:</span>{" "}
+                              {formatDateForDisplay(classItem.endDate)}
                             </p>
                           </div>
                         </div>
@@ -392,7 +528,7 @@ const AccountDashboard = () => {
                           </div>
                           <div>
                             <p className="text-muted-foreground">Meeting schedule</p>
-                            <p className="font-medium text-foreground">{classItem.meetingSchedule ?? "—"}</p>
+                            <p className="font-medium text-foreground">{formatTimeForDisplay(classItem.meetingSchedule)}</p>
                           </div>
                           <div>
                             <p className="text-muted-foreground">Max capacity</p>
@@ -445,19 +581,6 @@ const AccountDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="notifications">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">Notifications</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Stay informed about updates, mentions, and community replies. Notification filters and delivery preferences
-                  will live here.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
           <TabsContent value="savedPosts">
             <Card>
               <CardHeader>
@@ -471,18 +594,55 @@ const AccountDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="research">
+          <TabsContent value="activity">
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">My Research</CardTitle>
+                <CardTitle className="text-xl font-semibold">{t.account.activity.title}</CardTitle>
+                <CardDescription>{t.account.activity.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
-                  Monitor your applications and submissions in progress. This space will highlight deadlines, statuses, and any
-                  feedback that requires your attention.
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/40 p-4">
+                    <p className="text-sm text-muted-foreground">{t.account.activity.comments}</p>
+                    <p className="text-2xl font-semibold text-foreground">{counts?.activity ?? 0}</p>
+                  </div>
+                  <div className="rounded-lg border bg-muted/40 p-4">
+                    <p className="text-sm text-muted-foreground">{t.account.activity.posts}</p>
+                    <p className="text-2xl font-semibold text-foreground">{counts?.savedPosts ?? 0}</p>
+                  </div>
+                </div>
+                <p className="mt-6 text-sm text-muted-foreground">
+                  {t.account.activity.lastLogin}:{" "}
+                  {user.last_sign_in_at
+                    ? format(parseISO(user.last_sign_in_at), "PPP p")
+                    : t.account.activity.neverLoggedIn}
                 </p>
               </CardContent>
             </Card>
+          </TabsContent>
+          <TabsContent value="security">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">{t.account.security.title}</CardTitle>
+                <CardDescription>{t.account.security.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">{t.account.securityTips.description}</p>
+                <ul className="list-disc space-y-2 pl-5 text-sm text-foreground">
+                  {(t.account.securityTips.tips ?? []).map((tip: string, index: number) => (
+                    <li key={index}>{tip}</li>
+                  ))}
+                </ul>
+                <div>
+                  <Button size="sm" variant="outline" onClick={() => handleTabChange("settings")}>
+                    {t.account.tabs.settings}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="settings">
+            <SettingsPanel user={user} />
           </TabsContent>
         </Tabs>
       </div>

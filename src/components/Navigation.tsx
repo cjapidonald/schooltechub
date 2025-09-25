@@ -2,8 +2,18 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Search, User, LogOut, Languages, BookOpen } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  Menu,
+  Search,
+  User,
+  LogOut,
+  Languages,
+  BookOpen,
+  LayoutDashboard,
+  SquarePen,
+  GraduationCap,
+} from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -37,14 +47,22 @@ const Navigation = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const navItems = [
-    { name: t.nav.home, path: "/" },
-    { name: t.nav.blog, path: "/blog" },
-    { name: t.nav.builder, path: "/lesson-builder" },
-    { name: t.nav.events, path: "/events" },
-    { name: t.nav.services, path: "/services" },
-    { name: t.nav.about, path: "/about" },
-  ];
+  const navItems = useMemo(() => {
+    const items = [
+      { name: t.nav.home, path: "/" },
+      { name: t.nav.blog, path: "/blog" },
+      { name: t.nav.builder, path: "/lesson-builder" },
+      { name: t.nav.events, path: "/events" },
+      { name: t.nav.services, path: "/services" },
+      { name: t.nav.about, path: "/about" },
+    ];
+
+    if (user) {
+      items.splice(1, 0, { name: t.nav.profile, path: "/account" });
+    }
+
+    return items;
+  }, [t.nav.about, t.nav.blog, t.nav.builder, t.nav.events, t.nav.home, t.nav.profile, t.nav.services, user]);
   
   const getLocalizedNavPath = (path: string) => {
     return getLocalizedPath(path, language);
@@ -158,8 +176,20 @@ const Navigation = () => {
                   <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/account"))}
                   >
-                    <User className="mr-2 h-4 w-4" />
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
                     {t.nav.profile}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate(getLocalizedNavPath("/lesson-builder"))}
+                  >
+                    <SquarePen className="mr-2 h-4 w-4" />
+                    {t.nav.builder}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}
+                  >
+                    <GraduationCap className="mr-2 h-4 w-4" />
+                    {t.account.tabs.classes}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
@@ -257,6 +287,22 @@ const Navigation = () => {
                     >
                       <Button className="w-full" variant="secondary">
                         {t.nav.profile}
+                      </Button>
+                    </Link>
+                    <Link
+                      to={getLocalizedNavPath("/lesson-builder")}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Button className="w-full" variant="outline">
+                        {t.nav.builder}
+                      </Button>
+                    </Link>
+                    <Link
+                      to={getLocalizedNavPath("/account?tab=classes")}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Button className="w-full" variant="outline">
+                        {t.account.tabs.classes}
                       </Button>
                     </Link>
                     <Button
