@@ -404,6 +404,89 @@ const AccountDashboard = () => {
           <h1 className="text-3xl font-bold tracking-tight">{t.account.overview.title}</h1>
           <p className="text-muted-foreground">{t.account.overview.subtitle}</p>
         </div>
+        <Card className="border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)]">
+          <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20 border-2 border-primary/40 shadow-[0_0_25px_hsl(var(--glow-primary)/0.35)]">
+                  {avatarUrl ? (
+                    <AvatarImage src={avatarUrl} alt={`${welcomeDisplayName} avatar`} />
+                  ) : (
+                    <AvatarFallback className="text-2xl font-semibold text-primary">
+                      {primaryInitial || "S"}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Welcome back</p>
+                  <h2 className="text-2xl font-semibold text-foreground">{welcomeDisplayName}</h2>
+                  <p className="text-sm text-muted-foreground">{roleDisplay}</p>
+                </div>
+              </div>
+              <div className="space-y-4 text-sm">
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.25)]">
+                      <Building2 className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t.account.school.nameLabel}
+                      </p>
+                      <p className="text-sm font-medium text-foreground">
+                        {schoolName?.trim() || t.account.school.namePlaceholder}
+                      </p>
+                    </div>
+                  </div>
+                  {schoolLogoUrl ? (
+                    <div className="mt-4 flex items-center gap-3 rounded-md border border-border/50 bg-background/80 p-3">
+                      <div className="h-12 w-12 overflow-hidden rounded-md border border-primary/30 bg-white">
+                        <img
+                          src={schoolLogoUrl}
+                          alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Official logo</p>
+                        <p className="text-sm font-medium text-foreground">
+                          {schoolName?.trim() || t.account.school.namePlaceholder}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t.account.profile.roleLabel}
+                  </p>
+                  <p className="text-sm font-medium text-foreground">{roleDisplay}</p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  We&apos;re glad to see you, {greetingName || fallbackName}.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 lg:max-w-xs lg:flex-col">
+              <Button asChild size="sm" variant="secondary">
+                <Link to={getLocalizedPath("/lesson-builder", language)}>{t.nav.builder}</Link>
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => handleTabChange("classes")}>
+                {t.account.tabs.classes}
+              </Button>
+              <Button asChild size="sm">
+                <Link to={getLocalizedPath("/blog/new", language)}>
+                  {t.account.overview.ctas.postBlog}
+                </Link>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <Link to={getLocalizedPath("/forum/new", language)}>
+                  {t.account.overview.ctas.askQuestion}
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="flex w-full flex-wrap gap-2 border-none bg-transparent p-0 shadow-none h-auto backdrop-blur-0">
             {dashboardTabs.map(tab => (
@@ -418,182 +501,107 @@ const AccountDashboard = () => {
             ))}
           </TabsList>
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="space-y-6">
-                <div className="grid gap-4 lg:grid-cols-2">
-                  <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
-                    <CardHeader className="flex flex-row items-start justify-between gap-4">
-                      <div className="space-y-1">
-                        <CardTitle className="text-xl font-semibold">At a glance</CardTitle>
-                        <CardDescription>
-                          Review your latest activity across the SchoolTech Hub community.
-                        </CardDescription>
-                      </div>
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_25px_hsl(var(--glow-primary)/0.2)]">
-                        <Sparkles className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />
-                      </span>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Stay informed with a quick overview of what&apos;s new since your last visit.
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <UpcomingLessonsCard isEnabled={Boolean(user)} />
-                  <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
-                    <CardHeader className="flex flex-row items-start justify-between gap-4">
-                      <div className="space-y-1">
-                        <CardTitle className="text-xl font-semibold">
-                          {t.account.research.cardTitle}
-                        </CardTitle>
-                        <CardDescription>{t.account.research.cardDescription}</CardDescription>
-                      </div>
-                      <Badge variant="outline" className="border-primary/40 bg-primary/5 text-primary">
-                        {t.account.research.badge}
-                      </Badge>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        {t.account.research.cardBody}
-                      </p>
-                      <div className="flex items-start justify-between gap-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium text-foreground">
-                            {t.account.research.toggleLabel}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {t.account.research.toggleDescription}
-                          </p>
-                        </div>
-                        <Switch
-                          checked={isResearchNotificationsEnabled}
-                          onCheckedChange={handleResearchNotificationChange}
-                          disabled={isResearchToggleSaving}
-                          aria-label={t.account.research.toggleAria}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                {counts ? (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {summaryTabs.map(tab => {
-                      const details = summaryTabDetails[tab.value];
-                      const Icon = details.icon;
-
-                      return (
-                        <Card
-                          key={tab.value}
-                          className="border border-primary/20 bg-background/80 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] transition hover:border-primary/40 hover:shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)]"
-                        >
-                          <CardHeader className="flex flex-row items-start justify-between gap-4">
-                            <div className="space-y-1">
-                              <CardTitle className="text-sm font-medium text-muted-foreground">{tab.label}</CardTitle>
-                              <p className="text-xs text-muted-foreground">{details.label}</p>
-                            </div>
-                            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.2)]">
-                              <Icon className="h-4 w-4 animate-pulse-glow" aria-hidden="true" />
-                            </span>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="text-3xl font-bold">{counts?.[tab.value] ?? 0}</div>
-                            <p className="text-sm text-muted-foreground">Items awaiting your attention</p>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <div key={index} className="h-24 animate-pulse rounded-md bg-muted/60" />
-                    ))}
-                  </div>
-                )}
-              </div>
-              <Card className="relative overflow-hidden border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)] lg:order-last lg:justify-self-end">
-                <CardContent className="flex h-full flex-col gap-6 p-6">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-20 w-20 border-2 border-primary/40 shadow-[0_0_25px_hsl(var(--glow-primary)/0.35)]">
-                      {avatarUrl ? (
-                        <AvatarImage src={avatarUrl} alt={`${welcomeDisplayName} avatar`} />
-                      ) : (
-                        <AvatarFallback className="text-2xl font-semibold text-primary">
-                          {primaryInitial || "S"}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
+            <div className="space-y-6">
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
+                  <CardHeader className="flex flex-row items-start justify-between gap-4">
                     <div className="space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Welcome back
-                      </p>
-                      <h2 className="text-2xl font-semibold text-foreground">{welcomeDisplayName}</h2>
-                      <p className="text-sm text-muted-foreground">{roleDisplay}</p>
+                      <CardTitle className="text-xl font-semibold">At a glance</CardTitle>
+                      <CardDescription>
+                        Review your latest activity across the SchoolTech Hub community.
+                      </CardDescription>
                     </div>
-                  </div>
-                  <div className="space-y-4 text-sm">
-                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.25)]">
-                          <Building2 className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                        <div className="space-y-1">
-                          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                            {t.account.school.nameLabel}
-                          </p>
-                          <p className="text-sm font-medium text-foreground">
-                            {schoolName?.trim() || t.account.school.namePlaceholder}
-                          </p>
-                        </div>
-                      </div>
-                      {schoolLogoUrl ? (
-                        <div className="mt-4 flex items-center gap-3 rounded-md border border-border/50 bg-background/80 p-3">
-                          <div className="h-12 w-12 overflow-hidden rounded-md border border-primary/30 bg-white">
-                            <img
-                              src={schoolLogoUrl}
-                              alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
-                              className="h-full w-full object-contain"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-xs uppercase tracking-wide text-muted-foreground">Official logo</p>
-                            <p className="text-sm font-medium text-foreground">
-                              {schoolName?.trim() || t.account.school.namePlaceholder}
-                            </p>
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        {t.account.profile.roleLabel}
-                      </p>
-                      <p className="text-sm font-medium text-foreground">{roleDisplay}</p>
-                    </div>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_25px_hsl(var(--glow-primary)/0.2)]">
+                      <Sparkles className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />
+                    </span>
+                  </CardHeader>
+                  <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      We&apos;re glad to see you, {greetingName || fallbackName}.
+                      Stay informed with a quick overview of what&apos;s new since your last visit.
                     </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button asChild size="sm" variant="secondary">
-                      <Link to={getLocalizedPath("/lesson-builder", language)}>{t.nav.builder}</Link>
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleTabChange("classes")}>
-                      {t.account.tabs.classes}
-                    </Button>
-                    <Button asChild size="sm">
-                      <Link to={getLocalizedPath("/blog/new", language)}>
-                        {t.account.overview.ctas.postBlog}
-                      </Link>
-                    </Button>
-                    <Button asChild size="sm" variant="outline">
-                      <Link to={getLocalizedPath("/forum/new", language)}>
-                        {t.account.overview.ctas.askQuestion}
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+                <UpcomingLessonsCard isEnabled={Boolean(user)} />
+                <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
+                  <CardHeader className="flex flex-row items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <CardTitle className="text-xl font-semibold">
+                        {t.account.research.cardTitle}
+                      </CardTitle>
+                      <CardDescription>{t.account.research.cardDescription}</CardDescription>
+                    </div>
+                    <Badge variant="outline" className="border-primary/40 bg-primary/5 text-primary">
+                      {t.account.research.badge}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {t.account.research.cardBody}
+                    </p>
+                    <div className="flex items-start justify-between gap-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium text-foreground">
+                          {t.account.research.toggleLabel}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t.account.research.toggleDescription}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={isResearchNotificationsEnabled}
+                        onCheckedChange={handleResearchNotificationChange}
+                        disabled={isResearchToggleSaving}
+                        aria-label={t.account.research.toggleAria}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              {counts ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {summaryTabs.map(tab => {
+                    const details = summaryTabDetails[tab.value];
+                    const Icon = details.icon;
+
+                    return (
+                      <Card
+                        key={tab.value}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Open ${tab.label}`}
+                        onClick={() => handleTabChange(tab.value)}
+                        onKeyDown={event => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            handleTabChange(tab.value);
+                          }
+                        }}
+                        className="border border-primary/20 bg-background/80 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] transition hover:border-primary/40 hover:shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
+                      >
+                        <CardHeader className="flex flex-row items-start justify-between gap-4">
+                          <div className="space-y-1">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{tab.label}</CardTitle>
+                            <p className="text-xs text-muted-foreground">{details.label}</p>
+                          </div>
+                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.2)]">
+                            <Icon className="h-4 w-4 animate-pulse-glow" aria-hidden="true" />
+                          </span>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold">{counts?.[tab.value] ?? 0}</div>
+                          <p className="text-sm text-muted-foreground">Items awaiting your attention</p>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="h-24 animate-pulse rounded-md bg-muted/60" />
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
           <TabsContent value="classes">
