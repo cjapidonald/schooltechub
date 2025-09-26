@@ -56,6 +56,12 @@ const getReadTimeLabel = (
 };
 
 type SavedPostRow = Database["public"]["Tables"]["saved_posts"]["Row"];
+type BlogPostRow = Database["public"]["Tables"]["blogs"]["Row"] & {
+  subtitle?: string | null;
+  author_job_title?: string | null;
+  time_required?: string | null;
+  language?: string | null;
+};
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -77,27 +83,31 @@ export default function BlogPost() {
   }, []);
 
   // Fetch blog post
-  const { data: post, isLoading } = useQuery({
+  const { data: post, isLoading } = useQuery<BlogPostRow | null>({
     queryKey: ["blog-post", slug, language],
     enabled: !!slug,
     queryFn: async () => {
       if (!slug) return null;
 
       const { data, error } = await supabase
-        .from("content_master")
+        .from("blogs")
         .select("*")
         .eq("slug", slug)
-        .in("page", ["research_blog", "edutech", "teacher_diary"])
-        .eq("language", language)
         .eq("is_published", true)
-        .eq("status", "published")
-        .is("deleted_at", null);
+        .order("published_at", { ascending: false })
+        .limit(1);
 
       if (error) {
         throw error;
       }
 
-      return data?.[0] ?? null;
+      const post = data?.[0] ?? null;
+
+      if (post && "language" in post && post.language && post.language !== language) {
+        return null;
+      }
+
+      return (post as BlogPostRow) ?? null;
     }
   });
 
