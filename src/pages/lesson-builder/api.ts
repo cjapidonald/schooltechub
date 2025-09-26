@@ -17,6 +17,11 @@ interface LessonPlanResponseBody {
   plan?: Record<string, unknown> | null;
 }
 
+interface ParsedJsonResult<T> {
+  body: T | null;
+  parseError: Error | null;
+}
+
 const LESSON_PLAN_ENDPOINT = "/api/lesson-plans";
 
 function normaliseString(value: unknown): string | null {
@@ -148,6 +153,34 @@ async function requestWithAuth(path: string, init: RequestInit): Promise<Respons
   return fetch(path, { ...init, headers });
 }
 
+async function parseJsonResponse<T>(response: Response): Promise<ParsedJsonResult<T>> {
+  try {
+    const body = (await response.json()) as T;
+    return { body, parseError: null };
+  } catch (error) {
+    const parseError =
+      error instanceof Error
+        ? error
+        : new Error("Failed to parse server response.");
+    return { body: null, parseError };
+  }
+}
+
+function assertPlanPayload(
+  payload: LessonPlanResponseBody | null,
+  parseError: Error | null,
+): Record<string, unknown> {
+  if (payload && typeof payload === "object" && payload.plan && typeof payload.plan === "object") {
+    return payload.plan;
+  }
+
+  if (parseError) {
+    throw new Error("Failed to parse server response.", { cause: parseError });
+  }
+
+  throw new Error("The server response did not include lesson plan data.");
+}
+
 function buildPlanUpdate(meta: Partial<LessonPlanMetaDraft>): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
 
@@ -201,15 +234,14 @@ export async function createLessonPlan(meta: LessonPlanMetaDraft): Promise<Lesso
     throw new Error("Failed to create a lesson plan draft.", { cause });
   }
 
-  const payload = await response
-    .json()
-    .catch(() => ({ error: response.ok ? "" : "Failed to parse server response." }));
+  const { body: payload, parseError } = await parseJsonResponse<LessonPlanResponseBody>(response);
 
   if (!response.ok) {
     throw new Error(extractErrorMessage(payload, "Failed to create a lesson plan draft."));
   }
 
-  const plan = mapPlanRecord((payload as LessonPlanResponseBody).plan ?? undefined);
+  const planPayload = assertPlanPayload(payload, parseError);
+  const plan = mapPlanRecord(planPayload);
 
   return plan;
 }
@@ -233,17 +265,12 @@ export async function updateLessonPlan(
     throw new Error("Failed to save lesson plan changes.", { cause });
   }
 
-  const payload = await response
-    .json()
-    .catch(() => ({ error: response.ok ? "" : "Failed to parse server response." }));
-
   if (!response.ok) {
+    const { body: payload } = await parseJsonResponse<LessonPlanResponseBody>(response);
     throw new Error(extractErrorMessage(payload, "Failed to save lesson plan changes."));
   }
 
-  const plan = mapPlanRecord((payload as LessonPlanResponseBody).plan ?? undefined);
-
-  return plan;
+  return getLessonPlan(id);
 }
 
 export async function getLessonPlan(id: string): Promise<LessonPlanRecord> {
@@ -256,15 +283,14 @@ export async function getLessonPlan(id: string): Promise<LessonPlanRecord> {
     throw new Error("Failed to load lesson plan.", { cause });
   }
 
-  const payload = await response
-    .json()
-    .catch(() => ({ error: response.ok ? "" : "Failed to parse server response." }));
+  const { body: payload, parseError } = await parseJsonResponse<LessonPlanResponseBody>(response);
 
   if (!response.ok) {
     throw new Error(extractErrorMessage(payload, "Failed to load lesson plan."));
   }
 
-  const plan = mapPlanRecord((payload as LessonPlanResponseBody).plan ?? undefined);
+  const planPayload = assertPlanPayload(payload, parseError);
+  const plan = mapPlanRecord(planPayload);
 
   return plan;
 }
