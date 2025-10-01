@@ -161,7 +161,7 @@ export async function listMyClasses(client: Client = supabase): Promise<Class[]>
   const { data, error } = await client
     .from("classes")
     .select(CLASS_SELECT)
-    .order("created_at", { ascending: false, nullsLast: true });
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new ClassDataError("Failed to load your classes.", { cause: error });
@@ -178,7 +178,7 @@ export async function listMyClassesWithPlanCount(
   const { data, error } = await client
     .from("classes")
     .select("*, class_lesson_plans ( id )")
-    .order("created_at", { ascending: false, nullsLast: true });
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new ClassDataError("Failed to load your classes.", { cause: error });
@@ -404,7 +404,6 @@ export async function listClassLessonPlans(
 
   const { data, error } = await query.order("date", {
     ascending: false,
-    nullsLast: true,
     foreignTable: "lesson_plans",
   });
 

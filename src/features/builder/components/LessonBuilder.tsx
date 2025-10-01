@@ -62,7 +62,7 @@ export const BuilderShell = () => {
 
         if (!active) return;
 
-        const logoUrl = profile?.school_logo_url ?? null;
+        const logoUrl = (profile as any)?.school_logo_url ?? null;
         if (logoUrl) {
           setState(prev => (prev.schoolLogoUrl ? prev : { ...prev, schoolLogoUrl: logoUrl }));
         }
@@ -249,7 +249,7 @@ export const BuilderShell = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ school_logo_url: null })
+        .update({ school_logo_url: null } as any)
         .eq("id", profileId);
 
       if (error) throw error;

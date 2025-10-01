@@ -38,8 +38,8 @@ export function useMyClasses() {
         setClasses(summaries);
       } catch (cause) {
         if (isMounted) {
-          const message = cause instanceof Error ? cause.message : "Failed to load classes.";
-          setError(new Error(message, { cause }));
+        const message = cause instanceof Error ? cause.message : "Failed to load classes.";
+        setError(new Error(message));
           setClasses([]);
         }
       } finally {

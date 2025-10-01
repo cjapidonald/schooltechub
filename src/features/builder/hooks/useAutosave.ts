@@ -45,13 +45,13 @@ export const useAutosave = (state: BuilderState, options: UseAutosaveOptions = {
       };
 
       const { error } = await supabase.from("builder_lesson_plans").upsert(
-        {
+        [{
           id: state.id,
           anon_user_id: anonUserId,
           title: state.title || "Untitled Lesson",
-          data: payload,
+          data: payload as any,
           updated_at: new Date().toISOString(),
-        },
+        }],
         { onConflict: "anon_user_id" },
       );
 

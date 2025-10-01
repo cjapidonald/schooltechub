@@ -220,7 +220,7 @@ export async function listProjects(
   let query = client
     .from("research_projects")
     .select(PROJECT_SELECT)
-    .order("created_at", { ascending: false, nullsLast: true });
+    .order("created_at", { ascending: false });
 
   if (filters.status) {
     query = query.eq("status", filters.status);
@@ -419,7 +419,7 @@ export async function listMyApplications(
     .from("research_applications")
     .select(APPLICATION_SELECT)
     .eq("applicant_id", userId)
-    .order("submitted_at", { ascending: false, nullsLast: true });
+    .order("submitted_at", { ascending: false });
 
   if (error) {
     throw new ResearchDataError("Failed to load your applications.", { cause: error });
@@ -436,7 +436,7 @@ export async function listParticipantDocs(
     .from("research_documents")
     .select(DOCUMENT_SELECT)
     .eq("project_id", projectId)
-    .order("created_at", { ascending: true, nullsLast: false });
+    .order("created_at", { ascending: true });
 
   if (error) {
     throw new ResearchDataError("Failed to load project documents.", { cause: error });
@@ -578,7 +578,7 @@ export async function listMySubmissions(
     .select(SUBMISSION_SELECT)
     .eq("project_id", projectId)
     .eq("participant_id", userId)
-    .order("reviewed_at", { ascending: false, nullsLast: true });
+    .order("reviewed_at", { ascending: false });
 
   if (error) {
     throw new ResearchDataError("Failed to load your submissions.", { cause: error });

@@ -15,10 +15,11 @@ const INITIAL_PROFILE: MyProfileData = {
   schoolLogoUrl: null,
 };
 
-type ProfileRow = Pick<
-  Database["public"]["Tables"]["profiles"]["Row"],
-  "full_name" | "school_name" | "school_logo_url"
->;
+type ProfileRow = {
+  full_name: string | null;
+  school_name: string | null;
+  school_logo_url: string | null;
+};
 
 function normalizeString(value: unknown): string | null {
   if (typeof value !== "string") {
@@ -80,7 +81,7 @@ export function useMyProfile() {
         .from("profiles")
         .select("full_name, school_name, school_logo_url")
         .eq("id", user.id)
-        .maybeSingle<ProfileRow>();
+        .maybeSingle() as { data: ProfileRow | null; error: any };
 
       if (profileError) {
         throw profileError;
@@ -113,7 +114,7 @@ export function useMyProfile() {
       }
 
       const message = cause instanceof Error ? cause.message : "Failed to load profile.";
-      setError(new Error(message, { cause }));
+      setError(new Error(message));
       setProfile({ ...INITIAL_PROFILE });
     } finally {
       if (isMountedRef.current) {

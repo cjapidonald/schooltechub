@@ -78,7 +78,7 @@ export async function getMyNotifications(
     .from("notifications")
     .select(NOTIFICATION_SELECT)
     .eq("user_id", userId)
-    .order("created_at", { ascending: false, nullsLast: true });
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new NotificationDataError("Failed to load notifications.", { cause: error });

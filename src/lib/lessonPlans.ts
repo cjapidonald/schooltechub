@@ -371,7 +371,7 @@ export async function getMyPlans(
     .from("lesson_plans")
     .select(LESSON_PLAN_SELECT)
     .eq("owner_id", userId)
-    .order("created_at", { ascending: false, nullsLast: true });
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new LessonPlanDataError("Failed to load your lesson plans.", { cause: error });

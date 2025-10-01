@@ -156,14 +156,14 @@ export async function searchResources(
 
   let query = supabase
     .from("resources")
-    .select<Resource>(RESOURCE_SELECT, { count: "exact" })
+    .select(RESOURCE_SELECT, { count: "exact" })
     .eq("is_active", true)
     .eq("status", "approved");
 
   if (sort === "title") {
-    query = query.order("title", { ascending: true, nullsLast: true });
+    query = query.order("title", { ascending: true });
   } else {
-    query = query.order("created_at", { ascending: false, nullsLast: true });
+    query = query.order("created_at", { ascending: false });
   }
 
   query = query.range(from, to);
@@ -213,7 +213,7 @@ export async function searchResources(
     throw new ResourceDataError("Unable to search resources.", { cause: error });
   }
 
-  const items = (data ?? []).map(mapResource);
+  const items = ((data ?? []) as any[]).map(mapResource);
 
   if (sort === "most-tagged") {
     items.sort((a, b) => {
@@ -234,7 +234,7 @@ export async function searchResources(
 export async function fetchResourceById(id: string): Promise<ResourceDetail> {
   const { data, error } = await supabase
     .from("resources")
-    .select<ResourceDetailRecord>(RESOURCE_DETAIL_SELECT)
+    .select(RESOURCE_DETAIL_SELECT)
     .eq("id", id)
     .maybeSingle();
 
@@ -246,7 +246,7 @@ export async function fetchResourceById(id: string): Promise<ResourceDetail> {
     throw new ResourceDataError("Resource not found.");
   }
 
-  return mapResourceDetail(data);
+  return mapResourceDetail(data as ResourceDetailRecord);
 }
 
 /**
@@ -255,7 +255,7 @@ export async function fetchResourceById(id: string): Promise<ResourceDetail> {
 export async function getResourceById(id: string): Promise<Resource | null> {
   const { data, error } = await supabase
     .from("resources")
-    .select<Resource>(RESOURCE_SELECT)
+    .select(RESOURCE_SELECT)
     .eq("id", id)
     .eq("is_active", true)
     .eq("status", "approved")
@@ -280,7 +280,7 @@ export async function getResourcesByIds(ids: string[]): Promise<Resource[]> {
 
   const { data, error } = await supabase
     .from("resources")
-    .select<Resource>(RESOURCE_SELECT)
+    .select(RESOURCE_SELECT)
     .in("id", uniqueIds)
     .eq("is_active", true)
     .eq("status", "approved");
@@ -289,7 +289,7 @@ export async function getResourcesByIds(ids: string[]): Promise<Resource[]> {
     throw new ResourceDataError("Unable to load the requested resources.", { cause: error });
   }
 
-  const lookup = new Map((data ?? []).map(resource => [resource.id, mapResource(resource)] as const));
+  const lookup = new Map(((data ?? []) as any[]).map(resource => [resource.id, mapResource(resource)] as const));
   return uniqueIds
     .map(id => lookup.get(id))
     .filter((resource): resource is Resource => Boolean(resource));

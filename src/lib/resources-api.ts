@@ -136,7 +136,7 @@ export async function searchResources(params: ResourceSearchParams = {}): Promis
     throw new ResourceApiError(500, error.message);
   }
 
-  const records = (data ?? []) as ResourceWithProfile[];
+  const records = (data ?? []) as unknown as ResourceWithProfile[];
   const items = records.map(mapRecordToCard);
   const total = count ?? items.length;
   const hasMore = from + items.length < total;
@@ -180,7 +180,7 @@ export async function createResource(payload: ResourceCreateRequest): Promise<Re
     throw new ResourceApiError(500, error?.message ?? "Failed to create resource");
   }
 
-  return mapRecordToCard(data as ResourceWithProfile);
+  return mapRecordToCard(data as unknown as ResourceWithProfile);
 }
 
 export async function updateResource(id: string, payload: ResourceUpdateRequest): Promise<ResourceCard> {
