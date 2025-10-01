@@ -44,7 +44,7 @@ export const useAutosave = (state: BuilderState, options: UseAutosaveOptions = {
         steps: state.steps,
       };
 
-      const { error } = await supabase.from("builder_drafts").upsert(
+      const { error } = await supabase.from("builder_lesson_plans").upsert(
         {
           id: state.id,
           anon_user_id: anonUserId,

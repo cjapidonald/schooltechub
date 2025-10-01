@@ -50,16 +50,7 @@ describe("ClassLessonPlanViewer", () => {
   });
 
   beforeEach(() => {
-    (listClassLessonPlans as unknown as vi.Mock).mockResolvedValue([
-      {
-        id: "plan-1",
-        title: "Sample plan",
-        date: "2024-01-15",
-        duration: "45 minutes",
-        addedAt: "2024-01-10T08:00:00.000Z",
-      },
-    ]);
-    (linkPlanToClass as unknown as vi.Mock).mockResolvedValue(undefined);
+    // Mock functions are setup in vi.mock calls above
   });
 
   afterEach(() => {

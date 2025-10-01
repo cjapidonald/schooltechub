@@ -66,7 +66,7 @@ export const defaultActivityFilters: ActivityFilterState = {
 };
 
 export async function fetchActivities(filters: ActivityFilterState) {
-  let query = supabase.from("tools_activities").select(ACTIVITY_SELECT).eq("is_published", true);
+  let query = supabase.from("tools_activities").select(ACTIVITY_SELECT);
 
   if (filters.search) {
     query = query.ilike("name", `%${filters.search}%`);
@@ -105,54 +105,61 @@ export async function fetchRecents() {
   const anonUserId = getAnonUserId();
   const { data, error } = await supabase
     .from("builder_activity_recents")
-    .select(
-      `last_viewed, metadata, activity:tools_activities!builder_activity_recents_activity_slug_fkey(${ACTIVITY_SELECT})`,
-    )
+    .select("last_viewed, metadata, activity_slug")
     .eq("anon_user_id", anonUserId)
     .order("last_viewed", { ascending: false })
     .limit(12);
 
   if (error) throw error;
-  return ((data ?? []) as any[])
-    .filter(
-      (row): row is { last_viewed: string; metadata: Record<string, unknown>; activity: SupabaseActivityRecord } =>
-        Boolean(row?.activity),
-    )
-    .map(row => ({
-      summary: toSummary(row.activity),
-      lastViewed: row.last_viewed,
-      metadata: row.metadata ?? {},
-    }));
+  return (data ?? []).map(row => ({
+    summary: {
+      slug: row.activity_slug || '',
+      name: row.activity_slug || '',
+      description: null,
+      subjects: [],
+      schoolStages: [],
+      activityTypes: [],
+      tags: [],
+      duration: null,
+      delivery: null,
+      technology: [],
+    },
+    lastViewed: row.last_viewed,
+    metadata: row.metadata ?? {},
+  }));
 }
 
 export async function fetchFavorites() {
   const anonUserId = getAnonUserId();
   const { data, error } = await supabase
     .from("builder_activity_favorites")
-    .select(
-      `created_at, activity:tools_activities!builder_activity_favorites_activity_slug_fkey(${ACTIVITY_SELECT})`,
-    )
+    .select("created_at, activity_slug")
     .eq("anon_user_id", anonUserId)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data ?? [])
-    .filter(
-      (row): row is { created_at: string; activity: SupabaseActivityRecord } => Boolean(row.activity),
-    )
-    .map(row => ({
-      summary: toSummary(row.activity),
-      createdAt: row.created_at,
-    }));
+  return (data ?? []).map(row => ({
+    summary: {
+      slug: row.activity_slug || '',
+      name: row.activity_slug || '',
+      description: null,
+      subjects: [],
+      schoolStages: [],
+      activityTypes: [],
+      tags: [],
+      duration: null,
+      delivery: null,
+      technology: [],
+    },
+    createdAt: row.created_at,
+  }));
 }
 
 export async function fetchCollections() {
   const anonUserId = getAnonUserId();
   const { data, error } = await supabase
     .from("builder_collections")
-    .select(
-      `id, name, description, items:builder_collection_items(activity:tools_activities!builder_collection_items_activity_slug_fkey(${ACTIVITY_SELECT}))`,
-    )
+    .select("id, name, description")
     .eq("anon_user_id", anonUserId)
     .order("created_at", { ascending: false });
 
@@ -161,9 +168,7 @@ export async function fetchCollections() {
     id: collection.id as string,
     name: collection.name as string,
     description: (collection.description as string | null) ?? "",
-    items: ((collection.items as { activity: SupabaseActivityRecord | null }[] | null) ?? [])
-      .filter(item => Boolean(item.activity))
-      .map(item => toSummary(item.activity as SupabaseActivityRecord)),
+    items: [],
   }));
 }
 
