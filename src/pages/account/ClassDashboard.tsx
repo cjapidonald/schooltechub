@@ -110,7 +110,7 @@ export function ClassDashboard() {
       <SEO
         title={t.account.classes.dashboard.seoTitle}
         description={t.account.classes.dashboard.seoDescription}
-        canonical="https://schooltechhub.com/account/classes"
+        canonicalUrl="https://schooltechhub.com/account/classes"
       />
       <main className="container mx-auto space-y-8 px-4">
         <div className="flex items-center justify-between gap-4">

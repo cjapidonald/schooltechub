@@ -158,8 +158,8 @@ const EventDetail = () => {
 
               <h1 className="text-4xl font-bold mb-4">{event.title}</h1>
 
-              {event.subtitle && (
-                <p className="text-lg text-muted-foreground mb-6">{event.subtitle}</p>
+              {(event as any).subtitle && (
+                <p className="text-lg text-muted-foreground mb-6">{(event as any).subtitle}</p>
               )}
 
               <div className="grid gap-4 sm:grid-cols-2 mb-8 text-sm text-muted-foreground">
@@ -261,14 +261,12 @@ const EventDetail = () => {
                 </CardContent>
               </Card>
 
-              {(event.stage || event.subject || (event.tags && event.tags.length > 0)) && (
+              {(event.tags && event.tags.length > 0) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Audience & Topics</CardTitle>
+                    <CardTitle>Topics</CardTitle>
                   </CardHeader>
                   <CardContent className="flex flex-wrap gap-2">
-                    {event.stage && <Badge variant="outline">{event.stage}</Badge>}
-                    {event.subject && <Badge variant="outline">{event.subject}</Badge>}
                     {event.tags?.map((tag) => (
                       <Badge key={tag} variant="secondary">
                         {tag}

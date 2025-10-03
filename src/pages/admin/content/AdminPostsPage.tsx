@@ -177,24 +177,31 @@ function normaliseTags(tags: string): string[] {
 
 async function fetchAdminPosts(): Promise<AdminPost[]> {
   const { data, error } = await supabase
-    .from("content_master")
-    .select<AdminPostRecord>(
-      "id,title,slug,language,page,status,updated_at,created_at,published_at,is_published,deleted_at,subtitle,excerpt,author,content,tags",
-    )
-    .in(
-      "page",
-      POST_PAGES.map(option => option.value),
-    )
-    .order("updated_at", { ascending: false, nullsLast: true })
-    .order("created_at", { ascending: false, nullsLast: true });
+    .from("blogs")
+    .select("*")
+    .order("updated_at", { ascending: false })
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(error.message);
   }
 
   return (data ?? []).map(record => ({
-    ...record,
-    authorName: extractAuthorName(record.author),
+    id: record.id,
+    title: record.title,
+    slug: record.slug,
+    language: null,
+    page: record.category || "blog",
+    status: "published" as AdminPostStatus,
+    updated_at: record.updated_at,
+    created_at: record.created_at,
+    published_at: record.published_at,
+    is_published: record.is_published,
+    deleted_at: null,
+    subtitle: null,
+    excerpt: record.excerpt,
+    tags: record.tags,
+    authorName: extractAuthorName(record.author as any),
     contentBody: extractBodyFromContent(record.content),
   }));
 }
@@ -223,14 +230,19 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
 
   if (!existing) {
     const { data, error } = await supabase
-      .from("content_master")
+      .from("blogs")
       .insert({
-        ...payload,
+        title: payload.title,
+        slug: payload.slug,
+        category: payload.page,
+        excerpt: payload.excerpt,
+        author: payload.author,
+        tags: payload.tags,
+        content: payload.content,
+        is_published: shouldPublish,
         ...publishPatch,
       })
-      .select<AdminPostRecord>(
-        "id,title,slug,language,page,status,updated_at,created_at,published_at,is_published,deleted_at,subtitle,excerpt,author,content,tags",
-      )
+      .select("*")
       .single();
 
     if (error || !data) {
@@ -238,22 +250,40 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
     }
 
     return {
-      ...data,
-      authorName: extractAuthorName(data.author),
+      id: data.id,
+      title: data.title,
+      slug: data.slug,
+      language: null,
+      page: data.category || "blog",
+      status: "published" as AdminPostStatus,
+      updated_at: data.updated_at,
+      created_at: data.created_at,
+      published_at: data.published_at,
+      is_published: data.is_published,
+      deleted_at: null,
+      subtitle: null,
+      excerpt: data.excerpt,
+      tags: data.tags,
+      authorName: extractAuthorName(data.author as any),
       contentBody: extractBodyFromContent(data.content),
     };
   }
 
   const { data, error } = await supabase
-    .from("content_master")
+    .from("blogs")
     .update({
-      ...payload,
+      title: payload.title,
+      slug: payload.slug,
+      category: payload.page,
+      excerpt: payload.excerpt,
+      author: payload.author,
+      tags: payload.tags,
+      content: payload.content,
+      is_published: shouldPublish,
       ...publishPatch,
     })
     .eq("id", existing.id)
-    .select<AdminPostRecord>(
-      "id,title,slug,language,page,status,updated_at,created_at,published_at,is_published,deleted_at,subtitle,excerpt,author,content,tags",
-    )
+    .select("*")
     .single();
 
   if (error || !data) {
@@ -261,8 +291,21 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
   }
 
   return {
-    ...data,
-    authorName: extractAuthorName(data.author),
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    language: null,
+    page: data.category || "blog",
+    status: "published" as AdminPostStatus,
+    updated_at: data.updated_at,
+    created_at: data.created_at,
+    published_at: data.published_at,
+    is_published: data.is_published,
+    deleted_at: null,
+    subtitle: null,
+    excerpt: data.excerpt,
+    tags: data.tags,
+    authorName: extractAuthorName(data.author as any),
     contentBody: extractBodyFromContent(data.content),
   };
 }
@@ -358,7 +401,7 @@ export function AdminPostsPage() {
   const performUpdate = async (id: string, update: Record<string, unknown>, successMessage: string) => {
     setActionPostId(id);
     try {
-      const { error: updateError } = await supabase.from("content_master").update(update).eq("id", id);
+      const { error: updateError } = await supabase.from("blogs").update(update).eq("id", id);
       if (updateError) {
         throw new Error(updateError.message);
       }

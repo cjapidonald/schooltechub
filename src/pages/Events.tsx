@@ -82,13 +82,7 @@ const Events = () => {
         query = query.in("event_price_type", filters.eventPriceType as any);
       }
 
-      if (filters.stage.length > 0) {
-        query = query.in("stage", filters.stage as any);
-      }
-
-      if (filters.subject.length > 0) {
-        query = query.in("subject", filters.subject as any);
-      }
+      // Note: stage and subject filters removed as they don't exist in events table
 
       const { data, error } = await query.order("start_datetime", { ascending: true });
 

@@ -148,9 +148,9 @@ const loadEntries = (): ActivityEntry[] => {
           message: entry.message,
           timestamp,
           metadata: metadata ? sanitizeMetadata(metadata) : undefined,
-        } satisfies ActivityEntry;
+        } as ActivityEntry;
       })
-      .filter((entry): entry is ActivityEntry => Boolean(entry && entry.id && entry.type && entry.message));
+      .filter((entry): entry is ActivityEntry => Boolean(entry));
 
     memoryEntries = entries;
     return memoryEntries;

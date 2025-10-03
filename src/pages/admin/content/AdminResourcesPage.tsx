@@ -82,11 +82,9 @@ function normaliseTags(input: string): string[] {
 async function fetchResources(): Promise<AdminResource[]> {
   const { data, error } = await supabase
     .from("resources")
-    .select<AdminResourceRecord>(
-      "id,title,description,url,storage_path,type,subject,stage,tags,thumbnail_url,status,is_active,created_at,updated_at,created_by,approved_by,approved_at",
-    )
-    .order("updated_at", { ascending: false, nullsLast: true })
-    .order("created_at", { ascending: false, nullsLast: true });
+    .select("id,title,description,url,storage_path,type,subject,stage,tags,thumbnail_url,status,is_active,created_at,updated_at,created_by,approved_by,approved_at")
+    .order("updated_at", { ascending: false })
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(error.message);
@@ -94,6 +92,7 @@ async function fetchResources(): Promise<AdminResource[]> {
 
   return (data ?? []).map(record => ({
     ...record,
+    status: record.status as ResourceStatus,
     tagList: record.tags ?? [],
   }));
 }
@@ -176,16 +175,18 @@ async function saveResource(
         ...approvedPatch,
         created_by: userId,
       })
-      .select<AdminResourceRecord>(
-        "id,title,description,url,storage_path,type,subject,stage,tags,thumbnail_url,status,is_active,created_at,updated_at,created_by,approved_by,approved_at",
-      )
+      .select("*")
       .single();
 
     if (error || !data) {
       throw new Error(error?.message ?? "Failed to create resource");
     }
 
-    return { ...data, tagList: data.tags ?? [] };
+    return {
+      ...data,
+      status: data.status as ResourceStatus,
+      tagList: data.tags ?? []
+    };
   }
 
   const { data, error } = await supabase
@@ -195,16 +196,18 @@ async function saveResource(
       ...approvedPatch,
     })
     .eq("id", options.existing.id)
-    .select<AdminResourceRecord>(
-      "id,title,description,url,storage_path,type,subject,stage,tags,thumbnail_url,status,is_active,created_at,updated_at,created_by,approved_by,approved_at",
-    )
+    .select("*")
     .single();
 
   if (error || !data) {
     throw new Error(error?.message ?? "Failed to update resource");
   }
 
-  return { ...data, tagList: data.tags ?? [] };
+  return {
+    ...data,
+    status: data.status as ResourceStatus,
+    tagList: data.tags ?? []
+  };
 }
 
 export function AdminResourcesPage() {
@@ -223,9 +226,9 @@ export function AdminResourcesPage() {
   const [actionResourceId, setActionResourceId] = useState<string | null>(null);
 
   const typeOptions = useMemo(() => {
-    const base = [...RESOURCE_TYPES];
+    const base = [...RESOURCE_TYPES] as Array<{value: string, label: string}>;
     if (editingResource && editingResource.type && !base.some(option => option.value === editingResource.type)) {
-      base.push({ value: editingResource.type, label: editingResource.type });
+      base.push({ value: editingResource.type as any, label: editingResource.type as any });
     }
     return base;
   }, [editingResource]);

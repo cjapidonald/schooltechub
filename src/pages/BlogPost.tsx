@@ -212,18 +212,24 @@ export default function BlogPost() {
     const fetchComments = async () => {
       const { data, error } = await supabase
         .from("comments")
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            email
-          )
-        `)
-        .eq("content_id", post.id)
+        .select("*")
+        .eq("blog_id", post.id)
         .order("created_at", { ascending: false });
 
       if (!error && data) {
-        setComments(data);
+        // Fetch profiles separately
+        const profileIds = [...new Set(data.map(c => c.user_id).filter(Boolean))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", profileIds);
+
+        const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+        const commentsWithProfiles = data.map(c => ({
+          ...c,
+          profiles: c.user_id ? profileMap.get(c.user_id) : null
+        }));
+        setComments(commentsWithProfiles);
       }
     };
 
@@ -266,7 +272,7 @@ export default function BlogPost() {
       .from("comments")
       .insert({
         content: comment,
-        content_id: post?.id,
+        blog_id: post?.id,
         user_id: user.id,
         parent_id: null
       });
@@ -303,7 +309,7 @@ export default function BlogPost() {
       .from("comments")
       .insert({
         content: replyText,
-        content_id: post?.id,
+        blog_id: post?.id,
         user_id: user.id,
         parent_id: parentId
       });
@@ -368,10 +374,11 @@ export default function BlogPost() {
   const publishedAtISO = post.published_at ? new Date(post.published_at).toISOString() : undefined;
   const modifiedAtISO = post.updated_at ? new Date(post.updated_at).toISOString() : publishedAtISO;
   const description = post.meta_description || post.excerpt || "";
-  const keywordList = Array.isArray(post.keywords)
-    ? post.keywords
-    : typeof post.keywords === "string"
-      ? post.keywords.split(",").map(keyword => keyword.trim()).filter(Boolean)
+  const keywords = (post as any).keywords;
+  const keywordList = Array.isArray(keywords)
+    ? keywords
+    : typeof keywords === "string"
+      ? keywords.split(",").map((keyword: string) => keyword.trim()).filter(Boolean)
       : [];
 
   const renderComment = (comment: any, depth = 0) => {
