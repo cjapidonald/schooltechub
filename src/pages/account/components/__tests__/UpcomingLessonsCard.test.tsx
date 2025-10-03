@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { UpcomingLessonsCard } from "../UpcomingLessonsCard";
 import { en } from "@/translations/en";
@@ -22,7 +22,7 @@ describe("UpcomingLessonsCard", () => {
   });
 
   beforeEach(() => {
-    (listUpcomingLessonPlans as unknown as vi.Mock).mockResolvedValue([
+    (listUpcomingLessonPlans as Mock).mockResolvedValue([
       {
         lessonId: "lesson-1",
         classTitle: "STEM Club",
@@ -55,7 +55,7 @@ describe("UpcomingLessonsCard", () => {
   });
 
   it("renders empty state when there are no lessons", async () => {
-    (listUpcomingLessonPlans as unknown as vi.Mock).mockResolvedValueOnce([]);
+    (listUpcomingLessonPlans as Mock).mockResolvedValueOnce([]);
 
     renderCard();
 

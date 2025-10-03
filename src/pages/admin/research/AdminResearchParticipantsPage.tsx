@@ -47,7 +47,7 @@ async function fetchParticipants(projectId: string): Promise<ResearchParticipant
     .from("research_participants")
     .select("id,project_id,user_id,joined_at")
     .eq("project_id", projectId)
-    .order("joined_at", { ascending: true, nullsLast: false });
+    .order("joined_at", { ascending: true });
 
   if (error) {
     throw new Error(error.message || "Failed to load participants");

@@ -7,7 +7,7 @@ export async function fetchResearchProjects(): Promise<ResearchProject[]> {
   const { data, error } = await supabase
     .from("research_projects")
     .select("id,title,slug,summary,status,visibility,created_by,created_at")
-    .order("created_at", { ascending: false, nullsLast: true });
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(error.message || "Failed to load research projects");

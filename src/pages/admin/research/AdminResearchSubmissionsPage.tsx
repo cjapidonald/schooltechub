@@ -78,7 +78,7 @@ async function fetchSubmissions(filters: SubmissionFilters): Promise<ResearchSub
   let query = supabase
     .from("research_submissions")
     .select("id,project_id,participant_id,title,description,storage_path,status,review_note,reviewed_by,reviewed_at,submitted_at,created_at")
-    .order("submitted_at", { ascending: false, nullsLast: true });
+    .order("submitted_at", { ascending: false });
 
   if (filters.projectId) {
     query = query.eq("project_id", filters.projectId);
@@ -94,7 +94,7 @@ async function fetchSubmissions(filters: SubmissionFilters): Promise<ResearchSub
     throw new Error(error.message || "Failed to load submissions");
   }
 
-  return (data ?? []).map(toSubmission);
+  return (data ?? []).map((record: any) => toSubmission(record));
 }
 
 async function reviewSubmission(

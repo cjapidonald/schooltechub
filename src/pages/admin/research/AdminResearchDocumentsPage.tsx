@@ -59,7 +59,7 @@ interface DocumentRecord {
   projectId?: string;
   title?: string | null;
   doc_type?: ResearchDocumentType | null;
-  storage_path?: string | null;
+  file_path?: string | null;
   storagePath?: string | null;
   status?: ResearchDocumentStatus | null;
   created_at?: string;
@@ -88,7 +88,7 @@ function toDocument(record: DocumentRecord): ResearchDocument {
     projectId: record.project_id ?? record.projectId ?? "",
     title: record.title ?? null,
     docType: (record.doc_type as ResearchDocumentType | undefined) ?? null,
-    storagePath: record.storage_path ?? record.storagePath ?? null,
+    storagePath: record.file_path ?? record.storagePath ?? null,
     status: (record.status as ResearchDocumentStatus | undefined) ?? "participant",
     createdAt: record.created_at ?? new Date().toISOString(),
   } satisfies ResearchDocument;
@@ -97,14 +97,14 @@ function toDocument(record: DocumentRecord): ResearchDocument {
 async function fetchDocuments(): Promise<ResearchDocument[]> {
   const { data, error } = await supabase
     .from("research_documents")
-    .select("id,project_id,title,doc_type,storage_path,status,created_at")
-    .order("created_at", { ascending: false, nullsLast: true });
+    .select("id,project_id,title,doc_type,file_path,status,created_at")
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(error.message || "Failed to load documents");
   }
 
-  return (data ?? []).map(toDocument);
+  return (data ?? []).map((record: any) => toDocument(record));
 }
 
 async function uploadDocument(values: DocumentFormValues, file: File | null): Promise<ResearchDocument> {
