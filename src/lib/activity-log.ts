@@ -150,7 +150,7 @@ const loadEntries = (): ActivityEntry[] => {
           metadata: metadata ? sanitizeMetadata(metadata) : undefined,
         } satisfies ActivityEntry;
       })
-      .filter((entry): entry is ActivityEntry => Boolean(entry && entry.id));
+      .filter((entry): entry is ActivityEntry => Boolean(entry && entry.id && entry.type && entry.message));
 
     memoryEntries = entries;
     return memoryEntries;

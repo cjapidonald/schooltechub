@@ -117,18 +117,18 @@ const Sitemap = () => {
       title: t.sitemap.sections.blogPosts,
       links: blogPosts.map((post) => ({
         title: post.title || post.slug,
-        url: getLocalizedPath(`/blog/${post.slug}`, post.language || "en"),
+        url: getLocalizedPath(`/blog/${post.slug}`, 'en'),
         updatedAt: formatUpdatedAt(post.updated_at ?? post.published_at ?? undefined),
-        language: post.language || "en"
+        language: "en"
       }))
     },
     {
       title: t.sitemap.sections.events,
       links: events.map((event) => ({
         title: event.title || event.slug,
-        url: getLocalizedPath(`/events/${event.slug}`, event.language || "en"),
+        url: getLocalizedPath(`/events/${event.slug}`, 'en'),
         updatedAt: formatUpdatedAt(event.updated_at ?? event.start_datetime ?? undefined),
-        language: event.language || "en"
+        language: "en"
       }))
     }
   ].map((section) => ({

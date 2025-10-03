@@ -23,7 +23,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import type { Database } from "@/integrations/supabase/types";
 
-type Event = Database["public"]["Tables"]["content_master"]["Row"];
+type Event = Database["public"]["Tables"]["events"]["Row"];
 
 const formatDate = (dateString: string | null) => {
   if (!dateString) return null;
@@ -66,7 +66,7 @@ const EventDetail = () => {
         .maybeSingle();
 
       if (error) throw error;
-      return data as Event | null;
+      return data;
     },
   });
 
@@ -115,9 +115,9 @@ const EventDetail = () => {
     <>
       <SEO
         title={event.meta_title || event.title}
-        description={event.meta_description || event.excerpt}
+        description={event.meta_description || event.excerpt || undefined}
         image={event.featured_image || undefined}
-        keywords={event.keywords?.join(", ")}
+        keywords={(event as any).keywords?.join(", ")}
       />
 
       <article className="min-h-screen bg-background">
@@ -142,7 +142,7 @@ const EventDetail = () => {
                     {event.price && event.event_price_type === "Paid" && ` $${event.price}`}
                   </Badge>
                 )}
-                {event.event_certificate_pd && (
+                {(event as any).event_certificate_pd && (
                   <Badge className="bg-purple-100 text-purple-800">
                     <Award className="h-3 w-3 mr-1" />
                     PD Certificate
@@ -197,10 +197,10 @@ const EventDetail = () => {
                     <span>{event.event_host}</span>
                   </div>
                 )}
-                {event.event_duration && (
+                {(event as any).event_duration && (
                   <div className="flex items-center gap-2">
                     <Timer className="h-4 w-4" />
-                    <span>{event.event_duration}</span>
+                    <span>{(event as any).event_duration}</span>
                   </div>
                 )}
                 {event.event_capacity && (
@@ -225,7 +225,7 @@ const EventDetail = () => {
                 </div>
               )}
 
-              <RichContent content={event.content} />
+              <RichContent content={event.content as any} />
             </div>
 
             <aside className="space-y-6">
