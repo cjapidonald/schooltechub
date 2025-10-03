@@ -63,9 +63,8 @@ const Sitemap = () => {
     queryKey: ["sitemap-blog-posts"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("content_master")
-        .select("slug, title, updated_at, published_at, language")
-        .eq("page", "research_blog")
+        .from("blogs")
+        .select("slug, title, updated_at, published_at")
         .eq("is_published", true)
         .order("published_at", { ascending: false });
 
@@ -78,9 +77,8 @@ const Sitemap = () => {
     queryKey: ["sitemap-events"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("content_master")
-        .select("slug, title, updated_at, start_datetime, language")
-        .eq("page", "events")
+        .from("events")
+        .select("slug, title, updated_at, start_datetime")
         .eq("is_published", true)
         .order("start_datetime", { ascending: false });
 

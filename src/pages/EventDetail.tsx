@@ -59,10 +59,9 @@ const EventDetail = () => {
     enabled: Boolean(slug),
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("content_master")
+        .from("events")
         .select("*")
         .eq("slug", slug)
-        .eq("page", "events")
         .eq("is_published", true)
         .maybeSingle();
 

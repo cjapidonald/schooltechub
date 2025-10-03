@@ -58,9 +58,8 @@ const Events = () => {
     try {
       setLoading(true);
       let query = supabase
-        .from("content_master")
+        .from("events")
         .select("*")
-        .eq("page", "events")
         .eq("is_published", true);
 
       if (selectedType === "upcoming") {

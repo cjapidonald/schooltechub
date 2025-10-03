@@ -85,7 +85,7 @@ export async function searchResources(params: ResourceSearchParams = {}): Promis
   let query = supabase
     .from("resources")
     .select(
-      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at,profiles:creator_id(full_name)`,
+      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at`,
       { count: "exact" },
     )
     .order("created_at", { ascending: false })
@@ -207,16 +207,20 @@ export async function updateResource(id: string, payload: ResourceUpdateRequest)
     .update(updatePayload)
     .eq("id", id)
     .eq("creator_id", payload.userId)
-    .select(
-      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at,profiles:creator_id(full_name)`,
-    )
+    .select()
     .single();
 
   if (error || !data) {
     throw new ResourceApiError(500, error?.message ?? "Failed to update resource");
   }
 
-  return mapRecordToCard(data as ResourceWithProfile);
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', data.creator_id)
+    .single();
+
+  return mapRecordToCard({ ...data, profiles: profile } as ResourceWithProfile);
 }
 
 export async function deleteResource(id: string, userId: string): Promise<void> {
@@ -229,9 +233,7 @@ export async function deleteResource(id: string, userId: string): Promise<void> 
 export async function getResource(id: string, ownerId: string): Promise<ResourceCard | null> {
   const { data, error } = await supabase
     .from("resources")
-    .select(
-      `id,title,url,description,tags,resource_type,subject,grade_level,format,instructional_notes,creator_id,created_at,updated_at,profiles:creator_id(full_name)`,
-    )
+    .select()
     .eq("id", id)
     .eq("creator_id", ownerId)
     .maybeSingle();
@@ -244,5 +246,11 @@ export async function getResource(id: string, ownerId: string): Promise<Resource
     return null;
   }
 
-  return mapRecordToCard(data as ResourceWithProfile);
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', data.creator_id)
+    .single();
+
+  return mapRecordToCard({ ...data, profiles: profile } as ResourceWithProfile);
 }

@@ -460,6 +460,42 @@ export type Database = {
           },
         ]
       }
+      content_master: {
+        Row: {
+          content_type: string
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language: string | null
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language?: string | null
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language?: string | null
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       enrollments: {
         Row: {
           class_id: string
@@ -794,6 +830,35 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      saved_posts: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blogs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       testimonials: {
         Row: {

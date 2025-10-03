@@ -265,7 +265,7 @@ export async function getResourceById(id: string): Promise<Resource | null> {
     throw new ResourceDataError("Unable to load the requested resource.", { cause: error });
   }
 
-  return data ? mapResource(data) : null;
+  return data ? (mapResource(data) as Resource) : null;
 }
 
 /**
