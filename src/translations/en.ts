@@ -1,6 +1,6 @@
 export const en = {
   nav: {
-    dashboard: "Dashboard",
+    dashboard: "My Dashboard",
     home: "Home",
     about: "About",
     services: "Services",
@@ -17,7 +17,7 @@ export const en = {
     signIn: "Sign In",
     signUp: "Sign Up",
     signOut: "Sign Out",
-    profile: "My Profile"
+    profile: "My Dashboard"
   },
   profilePage: {
     title: "My Profile",
@@ -1601,6 +1601,14 @@ export const en = {
         lessonCount: "Lesson plans: {count}",
         lessonCountLoading: "Lesson plans: —",
         noSummary: "Keep track of attendance, assignments, and resources for this class.",
+        overviewLessonsLabel: "Lesson plans linked",
+        overviewLessonsDescription: "Use the lesson builder tab to draft and refine your planning notes.",
+        overviewCurriculumLabel: "Curriculum alignment",
+        overviewCurriculumValue: "Launch from curriculum tab",
+        overviewCurriculumDescription: "Filters, class, and dates carry over when you open the lesson builder.",
+        overviewReportsLabel: "Student insights",
+        overviewReportsValue: "Prepare AI reports",
+        overviewReportsDescription: "Capture behaviour and appraisal notes before requesting a progress summary.",
         scheduleLabel: "Meeting details",
         schedulePlaceholder: "Add meeting times to help you stay organised.",
         dateRangePlaceholder: "Set class start and end dates to build a clear timeline.",
@@ -1616,9 +1624,13 @@ export const en = {
         lessonPlansTitle: "Lesson plans",
         quickActions: "Quick actions",
         managePlans: "Manage lesson plans",
-        scheduleHighlights: "Schedule highlights",
-        scheduleHighlightsEmpty: "Create a recurring schedule to see upcoming class meetings.",
-        scheduleHighlightDuration: "Duration: {minutes} minutes",
+        workspaceTipsTitle: "Workspace tips",
+        workspaceTipsDescription: "Keep everything connected as you move between tabs.",
+        workspaceTips: [
+          "Create or refine your curriculum entries before launching the lesson builder.",
+          "Attach resources from the builder so every handout and link lives with the plan.",
+          "Use Assessment Tracking to record results that feed into AI-generated progress reports.",
+        ],
       },
       schedule: {
         title: "Recurring class schedule",

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, ChevronLeft, MapPin, Users, Clock, BookOpen } from "lucide-react";
+import { ChevronLeft, BookOpen } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -18,40 +18,6 @@ import {
 } from "@/lib/classes";
 import { ClassLessonPlanViewer } from "@/components/classes/ClassLessonPlanViewer";
 import { ClassRecurringSchedule, type ClassScheduleOccurrence } from "@/components/classes/ClassRecurringSchedule";
-
-const formatDateRange = (classItem: Class | null, fallback: string): string => {
-  if (!classItem) {
-    return fallback;
-  }
-
-  const start = classItem.startDate ? new Date(classItem.startDate) : null;
-  const end = classItem.endDate ? new Date(classItem.endDate) : null;
-
-  if (!start && !end) {
-    return fallback;
-  }
-
-  if (start && !end) {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-    }).format(start);
-  }
-
-  if (!start && end) {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-    }).format(end);
-  }
-
-  if (!start || !end) {
-    return fallback;
-  }
-
-  return `${new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(start)} → ${new Intl.DateTimeFormat(
-    undefined,
-    { dateStyle: "medium" },
-  ).format(end)}`;
-};
 
 export function ClassDashboard() {
   const params = useParams<{ id: string }>();
@@ -151,83 +117,44 @@ export function ClassDashboard() {
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-foreground">{classData.title}</CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    {classData.subject ? <Badge variant="secondary">{classData.subject}</Badge> : null}
-                    {classData.stage ? <Badge variant="outline">{classData.stage}</Badge> : null}
-                    <Badge variant="outline">{planCountBadge}</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{classData.summary ?? t.account.classes.dashboard.noSummary}</p>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-3">
-                      <CalendarClock className="mt-1 h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {t.account.classes.dashboard.scheduleLabel}
-                        </p>
-                        <p className="text-sm font-medium text-foreground">
-                          {classData.meetingSchedule?.trim() || t.account.classes.dashboard.schedulePlaceholder}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDateRange(classData, t.account.classes.dashboard.dateRangePlaceholder)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-3">
-                      <Users className="mt-1 h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {t.account.classes.dashboard.capacityLabel}
-                        </p>
-                        <p className="text-sm font-medium text-foreground">
-                          {typeof classData.maxCapacity === "number"
-                            ? t.account.classes.dashboard.capacityValue
-                                .replace("{current}", String(classData.currentEnrollment ?? 0))
-                                .replace("{max}", String(classData.maxCapacity))
-                            : t.account.classes.dashboard.capacityUnknown}
-                        </p>
-                        {classData.meetingLink ? (
-                          <a
-                            href={classData.meetingLink}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="text-xs text-primary underline"
-                          >
-                            {t.account.classes.dashboard.openMeeting}
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
+              <CardContent className="space-y-6">
+                <div className="flex flex-wrap gap-2">
+                  {classData.subject ? <Badge variant="secondary">{classData.subject}</Badge> : null}
+                  {classData.stage ? <Badge variant="outline">{classData.stage}</Badge> : null}
+                  <Badge variant="outline">{planCountBadge}</Badge>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {t.account.classes.dashboard.nextClassLabel}
-                      </p>
-                      <p className="text-sm font-medium text-foreground">
-                        {scheduleOccurrences.length > 0
-                          ? new Intl.DateTimeFormat(undefined, {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                            }).format(new Date(scheduleOccurrences[0].start))
-                          : t.account.classes.dashboard.nextClassPlaceholder}
-                      </p>
-                    </div>
+                <p className="text-sm text-muted-foreground">{classData.summary ?? t.account.classes.dashboard.noSummary}</p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="space-y-2 rounded-lg border bg-muted/40 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {t.account.classes.dashboard.overviewLessonsLabel}
+                    </p>
+                    <p className="text-sm font-semibold text-foreground">{planCountBadge}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.account.classes.dashboard.overviewLessonsDescription}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-3">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                        {t.account.classes.dashboard.locationLabel}
-                      </p>
-                      <p className="text-sm font-medium text-foreground">
-                        {classData.meetingLink ? t.account.classes.dashboard.virtualLocation : t.account.classes.dashboard.noLocation}
-                      </p>
-                    </div>
+                  <div className="space-y-2 rounded-lg border bg-muted/40 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {t.account.classes.dashboard.overviewCurriculumLabel}
+                    </p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {t.account.classes.dashboard.overviewCurriculumValue}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.account.classes.dashboard.overviewCurriculumDescription}
+                    </p>
+                  </div>
+                  <div className="space-y-2 rounded-lg border bg-muted/40 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {t.account.classes.dashboard.overviewReportsLabel}
+                    </p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {t.account.classes.dashboard.overviewReportsValue}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t.account.classes.dashboard.overviewReportsDescription}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -276,38 +203,17 @@ export function ClassDashboard() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>{t.account.classes.dashboard.scheduleHighlights}</CardTitle>
+                    <CardTitle>{t.account.classes.dashboard.workspaceTipsTitle}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    {scheduleOccurrences.length === 0 ? (
-                      <p>{t.account.classes.dashboard.scheduleHighlightsEmpty}</p>
-                    ) : (
-                      scheduleOccurrences.slice(0, 5).map(occurrence => {
-                        const durationMinutes = Math.max(
-                          1,
-                          Math.round(
-                            (new Date(occurrence.end).getTime() - new Date(occurrence.start).getTime()) / 60000,
-                          ),
-                        );
-
-                        return (
-                          <div key={occurrence.start} className="rounded-md border p-3">
-                            <p className="font-medium text-foreground">
-                              {new Intl.DateTimeFormat(undefined, {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              }).format(new Date(occurrence.start))}
-                            </p>
-                            <p>
-                              {t.account.classes.dashboard.scheduleHighlightDuration.replace(
-                                "{minutes}",
-                                String(durationMinutes),
-                              )}
-                            </p>
-                          </div>
-                        );
-                      })
-                    )}
+                    <p>{t.account.classes.dashboard.workspaceTipsDescription}</p>
+                    <ul className="list-disc space-y-2 pl-5 text-xs text-muted-foreground">
+                      {t.account.classes.dashboard.workspaceTips?.map(tip => (
+                        <li key={tip} className="leading-relaxed">
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
                   </CardContent>
                 </Card>
               </aside>

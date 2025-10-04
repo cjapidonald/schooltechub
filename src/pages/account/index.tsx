@@ -2222,9 +2222,6 @@ const AssessmentsPanel = ({
             <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
               {selectedClass.stage ? <Badge variant="outline">{selectedClass.stage}</Badge> : null}
               {selectedClass.subject ? <Badge variant="outline">{selectedClass.subject}</Badge> : null}
-              {selectedClass.startDate ? (
-                <Badge variant="outline">Started {formatDate(selectedClass.startDate)}</Badge>
-              ) : null}
             </div>
           </>
         ) : (
@@ -2403,9 +2400,6 @@ const AssessmentsPanel = ({
                     <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                       {classItem.stage ? <Badge variant="outline">{classItem.stage}</Badge> : null}
                       {classItem.subject ? <Badge variant="outline">{classItem.subject}</Badge> : null}
-                      {classItem.startDate ? (
-                        <Badge variant="outline">Starts {formatDate(classItem.startDate)}</Badge>
-                      ) : null}
                     </div>
                   </button>
                 ))}
