@@ -5,6 +5,7 @@ export const vi = {
     about: "Về chúng tôi",
     services: "Dịch vụ",
     blog: "Blog",
+    curriculum: "Chương trình học",
     lessonPlans: "Kế hoạch bài học",
     builder: "Trình xây dựng bài học",
     worksheets: "Phiếu học tập",
