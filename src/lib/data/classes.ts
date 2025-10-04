@@ -185,13 +185,26 @@ function buildClassPayload(
 }
 
 function isUndefinedColumnError(error: unknown): boolean {
-  return Boolean(
-    error &&
-      typeof error === "object" &&
-      "code" in error &&
-      typeof (error as { code?: unknown }).code === "string" &&
-      (error as { code: string }).code === "42703",
-  );
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const code = (error as { code?: unknown }).code;
+  if (typeof code === "string" && code === "42703") {
+    return true;
+  }
+
+  const message = (error as { message?: unknown }).message;
+  if (typeof message === "string" && /column .* does not exist/i.test(message)) {
+    return true;
+  }
+
+  const details = (error as { details?: unknown }).details;
+  if (typeof details === "string" && /column .* does not exist/i.test(details)) {
+    return true;
+  }
+
+  return false;
 }
 
 async function insertClassRecord(

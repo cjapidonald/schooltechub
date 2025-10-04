@@ -45,6 +45,7 @@ export const en = {
     },
     fallback: {
       notProvided: "Not provided",
+      signInRequired: "Sign in to view your profile details.",
     },
   },
   hero: {

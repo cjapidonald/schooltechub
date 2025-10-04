@@ -253,14 +253,6 @@ const AccountDashboard = () => {
     return emailName ? `Mr ${emailName}` : defaultSalutation;
   }, [fullName, user, defaultSalutation]);
 
-  const accountDisplayName = useMemo(() => {
-    const trimmed = fullName?.trim();
-    if (trimmed && trimmed.length > 0) {
-      return trimmed;
-    }
-    return user?.email ?? defaultSalutation;
-  }, [fullName, user, defaultSalutation]);
-
   const classesQuery = useQuery({
     queryKey: ["dashboard-classes"],
     queryFn: () => listMyClassesWithPlanCount(),
@@ -592,9 +584,6 @@ const AccountDashboard = () => {
                   <CardDescription>
                     Everything you need to run your classroom in one place.
                   </CardDescription>
-                  {accountDisplayName ? (
-                    <p className="text-sm text-muted-foreground">Signed in as {accountDisplayName}</p>
-                  ) : null}
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -651,7 +640,7 @@ const AccountDashboard = () => {
                   Ask a question
                 </Button>
               )}
-              <Button onClick={() => handleOpenLessonBuilder(null, null)}>
+              <Button onClick={() => handleTabChange("curriculum")}>
                 <NotebookPen className="mr-2 h-4 w-4" /> Plan a lesson
               </Button>
             </div>
