@@ -277,16 +277,39 @@ describe("classes data helpers", () => {
       classes: {
         selectOrder: () => Promise.resolve({ data: [classRow], error: null }),
         selectMaybeSingle: () => Promise.resolve({ data: classRow, error: null }),
-        insert: payload =>
-          Promise.resolve({
-            data: { ...classRow, id: "class-2", title: payload.title },
+        insert: payload => {
+          const recordPayload = payload as Record<string, unknown>;
+          const payloadNameValue = recordPayload["name"];
+          const payloadTitleValue = recordPayload["title"];
+          const payloadName = typeof payloadNameValue === "string" ? payloadNameValue : undefined;
+          const payloadTitle = typeof payloadTitleValue === "string" ? payloadTitleValue : undefined;
+
+          return Promise.resolve({
+            data: {
+              ...classRow,
+              id: "class-2",
+              title: payloadTitle ?? payloadName ?? classRow.title,
+              name: payloadName ?? payloadTitle ?? classRow.title,
+            },
             error: null,
-          }),
-        update: ({ payload }) =>
-          Promise.resolve({
-            data: { ...classRow, title: payload.title ?? classRow.title },
+          });
+        },
+        update: ({ payload }) => {
+          const recordPayload = payload as Record<string, unknown>;
+          const payloadNameValue = recordPayload["name"];
+          const payloadTitleValue = recordPayload["title"];
+          const payloadName = typeof payloadNameValue === "string" ? payloadNameValue : undefined;
+          const payloadTitle = typeof payloadTitleValue === "string" ? payloadTitleValue : undefined;
+
+          return Promise.resolve({
+            data: {
+              ...classRow,
+              title: payloadTitle ?? payloadName ?? classRow.title,
+              name: payloadName ?? payloadTitle ?? classRow.title,
+            },
             error: null,
-          }),
+          });
+        },
         delete: () => Promise.resolve({ error: null }),
       },
       class_lesson_plans: {

@@ -10,6 +10,8 @@ const CLASS_SELECT = "*";
 
 type Client = SupabaseClient;
 
+type ClassTableSchema = "modern" | "legacy";
+
 export class ClassDataError extends Error {
   declare cause?: unknown;
 
@@ -108,51 +110,101 @@ async function requireUserId(client: Client, action: string): Promise<string> {
 
 function buildClassPayload(
   input: ClassCreateInput | ClassUpdateInput,
+  schema: ClassTableSchema,
   userId?: string,
 ): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
 
   if ("title" in input && input.title !== undefined) {
-    payload.title = input.title;
+    if (schema === "modern") {
+      payload.name = input.title;
+    } else {
+      payload.title = input.title;
+    }
   }
-  if ("summary" in input && input.summary !== undefined) {
-    payload.description = input.summary;
-  }
-  if ("subject" in input && input.subject !== undefined) {
-    payload.subject = input.subject;
-  }
-  if ("stage" in input && input.stage !== undefined) {
-    payload.level = input.stage;
-  }
-  if ("status" in input && input.status !== undefined) {
-    payload.status = input.status;
-  }
-  if ("startDate" in input && input.startDate !== undefined) {
-    payload.start_date = input.startDate;
-  }
-  if ("endDate" in input && input.endDate !== undefined) {
-    payload.end_date = input.endDate;
-  }
-  if ("meetingSchedule" in input && input.meetingSchedule !== undefined) {
-    payload.meeting_schedule = input.meetingSchedule;
-  }
-  if ("meetingLink" in input && input.meetingLink !== undefined) {
-    payload.meeting_link = input.meetingLink;
-  }
-  if ("imageUrl" in input && input.imageUrl !== undefined) {
-    payload.image_url = input.imageUrl;
-  }
-  if ("maxCapacity" in input && input.maxCapacity !== undefined) {
-    payload.max_capacity = input.maxCapacity;
-  }
-  if ("currentEnrollment" in input && input.currentEnrollment !== undefined) {
-    payload.current_enrollment = input.currentEnrollment;
-  }
-  if (userId) {
-    payload.owner_id = userId;
+
+  if (schema === "modern") {
+    if ("subject" in input && input.subject !== undefined) {
+      payload.subject = input.subject;
+    }
+
+    if ("stage" in input && input.stage !== undefined) {
+      payload.stage = input.stage;
+    }
+
+    if (userId) {
+      payload.owner_id = userId;
+    }
+  } else {
+    if ("summary" in input && input.summary !== undefined) {
+      payload.description = input.summary;
+    }
+
+    if ("stage" in input && input.stage !== undefined) {
+      payload.level = input.stage;
+    }
+
+    if ("status" in input && input.status !== undefined) {
+      payload.status = input.status;
+    }
+
+    if ("startDate" in input && input.startDate !== undefined) {
+      payload.start_date = input.startDate;
+    }
+
+    if ("endDate" in input && input.endDate !== undefined) {
+      payload.end_date = input.endDate;
+    }
+
+    if ("meetingSchedule" in input && input.meetingSchedule !== undefined) {
+      payload.meeting_schedule = input.meetingSchedule;
+    }
+
+    if ("meetingLink" in input && input.meetingLink !== undefined) {
+      payload.meeting_link = input.meetingLink;
+    }
+
+    if ("imageUrl" in input && input.imageUrl !== undefined) {
+      payload.image_url = input.imageUrl;
+    }
+
+    if ("maxCapacity" in input && input.maxCapacity !== undefined) {
+      payload.max_capacity = input.maxCapacity;
+    }
+
+    if ("currentEnrollment" in input && input.currentEnrollment !== undefined) {
+      payload.current_enrollment = input.currentEnrollment;
+    }
+
+    if (userId) {
+      payload.instructor_id = userId;
+    }
   }
 
   return payload;
+}
+
+function isUndefinedColumnError(error: unknown): boolean {
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "code" in error &&
+      typeof (error as { code?: unknown }).code === "string" &&
+      (error as { code: string }).code === "42703",
+  );
+}
+
+async function insertClassRecord(
+  payload: Record<string, unknown>,
+  client: Client,
+): Promise<{ data: Record<string, unknown> | null; error: unknown }> {
+  const { data, error } = await client
+    .from("classes")
+    .insert(payload)
+    .select(CLASS_SELECT)
+    .single();
+
+  return { data, error };
 }
 
 export async function listMyClasses(client: Client = supabase): Promise<Class[]> {
@@ -222,19 +274,24 @@ export async function createClass(
   client: Client = supabase,
 ): Promise<Class> {
   const userId = await requireUserId(client, "create classes");
-  const payload = { ...buildClassPayload(input, userId) };
+  const primaryPayload = buildClassPayload(input, "modern", userId);
+  const primaryResult = await insertClassRecord(primaryPayload, client);
 
-  const { data, error } = await client
-    .from("classes")
-    .insert(payload)
-    .select(CLASS_SELECT)
-    .single();
+  let record = primaryResult.data;
+  let insertError = primaryResult.error;
 
-  if (error || !data) {
-    throw new ClassDataError("Unable to create the class.", { cause: error });
+  if ((!record || insertError) && isUndefinedColumnError(insertError)) {
+    const legacyPayload = buildClassPayload(input, "legacy", userId);
+    const legacyResult = await insertClassRecord(legacyPayload, client);
+    record = legacyResult.data;
+    insertError = legacyResult.error;
   }
 
-  const result = mapClass(data);
+  if (!record || insertError) {
+    throw new ClassDataError("Unable to create the class.", { cause: insertError });
+  }
+
+  const result = mapClass(record);
   const classTitle = result.title?.trim();
   logActivity("class-created", classTitle ? `Created class “${classTitle}”.` : "Created a new class.", {
     classId: result.id,
@@ -250,26 +307,50 @@ export async function updateClass(
   client: Client = supabase,
 ): Promise<Class> {
   await requireUserId(client, "update classes");
-  const payload = buildClassPayload(updates);
+  const modernPayload = buildClassPayload(updates, "modern");
+  const legacyPayload = buildClassPayload(updates, "legacy");
 
-  if (Object.keys(payload).length === 0) {
+  if (Object.keys(modernPayload).length === 0 && Object.keys(legacyPayload).length === 0) {
     return (await getClass(id, client)) ?? (() => {
       throw new ClassDataError("Class not found.");
     })();
   }
 
-  const { data, error } = await client
-    .from("classes")
-    .update(payload)
-    .eq("id", id)
-    .select(CLASS_SELECT)
-    .single();
+  if (Object.keys(modernPayload).length > 0) {
+    const { data, error } = await client
+      .from("classes")
+      .update(modernPayload)
+      .eq("id", id)
+      .select(CLASS_SELECT)
+      .single();
 
-  if (error || !data) {
+    if (data && !error) {
+      return mapClass(data);
+    }
+
+    if (!isUndefinedColumnError(error)) {
+      throw new ClassDataError("Unable to update the class.", { cause: error });
+    }
+  }
+
+  if (Object.keys(legacyPayload).length > 0) {
+    const { data, error } = await client
+      .from("classes")
+      .update(legacyPayload)
+      .eq("id", id)
+      .select(CLASS_SELECT)
+      .single();
+
+    if (data && !error) {
+      return mapClass(data);
+    }
+
     throw new ClassDataError("Unable to update the class.", { cause: error });
   }
 
-  return mapClass(data);
+  return (await getClass(id, client)) ?? (() => {
+    throw new ClassDataError("Class not found.");
+  })();
 }
 
 export async function deleteClass(
