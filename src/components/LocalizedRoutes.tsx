@@ -73,6 +73,7 @@ export const LocalizedRoutes = () => {
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
+      <Route path="/dashboard" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
       <Route path="/profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
       <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
       <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
@@ -95,4 +96,3 @@ export const LocalizedRoutes = () => {
     </Routes>
   );
 };
-      <Route path="/dashboard" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
