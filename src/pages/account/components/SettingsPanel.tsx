@@ -33,7 +33,7 @@ import {
 } from "@/lib/avatar";
 
 type ThemePreference = "system" | "light" | "dark";
-type LanguageOption = "en" | "sq" | "vi";
+type LanguageOption = "en";
 
 type SettingsPanelProps = {
   user: User;
@@ -48,8 +48,7 @@ const createFileIdentifier = () => {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
-const isLanguageOption = (value: unknown): value is LanguageOption =>
-  value === "en" || value === "sq" || value === "vi";
+const isLanguageOption = (value: unknown): value is LanguageOption => value === "en";
 
 const isThemePreference = (value: unknown): value is ThemePreference =>
   value === "light" || value === "dark" || value === "system";
@@ -499,15 +498,6 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     }
   };
 
-  const languageOptions = useMemo(
-    () => [
-      { value: "en" as LanguageOption, label: t.sitemap.languages.en },
-      { value: "sq" as LanguageOption, label: t.sitemap.languages.sq },
-      { value: "vi" as LanguageOption, label: t.sitemap.languages.vi },
-    ],
-    [t]
-  );
-
   return (
     <div className="space-y-6">
       <Card>
@@ -713,18 +703,9 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
             </div>
             <div className="grid gap-2">
               <Label>{t.account.settings.language}</Label>
-              <Select value={languagePreference} onValueChange={value => setLanguagePreference(value as LanguageOption)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t.account.settings.languagePlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {languageOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                {t.sitemap.languages.en}
+              </div>
             </div>
             <div className="grid gap-2">
               <Label>{t.account.settings.theme}</Label>

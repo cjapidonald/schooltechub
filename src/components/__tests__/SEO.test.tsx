@@ -4,19 +4,17 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { SEO } from '../SEO';
 
-type SupportedLang = NonNullable<Parameters<typeof SEO>[0]['lang']>;
-
 const defaultProps = {
   title: 'Test Page',
   description: 'Testing alternate language links.',
 };
 
-const renderSEO = (path: string, lang: SupportedLang) => {
+const renderSEO = (path: string) => {
   window.history.replaceState({}, '', path);
 
   render(
     <HelmetProvider>
-      <SEO {...defaultProps} lang={lang} />
+      <SEO {...defaultProps} />
     </HelmetProvider>,
   );
 };
@@ -48,43 +46,16 @@ describe('SEO locale alternates', () => {
     });
   });
 
-  it('emits localized alternates for English routes', async () => {
-    renderSEO('/services', 'en');
+  it('emits only English alternates for routes', async () => {
+    renderSEO('/services');
 
     await waitFor(() => {
       const alternateLinks = getAlternateLinks();
       expect(alternateLinks.en).toBe(withOrigin('/services'));
-      expect(alternateLinks.sq).toBe(withOrigin('/sq/services'));
-      expect(alternateLinks.vi).toBe(withOrigin('/vi/services'));
       expect(alternateLinks['x-default']).toBe(withOrigin('/services'));
+      expect(Object.keys(alternateLinks)).toHaveLength(2);
 
       expect(getCanonicalLink()).toBe(withOrigin('/services'));
-    });
-  });
-
-  it('keeps localized canonical and alternates for Albanian routes', async () => {
-    renderSEO('/sq/services', 'sq');
-
-    await waitFor(() => {
-      const alternateLinks = getAlternateLinks();
-      expect(alternateLinks.en).toBe(withOrigin('/services'));
-      expect(alternateLinks.sq).toBe(withOrigin('/sq/services'));
-      expect(alternateLinks.vi).toBe(withOrigin('/vi/services'));
-
-      expect(getCanonicalLink()).toBe(withOrigin('/sq/services'));
-    });
-  });
-
-  it('keeps localized canonical and alternates for Vietnamese routes', async () => {
-    renderSEO('/vi/services', 'vi');
-
-    await waitFor(() => {
-      const alternateLinks = getAlternateLinks();
-      expect(alternateLinks.en).toBe(withOrigin('/services'));
-      expect(alternateLinks.sq).toBe(withOrigin('/sq/services'));
-      expect(alternateLinks.vi).toBe(withOrigin('/vi/services'));
-
-      expect(getCanonicalLink()).toBe(withOrigin('/vi/services'));
     });
   });
 });

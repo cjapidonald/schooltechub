@@ -13,13 +13,11 @@ interface SEOProps {
   section?: string;
   tags?: string[];
   canonicalUrl?: string;
-  lang?: "en" | "sq" | "vi";
+  lang?: "en";
 }
 
-const SUPPORTED_LANGS = ["en", "sq", "vi"] as const;
-const LOCALIZED_PREFIXES = new Set<typeof SUPPORTED_LANGS[number]>(
-  SUPPORTED_LANGS.filter(locale => locale !== "en"),
-);
+const SUPPORTED_LANGS = ["en"] as const;
+const LOCALIZED_PREFIXES = new Set<typeof SUPPORTED_LANGS[number]>();
 
 const normalizePathname = (path: string | undefined | null) => {
   if (!path) {
@@ -59,8 +57,8 @@ export function SEO({
 }: SEOProps) {
   const siteName = "SchoolTech Hub";
   const fullTitle = `${title} | ${siteName} - AI Education Solutions`;
-  const langLabel = lang === "sq" ? "Albanian" : lang === "vi" ? "Vietnamese" : "English";
-  const ogLocale = lang === "sq" ? "sq_AL" : lang === "vi" ? "vi_VN" : "en_US";
+  const langLabel = "English";
+  const ogLocale = "en_US";
 
   let origin = "";
   let pathname = "/";
@@ -98,8 +96,6 @@ export function SEO({
   const normalizedBasePath = basePath === "" ? "/" : basePath;
 
   const englishPath = normalizedBasePath;
-  const albanianPath = normalizedBasePath === "/" ? "/sq" : `/sq${normalizedBasePath}`;
-  const vietnamesePath = normalizedBasePath === "/" ? "/vi" : `/vi${normalizedBasePath}`;
 
   const canonicalPath = rawPathname || "/";
   const canonical =
@@ -108,8 +104,6 @@ export function SEO({
 
   const alternateLinks = {
     en: buildAbsoluteUrl(origin, englishPath),
-    sq: buildAbsoluteUrl(origin, albanianPath),
-    vi: buildAbsoluteUrl(origin, vietnamesePath),
   };
 
   const ogUrl = canonical || url;
@@ -130,8 +124,6 @@ export function SEO({
       {canonical && <link rel="canonical" href={canonical} />}
       {/* Alternate locales */}
       <link rel="alternate" hrefLang="en" href={alternateLinks.en} />
-      <link rel="alternate" hrefLang="sq" href={alternateLinks.sq} />
-      <link rel="alternate" hrefLang="vi" href={alternateLinks.vi} />
       <link rel="alternate" hrefLang="x-default" href={alternateLinks.en} />
       
       {/* Open Graph / Facebook */}
@@ -142,7 +134,6 @@ export function SEO({
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content={siteName} />
       <meta property="og:locale" content={ogLocale} />
-      <meta property="og:locale:alternate" content="sq_AL" />
       
       {/* Article specific tags */}
       {type === "article" && (

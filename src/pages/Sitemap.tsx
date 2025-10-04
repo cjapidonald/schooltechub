@@ -7,8 +7,6 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { en } from "@/translations/en";
-import { sq } from "@/translations/sq";
-import { vi } from "@/translations/vi";
 
 type RouteLink = {
   title: string;
@@ -17,16 +15,9 @@ type RouteLink = {
 
 type DynamicLink = RouteLink & {
   updatedAt?: string | null;
-  language?: string | null;
 };
 
 type TranslationDictionary = typeof en;
-
-const supportedLanguages = [
-  { code: "en", dictionary: en },
-  { code: "sq", dictionary: sq },
-  { code: "vi", dictionary: vi },
-] as const;
 
 const createStaticRoutes = (dictionary: TranslationDictionary): RouteLink[] => [
   { title: dictionary.nav.home, url: "/" },
@@ -52,12 +43,6 @@ const formatUpdatedAt = (value?: string | null) => {
 
 const Sitemap = () => {
   const { t } = useLanguage();
-
-  const languageLabels = supportedLanguages.reduce<Record<string, string>>((acc, lang) => {
-    const label = t.sitemap.languages?.[lang.code];
-    acc[lang.code] = label || lang.code.toUpperCase();
-    return acc;
-  }, {});
 
   const { data: blogPosts = [] } = useQuery({
     queryKey: ["sitemap-blog-posts"],
@@ -87,30 +72,12 @@ const Sitemap = () => {
     }
   });
 
-  const staticSections = supportedLanguages.map((lang) => {
-    const links = createStaticRoutes(lang.dictionary).map((route) => ({
-      title: route.title,
-      url:
-        lang.code === "en"
-          ? route.url
-          : route.url === "/"
-            ? `/${lang.code}`
-            : `/${lang.code}${route.url}`
-    }));
-
-    const title =
-      lang.code === "en"
-        ? t.sitemap.sections.englishPages
-        : t.sitemap.sections.localizedPages.replace(
-            "{{language}}",
-            languageLabels[lang.code] || lang.code.toUpperCase()
-          );
-
-    return {
-      title,
-      links
-    };
-  });
+  const staticSections = [
+    {
+      title: t.sitemap.sections.englishPages,
+      links: createStaticRoutes(en)
+    }
+  ];
 
   const dynamicSections: { title: string; links: DynamicLink[] }[] = [
     {
@@ -118,8 +85,7 @@ const Sitemap = () => {
       links: blogPosts.map((post) => ({
         title: post.title || post.slug,
         url: getLocalizedPath(`/blog/${post.slug}`, 'en'),
-        updatedAt: formatUpdatedAt(post.updated_at ?? post.published_at ?? undefined),
-        language: "en"
+        updatedAt: formatUpdatedAt(post.updated_at ?? post.published_at ?? undefined)
       }))
     },
     {
@@ -127,8 +93,7 @@ const Sitemap = () => {
       links: events.map((event) => ({
         title: event.title || event.slug,
         url: getLocalizedPath(`/events/${event.slug}`, 'en'),
-        updatedAt: formatUpdatedAt(event.updated_at ?? event.start_datetime ?? undefined),
-        language: "en"
+        updatedAt: formatUpdatedAt(event.updated_at ?? event.start_datetime ?? undefined)
       }))
     }
   ].map((section) => ({
@@ -193,16 +158,11 @@ const Sitemap = () => {
                             >
                               {link.title}
                             </Link>
-                            <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-2">
-                              {link.language && (
-                                <span className="uppercase">
-                                  {languageLabels[link.language] || link.language.toUpperCase()}
-                                </span>
-                              )}
-                              {link.updatedAt && (
-                                <span>Updated {link.updatedAt}</span>
-                              )}
-                            </div>
+                            {link.updatedAt && (
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Updated {link.updatedAt}
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>
