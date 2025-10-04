@@ -7,12 +7,14 @@ import {
   ChevronRight,
   NotebookPen,
   Library,
-  MessageCircle,
-  GraduationCap,
+  FileSpreadsheet,
+  ActivitySquare,
   BarChart3,
-  Users,
+  BrainCircuit,
   Sparkles,
   LifeBuoy,
+  TabletSmartphone,
+  CloudCog,
   Facebook,
   Instagram,
   Linkedin,
@@ -80,8 +82,8 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
 
   const highlights = [
     { icon: NotebookPen, text: t.home.highlights.workspace, iconColor: "text-primary" },
-    { icon: Library, text: t.home.highlights.resourceLibrary, iconColor: "text-accent" },
-    { icon: MessageCircle, text: t.home.highlights.community, iconColor: "text-secondary" },
+    { icon: FileSpreadsheet, text: t.home.highlights.resourceLibrary, iconColor: "text-accent" },
+    { icon: ActivitySquare, text: t.home.highlights.community, iconColor: "text-secondary" },
   ];
 
   const statsData = [
@@ -90,6 +92,18 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
     { value: `${counters.satisfaction}%`, label: t.home.stats.teacherSatisfaction, icon: Sparkles },
     { value: "40+", label: t.home.stats.supportAvailable, icon: LifeBuoy },
   ];
+
+  const workflowIcons = [NotebookPen, FileSpreadsheet, ActivitySquare];
+  const workflowItems = t.home.workflow.items.map((item, index) => ({
+    ...item,
+    Icon: workflowIcons[index] ?? NotebookPen,
+  }));
+
+  const techTopicIcons = [BrainCircuit, TabletSmartphone, CloudCog, Sparkles];
+  const techTopicCards = t.home.techTopics.items.map((item, index) => ({
+    ...item,
+    Icon: techTopicIcons[index % techTopicIcons.length],
+  }));
 
   const socialLinks = [
     {
@@ -125,9 +139,9 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
       {!embedded && (
         <>
           <SEO
-            title="Teacher Workspace for Lesson Planning | SchoolTech Hub"
-            description="SchoolTech Hub is the collaborative teacher workspace for planning lessons, curating classroom technology resources, sharing research, and staying on top of emerging EdTech trends."
-            keywords="teacher workspace, lesson planning platform, teaching resources hub, teacher community, collaborative lesson planning, education technology for teachers, professional learning network"
+            title="Teacher Workspace for Lesson Planning & Student Reports | SchoolTech Hub"
+            description="SchoolTech Hub is the digital staffroom where teachers plan lessons, generate student reports, track skills, assign digital homework, and master classroom technology."
+            keywords="teacher workspace, lesson planning software, student progress reports, skill tracking dashboard, digital homework platform, classroom technology coaching, edtech for teachers"
             canonicalUrl={canonicalUrl}
           />
           <StructuredData
@@ -137,7 +151,7 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
               name: "SchoolTech Hub",
               url: canonicalUrl,
               description:
-                "Collaborative teacher workspace for lesson planning, resource discovery, and professional learning.",
+                "Teacher workspace for lesson planning, student reporting, digital homework, and classroom technology coaching.",
               sameAs: [
                 "https://www.facebook.com/share/g/1NukWcXVpp/",
                 "https://www.instagram.com/schooltechhub/",
@@ -258,25 +272,25 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
                 color: "primary",
               },
               {
-                icon: Library,
+                icon: FileSpreadsheet,
                 title: t.features.feature2.title,
                 description: t.features.feature2.description,
                 color: "accent",
               },
               {
-                icon: GraduationCap,
+                icon: BarChart3,
                 title: t.features.feature3.title,
                 description: t.features.feature3.description,
                 color: "secondary",
               },
               {
-                icon: BarChart3,
+                icon: ActivitySquare,
                 title: t.features.feature4.title,
                 description: t.features.feature4.description,
                 color: "primary",
               },
               {
-                icon: Users,
+                icon: BrainCircuit,
                 title: t.features.feature5.title,
                 description: t.features.feature5.description,
                 color: "accent",
@@ -307,6 +321,48 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
         </div>
       </section>
 
+      <section className="relative py-12 lg:py-20">
+        <div className="container">
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+              <Sparkles className="h-4 w-4" />
+              <span>{workflowItems.map((item) => item.badge).join(" • ")}</span>
+            </div>
+            <h2 className="text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {t.home.workflow.title}
+            </h2>
+            <p className="text-lg text-muted-foreground font-space">
+              {t.home.workflow.subtitle}
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {workflowItems.map((item, index) => (
+              <Card
+                key={`${item.badge}-${index}`}
+                className="group relative h-full overflow-hidden border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_35px_hsl(var(--glow-primary)/0.25)]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="relative flex h-full flex-col p-6">
+                  <div className="mb-6 flex items-center justify-between">
+                    <span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+                      {item.badge}
+                    </span>
+                    <item.Icon className="h-10 w-10 text-primary animate-pulse-glow" />
+                  </div>
+                  <h3 className="mb-3 text-xl font-orbitron font-semibold text-foreground">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-space flex-1">
+                    {item.description}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="relative py-12 lg:py-20" ref={statsRef}>
         <div className="container">
           <div className="grid gap-8 md:grid-cols-4">
@@ -318,6 +374,45 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
                 </div>
                 <div className="text-muted-foreground font-space mt-2">{stat.label}</div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-12 lg:py-20">
+        <div className="container">
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <h2 className="text-4xl font-orbitron font-bold mb-4 bg-gradient-to-r from-secondary via-accent to-primary bg-clip-text text-transparent">
+              {t.home.techTopics.title}
+            </h2>
+            <p className="text-lg text-muted-foreground font-space">
+              {t.home.techTopics.subtitle}
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {techTopicCards.map((topic, index) => (
+              <Link
+                to={getLocalizedPath("/blog", language)}
+                key={`${topic.title}-${index}`}
+                className="block h-full"
+              >
+                <Card className="group relative flex h-full flex-col overflow-hidden border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-accent/60 hover:shadow-[0_0_35px_hsl(var(--glow-accent)/0.25)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  <div className="relative flex h-full flex-col p-6">
+                    <div className="mb-6 flex items-center justify-between">
+                      <topic.Icon className="h-10 w-10 text-accent animate-pulse-glow" />
+                      <ArrowRight className="h-4 w-4 text-primary transition-transform group-hover:translate-x-1" />
+                    </div>
+                    <h3 className="mb-3 text-lg font-orbitron font-semibold text-foreground">{topic.title}</h3>
+                    <p className="text-sm text-muted-foreground font-space flex-1">{topic.description}</p>
+                    <div className="mt-6 inline-flex items-center text-primary group-hover:text-accent transition-colors">
+                      <span className="text-sm font-semibold">{t.home.techTopics.action}</span>
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>

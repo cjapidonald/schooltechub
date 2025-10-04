@@ -50,39 +50,39 @@ export const en = {
     },
   },
   hero: {
-    title: "Your All-in-One Teacher Workspace",
-    subtitle: "Plan, collaborate, and grow with SchoolTech Hub",
+    title: "The Digital Staffroom Built for Teachers",
+    subtitle: "Plan lessons, track progress, and assign homework with confidence",
     description:
-      "SchoolTech Hub gives educators a centralized digital staff room to plan lessons, curate resources, share research, and stay ahead of emerging EdTech trends.",
-    getStarted: "Start planning",
-    learnMore: "Explore the workspace"
+      "SchoolTech Hub unites lesson planning, student analytics, and classroom technology guidance in one secure workspace designed for teachers.",
+    getStarted: "Build my workspace",
+    learnMore: "See everything included"
   },
   features: {
-    title: "Everything teachers need in one workspace",
-    subtitle: "Curated tools to help you teach, learn, and lead with confidence",
+    title: "An AI-ready teacher workspace",
+    subtitle: "Bring planning, reporting, and classroom technology together in one place",
     feature1: {
-      title: "Strategic lesson planning",
-      description: "Guided templates, AI suggestions, and curriculum alignment that keep every lesson purposeful"
+      title: "Guided lesson planning",
+      description: "Blueprint every lesson with ready-made templates, curriculum alignment, and AI-powered suggestions"
     },
     feature2: {
-      title: "Curated resource library",
-      description: "Search classroom-tested tools, downloads, and technology recommendations in seconds"
+      title: "Automated student reports",
+      description: "Turn classroom data into parent-friendly summaries, growth snapshots, and inspection-ready evidence"
     },
     feature3: {
-      title: "Professional learning hub",
-      description: "Follow educator blogs, research summaries, and implementation guides without leaving your workspace"
+      title: "Skill tracking dashboards",
+      description: "Monitor mastery, intervene early, and celebrate wins with visual progress insights for every learner"
     },
     feature4: {
-      title: "Data-ready templates",
-      description: "Access progress trackers, reflection journals, and reporting exports for meetings and inspections"
+      title: "Digital homework hub",
+      description: "Assign interactive activities, collect submissions, and give feedback from the same workspace"
     },
     feature5: {
-      title: "Collaboration spaces",
-      description: "Share lesson plans, pose questions, and co-create units with colleagues or your wider PLN"
+      title: "Technology coaching",
+      description: "Follow practical guides and micro-courses on using EdTech tools to energize your classroom"
     },
     feature6: {
-      title: "Guided onboarding & support",
-      description: "Personalized walkthroughs, office hours, and help center resources to keep momentum going"
+      title: "On-demand support",
+      description: "Join live clinics, office hours, and a peer community whenever you need a co-teacher"
     }
   },
   about: {
@@ -1195,9 +1195,9 @@ export const en = {
   },
   home: {
     highlights: {
-      workspace: "Collaborative lesson planning boards",
-      resourceLibrary: "Curated teaching tools & resources",
-      community: "Active teacher community and Q&A"
+      workspace: "Plan purposeful lessons in minutes",
+      resourceLibrary: "Generate insight-rich student reports",
+      community: "Assign interactive homework & track progress"
     },
     stats: {
       lessonPlans: "Lesson plans organized",
@@ -1206,16 +1206,60 @@ export const en = {
       supportAvailable: "Live support hours each week"
     },
     cta: {
-      title: "Build your teacher workspace today",
-      description: "Centralize planning, resources, and professional learning in minutes.",
-      primary: "Book a walkthrough",
-      secondary: "Browse teacher resources",
+      title: "Launch your SchoolTech Hub workspace",
+      description: "Bring lesson planning, student insights, and digital homework together for your whole class.",
+      primary: "Start my free tour",
+      secondary: "Discover teacher resources",
       social: {
         facebook: "Facebook",
         instagram: "Instagram",
         linkedin: "LinkedIn",
         email: "Email"
       }
+    },
+    workflow: {
+      title: "Everything you need for the modern classroom",
+      subtitle: "Follow an intuitive flow from planning to reporting, built around the way teachers work.",
+      items: [
+        {
+          badge: "Plan",
+          title: "Craft lessons with smart templates",
+          description: "Start with standards-aligned templates, add your strategies, and let AI suggest differentiation."
+        },
+        {
+          badge: "Report",
+          title: "Generate student-ready insights",
+          description: "Transform attendance, assessment, and behaviour data into clear progress reports instantly."
+        },
+        {
+          badge: "Assign",
+          title: "Deliver digital homework with ease",
+          description: "Send interactive tasks, collect evidence, and monitor completion without juggling extra tools."
+        }
+      ]
+    },
+    techTopics: {
+      title: "Technology inspiration for your next lesson",
+      subtitle: "Browse trending topics from our blog to help you blend pedagogy and innovation.",
+      action: "Read the guide",
+      items: [
+        {
+          title: "AI coaching for personalised learning",
+          description: "Discover how to pair teacher intuition with AI prompts that adapt to every student's pace."
+        },
+        {
+          title: "Interactive whiteboard workflows",
+          description: "Turn devices into collaborative spaces with ready-to-use routines and classroom management tips."
+        },
+        {
+          title: "Data dashboards that inform instruction",
+          description: "Learn how to connect your gradebook and formative checks to spot trends faster."
+        },
+        {
+          title: "Digital homework that sparks curiosity",
+          description: "Explore platforms and app smash ideas that keep students practicing between lessons."
+        }
+      ]
     }
   },
   sitemap: {
