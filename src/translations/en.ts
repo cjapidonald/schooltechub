@@ -1586,6 +1586,19 @@ export const en = {
       changeButton: "Change avatar",
       uploadButton: "Save new avatar"
     },
+    personal: {
+      title: "Personal information",
+      description: "Update the details that appear on your profile.",
+      firstNameLabel: "First name",
+      firstNamePlaceholder: "e.g. Jordan",
+      lastNameLabel: "Last name",
+      lastNamePlaceholder: "e.g. Rivera",
+      subjectLabel: "Subject focus",
+      subjectPlaceholder: "e.g. Mathematics",
+      phoneLabel: "Phone number",
+      phonePlaceholder: "e.g. +1 555 123 4567",
+      saveButton: "Save personal info"
+    },
     school: {
       title: "School information",
       description: "Share your school's details to personalise lesson previews and exports.",

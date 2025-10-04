@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, Mail, School, User as UserIcon } from "lucide-react";
+import { BookOpen, Loader2, Mail, Phone, School, User as UserIcon } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -186,6 +186,16 @@ const Profile = () => {
       label: t.profilePage.info.lastName,
       value: lastName ?? fallbackValue,
       icon: <UserIcon className="h-4 w-4" />,
+    },
+    {
+      label: t.profilePage.info.subject,
+      value: subject ?? fallbackValue,
+      icon: <BookOpen className="h-4 w-4" />,
+    },
+    {
+      label: t.profilePage.info.phone,
+      value: phoneNumber ?? fallbackValue,
+      icon: <Phone className="h-4 w-4" />,
     },
     {
       label: t.profilePage.info.school,
