@@ -46,7 +46,8 @@ const Navigation = () => {
 
   const navItems = useMemo(() => {
     const items = [
-      { name: t.nav.home, path: "/" },
+      { name: t.nav.dashboard, path: "/" },
+      { name: t.nav.home, path: "/home" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.events, path: "/events" },
       { name: t.nav.services, path: "/services" },
@@ -54,11 +55,20 @@ const Navigation = () => {
     ];
 
     if (user) {
-      items.unshift({ name: t.nav.profile, path: "/account" });
+      items.push({ name: t.nav.profile, path: "/account" });
     }
 
     return items;
-  }, [t.nav.about, t.nav.blog, t.nav.events, t.nav.home, t.nav.profile, t.nav.services, user]);
+  }, [
+    t.nav.about,
+    t.nav.blog,
+    t.nav.dashboard,
+    t.nav.events,
+    t.nav.home,
+    t.nav.profile,
+    t.nav.services,
+    user,
+  ]);
   
   const getLocalizedNavPath = (path: string) => getLocalizedPath(path, "en");
 

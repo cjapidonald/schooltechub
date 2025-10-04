@@ -30,9 +30,10 @@ import heroImage from "@/assets/futuristic-classroom-hero.jpg";
 
 type HomeLandingProps = {
   embedded?: boolean;
+  canonicalUrl?: string;
 };
 
-export const HomeLanding = ({ embedded = false }: HomeLandingProps) => {
+export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schooltechhub.com" }: HomeLandingProps) => {
   const [counters, setCounters] = useState({ lessons: 0, vr: 0, engagement: 0 });
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -126,7 +127,7 @@ export const HomeLanding = ({ embedded = false }: HomeLandingProps) => {
             title="Home"
             description="Transform your classroom with SchoolTech Hub's AI-powered educational technology. Explore VR labs, gamification tools, and teacher management software. Get started for free today"
             keywords="AI education platform, virtual reality classroom, gamification in education, teacher management software, student tracking system, curriculum development tools, educational technology Albania, auto graded homework, classroom management software"
-            canonicalUrl="https://schooltechhub.com"
+            canonicalUrl={canonicalUrl}
           />
           <StructuredData type="Organization" data={{}} />
         </>

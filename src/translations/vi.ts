@@ -1,5 +1,6 @@
 export const vi = {
   nav: {
+    dashboard: "Bảng điều khiển",
     home: "Trang chủ",
     about: "Về chúng tôi",
     services: "Dịch vụ",
