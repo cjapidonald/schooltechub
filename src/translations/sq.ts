@@ -17,7 +17,35 @@ export const sq = {
     signIn: "Hyr",
     signUp: "Regjistrohu",
     signOut: "Dil",
-    profile: "Pulti Im"
+    profile: "Profili Im"
+  },
+  profilePage: {
+    title: "Profili im",
+    subtitle: "Menaxho informacionet e mësuesit dhe cilësimet e sigurisë.",
+    info: {
+      title: "Informacioni i mësuesit",
+      description: "Shiko të dhënat personale të lidhura me llogarinë tënde SchoolTech Hub.",
+      firstName: "Emri",
+      lastName: "Mbiemri",
+      school: "Shkolla",
+      subject: "Lënda",
+      phone: "Numri i telefonit",
+      email: "Email",
+    },
+    security: {
+      title: "Siguria",
+      description: "Mbaj llogarinë tënde të sigurt duke përditësuar fjalëkalimin kur është e nevojshme.",
+      instructions:
+        "Dërgo një lidhje për rinisjen e fjalëkalimit në emailin tënd dhe ndiq udhëzimet për të vendosur një fjalëkalim të ri.",
+      resetButton: "Dërgo email për rinisjen e fjalëkalimit",
+      resetSent: "Emaili për rinisjen u dërgua",
+      resetDescription: "Kontrollo kutinë postare dhe ndiq lidhjen për të përfunduar procesin.",
+      resetError: "Nuk mund të dërgohet emaili",
+      noEmail: "Nuk u gjet një email i lidhur me këtë llogari.",
+    },
+    fallback: {
+      notProvided: "E paplotësuar",
+    },
   },
   hero: {
     title: "Fuqizimi i Arsimit përmes Inovacionit",

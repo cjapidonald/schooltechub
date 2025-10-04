@@ -4,7 +4,6 @@ import Index from '@/pages/Index';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
-import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import BlogBuilderPage from '@/pages/BlogBuilderPage';
 import Resources from '@/pages/resources';
@@ -16,6 +15,7 @@ import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
 import Account from '@/pages/account';
+import Profile from '@/pages/Profile';
 import ClassDashboard from '@/pages/account/ClassDashboard';
 import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
@@ -54,7 +54,6 @@ export const LocalizedRoutes = () => {
       <Route path="/home" element={<RouteWrapper><Home /></RouteWrapper>} />
       <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
-      <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
       <Route path="/blog/new" element={<RouteWrapper><BlogBuilderPage /></RouteWrapper>} />
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
@@ -70,6 +69,7 @@ export const LocalizedRoutes = () => {
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
+      <Route path="/profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
       <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
       <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
       <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />

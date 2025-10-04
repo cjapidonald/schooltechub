@@ -17,7 +17,35 @@ export const en = {
     signIn: "Sign In",
     signUp: "Sign Up",
     signOut: "Sign Out",
-    profile: "My Dashboard"
+    profile: "My Profile"
+  },
+  profilePage: {
+    title: "My Profile",
+    subtitle: "Manage your teacher information and security preferences.",
+    info: {
+      title: "Teacher Information",
+      description: "Review the personal details connected to your SchoolTech Hub account.",
+      firstName: "First name",
+      lastName: "Last name",
+      school: "School",
+      subject: "Subject",
+      phone: "Phone number",
+      email: "Email",
+    },
+    security: {
+      title: "Security",
+      description: "Keep your account secure by updating your password when needed.",
+      instructions:
+        "Send a password reset link to your email address. Follow the instructions in the email to choose a new password.",
+      resetButton: "Send password reset email",
+      resetSent: "Password reset sent",
+      resetDescription: "Check your inbox for the password reset email and follow the link provided.",
+      resetError: "Unable to send reset email",
+      noEmail: "We could not find an email associated with your account.",
+    },
+    fallback: {
+      notProvided: "Not provided",
+    },
   },
   hero: {
     title: "Empowering Education Through Innovation",
