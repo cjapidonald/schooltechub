@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState, type ComponentProps, type ComponentType } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentProps, type ComponentType } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
+  ArrowLeft,
   BookOpen,
   Calendar,
   CalendarClock,
@@ -152,14 +153,6 @@ const AccountDashboard = () => {
     week: "all" as string | "all",
     date: "",
   });
-  const [assessmentDialogOpen, setAssessmentDialogOpen] = useState(false);
-  const [assessmentForm, setAssessmentForm] = useState({
-    title: "",
-    classId: "",
-    description: "",
-    dueDate: "",
-    scale: "letter" as GradeScale,
-  });
   const [gradingDialogOpen, setGradingDialogOpen] = useState(false);
   const [gradingContext, setGradingContext] = useState({
     assessment: null as AssessmentTemplate | null,
@@ -270,18 +263,22 @@ const AccountDashboard = () => {
   });
 
   const createAssessmentMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (payload: {
+      classId: string;
+      title: string;
+      description: string;
+      dueDate: string;
+      scale: GradeScale;
+    }) =>
       createAssessment({
-        classId: assessmentForm.classId,
-        title: assessmentForm.title,
-        description: assessmentForm.description,
-        dueDate: assessmentForm.dueDate || null,
-        gradingScale: assessmentForm.scale,
+        classId: payload.classId,
+        title: payload.title,
+        description: payload.description,
+        dueDate: payload.dueDate || null,
+        gradingScale: payload.scale,
       }),
     onSuccess: () => {
       toast({ title: "Assessment created" });
-      setAssessmentDialogOpen(false);
-      setAssessmentForm({ title: "", classId: "", description: "", dueDate: "", scale: "letter" });
       queryClient.invalidateQueries({ queryKey: ["dashboard-assessments"] });
     },
     onError: (error: unknown) => {
@@ -572,7 +569,8 @@ const AccountDashboard = () => {
               classes={classes}
               isLoading={assessmentsQuery.isLoading}
               error={assessmentsQuery.error instanceof Error ? assessmentsQuery.error : null}
-              onCreate={() => setAssessmentDialogOpen(true)}
+              onCreate={createAssessmentMutation.mutateAsync}
+              isCreating={createAssessmentMutation.isPending}
               onOpenGrades={assessment => {
                 setGradingContext(context => ({
                   ...context,
@@ -612,16 +610,6 @@ const AccountDashboard = () => {
           appraisalMutation.mutate({ studentId: selectedStudentId, highlight: appraisalNote })
         }
         onGenerateReport={() => selectedStudentId && reportMutation.mutate(selectedStudentId)}
-      />
-
-      <AssessmentDialog
-        open={assessmentDialogOpen}
-        onOpenChange={setAssessmentDialogOpen}
-        classes={classes}
-        form={assessmentForm}
-        onChange={setAssessmentForm}
-        onSubmit={() => createAssessmentMutation.mutate()}
-        isSubmitting={createAssessmentMutation.isPending}
       />
 
       <GradingDialog
@@ -1001,71 +989,269 @@ interface AssessmentsPanelProps {
   classes: ClassWithPlanCount[];
   isLoading: boolean;
   error: Error | null;
-  onCreate: () => void;
+  onCreate: (input: {
+    classId: string;
+    title: string;
+    description: string;
+    dueDate: string;
+    scale: GradeScale;
+  }) => Promise<unknown>;
+  isCreating: boolean;
   onOpenGrades: (assessment: AssessmentTemplate) => void;
 }
 
-const AssessmentsPanel = ({ assessments, classes, isLoading, error, onCreate, onOpenGrades }: AssessmentsPanelProps) => {
-  const classMap = useMemo(() => {
-    const map = new Map<string, string>();
-    classes.forEach(cls => map.set(cls.id, cls.title));
+const AssessmentsPanel = ({
+  assessments,
+  classes,
+  isLoading,
+  error,
+  onCreate,
+  isCreating,
+  onOpenGrades,
+}: AssessmentsPanelProps) => {
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    dueDate: "",
+    scale: "letter" as GradeScale,
+  });
+
+  useEffect(() => {
+    if (selectedClassId && !classes.some(cls => cls.id === selectedClassId)) {
+      setSelectedClassId(null);
+    }
+  }, [classes, selectedClassId]);
+
+  useEffect(() => {
+    setForm({ title: "", description: "", dueDate: "", scale: "letter" });
+  }, [selectedClassId]);
+
+  const assessmentCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    assessments.forEach(assessment => {
+      map.set(assessment.classId, (map.get(assessment.classId) ?? 0) + 1);
+    });
     return map;
-  }, [classes]);
+  }, [assessments]);
+
+  const selectedClass = useMemo(
+    () => (selectedClassId ? classes.find(cls => cls.id === selectedClassId) ?? null : null),
+    [classes, selectedClassId],
+  );
+
+  const classAssessments = useMemo(
+    () => (selectedClassId ? assessments.filter(assessment => assessment.classId === selectedClassId) : []),
+    [assessments, selectedClassId],
+  );
+
+  const handleSubmit = async () => {
+    if (!selectedClassId || !form.title.trim()) {
+      return;
+    }
+    try {
+      await onCreate({
+        classId: selectedClassId,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        dueDate: form.dueDate,
+        scale: form.scale,
+      });
+      setForm({ title: "", description: "", dueDate: "", scale: "letter" });
+    } catch (_error) {
+      // Notification handled by caller
+    }
+  };
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <CardTitle>Assessment tracking</CardTitle>
-          <CardDescription>Create assignments, track submissions, and grade with flexible scales.</CardDescription>
-        </div>
-        <Button onClick={onCreate}>
-          <Plus className="mr-2 h-4 w-4" /> New assessment
-        </Button>
+      <CardHeader className="flex flex-col gap-3">
+        {selectedClass ? (
+          <>
+            <Button variant="ghost" size="sm" className="w-fit pl-0" onClick={() => setSelectedClassId(null)}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to classes
+            </Button>
+            <div>
+              <CardTitle>{selectedClass.title}</CardTitle>
+              <CardDescription>
+                Review assessments, track submissions, and record grades for this class.
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+              {selectedClass.stage ? <Badge variant="outline">{selectedClass.stage}</Badge> : null}
+              {selectedClass.subject ? <Badge variant="outline">{selectedClass.subject}</Badge> : null}
+              {selectedClass.startDate ? (
+                <Badge variant="outline">Started {formatDate(selectedClass.startDate)}</Badge>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <>
+            <CardTitle>Assessment tracking</CardTitle>
+            <CardDescription>
+              Choose a class to review assessments, track submissions, and add new ones.
+            </CardDescription>
+          </>
+        )}
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : error ? (
-          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
-            {error.message}
-          </div>
-        ) : assessments.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-            No assessments yet—create one to begin tracking progress.
+        {selectedClass ? (
+          <div className="space-y-6">
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+                {error.message}
+              </div>
+            ) : classAssessments.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                No assessments for this class yet. Use the form below to create one.
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Assessment</TableHead>
+                      <TableHead>Due</TableHead>
+                      <TableHead>Scale</TableHead>
+                      <TableHead className="w-[140px]" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {classAssessments.map(assessment => (
+                      <TableRow key={assessment.id}>
+                        <TableCell className="font-medium text-foreground">{assessment.title}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{formatDate(assessment.dueDate)}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{assessment.gradingScale}</TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" onClick={() => onOpenGrades(assessment)}>
+                            Record grades
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            <section className="rounded-lg border bg-muted/20 p-4">
+              <h3 className="text-sm font-semibold text-foreground">Add new assessment</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Share expectations, due dates, and grading scales with your class.
+              </p>
+              <div className="mt-4 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="assessment-title">Title</Label>
+                  <Input
+                    id="assessment-title"
+                    value={form.title}
+                    onChange={event => setForm(current => ({ ...current, title: event.target.value }))}
+                    placeholder="Forces and motion quiz"
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="assessment-due">Due date</Label>
+                    <Input
+                      id="assessment-due"
+                      type="date"
+                      value={form.dueDate}
+                      onChange={event => setForm(current => ({ ...current, dueDate: event.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="assessment-scale">Grading scale</Label>
+                    <Select
+                      value={form.scale}
+                      onValueChange={value =>
+                        setForm(current => ({ ...current, scale: value as GradeScale }))
+                      }
+                    >
+                      <SelectTrigger id="assessment-scale">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gradeScales.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assessment-description">Instructions</Label>
+                  <Textarea
+                    id="assessment-description"
+                    value={form.description}
+                    onChange={event => setForm(current => ({ ...current, description: event.target.value }))}
+                    placeholder="Outline objectives, required materials, and success criteria"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!form.title.trim() || isCreating}
+                  >
+                    {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Add assessment
+                  </Button>
+                </div>
+              </div>
+            </section>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Assessment</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Due</TableHead>
-                  <TableHead>Scale</TableHead>
-                  <TableHead className="w-[140px]" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assessments.map(assessment => (
-                  <TableRow key={assessment.id}>
-                    <TableCell className="font-medium text-foreground">{assessment.title}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {classMap.get(assessment.classId) ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{formatDate(assessment.dueDate)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{assessment.gradingScale}</TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" onClick={() => onOpenGrades(assessment)}>
-                        Record grades
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+          <div className="space-y-4">
+            {error ? (
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+                {error.message}
+              </div>
+            ) : null}
+            {classes.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                Create a class to start tracking assessments.
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {classes.map(classItem => (
+                  <button
+                    key={classItem.id}
+                    type="button"
+                    onClick={() => setSelectedClassId(classItem.id)}
+                    className="flex w-full flex-col items-start gap-3 rounded-xl border bg-background/80 p-4 text-left shadow-sm transition hover:border-primary/60 hover:shadow"
+                  >
+                    <div className="flex w-full items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">{classItem.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {classItem.summary ?? "Track assignments, submissions, and feedback in one place."}
+                        </p>
+                      </div>
+                      <Badge variant="outline">
+                        {assessmentCounts.get(classItem.id) ?? 0} assessments
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      {classItem.stage ? <Badge variant="outline">{classItem.stage}</Badge> : null}
+                      {classItem.subject ? <Badge variant="outline">{classItem.subject}</Badge> : null}
+                      {classItem.startDate ? (
+                        <Badge variant="outline">Starts {formatDate(classItem.startDate)}</Badge>
+                      ) : null}
+                    </div>
+                  </button>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            )}
+            {isLoading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            ) : null}
           </div>
         )}
       </CardContent>
@@ -1249,107 +1435,6 @@ const StudentDialog = ({
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-interface AssessmentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  classes: ClassWithPlanCount[];
-  form: {
-    title: string;
-    classId: string;
-    description: string;
-    dueDate: string;
-    scale: GradeScale;
-  };
-  onChange: (form: AssessmentDialogProps["form"]) => void;
-  onSubmit: () => void;
-  isSubmitting: boolean;
-}
-
-const AssessmentDialog = ({ open, onOpenChange, classes, form, onChange, onSubmit, isSubmitting }: AssessmentDialogProps) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Create assessment</DialogTitle>
-          <DialogDescription>
-            Capture projects, quizzes, or homework assignments and share expectations with your class.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="assessment-title">Title</Label>
-            <Input
-              id="assessment-title"
-              value={form.title}
-              onChange={event => onChange({ ...form, title: event.target.value })}
-              placeholder="Forces and motion quiz"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="assessment-class">Class</Label>
-            <Select value={form.classId} onValueChange={value => onChange({ ...form, classId: value })}>
-              <SelectTrigger id="assessment-class">
-                <SelectValue placeholder="Select a class" />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map(cls => (
-                  <SelectItem key={cls.id} value={cls.id}>
-                    {cls.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="assessment-description">Instructions</Label>
-            <Textarea
-              id="assessment-description"
-              value={form.description}
-              onChange={event => onChange({ ...form, description: event.target.value })}
-              placeholder="Outline objectives, required materials, and success criteria"
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="assessment-due">Due date</Label>
-              <Input
-                id="assessment-due"
-                type="date"
-                value={form.dueDate}
-                onChange={event => onChange({ ...form, dueDate: event.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Grading scale</Label>
-              <Select value={form.scale} onValueChange={value => onChange({ ...form, scale: value as GradeScale })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {gradeScales.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={onSubmit} disabled={!form.title || !form.classId || isSubmitting}>
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Create assessment
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
