@@ -20,9 +20,9 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           "foundingDate": "2020",
           "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": "+355-69-123-4567",
+            "telephone": "+1-800-555-0100",
             "contactType": "customer service",
-            "areaServed": ["AL", "XK", "MK", "ME"],
+            "areaServed": ["US", "GB", "CA", "AU"],
             "availableLanguage": ["English"],
           },
           "sameAs": [
@@ -33,11 +33,11 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           ],
           "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Rruga Ismail Qemali",
-            "addressLocality": "Tirana",
-            "addressRegion": "Tirana",
-            "postalCode": "1001",
-            "addressCountry": "AL",
+            "streetAddress": "123 Innovation Way",
+            "addressLocality": "Remote",
+            "addressRegion": "Global",
+            "postalCode": "00000",
+            "addressCountry": "US",
           },
         };
 
@@ -78,7 +78,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
           },
           "areaServed": {
             "@type": "Country",
-            "name": ["Albania", "Kosovo", "North Macedonia", "Montenegro"]
+            "name": ["United States", "Canada", "United Kingdom", "Australia"]
           },
           "hasOfferCatalog": {
             "@type": "OfferCatalog",

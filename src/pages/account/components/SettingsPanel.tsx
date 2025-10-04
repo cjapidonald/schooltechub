@@ -34,20 +34,16 @@ import {
 import { createFileIdentifier } from "@/lib/files";
 
 type ThemePreference = "system" | "light" | "dark";
-type LanguageOption = "en";
-
 type SettingsPanelProps = {
   user: User;
 };
-
-const isLanguageOption = (value: unknown): value is LanguageOption => value === "en";
 
 const isThemePreference = (value: unknown): value is ThemePreference =>
   value === "light" || value === "dark" || value === "system";
 
 export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const { toast } = useToast();
-  const { t, language: activeLanguage, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const metadata = user.user_metadata as Record<string, unknown> | undefined;
   const initialSchoolName =
@@ -86,13 +82,6 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     const stored = (user.user_metadata as Record<string, unknown> | undefined)?.timezone;
     return typeof stored === "string" ? stored : "";
   });
-  const [languagePreference, setLanguagePreference] = useState<LanguageOption>(() => {
-    const stored = (user.user_metadata as Record<string, unknown> | undefined)?.language;
-    if (isLanguageOption(stored)) {
-      return stored;
-    }
-    return activeLanguage;
-  });
   const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
     const stored = (user.user_metadata as Record<string, unknown> | undefined)?.theme;
     if (isThemePreference(stored)) {
@@ -112,15 +101,10 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     setCurrentAvatarUrl(url);
 
     const storedTimezone = metadata?.timezone;
-    const storedLanguage = metadata?.language;
     const storedTheme = metadata?.theme;
 
     if (typeof storedTimezone === "string") {
       setTimezone(storedTimezone);
-    }
-
-    if (isLanguageOption(storedLanguage)) {
-      setLanguagePreference(storedLanguage);
     }
 
     if (isThemePreference(storedTheme)) {
@@ -464,7 +448,6 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
       const { error } = await supabase.auth.updateUser({
         data: {
           timezone: timezone.trim() || null,
-          language: languagePreference,
           theme: themePreference,
         },
       });
@@ -472,8 +455,6 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
       if (error) {
         throw error;
       }
-
-      setLanguage(languagePreference);
 
       toast({
         title: t.account.toast.settingsUpdated,
@@ -696,7 +677,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
             <div className="grid gap-2">
               <Label>{t.account.settings.language}</Label>
               <div className="rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-                {t.sitemap.languages.en}
+                {t.account.settings.languageValue}
               </div>
             </div>
             <div className="grid gap-2">

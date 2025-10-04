@@ -87,11 +87,6 @@ export const LocalizedRoutes = () => {
         <Route path=":segment/:subSegment/:child" element={<AdminPage />} />
       </Route>
 
-      <Route path="/sq" element={<Navigate to="/" replace />} />
-      <Route path="/sq/*" element={<Navigate to="/" replace />} />
-      <Route path="/vi" element={<Navigate to="/" replace />} />
-      <Route path="/vi/*" element={<Navigate to="/" replace />} />
-
       <Route path="*" element={<RouteWrapper><NotFound /></RouteWrapper>} />
     </Routes>
   );
