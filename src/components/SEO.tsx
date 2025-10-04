@@ -43,7 +43,7 @@ const buildAbsoluteUrl = (origin: string, path: string) => {
 export function SEO({
   title,
   description,
-  keywords = "AI education, EdTech, virtual reality learning, gamification, teacher management software, student tracking, curriculum development, educational technology, classroom management, Albania education, online learning platform",
+  keywords = "AI education, EdTech, virtual reality learning, gamification, teacher management software, student tracking, curriculum development, educational technology, classroom management, online learning platform",
   image = "/og-image.jpg",
   url = typeof window !== 'undefined' ? window.location.href : '',
   type = "website",

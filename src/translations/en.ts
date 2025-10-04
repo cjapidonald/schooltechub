@@ -327,9 +327,9 @@ export const en = {
             "We continuously test new tools, attend conferences, and collaborate with teachers worldwide to ensure our recommendations are cutting-edge yet practical."
         },
         {
-          question: "Do you work with schools outside Vietnam?",
+          question: "Do you work with schools outside your local area?",
           answer:
-            "Yes! While based in Vietnam, we offer online consulting and training services globally, with experience across multiple education systems."
+            "Yes! We partner with schools worldwide through virtual consulting and training, drawing on experience across multiple education systems."
         },
         {
           question: "What makes your approach different?",
@@ -1669,9 +1669,10 @@ export const en = {
       title: "Account preferences",
       description: "Customise how SchoolTech Hub works for you.",
       timezone: "Time zone",
-      timezonePlaceholder: "e.g. GMT+1, Hanoi",
+      timezonePlaceholder: "e.g. GMT+1, London",
       language: "Content language",
-      languagePlaceholder: "Choose a language",
+      languagePlaceholder: "English",
+      languageValue: "English",
       theme: "Theme",
       themePlaceholder: "Select a theme",
       themeOptions: {

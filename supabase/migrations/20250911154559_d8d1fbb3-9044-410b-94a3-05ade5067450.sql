@@ -108,7 +108,7 @@ INSERT INTO public.events (
   'workshop',
   '2025-03-22 09:00:00+00',
   '2025-03-22 12:00:00+00',
-  'Ho Chi Minh City',
+  'Online',
   false,
   'https://example.com/register/digital-citizenship',
   ARRAY['Digital Citizenship', 'Online Safety', 'SEL'],
@@ -120,14 +120,14 @@ INSERT INTO public.events (
   'published'
 ),
 (
-  'Teacher Tech Meetup - Vietnam',
-  'teacher-tech-meetup-vietnam',
+  'Teacher Tech Meetup - Global',
+  'teacher-tech-meetup-global',
   'Monthly networking event for tech-savvy educators',
   '{"content": "Connect with fellow educators passionate about technology in education. Share experiences, learn new tools, and build your professional network.", "topics": ["Tool sharing session", "Success stories", "Networking time"]}',
   'meetup',
   '2025-03-28 17:00:00+00',
   '2025-03-28 19:00:00+00',
-  'Saigon Innovation Hub',
+  'Online',
   false,
   'https://example.com/register/teacher-meetup',
   ARRAY['Networking', 'EdTech', 'Community'],
@@ -135,6 +135,6 @@ INSERT INTO public.events (
   ARRAY['All Subjects'],
   '{"name": "Community Team", "bio": "SchoolTech Hub Community"}',
   NULL,
-  '{"meta_title": "Teacher Tech Meetup Vietnam | March 2025", "meta_description": "Join our monthly teacher meetup to network and share EdTech experiences."}',
+  '{"meta_title": "Teacher Tech Meetup Global | March 2025", "meta_description": "Join our monthly teacher meetup to network and share EdTech experiences."}',
   'published'
 );

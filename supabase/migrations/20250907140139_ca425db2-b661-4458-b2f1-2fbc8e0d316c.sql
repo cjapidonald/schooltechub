@@ -28,7 +28,7 @@ CREATE TABLE public.tutorials (
   learning_outcomes TEXT[], -- What students will learn
   resources JSONB, -- Additional resources (PDFs, links, etc.)
   transcript TEXT, -- Video transcript for accessibility
-  language TEXT DEFAULT 'en' CHECK (language IN ('en', 'sq'))
+  language TEXT DEFAULT 'en' CHECK (language = 'en')
 );
 
 -- Enable Row Level Security
