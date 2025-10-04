@@ -198,9 +198,14 @@ const Profile = () => {
     <div className="min-h-screen bg-muted/10 pb-16">
       <SEO title={t.profilePage.title} description={t.profilePage.subtitle} />
       <div className="container space-y-8 py-10">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">{t.profilePage.title}</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">{t.profilePage.subtitle}</p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">{t.profilePage.title}</h1>
+            <p className="mt-2 max-w-2xl text-muted-foreground">{t.profilePage.subtitle}</p>
+          </div>
+          <Button asChild className="sm:shrink-0" variant="outline">
+            <a href="#profile-settings">{t.profilePage.editButton}</a>
+          </Button>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[360px,1fr]">
@@ -257,7 +262,7 @@ const Profile = () => {
             </Card>
           </div>
 
-          <div>
+          <div id="profile-settings">
             <SettingsPanel user={user} />
           </div>
         </div>

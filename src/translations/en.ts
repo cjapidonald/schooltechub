@@ -22,6 +22,7 @@ export const en = {
   profilePage: {
     title: "My Profile",
     subtitle: "Manage your teacher information and security preferences.",
+    editButton: "Edit profile",
     info: {
       title: "Teacher Information",
       description: "Review the personal details connected to your SchoolTech Hub account.",
