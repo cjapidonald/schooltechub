@@ -435,6 +435,8 @@ export const sq = {
     },
     filters: {
       title: "Filtrat",
+      helper: "Përdor filtrat për të ngushtuar rezultatet sipas temës, fazës dhe formatit.",
+      clear: "Pastro filtrat",
       category: "Kategoria",
       stage: "Niveli",
       subject: "Lënda",
@@ -451,6 +453,7 @@ export const sq = {
         shop: "Dyqan",
         caseStudy: "Studim Rasti",
         research: "Kërkim",
+        researchQuestion: "Pyetje kërkimore",
         teacherDebates: "Debate të Mësuesve"
       },
       stages: {

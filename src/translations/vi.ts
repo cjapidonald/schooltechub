@@ -435,6 +435,8 @@ export const vi = {
     },
     filters: {
       title: "Bộ lọc",
+      helper: "Lọc bài viết theo chủ đề, cấp học, môn học và định dạng.",
+      clear: "Xóa bộ lọc",
       category: "Danh mục",
       stage: "Cấp học",
       subject: "Môn học",
@@ -451,6 +453,7 @@ export const vi = {
         shop: "Cửa hàng",
         caseStudy: "Nghiên cứu tình huống",
         research: "Nghiên cứu",
+        researchQuestion: "Câu hỏi nghiên cứu",
         teacherDebates: "Tranh luận giáo viên"
       },
       stages: {
