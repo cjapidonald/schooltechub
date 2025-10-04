@@ -1,28 +1,7 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-  type ComponentProps,
-  type ComponentType,
-} from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Activity,
-  ArrowLeft,
-  BookOpen,
-  CalendarClock,
-  ClipboardCheck,
-  FileText,
-  GraduationCap,
-  Loader2,
-  NotebookPen,
-  Plus,
-  Users,
-} from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, Loader2, NotebookPen, Plus } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
 
 import { SEO } from "@/components/SEO";
@@ -75,7 +54,6 @@ import {
   saveStudentAppraisalNote,
   saveStudentBehaviorNote,
 } from "@/lib/data/students";
-import { listCurriculumItems } from "@/lib/data/curriculum";
 import {
   createAssessment,
   listAssessmentGrades,
@@ -97,12 +75,7 @@ import type {
   StudentSummary,
 } from "@/types/platform";
 import type { LessonPlanMetaDraft } from "@/pages/lesson-builder/types";
-import {
-  PROFILE_IMAGE_BUCKET,
-  createProfileImageSignedUrl,
-  resolveAvatarReference,
-} from "@/lib/avatar";
-import { createFileIdentifier } from "@/lib/files";
+import { createProfileImageSignedUrl, resolveAvatarReference } from "@/lib/avatar";
 
 const tabs = [
   { value: "classes", label: "My Classes" },
@@ -173,9 +146,7 @@ const AccountDashboard = () => {
     numeric: "",
     feedback: "",
   });
-  const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const defaultLessonDocHtml =
     "<p>Start drafting your lesson narrative. Highlight key moves, questions, and differentiation.</p>";
   const [lessonDocHtml, setLessonDocHtml] = useState<string>(defaultLessonDocHtml);
@@ -273,12 +244,6 @@ const AccountDashboard = () => {
     enabled: Boolean(user),
   });
 
-  const curriculumQuery = useQuery({
-    queryKey: ["dashboard-curriculum"],
-    queryFn: () => listCurriculumItems(),
-    enabled: Boolean(user),
-  });
-
   const assessmentsQuery = useQuery({
     queryKey: ["dashboard-assessments"],
     queryFn: () => listAssessments(),
@@ -299,72 +264,6 @@ const AccountDashboard = () => {
         : Promise.resolve([]),
     enabled: gradingDialogOpen && Boolean(gradingContext.assessment?.id),
   });
-
-  const handleAvatarButtonClick = () => {
-    if (!canManage) {
-      toast({ title: "Create a free account", description: "Sign in to personalise your dashboard photo." });
-      return;
-    }
-    avatarInputRef.current?.click();
-  };
-
-  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) {
-      return;
-    }
-
-    setIsUploadingAvatar(true);
-
-    try {
-      const extension = file.name.split(".").pop();
-      const safeExtension = extension ? extension.toLowerCase() : "png";
-      const filePath = `${user.id}/${createFileIdentifier()}.${safeExtension}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from(PROFILE_IMAGE_BUCKET)
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: true,
-        });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from(PROFILE_IMAGE_BUCKET).getPublicUrl(filePath);
-
-      const signedUrl = await createProfileImageSignedUrl(filePath);
-
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          avatar_url: publicUrl,
-          avatar_storage_path: filePath,
-        },
-      });
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      setAvatarUrl(signedUrl);
-      toast({ title: t.account.toast.avatarUpdated });
-    } catch (error) {
-      console.error("Failed to upload avatar", error);
-      toast({
-        variant: "destructive",
-        title: t.account.toast.avatarError,
-        description: error instanceof Error ? error.message : undefined,
-      });
-    } finally {
-      setIsUploadingAvatar(false);
-      if (avatarInputRef.current) {
-        avatarInputRef.current.value = "";
-      }
-    }
-  };
 
   const assessmentSubmissionsQuery = useQuery<AssessmentSubmission[]>({
     queryKey: ["dashboard-assessment-submissions", gradingContext.assessment?.id],
@@ -497,18 +396,7 @@ const AccountDashboard = () => {
 
   const classes = useMemo(() => classesQuery.data ?? [], [classesQuery.data]);
   const students = useMemo(() => studentsQuery.data ?? [], [studentsQuery.data]);
-  const curriculumItems = useMemo(() => curriculumQuery.data ?? [], [curriculumQuery.data]);
   const assessments = useMemo(() => assessmentsQuery.data ?? [], [assessmentsQuery.data]);
-
-  const summary = useMemo(() => {
-    const upcomingLessons = curriculumItems.filter(item => item.date && parseISO(item.date) > new Date());
-    return {
-      classes: classes.length,
-      students: students.length,
-      lessons: upcomingLessons.length,
-      assessments: assessments.length,
-    };
-  }, [assessments.length, classes.length, curriculumItems, students.length]);
 
   const handleTabChange = (value: string) => {
     if (!tabs.some(tab => tab.value === value)) return;
@@ -597,30 +485,6 @@ const AccountDashboard = () => {
                   ) : null}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAvatarButtonClick}
-                  disabled={isUploadingAvatar}
-                >
-                  {isUploadingAvatar ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading
-                    </>
-                  ) : (
-                    "Update photo"
-                  )}
-                </Button>
-                <input
-                  ref={avatarInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarFileChange}
-                />
-              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               {canManage ? (
@@ -656,14 +520,6 @@ const AccountDashboard = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <SummaryCard icon={GraduationCap} label="Active classes" value={summary.classes} />
-              <SummaryCard icon={Users} label="Enrolled students" value={summary.students} />
-              <SummaryCard icon={CalendarClock} label="Upcoming lessons" value={summary.lessons} />
-              <SummaryCard icon={ClipboardCheck} label="Assessments" value={summary.assessments} />
-            </div>
-          </CardContent>
         </Card>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
@@ -911,26 +767,6 @@ const AccountDashboard = () => {
     </div>
   );
 };
-
-interface SummaryCardProps {
-  icon: ComponentType<ComponentProps<typeof Activity>>;
-  label: string;
-  value: number;
-}
-
-const SummaryCard = ({ icon: Icon, label, value }: SummaryCardProps) => (
-  <div className="rounded-lg border bg-muted/30 p-4">
-    <div className="flex items-center gap-3">
-      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" />
-      </span>
-      <div>
-        <p className="text-sm font-medium text-foreground">{label}</p>
-        <p className="text-2xl font-semibold text-foreground">{value}</p>
-      </div>
-    </div>
-  </div>
-);
 
 interface ClassesPanelProps {
   classes: ClassWithPlanCount[];
