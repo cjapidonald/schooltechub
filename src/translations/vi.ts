@@ -17,7 +17,35 @@ export const vi = {
     signIn: "Đăng nhập",
     signUp: "Đăng ký",
     signOut: "Đăng xuất",
-    profile: "Bảng điều khiển của tôi"
+    profile: "Hồ sơ của tôi"
+  },
+  profilePage: {
+    title: "Hồ sơ của tôi",
+    subtitle: "Quản lý thông tin giáo viên và cài đặt bảo mật của bạn.",
+    info: {
+      title: "Thông tin giáo viên",
+      description: "Xem lại các thông tin cá nhân được liên kết với tài khoản SchoolTech Hub của bạn.",
+      firstName: "Tên",
+      lastName: "Họ",
+      school: "Trường",
+      subject: "Môn giảng dạy",
+      phone: "Số điện thoại",
+      email: "Email",
+    },
+    security: {
+      title: "Bảo mật",
+      description: "Giữ an toàn cho tài khoản bằng cách cập nhật mật khẩu khi cần thiết.",
+      instructions:
+        "Gửi liên kết đặt lại mật khẩu đến email của bạn và làm theo hướng dẫn để tạo mật khẩu mới.",
+      resetButton: "Gửi email đặt lại mật khẩu",
+      resetSent: "Đã gửi email đặt lại",
+      resetDescription: "Kiểm tra hộp thư và làm theo liên kết để hoàn tất việc đặt lại mật khẩu.",
+      resetError: "Không thể gửi email đặt lại",
+      noEmail: "Không tìm thấy email liên kết với tài khoản của bạn.",
+    },
+    fallback: {
+      notProvided: "Chưa cung cấp",
+    },
   },
   hero: {
     title: "Trao quyền cho giáo dục thông qua đổi mới",
