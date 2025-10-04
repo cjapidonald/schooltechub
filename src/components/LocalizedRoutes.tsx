@@ -20,7 +20,6 @@ import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
 import AccountResourceEdit from '@/pages/AccountResourceEdit';
 import LessonBuilderPage from '@/pages/lesson-builder/LessonBuilderPage';
-import AuthGuard from '@/components/auth/AuthGuard';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
@@ -55,94 +54,22 @@ export const LocalizedRoutes = () => {
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-      <Route
-        path="/builder/lesson-plans"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <BuilderLessonPlan />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
-      <Route
-        path="/builder/lesson-plans/:id"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <BuilderLessonPlanDetail />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
+      <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
+      <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
-      <Route
-        path="/lesson-builder"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <LessonBuilderPage />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
+      <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
       <Route path="/resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
-      <Route
-        path="/account"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <Account />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
-      <Route
-        path="/account/classes/:id"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <ClassDashboard />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
-      <Route
-        path="/account/resources"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <AccountResources />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
-      <Route
-        path="/account/resources/new"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <AccountResourceNew />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
-      <Route
-        path="/account/resources/:id"
-        element={
-          <RouteWrapper>
-            <AuthGuard>
-              <AccountResourceEdit />
-            </AuthGuard>
-          </RouteWrapper>
-        }
-      />
+      <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
+      <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
+      <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
+      <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
+      <Route path="/account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminPage />} />

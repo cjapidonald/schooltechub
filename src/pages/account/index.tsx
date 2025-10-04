@@ -8,7 +8,7 @@ import {
   type ComponentProps,
   type ComponentType,
 } from "react";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
@@ -66,7 +66,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useOptionalUser } from "@/hooks/useOptionalUser";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,6 +92,7 @@ import {
   recordAssessmentGrade,
 } from "@/lib/data/assessments";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
+import { LessonDocEditor } from "./LessonDocEditor";
 import type {
   AssessmentGrade,
   AssessmentSubmission,
@@ -114,6 +115,7 @@ const tabs = [
   { value: "classes", label: "My Classes" },
   { value: "students", label: "My Students" },
   { value: "curriculum", label: "Curriculum" },
+  { value: "builder", label: "Lesson Builder" },
   { value: "assessments", label: "Assessment Tracking" },
 ] as const;
 
@@ -199,7 +201,7 @@ const formatDate = (value: string | null | undefined) => {
 };
 
 const AccountDashboard = () => {
-  const { user, loading } = useRequireAuth();
+  const { user, loading } = useOptionalUser();
   const { language, t } = useLanguage();
   const { fullName } = useMyProfile();
   const { toast } = useToast();
@@ -210,7 +212,6 @@ const AccountDashboard = () => {
     return tabs.some(tab => tab.value === initial) ? (initial as DashboardTab) : "classes";
   });
   const [lessonPreset, setLessonPreset] = useState<LessonBuilderPreset>(null);
-  const [isLessonBuilderOpen, setIsLessonBuilderOpen] = useState(false);
   const [studentDialogOpen, setStudentDialogOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [behaviorNote, setBehaviorNote] = useState("");
@@ -236,6 +237,11 @@ const AccountDashboard = () => {
   const uploadRef = useRef<HTMLInputElement | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const defaultLessonDocHtml =
+    "<p>Start drafting your lesson narrative. Highlight key moves, questions, and differentiation.</p>";
+  const [lessonDocHtml, setLessonDocHtml] = useState<string>(defaultLessonDocHtml);
+  const [lessonDocBackground, setLessonDocBackground] = useState<string>("default");
+  const canManage = Boolean(user);
 
   useEffect(() => {
     let isCancelled = false;
@@ -285,9 +291,11 @@ const AccountDashboard = () => {
     };
   }, [user]);
 
+  const defaultSalutation = "Mr Donald";
+
   const avatarFallback = useMemo(() => {
-    const nameSource = fullName?.trim() || user?.email || "";
-    return nameSource ? nameSource.charAt(0).toUpperCase() : "T";
+    const nameSource = fullName?.trim() || user?.email || defaultSalutation;
+    return nameSource.charAt(0).toUpperCase();
   }, [fullName, user]);
 
   const greetingName = useMemo(() => {
@@ -303,16 +311,16 @@ const AccountDashboard = () => {
     }
 
     const emailName = user?.email?.split("@")[0];
-    return emailName ? `Mr ${emailName}` : "Teacher";
-  }, [fullName, user]);
+    return emailName ? `Mr ${emailName}` : defaultSalutation;
+  }, [fullName, user, defaultSalutation]);
 
   const accountDisplayName = useMemo(() => {
     const trimmed = fullName?.trim();
     if (trimmed && trimmed.length > 0) {
       return trimmed;
     }
-    return user?.email ?? "";
-  }, [fullName, user]);
+    return user?.email ?? defaultSalutation;
+  }, [fullName, user, defaultSalutation]);
 
   const classesQuery = useQuery({
     queryKey: ["dashboard-classes"],
@@ -354,6 +362,10 @@ const AccountDashboard = () => {
   });
 
   const handleAvatarButtonClick = () => {
+    if (!canManage) {
+      toast({ title: "Create a free account", description: "Sign in to personalise your dashboard photo." });
+      return;
+    }
     avatarInputRef.current?.click();
   };
 
@@ -425,8 +437,12 @@ const AccountDashboard = () => {
   });
 
   const behaviorMutation = useMutation({
-    mutationFn: (payload: { studentId: string; note: string; sentiment: StudentBehaviorEntry["sentiment"] }) =>
-      saveStudentBehaviorNote({ studentId: payload.studentId, note: payload.note, sentiment: payload.sentiment }),
+    mutationFn: (payload: { studentId: string; note: string; sentiment: StudentBehaviorEntry["sentiment"] }) => {
+      if (!canManage) {
+        throw new Error("Sign in required to save behaviour notes.");
+      }
+      return saveStudentBehaviorNote({ studentId: payload.studentId, note: payload.note, sentiment: payload.sentiment });
+    },
     onSuccess: () => {
       toast({ title: "Behavior note saved" });
       void studentProfileQuery.refetch();
@@ -441,8 +457,12 @@ const AccountDashboard = () => {
   });
 
   const appraisalMutation = useMutation({
-    mutationFn: (payload: { studentId: string; highlight: string }) =>
-      saveStudentAppraisalNote({ studentId: payload.studentId, highlight: payload.highlight }),
+    mutationFn: (payload: { studentId: string; highlight: string }) => {
+      if (!canManage) {
+        throw new Error("Sign in required to save appraisals.");
+      }
+      return saveStudentAppraisalNote({ studentId: payload.studentId, highlight: payload.highlight });
+    },
     onSuccess: () => {
       toast({ title: "Appraisal saved" });
       void studentProfileQuery.refetch();
@@ -481,14 +501,18 @@ const AccountDashboard = () => {
       description: string;
       dueDate: string;
       scale: GradeScale;
-    }) =>
-      createAssessment({
+    }) => {
+      if (!canManage) {
+        throw new Error("Sign in required to create assessments.");
+      }
+      return createAssessment({
         classId: payload.classId,
         title: payload.title,
         description: payload.description,
         dueDate: payload.dueDate || null,
         gradingScale: payload.scale,
-      }),
+      });
+    },
     onSuccess: () => {
       toast({ title: "Assessment created" });
       queryClient.invalidateQueries({ queryKey: ["dashboard-assessments"] });
@@ -503,15 +527,19 @@ const AccountDashboard = () => {
   });
 
   const recordGradeMutation = useMutation({
-    mutationFn: () =>
-      recordAssessmentGrade({
+    mutationFn: () => {
+      if (!canManage) {
+        throw new Error("Sign in required to record grades.");
+      }
+      return recordAssessmentGrade({
         assessmentId: gradingContext.assessment?.id ?? "",
         studentId: gradingContext.studentId,
         gradeValue: gradingContext.grade || null,
         gradeNumeric: gradingContext.numeric ? Number(gradingContext.numeric) : null,
         scale: gradingContext.scale,
         feedback: gradingContext.feedback || null,
-      }),
+      });
+    },
     onSuccess: () => {
       toast({ title: "Grade recorded" });
       queryClient.invalidateQueries({ queryKey: ["dashboard-assessment-grades", gradingContext.assessment?.id] });
@@ -586,7 +614,10 @@ const AccountDashboard = () => {
       subject: (item?.subject as LessonPlanMetaDraft["subject"]) ?? null,
     };
     setLessonPreset({ meta, classId: classId ?? item?.classId ?? null, curriculumItem: item ?? null });
-    setIsLessonBuilderOpen(true);
+    handleTabChange("builder");
+    if (!canManage) {
+      toast({ title: "Preview lesson builder", description: "Sign in to save lessons back to your curriculum." });
+    }
   };
 
   const handleDownloadCurriculum = () => {
@@ -629,6 +660,23 @@ const AccountDashboard = () => {
     setAppraisalNote("");
   };
 
+  useEffect(() => {
+    if (!lessonPreset?.curriculumItem) {
+      return;
+    }
+    if (lessonDocHtml !== defaultLessonDocHtml) {
+      return;
+    }
+    const { title, week, stage, subject } = lessonPreset.curriculumItem;
+    const heading = title || "Lesson focus";
+    const metadata = [stage, subject, week ? `Week ${week}` : null]
+      .filter(Boolean)
+      .join(" • ");
+    setLessonDocHtml(
+      `<h2>${heading}</h2>${metadata ? `<p class="text-muted">${metadata}</p>` : ""}<p>Outline the learning journey, differentiation, and assessment touchpoints here.</p>`,
+    );
+  }, [defaultLessonDocHtml, lessonDocHtml, lessonPreset?.curriculumItem]);
+
   if (loading) {
     return (
       <div className="container space-y-6 py-10">
@@ -640,10 +688,6 @@ const AccountDashboard = () => {
         </div>
       </div>
     );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace state={{ from: `/account?tab=${activeTab}`, language }} />;
   }
 
   return (
@@ -700,12 +744,34 @@ const AccountDashboard = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="secondary" asChild>
-                <Link to="/blog/new">Post a blog</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/forum/new">Ask a question</Link>
-              </Button>
+              {canManage ? (
+                <Button variant="secondary" asChild>
+                  <Link to="/blog/new">Post a blog</Link>
+                </Button>
+              ) : (
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    toast({ title: "Create an account", description: "Sign in to publish blogs from your dashboard." })
+                  }
+                >
+                  Post a blog
+                </Button>
+              )}
+              {canManage ? (
+                <Button variant="outline" asChild>
+                  <Link to="/forum/new">Ask a question</Link>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    toast({ title: "Join the community", description: "Create an account to join discussions and Q&A." })
+                  }
+                >
+                  Ask a question
+                </Button>
+              )}
               <Button onClick={() => handleOpenLessonBuilder(null, null)}>
                 <NotebookPen className="mr-2 h-4 w-4" /> Plan a lesson
               </Button>
@@ -736,6 +802,7 @@ const AccountDashboard = () => {
               isLoading={classesQuery.isLoading}
               error={classesQuery.error instanceof Error ? classesQuery.error : null}
               onPlanLesson={handleOpenLessonBuilder}
+              canManage={canManage}
             />
           </TabsContent>
 
@@ -745,6 +812,7 @@ const AccountDashboard = () => {
               isLoading={studentsQuery.isLoading}
               error={studentsQuery.error instanceof Error ? studentsQuery.error : null}
               onSelectStudent={handleSelectStudent}
+              canManage={canManage}
             />
           </TabsContent>
 
@@ -758,6 +826,7 @@ const AccountDashboard = () => {
               onDownloadCsv={handleDownloadCurriculum}
               onUploadCsv={() => uploadRef.current?.click()}
               onBuildLesson={handleOpenLessonBuilder}
+              canManage={canManage}
             />
             <input
               ref={uploadRef}
@@ -766,6 +835,92 @@ const AccountDashboard = () => {
               onChange={handleUploadCurriculum}
               className="hidden"
             />
+          </TabsContent>
+
+          <TabsContent value="builder" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1">
+                  <CardTitle>Lesson plan document</CardTitle>
+                  <CardDescription>
+                    Draft your narrative in a doc-style view. Format headers, colours, and alignment before attaching
+                    resources below.
+                  </CardDescription>
+                  {lessonPreset?.curriculumItem ? (
+                    <p className="text-xs text-muted-foreground">
+                      Prefilled from {lessonPreset.curriculumItem.title}. Adjust the outline then save it back to the
+                      curriculum tab.
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setLessonDocHtml(defaultLessonDocHtml);
+                      setLessonDocBackground("default");
+                      setLessonPreset(null);
+                    }}
+                  >
+                    Reset canvas
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (canManage) {
+                        toast({ title: "Lesson saved", description: "We’ll connect this plan to your curriculum shortly." });
+                      } else {
+                        toast({
+                          title: "Create an account",
+                          description: "Sign in to save this lesson directly to your curriculum calendar.",
+                        });
+                      }
+                    }}
+                  >
+                    Save lesson view
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <LessonDocEditor
+                  value={lessonDocHtml}
+                  onChange={setLessonDocHtml}
+                  background={lessonDocBackground}
+                  onBackgroundChange={setLessonDocBackground}
+                />
+              </CardContent>
+            </Card>
+
+            <Card className="border-primary/40">
+              <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <CardTitle>Structured builder</CardTitle>
+                  <CardDescription>
+                    Use guided steps to attach resources, success criteria, and differentiation strategies. Fields pulled
+                    from your curriculum are already prefilled.
+                  </CardDescription>
+                </div>
+                {lessonPreset?.classId ? (
+                  <Badge variant="outline">Linked class: {lessonPreset.classId}</Badge>
+                ) : null}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!canManage ? (
+                  <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                    You’re exploring the lesson builder in preview mode. Sign in to autosave drafts and sync them to
+                    classes.
+                  </div>
+                ) : null}
+                <div className="rounded-lg border bg-background/70 p-2">
+                  <LessonBuilderPage
+                    layoutMode="embedded"
+                    initialMeta={lessonPreset?.meta ?? undefined}
+                    initialClassId={lessonPreset?.classId ?? null}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="assessments" className="space-y-6">
@@ -788,32 +943,67 @@ const AccountDashboard = () => {
                 }));
                 setGradingDialogOpen(true);
               }}
+              canManage={canManage}
             />
           </TabsContent>
         </Tabs>
 
-        <Card className="border border-dashed border-primary/40 bg-background/80">
-          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <CardTitle>{t.account.research.cardTitle}</CardTitle>
-              <CardDescription>{t.account.research.cardDescription}</CardDescription>
-            </div>
-            <Badge variant="outline" className="self-start">
-              {t.account.research.badge}
-            </Badge>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>{t.account.research.cardBody}</p>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button size="sm" variant="outline" disabled>
-                {t.account.research.toggleLabel}
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                {t.account.research.toggleDescription}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {canManage ? (
+          <Card className="border border-dashed border-primary/40 bg-background/80">
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle>{t.account.research.cardTitle}</CardTitle>
+                <CardDescription>{t.account.research.cardDescription}</CardDescription>
+              </div>
+              <Badge variant="outline" className="self-start">
+                {t.account.research.badge}
+              </Badge>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>{t.account.research.cardBody}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button size="sm" variant="outline" disabled>
+                  {t.account.research.toggleLabel}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {t.account.research.toggleDescription}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border border-dashed border-primary/40 bg-background/80">
+            <CardHeader>
+              <CardTitle>Explore more when you sign in</CardTitle>
+              <CardDescription>
+                Saved posts, community activity, and research highlights unlock once you create a free SchoolTech Hub
+                account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-3">
+              {[
+                { label: "Saved posts", description: "Bookmark strategies and revisit them anytime." },
+                { label: "Community activity", description: "Join debates, tutorials, and teacher questions." },
+                { label: "Research highlights", description: "Preview pilots and classroom innovation projects." },
+              ].map(item => (
+                <Button
+                  key={item.label}
+                  variant="outline"
+                  className="h-full flex-col items-start gap-1 text-left"
+                  onClick={() =>
+                    toast({
+                      title: "Sign in to continue",
+                      description: `${item.label} are reserved for members. Create an account to access them instantly.`,
+                    })
+                  }
+                >
+                  <span className="text-sm font-semibold text-foreground">{item.label}</span>
+                  <span className="text-xs text-muted-foreground">{item.description}</span>
+                </Button>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <StudentDialog
@@ -826,6 +1016,7 @@ const AccountDashboard = () => {
         behaviorSentiment={behaviorSentiment}
         onBehaviorSentimentChange={setBehaviorSentiment}
         onSaveBehavior={() =>
+          canManage &&
           selectedStudentId &&
           behaviorNote.trim().length > 0 &&
           behaviorMutation.mutate({ studentId: selectedStudentId, note: behaviorNote, sentiment: behaviorSentiment })
@@ -833,11 +1024,13 @@ const AccountDashboard = () => {
         appraisalNote={appraisalNote}
         onAppraisalNoteChange={setAppraisalNote}
         onSaveAppraisal={() =>
+          canManage &&
           selectedStudentId &&
           appraisalNote.trim().length > 0 &&
           appraisalMutation.mutate({ studentId: selectedStudentId, highlight: appraisalNote })
         }
-        onGenerateReport={() => selectedStudentId && reportMutation.mutate(selectedStudentId)}
+        onGenerateReport={() => canManage && selectedStudentId && reportMutation.mutate(selectedStudentId)}
+        canManage={canManage}
       />
 
       <GradingDialog
@@ -853,42 +1046,6 @@ const AccountDashboard = () => {
         isSubmitting={recordGradeMutation.isPending}
       />
 
-      <Dialog
-        open={isLessonBuilderOpen}
-        onOpenChange={open => {
-          setIsLessonBuilderOpen(open);
-          if (!open) {
-            setLessonPreset(null);
-          }
-        }}
-      >
-        <DialogContent className="max-w-5xl overflow-hidden border-0 p-0">
-          <DialogHeader className="border-b bg-background/90 px-6 py-4">
-            <DialogTitle>Lesson builder</DialogTitle>
-            <DialogDescription>
-              Draft lesson plans with AI assistance and sync them back to your curriculum items.
-            </DialogDescription>
-          </DialogHeader>
-          {lessonPreset?.curriculumItem ? (
-            <div className="border-b bg-muted/40 px-6 py-3 text-xs text-muted-foreground">
-              Prefilled from {lessonPreset.curriculumItem.title}
-            </div>
-          ) : null}
-          <div className="flex h-[70vh] flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-2">
-              <LessonBuilderPage
-                layoutMode="embedded"
-                initialMeta={lessonPreset?.meta ?? undefined}
-                initialClassId={lessonPreset?.classId ?? null}
-              />
-            </div>
-            <div className="border-t bg-muted/40 px-6 py-3 text-xs text-muted-foreground">
-              When your AI co-pilot is ready we will generate summaries and attach them back to the curriculum item
-              automatically.
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
@@ -918,6 +1075,7 @@ interface ClassesPanelProps {
   isLoading: boolean;
   error: Error | null;
   onPlanLesson: (item?: CurriculumItem | null, classId?: string | null) => void;
+  canManage: boolean;
 }
 
 type EditableClassState = {
@@ -935,7 +1093,7 @@ const createInitialClassForm = () => ({
   stage: "",
 });
 
-const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelProps) => {
+const ClassesPanel = ({ classes, isLoading, error, onPlanLesson, canManage }: ClassesPanelProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
@@ -944,9 +1102,13 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
   const [createError, setCreateError] = useState<string | null>(null);
   const [editState, setEditState] = useState<EditableClassState | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
+  const readOnly = !canManage;
 
   const createClassMutation = useMutation({
     mutationFn: async (values: ReturnType<typeof createInitialClassForm>) => {
+      if (readOnly) {
+        throw new Error("Sign in required to create classes.");
+      }
       const trimmedTitle = values.title.trim();
       const trimmedSummary = values.summary.trim();
       const trimmedSubject = values.subject.trim();
@@ -979,6 +1141,9 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
 
   const updateClassMutation = useMutation({
     mutationFn: async (values: EditableClassState) => {
+      if (readOnly) {
+        throw new Error("Sign in required to update classes.");
+      }
       const trimmedTitle = values.title.trim();
       const trimmedSummary = values.summary.trim();
       const trimmedSubject = values.subject.trim();
@@ -1019,6 +1184,10 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
 
   const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (readOnly) {
+      toast({ title: "Preview mode", description: "Create an account to build and manage your classes." });
+      return;
+    }
     const trimmedTitle = createForm.title.trim();
     if (!trimmedTitle) {
       setCreateError("Class name is required.");
@@ -1081,6 +1250,12 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
         <CardDescription>Build and refine your class roster without leaving the dashboard.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {readOnly ? (
+          <p className="rounded-lg border border-dashed border-primary/50 bg-primary/5 p-4 text-sm text-muted-foreground">
+            You’re browsing a sample dashboard. Sign in to create classes, attach lesson plans, and sync everything to
+            calendars.
+          </p>
+        ) : null}
         <form
           onSubmit={handleCreateSubmit}
           className="space-y-4 rounded-lg border border-dashed border-primary/40 bg-muted/20 p-4"
@@ -1092,7 +1267,7 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
               value={createForm.title}
               onChange={handleCreateChange("title")}
               placeholder="e.g. Year 5 STEM Club"
-              disabled={createClassMutation.isPending}
+              disabled={readOnly || createClassMutation.isPending}
               required
             />
             {createError ? <p className="text-sm text-destructive">{createError}</p> : null}
@@ -1104,7 +1279,7 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
               value={createForm.summary}
               onChange={handleCreateChange("summary")}
               placeholder="What will this class cover?"
-              disabled={createClassMutation.isPending}
+              disabled={readOnly || createClassMutation.isPending}
               rows={3}
             />
           </div>
@@ -1116,7 +1291,7 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
                 value={createForm.subject}
                 onChange={handleCreateChange("subject")}
                 placeholder="Math, Science, ..."
-                disabled={createClassMutation.isPending}
+                disabled={readOnly || createClassMutation.isPending}
               />
             </div>
             <div className="space-y-2">
@@ -1126,12 +1301,12 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
                 value={createForm.stage}
                 onChange={handleCreateChange("stage")}
                 placeholder="Grade level or age group"
-                disabled={createClassMutation.isPending}
+                disabled={readOnly || createClassMutation.isPending}
               />
             </div>
           </div>
           <div className="flex justify-end">
-            <Button type="submit" disabled={createClassMutation.isPending}>
+            <Button type="submit" disabled={readOnly || createClassMutation.isPending}>
               {createClassMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
@@ -1185,7 +1360,7 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
                           id={`edit-title-${classItem.id}`}
                           value={editState?.title ?? ""}
                           onChange={handleEditChange("title")}
-                          disabled={updateClassMutation.isPending}
+                          disabled={readOnly || updateClassMutation.isPending}
                           required
                         />
                       </div>
@@ -1195,7 +1370,7 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
                           id={`edit-summary-${classItem.id}`}
                           value={editState?.summary ?? ""}
                           onChange={handleEditChange("summary")}
-                          disabled={updateClassMutation.isPending}
+                          disabled={readOnly || updateClassMutation.isPending}
                           rows={3}
                         />
                       </div>
@@ -1206,7 +1381,7 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
                             id={`edit-subject-${classItem.id}`}
                             value={editState?.subject ?? ""}
                             onChange={handleEditChange("subject")}
-                            disabled={updateClassMutation.isPending}
+                            disabled={readOnly || updateClassMutation.isPending}
                           />
                         </div>
                         <div className="space-y-2">
@@ -1215,13 +1390,13 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
                             id={`edit-stage-${classItem.id}`}
                             value={editState?.stage ?? ""}
                             onChange={handleEditChange("stage")}
-                            disabled={updateClassMutation.isPending}
+                            disabled={readOnly || updateClassMutation.isPending}
                           />
                         </div>
                       </div>
                       {editError ? <p className="text-sm text-destructive">{editError}</p> : null}
                       <div className="flex flex-wrap gap-2">
-                        <Button type="submit" size="sm" disabled={updateClassMutation.isPending}>
+                        <Button type="submit" size="sm" disabled={readOnly || updateClassMutation.isPending}>
                           {updateClassMutation.isPending ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
@@ -1252,7 +1427,16 @@ const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelP
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleStartEditing(classItem)}
+                        onClick={() => {
+                          if (readOnly) {
+                            toast({
+                              title: "Preview mode",
+                              description: "Sign in to edit class details and sync lesson plans.",
+                            });
+                            return;
+                          }
+                          handleStartEditing(classItem);
+                        }}
                         disabled={updateClassMutation.isPending}
                       >
                         Edit details
@@ -1274,9 +1458,13 @@ interface StudentsPanelProps {
   isLoading: boolean;
   error: Error | null;
   onSelectStudent: (student: StudentSummary) => void;
+  canManage: boolean;
 }
 
-const StudentsPanel = ({ students, isLoading, error, onSelectStudent }: StudentsPanelProps) => {
+const StudentsPanel = ({ students, isLoading, error, onSelectStudent, canManage }: StudentsPanelProps) => {
+  const { toast } = useToast();
+  const readOnly = !canManage;
+
   return (
     <Card>
       <CardHeader>
@@ -1284,6 +1472,11 @@ const StudentsPanel = ({ students, isLoading, error, onSelectStudent }: Students
         <CardDescription>Click a learner to review assignments, behaviour, and appraisal notes.</CardDescription>
       </CardHeader>
       <CardContent>
+        {readOnly ? (
+          <div className="mb-4 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4 text-sm text-muted-foreground">
+            Viewing a sample roster. Sign in to enrol students, record notes, and generate AI-powered reports.
+          </div>
+        ) : null}
         {isLoading ? (
           <div className="flex justify-center py-10">
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -1324,7 +1517,19 @@ const StudentsPanel = ({ students, isLoading, error, onSelectStudent }: Students
                       {student.latestAppraisalNote?.highlight ?? "No highlights yet"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" onClick={() => onSelectStudent(student)}>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (readOnly) {
+                            toast({
+                              title: "Sign in to view profiles",
+                              description: "Create an account to unlock full student profiles and reporting tools.",
+                            });
+                            return;
+                          }
+                          onSelectStudent(student);
+                        }}
+                      >
                         View profile
                       </Button>
                     </TableCell>
@@ -1358,6 +1563,7 @@ interface CurriculumPanelProps {
   onDownloadCsv: () => void;
   onUploadCsv: () => void;
   onBuildLesson: (item: CurriculumItem) => void;
+  canManage: boolean;
 }
 
 const CurriculumPanel = ({
@@ -1369,9 +1575,11 @@ const CurriculumPanel = ({
   onDownloadCsv,
   onUploadCsv,
   onBuildLesson,
+  canManage,
 }: CurriculumPanelProps) => {
   const { toast } = useToast();
   const [newCurriculum, setNewCurriculum] = useState<DraftCurriculum>(() => createInitialDraftCurriculum());
+  const readOnly = !canManage;
 
   const updateFilters = (patch: Partial<CurriculumPanelProps["filters"]>) => {
     onChangeFilters({ ...filters, ...patch });
@@ -1434,6 +1642,13 @@ const CurriculumPanel = ({
   };
 
   const handleSaveCurriculum = () => {
+    if (readOnly) {
+      toast({
+        title: "Sign in to save",
+        description: "Create an account to keep curriculum drafts and sync them with your classes.",
+      });
+      return;
+    }
     toast({
       title: "Curriculum draft saved",
       description: `${newCurriculum.title || "Untitled curriculum"} is ready in your planning workspace.`,
@@ -1460,6 +1675,14 @@ const CurriculumPanel = ({
 
   return (
     <div className="space-y-6">
+      {readOnly ? (
+        <Card className="border border-dashed border-primary/40 bg-primary/5">
+          <CardContent className="text-sm text-muted-foreground">
+            Preview the curriculum planner. Sign in to upload CSV files, store drafts, and sync lessons to your
+            calendar.
+          </CardContent>
+        </Card>
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>Curriculum planner</CardTitle>
@@ -1533,16 +1756,16 @@ const CurriculumPanel = ({
             </Select>
             <Input type="date" value={filters.date} onChange={event => updateFilters({ date: event.target.value })} />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={onDownloadCsv}>
-              <FileDown className="mr-2 h-4 w-4" /> Download CSV
-            </Button>
-            <Button variant="outline" onClick={onUploadCsv}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" /> Upload CSV
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => updateFilters({ classId: "all", stage: "all", subject: "all", week: "all", date: "" })}
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={onDownloadCsv}>
+                <FileDown className="mr-2 h-4 w-4" /> Download CSV
+              </Button>
+              <Button variant="outline" onClick={onUploadCsv} disabled={readOnly}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" /> Upload CSV
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => updateFilters({ classId: "all", stage: "all", subject: "all", week: "all", date: "" })}
             >
               <RefreshCw className="mr-2 h-4 w-4" /> Reset filters
             </Button>
@@ -1635,7 +1858,7 @@ const CurriculumPanel = ({
             <Button variant="secondary" size="sm" onClick={handleAutoOutline}>
               <Sparkles className="mr-2 h-4 w-4" /> Generate outline
             </Button>
-            <Button size="sm" onClick={handleSaveCurriculum}>
+            <Button size="sm" onClick={handleSaveCurriculum} disabled={readOnly}>
               <Share2 className="mr-2 h-4 w-4" /> Save &amp; share
             </Button>
           </div>
@@ -1906,6 +2129,7 @@ interface AssessmentsPanelProps {
   }) => Promise<unknown>;
   isCreating: boolean;
   onOpenGrades: (assessment: AssessmentTemplate) => void;
+  canManage: boolean;
 }
 
 const AssessmentsPanel = ({
@@ -1916,6 +2140,7 @@ const AssessmentsPanel = ({
   onCreate,
   isCreating,
   onOpenGrades,
+  canManage,
 }: AssessmentsPanelProps) => {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -1924,6 +2149,8 @@ const AssessmentsPanel = ({
     dueDate: "",
     scale: "letter" as GradeScale,
   });
+  const { toast } = useToast();
+  const readOnly = !canManage;
 
   useEffect(() => {
     if (selectedClassId && !classes.some(cls => cls.id === selectedClassId)) {
@@ -1957,6 +2184,13 @@ const AssessmentsPanel = ({
     if (!selectedClassId || !form.title.trim()) {
       return;
     }
+    if (readOnly) {
+      toast({
+        title: "Sign in to create assessments",
+        description: "Log in to design assignments, collect submissions, and grade student work.",
+      });
+      return;
+    }
     try {
       await onCreate({
         classId: selectedClassId,
@@ -1972,13 +2206,13 @@ const AssessmentsPanel = ({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-3">
-        {selectedClass ? (
-          <>
-            <Button variant="ghost" size="sm" className="w-fit pl-0" onClick={() => setSelectedClassId(null)}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to classes
-            </Button>
+      <Card>
+        <CardHeader className="flex flex-col gap-3">
+          {selectedClass ? (
+            <>
+              <Button variant="ghost" size="sm" className="w-fit pl-0" onClick={() => setSelectedClassId(null)}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to classes
+              </Button>
             <div>
               <CardTitle>{selectedClass.title}</CardTitle>
               <CardDescription>
@@ -2035,7 +2269,20 @@ const AssessmentsPanel = ({
                         <TableCell className="text-sm text-muted-foreground">{formatDate(assessment.dueDate)}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{assessment.gradingScale}</TableCell>
                         <TableCell className="text-right">
-                          <Button size="sm" onClick={() => onOpenGrades(assessment)}>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (readOnly) {
+                                toast({
+                                  title: "Sign in to record grades",
+                                  description: "Log in to grade submissions and capture feedback for students.",
+                                });
+                                return;
+                              }
+                              onOpenGrades(assessment);
+                            }}
+                            disabled={readOnly}
+                          >
                             Record grades
                           </Button>
                         </TableCell>
@@ -2059,6 +2306,7 @@ const AssessmentsPanel = ({
                     value={form.title}
                     onChange={event => setForm(current => ({ ...current, title: event.target.value }))}
                     placeholder="Forces and motion quiz"
+                    disabled={readOnly}
                   />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -2069,6 +2317,7 @@ const AssessmentsPanel = ({
                       type="date"
                       value={form.dueDate}
                       onChange={event => setForm(current => ({ ...current, dueDate: event.target.value }))}
+                      disabled={readOnly}
                     />
                   </div>
                   <div className="space-y-2">
@@ -2078,6 +2327,7 @@ const AssessmentsPanel = ({
                       onValueChange={value =>
                         setForm(current => ({ ...current, scale: value as GradeScale }))
                       }
+                      disabled={readOnly}
                     >
                       <SelectTrigger id="assessment-scale">
                         <SelectValue />
@@ -2099,12 +2349,13 @@ const AssessmentsPanel = ({
                     value={form.description}
                     onChange={event => setForm(current => ({ ...current, description: event.target.value }))}
                     placeholder="Outline objectives, required materials, and success criteria"
+                    disabled={readOnly}
                   />
                 </div>
                 <div className="flex justify-end">
                   <Button
                     onClick={handleSubmit}
-                    disabled={!form.title.trim() || isCreating}
+                    disabled={!form.title.trim() || isCreating || readOnly}
                   >
                     {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Add assessment
@@ -2115,6 +2366,11 @@ const AssessmentsPanel = ({
           </div>
         ) : (
           <div className="space-y-4">
+            {readOnly ? (
+              <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4 text-sm text-muted-foreground">
+                Browse example assessment tracking. Sign in to create assignments, record submissions, and grade students.
+              </div>
+            ) : null}
             {error ? (
               <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
                 {error.message}
@@ -2181,6 +2437,7 @@ interface StudentDialogProps {
   onAppraisalNoteChange: (value: string) => void;
   onSaveAppraisal: () => void;
   onGenerateReport: () => void;
+  canManage: boolean;
 }
 
 const StudentDialog = ({
@@ -2197,7 +2454,9 @@ const StudentDialog = ({
   onAppraisalNoteChange,
   onSaveAppraisal,
   onGenerateReport,
+  canManage,
 }: StudentDialogProps) => {
+  const readOnly = !canManage;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -2205,6 +2464,12 @@ const StudentDialog = ({
           <DialogTitle>Student profile</DialogTitle>
           <DialogDescription>Blend class assignments, behaviour observations, and AI reporting in one view.</DialogDescription>
         </DialogHeader>
+        {!canManage ? (
+          <p className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3 text-xs text-muted-foreground">
+            This preview is read-only. Sign in to add behaviour observations, celebrate achievements, and generate full AI
+            reports.
+          </p>
+        ) : null}
         {isLoading ? (
           <div className="flex justify-center py-10">
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -2267,12 +2532,14 @@ const StudentDialog = ({
                   placeholder="Record behaviour notes"
                   value={behaviorNote}
                   onChange={event => onBehaviorNoteChange(event.target.value)}
+                  disabled={readOnly}
                 />
                 <Select
                   value={behaviorSentiment}
                   onValueChange={value =>
                     onBehaviorSentimentChange(value as StudentBehaviorEntry["sentiment"])
                   }
+                  disabled={readOnly}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -2288,7 +2555,7 @@ const StudentDialog = ({
                 <Button
                   size="sm"
                   onClick={onSaveBehavior}
-                  disabled={!behaviorNote.trim().length}
+                  disabled={!behaviorNote.trim().length || readOnly}
                 >
                   Save behaviour note
                 </Button>
@@ -2309,8 +2576,9 @@ const StudentDialog = ({
                   placeholder="Celebrate achievements and participation"
                   value={appraisalNote}
                   onChange={event => onAppraisalNoteChange(event.target.value)}
+                  disabled={readOnly}
                 />
-                <Button size="sm" onClick={onSaveAppraisal} disabled={!appraisalNote.trim().length}>
+                <Button size="sm" onClick={onSaveAppraisal} disabled={!appraisalNote.trim().length || readOnly}>
                   Save appraisal
                 </Button>
                 <div className="space-y-1 text-xs text-muted-foreground">
@@ -2330,7 +2598,11 @@ const StudentDialog = ({
                     Generate a personalised progress summary using your notes and assessment data.
                   </p>
                 </div>
-                <Button size="sm" onClick={onGenerateReport} disabled={profile.reportStatus?.status === "processing"}>
+                <Button
+                  size="sm"
+                  onClick={onGenerateReport}
+                  disabled={profile.reportStatus?.status === "processing" || readOnly}
+                >
                   <FileText className="mr-2 h-4 w-4" />
                   {profile.reportStatus?.status === "ready" ? "Regenerate report" : "Generate report"}
                 </Button>
