@@ -281,8 +281,18 @@ export async function createClass(
   let insertError = primaryResult.error;
 
   if ((!record || insertError) && isUndefinedColumnError(insertError)) {
-    const legacyPayload = buildClassPayload(input, "legacy", userId);
-    const legacyResult = await insertClassRecord(legacyPayload, client);
+    const legacyBasePayload = buildClassPayload(input, "legacy", userId);
+    const legacyPayloadWithOwner = userId
+      ? { ...legacyBasePayload, owner_id: userId }
+      : legacyBasePayload;
+
+    let legacyResult = await insertClassRecord(legacyPayloadWithOwner, client);
+
+    if ((!legacyResult.data || legacyResult.error) && isUndefinedColumnError(legacyResult.error) && userId) {
+      const { owner_id: _omit, ...fallbackLegacyPayload } = legacyPayloadWithOwner;
+      legacyResult = await insertClassRecord(fallbackLegacyPayload, client);
+    }
+
     record = legacyResult.data;
     insertError = legacyResult.error;
   }
