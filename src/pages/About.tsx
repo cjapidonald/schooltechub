@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Award, Users, BookOpen, Target, Heart, Lightbulb } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/components/SEO";
+import { HomeLanding } from "@/components/home/HomeLanding";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,10 @@ const About = () => {
         keywords={t.about.seo.keywords}
         canonicalUrl={t.about.seo.canonical}
       />
+
+      <div className="border-b border-border/40">
+        <HomeLanding embedded />
+      </div>
 
       {/* Hero Section */}
       <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
