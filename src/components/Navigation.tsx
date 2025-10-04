@@ -54,7 +54,7 @@ const Navigation = () => {
     ];
 
     if (user) {
-      items.splice(1, 0, { name: t.nav.profile, path: "/account" });
+      items.unshift({ name: t.nav.profile, path: "/account" });
     }
 
     return items;

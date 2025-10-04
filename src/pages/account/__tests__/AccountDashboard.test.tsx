@@ -27,11 +27,9 @@ vi.mock("@/hooks/useMyProfile", () => ({
 }));
 
 vi.mock("@/lib/classes", () => ({
-  listMyClasses: vi.fn().mockResolvedValue([]),
-}));
-
-vi.mock("@/components/classes/ClassCreateDialog", () => ({
-  ClassCreateDialog: () => null,
+  listMyClassesWithPlanCount: vi.fn().mockResolvedValue([]),
+  createClass: vi.fn(),
+  updateClass: vi.fn(),
 }));
 
 vi.mock("@/pages/account/components/UpcomingLessonsCard", () => ({
