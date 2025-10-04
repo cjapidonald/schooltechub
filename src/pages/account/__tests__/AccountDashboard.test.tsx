@@ -7,8 +7,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import AccountDashboard from "../index";
 import { en } from "@/translations/en";
 
-vi.mock("@/hooks/useRequireAuth", () => ({
-  useRequireAuth: () => ({
+vi.mock("@/hooks/useOptionalUser", () => ({
+  useOptionalUser: () => ({
     user: {
       id: "user-1",
       email: "user@example.com",
@@ -30,6 +30,26 @@ vi.mock("@/lib/classes", () => ({
   listMyClassesWithPlanCount: vi.fn().mockResolvedValue([]),
   createClass: vi.fn(),
   updateClass: vi.fn(),
+}));
+
+vi.mock("@/lib/data/students", () => ({
+  listMyStudents: vi.fn().mockResolvedValue([]),
+  getStudentProfile: vi.fn(),
+  recordStudentReportRequest: vi.fn(),
+  saveStudentAppraisalNote: vi.fn(),
+  saveStudentBehaviorNote: vi.fn(),
+}));
+
+vi.mock("@/lib/data/curriculum", () => ({
+  listCurriculumItems: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/lib/data/assessments", () => ({
+  listAssessments: vi.fn().mockResolvedValue([]),
+  listAssessmentSubmissions: vi.fn().mockResolvedValue([]),
+  listAssessmentGrades: vi.fn().mockResolvedValue([]),
+  createAssessment: vi.fn(),
+  recordAssessmentGrade: vi.fn(),
 }));
 
 vi.mock("@/pages/account/components/UpcomingLessonsCard", () => ({
