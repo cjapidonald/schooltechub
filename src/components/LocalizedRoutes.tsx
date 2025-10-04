@@ -16,7 +16,6 @@ import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
 import Account from '@/pages/account';
-import Profile from '@/pages/Profile';
 import ClassDashboard from '@/pages/account/ClassDashboard';
 import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
@@ -71,7 +70,6 @@ export const LocalizedRoutes = () => {
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
-      <Route path="/profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
       <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
       <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
       <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />

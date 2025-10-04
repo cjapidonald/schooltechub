@@ -55,11 +55,6 @@ import {
 import { createLessonBuilderDraft } from "@/lib/builder-api";
 import type { CurriculumItem, CurriculumLessonLink } from "@/types/platform";
 
-interface CurriculumPageProps {
-  variant?: "standalone" | "embedded";
-  className?: string;
-}
-
 interface CurriculumRow extends CurriculumItem {
   lessonLinkId: string | null;
   lessonPlanId: string | null;
@@ -153,18 +148,12 @@ const parsePastedCurriculum = (input: string): ParsedCurriculumRow[] => {
     });
 };
 
-const CurriculumPage = ({ variant = "standalone", className }: CurriculumPageProps) => {
+const CurriculumPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
-
-  const wrapperClassName = cn(
-    "space-y-8",
-    variant === "standalone" ? "container py-10" : "",
-    className,
-  );
 
   const classesById = useMemo(() => {
     return new Map(classes.map(item => [item.id, item.title]));
@@ -520,7 +509,7 @@ const CurriculumPage = ({ variant = "standalone", className }: CurriculumPagePro
   };
 
   return (
-    <div className={wrapperClassName}>
+    <div className="container py-10 space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Curriculum planner</h1>

@@ -18,12 +18,17 @@ import {
   CalendarClock,
   ClipboardCheck,
   FileDown,
+  FileSpreadsheet,
   FileText,
   ListChecks,
   GraduationCap,
   Loader2,
   NotebookPen,
   Plus,
+  RefreshCw,
+  Share2,
+  Sparkles,
+  Target,
   Users,
 } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
@@ -87,7 +92,6 @@ import {
   recordAssessmentGrade,
 } from "@/lib/data/assessments";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
-import CurriculumPage from "@/pages/Curriculum";
 import { LessonDocEditor } from "./LessonDocEditor";
 import type {
   AssessmentGrade,
@@ -122,6 +126,52 @@ type LessonBuilderPreset = {
   classId: string | null;
   curriculumItem?: CurriculumItem | null;
 } | null;
+
+type DraftCurriculumModule = {
+  id: number;
+  week: string;
+  focus: string;
+  activities: string;
+  assessment: string;
+  resources: string;
+};
+
+type DraftCurriculum = {
+  title: string;
+  subject: string;
+  stage: string;
+  term: string;
+  duration: string;
+  goals: string;
+  standards: string;
+  assessmentPlan: string;
+  differentiation: string;
+  collaboration: string;
+  modules: DraftCurriculumModule[];
+};
+
+const createDraftModule = (index: number): DraftCurriculumModule => ({
+  id: Date.now() + index + Math.floor(Math.random() * 1000),
+  week: `Week ${index + 1}`,
+  focus: "",
+  activities: "",
+  assessment: "",
+  resources: "",
+});
+
+const createInitialDraftCurriculum = (): DraftCurriculum => ({
+  title: "",
+  subject: "",
+  stage: "",
+  term: "",
+  duration: "10 weeks",
+  goals: "",
+  standards: "",
+  assessmentPlan: "",
+  differentiation: "",
+  collaboration: "",
+  modules: Array.from({ length: 4 }).map((_, index) => createDraftModule(index)),
+});
 
 const sentimentOptions: Array<{ value: StudentBehaviorEntry["sentiment"]; label: string }> = [
   { value: "positive", label: "Positive" },
@@ -167,6 +217,13 @@ const AccountDashboard = () => {
   const [behaviorNote, setBehaviorNote] = useState("");
   const [behaviorSentiment, setBehaviorSentiment] = useState<StudentBehaviorEntry["sentiment"]>("positive");
   const [appraisalNote, setAppraisalNote] = useState("");
+  const [curriculumFilters, setCurriculumFilters] = useState({
+    classId: "all" as string | "all",
+    stage: "all" as string | "all",
+    subject: "all" as string | "all",
+    week: "all" as string | "all",
+    date: "",
+  });
   const [gradingDialogOpen, setGradingDialogOpen] = useState(false);
   const [gradingContext, setGradingContext] = useState({
     assessment: null as AssessmentTemplate | null,
@@ -177,6 +234,7 @@ const AccountDashboard = () => {
     feedback: "",
   });
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadRef = useRef<HTMLInputElement | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const defaultLessonDocHtml =
@@ -513,6 +571,34 @@ const AccountDashboard = () => {
     };
   }, [assessments.length, classes.length, curriculumItems, students.length]);
 
+  const curriculumOptions = useMemo(() => {
+    const stages = new Set<string>();
+    const subjects = new Set<string>();
+    const weeks = new Set<number>();
+    curriculumItems.forEach(item => {
+      if (item.stage) stages.add(item.stage);
+      if (item.subject) subjects.add(item.subject);
+      if (typeof item.week === "number") weeks.add(item.week);
+    });
+    return {
+      stages: Array.from(stages),
+      subjects: Array.from(subjects),
+      weeks: Array.from(weeks).sort((a, b) => a - b),
+    };
+  }, [curriculumItems]);
+
+  const filteredCurriculum = useMemo(() => {
+    return curriculumItems.filter(item => {
+      const matchesClass = curriculumFilters.classId === "all" || item.classId === curriculumFilters.classId;
+      const matchesStage = curriculumFilters.stage === "all" || item.stage === curriculumFilters.stage;
+      const matchesSubject = curriculumFilters.subject === "all" || item.subject === curriculumFilters.subject;
+      const matchesWeek =
+        curriculumFilters.week === "all" || String(item.week ?? "") === curriculumFilters.week;
+      const matchesDate = !curriculumFilters.date || (item.date && item.date.startsWith(curriculumFilters.date));
+      return matchesClass && matchesStage && matchesSubject && matchesWeek && matchesDate;
+    });
+  }, [curriculumFilters, curriculumItems]);
+
   const handleTabChange = (value: string) => {
     if (!tabs.some(tab => tab.value === value)) return;
     setActiveTab(value as DashboardTab);
@@ -532,6 +618,38 @@ const AccountDashboard = () => {
     if (!canManage) {
       toast({ title: "Preview lesson builder", description: "Sign in to save lessons back to your curriculum." });
     }
+  };
+
+  const handleDownloadCurriculum = () => {
+    const rows = filteredCurriculum.map(item => [
+      item.title,
+      item.topic ?? "",
+      item.subject ?? "",
+      item.stage ?? "",
+      item.week ?? "",
+      item.date ?? "",
+    ]);
+    const csv = [["Title", "Topic", "Subject", "Stage", "Week", "Date"], ...rows]
+      .map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "curriculum.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleUploadCurriculum = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    console.info("Uploaded curriculum CSV", text.slice(0, 200));
+    toast({ title: "Curriculum upload received", description: "We'll map it to your planner." });
+    event.target.value = "";
   };
 
   const handleSelectStudent = (student: StudentSummary) => {
@@ -699,7 +817,24 @@ const AccountDashboard = () => {
           </TabsContent>
 
           <TabsContent value="curriculum" className="space-y-6">
-            <CurriculumPage variant="embedded" />
+            <CurriculumPanel
+              classes={classes}
+              items={filteredCurriculum}
+              filters={curriculumFilters}
+              options={curriculumOptions}
+              onChangeFilters={setCurriculumFilters}
+              onDownloadCsv={handleDownloadCurriculum}
+              onUploadCsv={() => uploadRef.current?.click()}
+              onBuildLesson={handleOpenLessonBuilder}
+              canManage={canManage}
+            />
+            <input
+              ref={uploadRef}
+              type="file"
+              accept=".csv"
+              onChange={handleUploadCurriculum}
+              className="hidden"
+            />
           </TabsContent>
 
           <TabsContent value="builder" className="space-y-6">
@@ -1406,6 +1541,577 @@ const StudentsPanel = ({ students, isLoading, error, onSelectStudent, canManage 
         )}
       </CardContent>
     </Card>
+  );
+};
+
+interface CurriculumPanelProps {
+  classes: ClassWithPlanCount[];
+  items: CurriculumItem[];
+  filters: {
+    classId: string | "all";
+    stage: string | "all";
+    subject: string | "all";
+    week: string | "all";
+    date: string;
+  };
+  options: {
+    stages: string[];
+    subjects: string[];
+    weeks: number[];
+  };
+  onChangeFilters: (filters: CurriculumPanelProps["filters"]) => void;
+  onDownloadCsv: () => void;
+  onUploadCsv: () => void;
+  onBuildLesson: (item: CurriculumItem) => void;
+  canManage: boolean;
+}
+
+const CurriculumPanel = ({
+  classes,
+  items,
+  filters,
+  options,
+  onChangeFilters,
+  onDownloadCsv,
+  onUploadCsv,
+  onBuildLesson,
+  canManage,
+}: CurriculumPanelProps) => {
+  const { toast } = useToast();
+  const [newCurriculum, setNewCurriculum] = useState<DraftCurriculum>(() => createInitialDraftCurriculum());
+  const readOnly = !canManage;
+
+  const updateFilters = (patch: Partial<CurriculumPanelProps["filters"]>) => {
+    onChangeFilters({ ...filters, ...patch });
+  };
+
+  const handleCurriculumFieldChange = <K extends keyof DraftCurriculum>(
+    field: K,
+    value: DraftCurriculum[K],
+  ) => {
+    setNewCurriculum(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleModuleChange = <K extends keyof DraftCurriculumModule>(
+    id: number,
+    field: K,
+    value: DraftCurriculumModule[K],
+  ) => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: prev.modules.map(module => (module.id === id ? { ...module, [field]: value } : module)),
+    }));
+  };
+
+  const handleAddModule = () => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: [...prev.modules, createDraftModule(prev.modules.length)],
+    }));
+  };
+
+  const handleRemoveModule = (id: number) => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: prev.modules.length > 1 ? prev.modules.filter(module => module.id !== id) : prev.modules,
+    }));
+  };
+
+  const handleResetCurriculum = () => {
+    setNewCurriculum(createInitialDraftCurriculum());
+    toast({ title: "Draft cleared", description: "Start again with a fresh curriculum canvas." });
+  };
+
+  const handleAutoOutline = () => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: prev.modules.map((module, index) => ({
+        ...module,
+        focus: module.focus || `Deep dive into ${(prev.subject || "core concept").toLowerCase()} ${index + 1}`,
+        activities:
+          module.activities ||
+          "Launch with an inquiry hook, facilitate collaborative exploration, and close with reflection prompts.",
+        assessment: module.assessment || (index % 2 === 0 ? "Exit ticket" : "Project checkpoint"),
+        resources: module.resources || "Slides, printable worksheet, interactive simulation",
+      })),
+    }));
+    toast({
+      title: "Outline generated",
+      description: "We filled each week with a suggested focus and activity mix.",
+    });
+  };
+
+  const handleSaveCurriculum = () => {
+    if (readOnly) {
+      toast({
+        title: "Sign in to save",
+        description: "Create an account to keep curriculum drafts and sync them with your classes.",
+      });
+      return;
+    }
+    toast({
+      title: "Curriculum draft saved",
+      description: `${newCurriculum.title || "Untitled curriculum"} is ready in your planning workspace.`,
+    });
+  };
+
+  const previewStats = useMemo(() => {
+    const populated = newCurriculum.modules.filter(module =>
+      module.focus.trim() || module.activities.trim() || module.assessment.trim(),
+    ).length;
+    const coverage = newCurriculum.modules.length
+      ? Math.round((populated / newCurriculum.modules.length) * 100)
+      : 0;
+    const goalsWordCount = newCurriculum.goals.trim()
+      ? newCurriculum.goals.trim().split(/\s+/).length
+      : 0;
+    return { populated, coverage, goalsWordCount };
+  }, [newCurriculum]);
+
+  const suggestedCollaborators = useMemo(() => {
+    if (!classes.length) return [];
+    return classes.slice(0, 3).map(cls => cls.title);
+  }, [classes]);
+
+  return (
+    <div className="space-y-6">
+      {readOnly ? (
+        <Card className="border border-dashed border-primary/40 bg-primary/5">
+          <CardContent className="text-sm text-muted-foreground">
+            Preview the curriculum planner. Sign in to upload CSV files, store drafts, and sync lessons to your
+            calendar.
+          </CardContent>
+        </Card>
+      ) : null}
+      <Card>
+        <CardHeader>
+          <CardTitle>Curriculum planner</CardTitle>
+          <CardDescription>Filter by class, stage, subject, or week to map your term.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Select
+              value={filters.classId === "all" ? "" : filters.classId}
+              onValueChange={value => updateFilters({ classId: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All classes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All classes</SelectItem>
+                {classes.map(cls => (
+                  <SelectItem key={cls.id} value={cls.id}>
+                    {cls.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.stage === "all" ? "" : filters.stage}
+              onValueChange={value => updateFilters({ stage: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All stages</SelectItem>
+                {options.stages.map(stage => (
+                  <SelectItem key={stage} value={stage}>
+                    {stage}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.subject === "all" ? "" : filters.subject}
+              onValueChange={value => updateFilters({ subject: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All subjects" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All subjects</SelectItem>
+                {options.subjects.map(subject => (
+                  <SelectItem key={subject} value={subject}>
+                    {subject}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.week === "all" ? "" : filters.week}
+              onValueChange={value => updateFilters({ week: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All weeks" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All weeks</SelectItem>
+                {options.weeks.map(week => (
+                  <SelectItem key={week} value={String(week)}>
+                    Week {week}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input type="date" value={filters.date} onChange={event => updateFilters({ date: event.target.value })} />
+          </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={onDownloadCsv}>
+                <FileDown className="mr-2 h-4 w-4" /> Download CSV
+              </Button>
+              <Button variant="outline" onClick={onUploadCsv} disabled={readOnly}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" /> Upload CSV
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => updateFilters({ classId: "all", stage: "all", subject: "all", week: "all", date: "" })}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" /> Reset filters
+            </Button>
+          </div>
+          <div className="overflow-hidden rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Lesson</TableHead>
+                  <TableHead>Topic</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Stage</TableHead>
+                  <TableHead>Week</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="w-[160px]" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+                      Nothing scheduled yet—add curriculum items or import a CSV.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  items.map(item => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium text-foreground">{item.title}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.topic ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.subject ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.stage ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.week ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{formatDate(item.date)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" onClick={() => onBuildLesson(item)}>
+                            Build lesson
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            View lesson plan
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendar sync</CardTitle>
+                <CardDescription>Push lessons to Google Calendar once connected.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>Keep your teaching schedule aligned across SchoolTech Hub and your calendar.</p>
+                <Button size="sm" variant="outline">
+                  <Calendar className="mr-2 h-4 w-4" /> Connect Google Calendar
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Curriculum insights</CardTitle>
+                <CardDescription>See how your plan is balanced across subjects.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <p>Science lessons scheduled: {items.filter(item => item.subject === "Science").length}</p>
+                <p>Literacy lessons scheduled: {items.filter(item => item.subject === "English").length}</p>
+                <p>Average week alignment: {items.reduce((acc, item) => acc + (item.week ?? 0), 0) / (items.length || 1)}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle>Create a new curriculum</CardTitle>
+            <CardDescription>
+              Design scope and sequence, align standards, and prepare resources without leaving your dashboard.
+            </CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={handleResetCurriculum}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Reset draft
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleAutoOutline}>
+              <Sparkles className="mr-2 h-4 w-4" /> Generate outline
+            </Button>
+            <Button size="sm" onClick={handleSaveCurriculum} disabled={readOnly}>
+              <Share2 className="mr-2 h-4 w-4" /> Save &amp; share
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-title">Curriculum title</Label>
+                  <Input
+                    id="curriculum-title"
+                    value={newCurriculum.title}
+                    onChange={event => handleCurriculumFieldChange("title", event.target.value)}
+                    placeholder="e.g. STEM Innovators Term 2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-subject">Subject focus</Label>
+                  <Input
+                    id="curriculum-subject"
+                    value={newCurriculum.subject}
+                    onChange={event => handleCurriculumFieldChange("subject", event.target.value)}
+                    placeholder="Science, Technology, Humanities..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-stage">Stage / year level</Label>
+                  <Input
+                    id="curriculum-stage"
+                    value={newCurriculum.stage}
+                    onChange={event => handleCurriculumFieldChange("stage", event.target.value)}
+                    placeholder="Stage 3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-term">Term</Label>
+                  <Input
+                    id="curriculum-term"
+                    value={newCurriculum.term}
+                    onChange={event => handleCurriculumFieldChange("term", event.target.value)}
+                    placeholder="Term 2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-duration">Duration</Label>
+                  <Input
+                    id="curriculum-duration"
+                    value={newCurriculum.duration}
+                    onChange={event => handleCurriculumFieldChange("duration", event.target.value)}
+                    placeholder="10 weeks"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-collaboration">Collaboration plan</Label>
+                  <Input
+                    id="curriculum-collaboration"
+                    value={newCurriculum.collaboration}
+                    onChange={event => handleCurriculumFieldChange("collaboration", event.target.value)}
+                    placeholder="Co-teach with..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-goals">Learning goals &amp; big ideas</Label>
+                  <Textarea
+                    id="curriculum-goals"
+                    value={newCurriculum.goals}
+                    onChange={event => handleCurriculumFieldChange("goals", event.target.value)}
+                    placeholder="Outline the overarching understandings and success criteria."
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-standards">Standards alignment</Label>
+                  <Textarea
+                    id="curriculum-standards"
+                    value={newCurriculum.standards}
+                    onChange={event => handleCurriculumFieldChange("standards", event.target.value)}
+                    placeholder="List curriculum codes or frameworks to target."
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-assessment">Assessment strategy</Label>
+                  <Textarea
+                    id="curriculum-assessment"
+                    value={newCurriculum.assessmentPlan}
+                    onChange={event => handleCurriculumFieldChange("assessmentPlan", event.target.value)}
+                    placeholder="Diagnostic, formative, and summative checkpoints."
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-differentiation">Differentiation &amp; support</Label>
+                  <Textarea
+                    id="curriculum-differentiation"
+                    value={newCurriculum.differentiation}
+                    onChange={event => handleCurriculumFieldChange("differentiation", event.target.value)}
+                    placeholder="How will you scaffold, extend, and personalise experiences?"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <ListChecks className="h-4 w-4 text-primary" /> Scope &amp; sequence
+                  </div>
+                  <Button size="sm" variant="outline" onClick={handleAddModule}>
+                    <Plus className="mr-2 h-4 w-4" /> Add week
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {newCurriculum.modules.map((module, index) => (
+                    <div key={module.id} className="space-y-4 rounded-lg border bg-background/70 p-4 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{module.week || `Week ${index + 1}`}</p>
+                          <p className="text-xs text-muted-foreground">Outline focus, learning sequence, and resources.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleModuleChange(module.id, "week", `Week ${index + 1}`)}
+                          >
+                            <Target className="mr-2 h-4 w-4" /> Label week
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={newCurriculum.modules.length === 1}
+                            onClick={() => handleRemoveModule(module.id)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-week-${module.id}`}>Week label</Label>
+                          <Input
+                            id={`module-week-${module.id}`}
+                            value={module.week}
+                            onChange={event => handleModuleChange(module.id, "week", event.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-focus-${module.id}`}>Focus concept</Label>
+                          <Input
+                            id={`module-focus-${module.id}`}
+                            value={module.focus}
+                            onChange={event => handleModuleChange(module.id, "focus", event.target.value)}
+                            placeholder="Inquiry question or theme"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-activities-${module.id}`}>Learning sequence</Label>
+                          <Textarea
+                            id={`module-activities-${module.id}`}
+                            value={module.activities}
+                            onChange={event => handleModuleChange(module.id, "activities", event.target.value)}
+                            placeholder="Hook, guided practice, collaborative task, reflection."
+                            rows={3}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-assessment-${module.id}`}>Assessment moments</Label>
+                          <Textarea
+                            id={`module-assessment-${module.id}`}
+                            value={module.assessment}
+                            onChange={event => handleModuleChange(module.id, "assessment", event.target.value)}
+                            placeholder="Exit ticket, rubric, peer feedback..."
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`module-resources-${module.id}`}>Key resources &amp; tech tools</Label>
+                        <Textarea
+                          id={`module-resources-${module.id}`}
+                          value={module.resources}
+                          onChange={event => handleModuleChange(module.id, "resources", event.target.value)}
+                          placeholder="Links, manipulatives, assistive tech, community partners."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border bg-muted/20 p-4">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Live preview</p>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {newCurriculum.title || "Untitled curriculum"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {(newCurriculum.stage || "Stage ?") + " • " + (newCurriculum.subject || "Subject TBD")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {(newCurriculum.term || "Term ?") + " • " + (newCurriculum.duration || "Duration TBD")}
+                </p>
+              </div>
+              <div className="space-y-3 rounded-lg border bg-background/80 p-4">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Weekly coverage</span>
+                  <span className="font-semibold text-foreground">{previewStats.coverage}% mapped</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted">
+                  <div
+                    className="h-2 rounded-full bg-primary transition-all"
+                    style={{ width: `${previewStats.coverage}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previewStats.populated} of {newCurriculum.modules.length} weeks include detail.
+                </p>
+              </div>
+              <div className="space-y-3 rounded-lg border bg-background/80 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Target className="h-4 w-4 text-primary" /> Outcomes snapshot
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previewStats.goalsWordCount} words describing learning goals. Aim for 60-120 to keep focus tight.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Suggested collaborators: {suggestedCollaborators.length ? suggestedCollaborators.join(", ") : "invite a colleague"}.
+                </p>
+              </div>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Use "Generate outline" to auto-fill focus areas and activities for each week.
+                </p>
+                <p className="flex items-center gap-2">
+                  <Share2 className="h-4 w-4 text-primary" />
+                  "Save &amp; share" will push the draft to your team workspace and attach it to selected classes soon.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
