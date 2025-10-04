@@ -82,6 +82,20 @@ function isTableMissing(error: unknown): boolean {
   return code === "42P01" || code === "42703";
 }
 
+async function hasActiveSession(client: Client): Promise<boolean> {
+  try {
+    const { data, error } = await client.auth.getSession();
+    if (error) {
+      console.warn("auth session check failed, falling back to demo assessments", error);
+      return false;
+    }
+    return Boolean(data.session?.user);
+  } catch (error) {
+    console.warn("auth session lookup threw, falling back to demo assessments", error);
+    return false;
+  }
+}
+
 function mapScale(value: unknown): GradeScale {
   if (value === "letter" || value === "percentage" || value === "points" || value === "rubric") {
     return value;
@@ -144,6 +158,11 @@ function mapSubmission(record: Record<string, unknown>): AssessmentSubmission {
 }
 
 export async function listAssessments(client: Client = supabase): Promise<AssessmentTemplate[]> {
+  const hasSession = await hasActiveSession(client);
+  if (!hasSession) {
+    return DEMO_ASSESSMENTS;
+  }
+
   const { data, error } = await client.from("assessments").select("*").order("due_date", { ascending: true });
 
   if (error) {
@@ -216,6 +235,11 @@ export async function listAssessmentGrades(
   assessmentId: string,
   client: Client = supabase,
 ): Promise<AssessmentGrade[]> {
+  const hasSession = await hasActiveSession(client);
+  if (!hasSession) {
+    return DEMO_GRADES.filter(grade => grade.assessmentId === assessmentId);
+  }
+
   const { data, error } = await client
     .from("assessment_grades")
     .select("*")
@@ -241,6 +265,11 @@ export async function listAssessmentSubmissions(
   assessmentId: string,
   client: Client = supabase,
 ): Promise<AssessmentSubmission[]> {
+  const hasSession = await hasActiveSession(client);
+  if (!hasSession) {
+    return DEMO_SUBMISSIONS.filter(submission => submission.assessmentId === assessmentId);
+  }
+
   const { data, error } = await client
     .from("assessment_submissions")
     .select("*")
