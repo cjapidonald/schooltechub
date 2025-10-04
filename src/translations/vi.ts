@@ -64,7 +64,6 @@ export const vi = {
       curriculum: "Chương trình",
       classes: "Lớp học của tôi",
       lessonPlans: "Kế hoạch",
-      resources: "Tài nguyên",
       activity: "Hoạt động",
     },
     common: {

@@ -64,7 +64,6 @@ export const sq = {
       curriculum: "Kurrikul",
       classes: "Klasat e mia",
       lessonPlans: "Planet mësimore",
-      resources: "Burimet",
       activity: "Aktiviteti",
     },
     common: {
