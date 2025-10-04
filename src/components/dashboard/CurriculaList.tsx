@@ -6,11 +6,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import type { Class, Curriculum } from "../../../types/supabase-tables";
 import { format } from "date-fns";
 
-interface CurriculumSummary extends Curriculum {
+type CurriculumSummary = Curriculum & {
   class: Class | null;
   items_count: number;
   created_at?: string;
-}
+  isExample?: boolean;
+};
 
 interface CurriculaListProps {
   curricula: CurriculumSummary[];
@@ -63,9 +64,16 @@ export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurri
           {curricula.map(item => (
             <Card key={item.id} className="flex flex-col justify-between">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold leading-tight">
-                  {item.title}
-                </CardTitle>
+                <div className="flex items-start justify-between gap-3">
+                  <CardTitle className="text-xl font-semibold leading-tight">
+                    {item.title}
+                  </CardTitle>
+                  {item.isExample ? (
+                    <Badge variant="outline" className="text-xs font-normal uppercase tracking-wide">
+                      {t.dashboard.common.exampleTag}
+                    </Badge>
+                  ) : null}
+                </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                   {item.class ? (
                     <Badge variant="secondary">{item.class.title}</Badge>
@@ -73,6 +81,9 @@ export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurri
                   <span>{item.subject}</span>
                   {item.class?.stage ? <span>· {item.class.stage}</span> : null}
                 </div>
+                {item.isExample ? (
+                  <p className="mt-2 text-sm text-muted-foreground">{t.dashboard.common.exampleDescription}</p>
+                ) : null}
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -92,10 +103,19 @@ export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurri
                 ) : null}
               </CardContent>
               <CardFooter className="flex items-center justify-between gap-2">
-                <Button variant="ghost" onClick={() => onOpenCurriculum(item.id)} aria-label={t.dashboard.curriculum.actions.open}>
+                <Button
+                  variant="ghost"
+                  onClick={() => onOpenCurriculum(item.id)}
+                  aria-label={t.dashboard.curriculum.actions.open}
+                >
                   {t.dashboard.curriculum.actions.open}
                 </Button>
-                <Button variant="outline" onClick={() => onExportCurriculum(item.id)} aria-label={t.dashboard.curriculum.actions.exportCsv}>
+                <Button
+                  variant="outline"
+                  disabled={item.isExample}
+                  onClick={() => onExportCurriculum(item.id)}
+                  aria-label={t.dashboard.curriculum.actions.exportCsv}
+                >
                   {t.dashboard.curriculum.actions.exportCsv}
                 </Button>
               </CardFooter>

@@ -70,6 +70,9 @@ export const sq = {
     common: {
       loading: "Po ngarkohet...",
       signInPrompt: "Hyni për të menaxhuar panelin tuaj.",
+      exampleTag: "Shembull",
+      exampleDescription: "Të dhëna demonstrative që tregojnë si do të duket hapësira juaj e punës.",
+      exampleActionsDisabled: "Veprimet janë çaktivizuar për elementët e shembullit.",
     },
     toasts: {
       classCreated: "Klasa u krijua",

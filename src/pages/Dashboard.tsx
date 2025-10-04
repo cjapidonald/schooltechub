@@ -20,7 +20,22 @@ import { DashboardHeader, DashboardQuickAction } from "@/components/dashboard/Da
 import { ClassesTable } from "@/components/dashboard/ClassesTable";
 import { CurriculaList } from "@/components/dashboard/CurriculaList";
 import { CurriculumEditor } from "@/components/dashboard/CurriculumEditor";
-import { createClass, createCurriculum, createLessonPlanFromItem, fetchCurricula, fetchCurriculumItems, fetchMyClasses, fetchMyProfile } from "@/features/dashboard/api";
+import {
+  createClass,
+  createCurriculum,
+  createLessonPlanFromItem,
+  fetchCurricula,
+  fetchCurriculumItems,
+  fetchMyClasses,
+  fetchMyProfile,
+} from "@/features/dashboard/api";
+import {
+  DASHBOARD_EXAMPLE_CLASS,
+  DASHBOARD_EXAMPLE_CURRICULUM,
+  DASHBOARD_EXAMPLE_CURRICULUM_ID,
+  DASHBOARD_EXAMPLE_CURRICULUM_ITEMS,
+  type DashboardCurriculumSummary,
+} from "@/features/dashboard/examples";
 import type { Class, CurriculumItem, Profile } from "../../types/supabase-tables";
 
 const classSchema = z.object({
@@ -80,16 +95,10 @@ export default function DashboardPage() {
     enabled: Boolean(user?.id),
   });
 
-  const curriculaQuery = useQuery({
+  const curriculaQuery = useQuery<DashboardCurriculumSummary[]>({
     queryKey: ["dashboard-curricula", user?.id],
     queryFn: () => fetchCurricula(user!.id),
     enabled: Boolean(user?.id),
-  });
-
-  const curriculumItemsQuery = useQuery<CurriculumItem[]>({
-    queryKey: ["dashboard-curriculum-items", activeCurriculumId],
-    queryFn: () => fetchCurriculumItems(activeCurriculumId!),
-    enabled: Boolean(activeCurriculumId),
   });
 
   const createClassMutation = useMutation({
@@ -172,11 +181,49 @@ export default function DashboardPage() {
     }
   };
 
-  const curricula = useMemo(() => curriculaQuery.data ?? [], [curriculaQuery.data]);
-  const selectedCurriculum = useMemo(
-    () => curricula.find(curriculum => curriculum.id === activeCurriculumId) ?? null,
-    [curricula, activeCurriculumId],
+  const classes = useMemo<Array<Class & { isExample?: boolean }>>(() => {
+    if (classesQuery.data && classesQuery.data.length > 0) {
+      return classesQuery.data;
+    }
+    return [DASHBOARD_EXAMPLE_CLASS];
+  }, [classesQuery.data]);
+
+  const curricula = useMemo(() => {
+    if (curriculaQuery.data && curriculaQuery.data.length > 0) {
+      return curriculaQuery.data;
+    }
+    return [DASHBOARD_EXAMPLE_CURRICULUM];
+  }, [curriculaQuery.data]);
+
+  const fallbackCurriculumId = curricula[0]?.id ?? null;
+  const effectiveCurriculumId = activeCurriculumId ?? fallbackCurriculumId;
+
+  const shouldFetchCurriculumItems = Boolean(
+    effectiveCurriculumId && effectiveCurriculumId !== DASHBOARD_EXAMPLE_CURRICULUM_ID,
   );
+
+  const curriculumItemsQuery = useQuery<CurriculumItem[]>({
+    queryKey: ["dashboard-curriculum-items", effectiveCurriculumId],
+    queryFn: () => fetchCurriculumItems(effectiveCurriculumId!),
+    enabled: shouldFetchCurriculumItems,
+  });
+
+  const selectedCurriculum = useMemo(
+    () => (effectiveCurriculumId ? curricula.find(curriculum => curriculum.id === effectiveCurriculumId) ?? null : null),
+    [curricula, effectiveCurriculumId],
+  );
+
+  const curriculumItems = useMemo(() => {
+    if (!effectiveCurriculumId) {
+      return [];
+    }
+    if (effectiveCurriculumId === DASHBOARD_EXAMPLE_CURRICULUM_ID) {
+      return DASHBOARD_EXAMPLE_CURRICULUM_ITEMS;
+    }
+    return curriculumItemsQuery.data ?? [];
+  }, [effectiveCurriculumId, curriculumItemsQuery.data]);
+
+  const curriculumItemsLoading = shouldFetchCurriculumItems ? curriculumItemsQuery.isLoading : false;
 
   if (!user) {
     return (
@@ -225,8 +272,8 @@ export default function DashboardPage() {
                 {t.dashboard.curriculumView.title.replace("{title}", selectedCurriculum.title)}
               </h3>
               <CurriculumEditor
-                items={curriculumItemsQuery.data ?? []}
-                loading={curriculumItemsQuery.isLoading}
+                items={curriculumItems}
+                loading={curriculumItemsLoading}
                 onCreateLessonPlan={id => createLessonPlanMutation.mutate(id)}
               />
             </div>
@@ -234,7 +281,7 @@ export default function DashboardPage() {
         </TabsContent>
         <TabsContent value="classes">
           <ClassesTable
-            classes={classesQuery.data ?? []}
+            classes={classes}
             loading={classesQuery.isLoading}
             onNewClass={() => setClassDialogOpen(true)}
             onViewClass={classId => navigate(`/account/classes/${classId}`)}

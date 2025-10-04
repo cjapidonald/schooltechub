@@ -72,6 +72,9 @@ export const en = {
     common: {
       loading: "Loading...",
       signInPrompt: "Sign in to manage your dashboard.",
+      exampleTag: "Example",
+      exampleDescription: "Preview data to show how your workspace will look.",
+      exampleActionsDisabled: "Actions are disabled for example items.",
     },
     toasts: {
       classCreated: "Class created",
