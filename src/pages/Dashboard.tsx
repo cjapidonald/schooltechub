@@ -21,6 +21,8 @@ import { DashboardHeader, DashboardQuickAction } from "@/components/dashboard/Da
 import { ClassesTable } from "@/components/dashboard/ClassesTable";
 import { CurriculaList } from "@/components/dashboard/CurriculaList";
 import { CurriculumEditor } from "@/components/dashboard/CurriculumEditor";
+import { StudentsSection } from "@/components/dashboard/StudentsSection";
+import { SkillsSection } from "@/components/dashboard/SkillsSection";
 import {
   createClass,
   createCurriculum,
@@ -287,6 +289,8 @@ export default function DashboardPage() {
         <TabsList>
           <TabsTrigger value="curriculum">{t.dashboard.tabs.curriculum}</TabsTrigger>
           <TabsTrigger value="classes">{t.dashboard.tabs.classes}</TabsTrigger>
+          <TabsTrigger value="students">{t.dashboard.tabs.students}</TabsTrigger>
+          <TabsTrigger value="skills">{t.dashboard.tabs.skills}</TabsTrigger>
           <TabsTrigger value="lessonPlans" disabled>
             {t.dashboard.tabs.lessonPlans}
           </TabsTrigger>
@@ -323,6 +327,15 @@ export default function DashboardPage() {
             onViewClass={classId => navigate(`/account/classes/${classId}`)}
             onEditClass={classId => navigate(`/account/classes/${classId}`)}
           />
+        </TabsContent>
+        <TabsContent value="students">
+          <StudentsSection
+            classes={classes}
+            onOpenStudent={studentId => navigate(`/dashboard/students/${studentId}`)}
+          />
+        </TabsContent>
+        <TabsContent value="skills">
+          <SkillsSection classes={classes} />
         </TabsContent>
       </Tabs>
 

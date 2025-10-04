@@ -30,6 +30,7 @@ import Footer from '@/components/Footer';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminPage from '@/pages/admin/AdminPage';
 import DashboardPage from '@/pages/Dashboard';
+import StudentDashboardPage from '@/pages/StudentDashboard';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>
@@ -74,6 +75,7 @@ export const LocalizedRoutes = () => {
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
       <Route path="/dashboard" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
+      <Route path="/dashboard/students/:id" element={<RouteWrapper><StudentDashboardPage /></RouteWrapper>} />
       <Route path="/profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
       <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
       <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
