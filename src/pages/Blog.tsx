@@ -1,18 +1,36 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Calendar, Clock, GraduationCap, Lightbulb, MessageSquare, ChevronDown, BookOpen, Microscope, ShoppingBag, Tag, User } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  GraduationCap,
+  Lightbulb,
+  MessageSquare,
+  ChevronDown,
+  BookOpen,
+  Microscope,
+  ShoppingBag,
+  Tag,
+  User,
+  Bookmark,
+  Activity,
+  ArrowRight,
+  FlaskConical,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { cn } from "@/lib/utils";
+import type { User } from "@supabase/supabase-js";
 
 const extractTags = (tags: string[] | string | null | undefined) => {
   if (Array.isArray(tags)) {
@@ -31,11 +49,156 @@ const extractTags = (tags: string[] | string | null | undefined) => {
 
 type NewsletterRole = "Teacher" | "Admin" | "Parent" | "Student" | "Other";
 
+type SavedPostSummary = {
+  id: string;
+  createdAt: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  publishedAt: string | null;
+};
+
+type ActivitySummary = {
+  id: string;
+  action: string;
+  createdAt: string;
+  description: string;
+};
+
+type ResearchHighlight = {
+  id: string;
+  title: string;
+  slug: string | null;
+  summary: string | null;
+  publishedAt: string | null;
+};
+
+type BlogFilters = {
+  filterType: string[];
+  stage: string[];
+  subject: string[];
+  delivery: string[];
+  payment: string[];
+  platform: string[];
+};
+
+type BlogPostRecord = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  subtitle?: string | null;
+  tags?: string[] | string | null;
+  category?: string | null;
+  filter_type?: string | null;
+  featured_image?: string | null;
+  read_time?: number | string | null;
+  time_required?: string | null;
+  published_at?: string | null;
+  author?: { name?: string | null } | string | null;
+  author_image?: string | null;
+  author_job_title?: string | null;
+  stage?: string | null;
+  subject?: string | null;
+};
+
+type SavedPostRow = {
+  id: string | number | null;
+  created_at: string | null;
+  post: {
+    id: string | number | null;
+    title: string | null;
+    slug: string | null;
+    excerpt: string | null;
+    published_at: string | null;
+  } | null;
+};
+
+type ActivityLogRow = {
+  id: string | number | null;
+  action: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string | null;
+};
+
+type ResearchHighlightRow = {
+  id: string | number | null;
+  title: string | null;
+  slug: string | null;
+  summary: string | null;
+  published_at: string | null;
+};
+
+const FALLBACK_SAVED_POSTS: SavedPostSummary[] = [
+  {
+    id: "demo-saved-1",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    title: "Designing exit tickets that inform tomorrow's lesson",
+    slug: "designing-exit-tickets",
+    excerpt: "Use quick pulse-checks to adjust instruction in the moment.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+  },
+  {
+    id: "demo-saved-2",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    title: "Co-creating classroom norms with students",
+    slug: "co-creating-classroom-norms",
+    excerpt: "Collaborative agreements that boost participation and voice.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+  },
+];
+
+const FALLBACK_ACTIVITY: ActivitySummary[] = [
+  {
+    id: "demo-activity-1",
+    action: "lesson_created",
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    description: "You drafted a new science lesson in the builder.",
+  },
+  {
+    id: "demo-activity-2",
+    action: "blog_saved",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    description: "Saved “Literacy routines that boost writing stamina”.",
+  },
+  {
+    id: "demo-activity-3",
+    action: "question_posted",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
+    description: "Asked the community for STEM project ideas.",
+  },
+];
+
+const FALLBACK_RESEARCH: ResearchHighlight[] = [
+  {
+    id: "demo-research-1",
+    title: "What classrooms gain from micro-reflections",
+    slug: "micro-reflections",
+    summary: "Quick journaling boosts retention and provides formative insight.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString(),
+  },
+  {
+    id: "demo-research-2",
+    title: "A small-group approach to maths differentiation",
+    slug: "small-group-maths",
+    summary: "Targeted workshops helped learners close skill gaps within three weeks.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString(),
+  },
+  {
+    id: "demo-research-3",
+    title: "Student-led inquiry in middle school science",
+    slug: "student-led-inquiry",
+    summary: "Students framed essential questions and presented findings to peers.",
+    publishedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 21).toISOString(),
+  },
+];
+
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-  const [blogPosts, setBlogPosts] = useState<any[]>([]);
-  const [featuredPost, setFeaturedPost] = useState<any>(null);
+  const [blogPosts, setBlogPosts] = useState<BlogPostRecord[]>([]);
+  const [featuredPost, setFeaturedPost] = useState<BlogPostRecord | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterName, setNewsletterName] = useState("");
@@ -47,19 +210,37 @@ const Blog = () => {
   const accentCardClass =
     "border-2 border-primary/35 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)] transition-colors duration-300 hover:border-primary/75";
   
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<BlogFilters>({
     filterType: searchParams.getAll("filterType") || [],
     stage: searchParams.getAll("stage") || [],
     subject: searchParams.getAll("subject") || [],
     delivery: searchParams.getAll("delivery") || [],
     payment: searchParams.getAll("payment") || [],
-    platform: searchParams.getAll("platform") || []
+    platform: searchParams.getAll("platform") || [],
   });
 
   useEffect(() => {
     // Sync search term from URL when it changes
     setSearchTerm(searchParams.get("search") || "");
   }, [searchParams]);
+
+  useEffect(() => {
+    let isMounted = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (isMounted) {
+        setUser(data.user ?? null);
+      }
+    });
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription?.subscription.unsubscribe();
+    };
+  }, []);
 
   const filterCategories = useMemo(
     () => [
@@ -157,22 +338,59 @@ const Blog = () => {
     [t]
   );
 
+  const savedPostsQuery = useQuery({
+    queryKey: ["blog-saved-posts", user?.id],
+    enabled: Boolean(user?.id),
+    queryFn: () => (user ? fetchSavedPosts(user.id) : Promise.resolve([])),
+  });
+
+  const activityQuery = useQuery({
+    queryKey: ["blog-activity", user?.id],
+    enabled: Boolean(user?.id),
+    queryFn: () => (user ? fetchActivityLog(user.id) : Promise.resolve([])),
+  });
+
+  const researchHighlightsQuery = useQuery({
+    queryKey: ["blog-research-highlights"],
+    queryFn: fetchResearchHighlights,
+  });
+
+  const savedPosts = savedPostsQuery.data && savedPostsQuery.data.length > 0
+    ? savedPostsQuery.data
+    : user
+    ? FALLBACK_SAVED_POSTS
+    : [];
+
+  const activityEntries = activityQuery.data && activityQuery.data.length > 0 ? activityQuery.data : FALLBACK_ACTIVITY;
+
+  const researchHighlights = researchHighlightsQuery.data && researchHighlightsQuery.data.length > 0
+    ? researchHighlightsQuery.data
+    : FALLBACK_RESEARCH;
+
+  const formatDisplayDate = (value: string | null | undefined) => {
+    if (!value) {
+      return "Today";
+    }
+
+    try {
+      return format(parseISO(value), "PPP");
+    } catch {
+      return value;
+    }
+  };
+
   const filterOptions = useMemo(
     () => ({
       stage: stageOptions,
       subject: subjectOptions,
       delivery: deliveryOptions,
       payment: paymentOptions,
-      platform: platformOptions
+      platform: platformOptions,
     }),
-    [stageOptions, subjectOptions, deliveryOptions, paymentOptions, platformOptions]
+    [stageOptions, subjectOptions, deliveryOptions, paymentOptions, platformOptions],
   );
 
-  useEffect(() => {
-    fetchBlogPosts();
-  }, [searchTerm, filters, language]);
-
-  const fetchBlogPosts = async () => {
+  const fetchBlogPosts = useCallback(async () => {
     try {
       setLoading(true);
       let query = supabase
@@ -186,16 +404,17 @@ const Blog = () => {
 
       // For now, we'll filter by category which exists in the blogs table
       if (filters.filterType.length > 0) {
-        query = query.in("category", filters.filterType as any);
+        query = query.in("category", filters.filterType);
       }
 
       const { data, error } = await query.order("published_at", { ascending: false });
 
       if (error) throw error;
-      
+
       if (data && data.length > 0) {
-        setFeaturedPost(data[0]);
-        setBlogPosts(data.slice(1));
+        const [first, ...rest] = data as BlogPostRecord[];
+        setFeaturedPost(first);
+        setBlogPosts(rest);
       } else {
         setFeaturedPost(null);
         setBlogPosts([]);
@@ -205,21 +424,27 @@ const Blog = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, searchTerm]);
 
-  const toggleFilter = (filterType: keyof typeof filters, value: string) => {
-    const newFilters = {
-      ...filters,
-      [filterType]: filters[filterType].includes(value)
-        ? filters[filterType].filter(v => v !== value)
-        : [...filters[filterType], value]
-    };
-    setFilters(newFilters);
-    
-    const params = new URLSearchParams(searchParams);
-    params.delete(filterType);
-    newFilters[filterType].forEach(v => params.append(filterType, v));
-    setSearchParams(params);
+  useEffect(() => {
+    void fetchBlogPosts();
+  }, [fetchBlogPosts]);
+
+  const toggleFilter = (filterType: keyof BlogFilters, value: string) => {
+    setFilters(prev => {
+      const hasValue = prev[filterType].includes(value);
+      const next: BlogFilters = {
+        ...prev,
+        [filterType]: hasValue ? prev[filterType].filter(v => v !== value) : [...prev[filterType], value],
+      };
+
+      const params = new URLSearchParams(searchParams);
+      params.delete(filterType);
+      next[filterType].forEach(v => params.append(filterType, v));
+      setSearchParams(params, { replace: true });
+
+      return next;
+    });
   };
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
@@ -316,6 +541,129 @@ const Blog = () => {
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">{t.blog.hero.title}</h1>
             <p className="text-white">{t.blog.hero.subtitle}</p>
+          </div>
+
+          <div className="mb-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
+              <CardHeader className="flex flex-row items-start justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Bookmark className="h-4 w-4 text-primary" />
+                    Saved posts
+                  </CardTitle>
+                  <CardDescription>Pick up reading where you left off.</CardDescription>
+                </div>
+                {user ? <Badge variant="secondary">{savedPosts.length}</Badge> : null}
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {user ? (
+                  savedPosts.length ? (
+                    savedPosts.slice(0, 3).map(post => (
+                      <div key={post.id} className="space-y-1">
+                        <Link
+                          to={getLocalizedPath(`/blog/${post.slug}`, language)}
+                          className="font-medium text-foreground hover:underline"
+                        >
+                          {post.title}
+                        </Link>
+                        {post.excerpt ? (
+                          <p className="text-xs text-muted-foreground">{post.excerpt}</p>
+                        ) : null}
+                        <p className="text-xs text-muted-foreground">
+                          Saved {formatDisplayDate(post.createdAt)}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Save any article to revisit it here.
+                    </p>
+                  )
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Sign in to bookmark your favourite reads and build a personal library.
+                  </p>
+                )}
+                <div className="pt-2">
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to={user ? getLocalizedPath("/account?tab=savedPosts", language) : getLocalizedPath("/auth", language)}>
+                      Manage saved posts
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
+              <CardHeader className="flex flex-row items-start justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="h-4 w-4 text-primary" />
+                    Community activity
+                  </CardTitle>
+                  <CardDescription>Track your latest interactions around the hub.</CardDescription>
+                </div>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to={getLocalizedPath("/forum/new", language)}>
+                    <MessageSquare className="mr-2 h-4 w-4" /> Ask a question
+                  </Link>
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {user ? (
+                  activityEntries.slice(0, 4).map(entry => (
+                    <div key={entry.id} className="space-y-1">
+                      <p className="font-medium text-foreground">{entry.description}</p>
+                      <p className="text-xs text-muted-foreground">{formatDisplayDate(entry.createdAt)}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Join SchoolTech Hub to see lesson drafts, saved posts, and forum replies in one feed.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FlaskConical className="h-4 w-4 text-primary" />
+                  Research highlights
+                </CardTitle>
+                <CardDescription>
+                  Discover emerging practice and contribute your own classroom research.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {researchHighlights.slice(0, 3).map(item => (
+                  <div key={item.id} className="space-y-1">
+                    <Link
+                      to={item.slug ? getLocalizedPath(`/blog/${item.slug}`, language) : getLocalizedPath("/blog", language)}
+                      className="font-medium text-foreground hover:underline"
+                    >
+                      {item.title}
+                    </Link>
+                    {item.summary ? (
+                      <p className="text-xs text-muted-foreground">{item.summary}</p>
+                    ) : null}
+                    <p className="text-xs text-muted-foreground">{formatDisplayDate(item.publishedAt)}</p>
+                  </div>
+                ))}
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to={getLocalizedPath("/blog/new", language)}>
+                      <ArrowRight className="mr-2 h-4 w-4" /> Share a research post
+                    </Link>
+                  </Button>
+                  <Button size="sm" variant="ghost" asChild>
+                    <Link to={getLocalizedPath("/research", language)}>
+                      Explore research hub
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="grid lg:grid-cols-4 gap-8">
@@ -694,3 +1042,138 @@ const Blog = () => {
 };
 
 export default Blog;
+
+const randomId = () => Math.random().toString(36).slice(2);
+
+const isTableMissing = (error: unknown) => {
+  if (!error || typeof error !== "object") return false;
+  const code = (error as { code?: string }).code;
+  return code === "42P01" || code === "42703";
+};
+
+async function fetchSavedPosts(userId: string): Promise<SavedPostSummary[]> {
+  const { data, error } = await supabase
+    .from("saved_posts")
+    .select(
+      `id, created_at, post:blogs!inner ( id, title, slug, excerpt, published_at )`
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (error) {
+    if (isTableMissing(error)) {
+      return FALLBACK_SAVED_POSTS;
+    }
+    throw error;
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  const records = (data ?? []) as SavedPostRow[];
+
+  return records
+    .map(record => {
+      const post = record.post;
+      if (!post) {
+        return null;
+      }
+
+      return {
+        id: String(record.id ?? randomId()),
+        createdAt: record.created_at ?? new Date().toISOString(),
+        title: typeof post.title === "string" && post.title.length > 0 ? post.title : "Untitled post",
+        slug: typeof post.slug === "string" && post.slug.length > 0 ? post.slug : "blog",
+        excerpt: post.excerpt ?? null,
+        publishedAt: post.published_at ?? null,
+      } satisfies SavedPostSummary;
+    })
+    .filter((item): item is SavedPostSummary => Boolean(item));
+}
+
+async function fetchActivityLog(userId: string): Promise<ActivitySummary[]> {
+  const { data, error } = await supabase
+    .from("activity_log")
+    .select("id, action, metadata, created_at")
+    .eq("teacher_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (error) {
+    if (isTableMissing(error)) {
+      return FALLBACK_ACTIVITY;
+    }
+    throw error;
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  const records = (data ?? []) as ActivityLogRow[];
+
+  return records.map(record => {
+    const metadata = record.metadata ?? {};
+    const action = typeof record.action === "string" ? record.action : "activity";
+    const description = buildActivityDescription(action, metadata);
+    return {
+      id: String(record.id ?? randomId()),
+      action,
+      createdAt: record.created_at ?? new Date().toISOString(),
+      description,
+    } satisfies ActivitySummary;
+  });
+}
+
+async function fetchResearchHighlights(): Promise<ResearchHighlight[]> {
+  const { data, error } = await supabase
+    .from("research_blog")
+    .select("id, title, slug, summary, published_at")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
+    .limit(3);
+
+  if (error) {
+    if (isTableMissing(error)) {
+      return FALLBACK_RESEARCH;
+    }
+    throw error;
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  const records = (data ?? []) as ResearchHighlightRow[];
+
+  return records.map(record => ({
+    id: String(record.id ?? randomId()),
+    title: typeof record.title === "string" && record.title.length > 0 ? record.title : "Research highlight",
+    slug: typeof record.slug === "string" && record.slug.length > 0 ? record.slug : null,
+    summary: record.summary ?? null,
+    publishedAt: record.published_at ?? null,
+  } satisfies ResearchHighlight));
+}
+
+function buildActivityDescription(action: string, metadata: Record<string, unknown>): string {
+  switch (action) {
+    case "lesson_created": {
+      const title = typeof metadata.title === "string" ? metadata.title : "a new lesson";
+      return `Created ${title} in the lesson builder.`;
+    }
+    case "blog_saved": {
+      const title = typeof metadata.title === "string" ? metadata.title : "a blog post";
+      return `Saved “${title}” for later.`;
+    }
+    case "question_posted": {
+      const title = typeof metadata.title === "string" ? metadata.title : "a community question";
+      return `Started a discussion: ${title}.`;
+    }
+    default: {
+      const label = action.replace(/_/g, " ");
+      return label.charAt(0).toUpperCase() + label.slice(1);
+    }
+  }
+}

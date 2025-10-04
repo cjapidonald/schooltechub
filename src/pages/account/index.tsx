@@ -1,818 +1,1520 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useRef, useState, type ComponentProps, type ComponentType } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
-  Bookmark,
-  Building2,
+  BookOpen,
+  Calendar,
+  CalendarClock,
+  ClipboardCheck,
+  FileDown,
+  FileSpreadsheet,
+  FileText,
   GraduationCap,
+  Loader2,
+  NotebookPen,
   Plus,
-  Settings,
-  ShieldCheck,
-  Sparkles,
-  SquarePen,
+  RefreshCw,
+  Users,
 } from "lucide-react";
-import { format, isValid, parse, parseISO } from "date-fns";
-import type { LucideIcon } from "lucide-react";
+import { format, isValid, parseISO } from "date-fns";
 
 import { SEO } from "@/components/SEO";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
-import { useMyProfile } from "@/hooks/useMyProfile";
-import { useToast } from "@/hooks/use-toast";
-import { listMyClasses } from "@/lib/classes";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-  createProfileImageSignedUrl,
-  resolveAvatarReference,
-  isHttpUrl,
-} from "@/lib/avatar";
-import { supabase } from "@/integrations/supabase/client";
-import { SettingsPanel } from "./components/SettingsPanel";
-import { UpcomingLessonsCard } from "./components/UpcomingLessonsCard";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useMyProfile } from "@/hooks/useMyProfile";
+import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
+import { listMyClassesWithPlanCount, type ClassWithPlanCount } from "@/lib/classes";
+import {
+  getStudentProfile,
+  listMyStudents,
+  recordStudentReportRequest,
+  saveStudentAppraisalNote,
+  saveStudentBehaviorNote,
+} from "@/lib/data/students";
+import { listCurriculumItems } from "@/lib/data/curriculum";
+import {
+  createAssessment,
+  listAssessmentGrades,
+  listAssessmentSubmissions,
+  listAssessments,
+  recordAssessmentGrade,
+} from "@/lib/data/assessments";
+import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
+import type {
+  AssessmentGrade,
+  AssessmentSubmission,
+  AssessmentTemplate,
+  CurriculumItem,
+  GradeScale,
+  StudentBehaviorEntry,
+  StudentProfile,
+  StudentSummary,
+} from "@/types/platform";
+import type { LessonPlanMetaDraft } from "@/pages/lesson-builder/types";
 
-const dashboardTabValues = [
-  "overview",
-  "classes",
-  "lessonPlans",
-  "savedPosts",
-  "activity",
-  "security",
-  "settings",
-  "research",
+const tabs = [
+  { value: "classes", label: "My Classes" },
+  { value: "students", label: "My Students" },
+  { value: "curriculum", label: "Curriculum" },
+  { value: "lessonBuilder", label: "Lesson Builder" },
+  { value: "assessments", label: "Assessment Tracking" },
 ] as const;
 
-type DashboardTabValue = (typeof dashboardTabValues)[number];
+type DashboardTab = (typeof tabs)[number]["value"];
 
-const summaryTabValues = [
-  "classes",
-  "lessonPlans",
-  "savedPosts",
-  "activity",
-  "security",
-  "settings",
-] as const;
+type LessonBuilderPreset = {
+  meta: Partial<LessonPlanMetaDraft>;
+  classId: string | null;
+  curriculumItem?: CurriculumItem | null;
+} | null;
 
-type SummaryTabValue = (typeof summaryTabValues)[number];
+const sentimentOptions: Array<{ value: StudentBehaviorEntry["sentiment"]; label: string }> = [
+  { value: "positive", label: "Positive" },
+  { value: "neutral", label: "Neutral" },
+  { value: "needs_support", label: "Needs support" },
+];
 
-const defaultCounts: Record<SummaryTabValue, number> = {
-  classes: 2,
-  lessonPlans: 6,
-  savedPosts: 4,
-  activity: 5,
-  security: 2,
-  settings: 3,
+const gradeScales: Array<{ value: GradeScale; label: string }> = [
+  { value: "letter", label: "Letter" },
+  { value: "percentage", label: "Percentage" },
+  { value: "points", label: "Points" },
+  { value: "rubric", label: "Rubric" },
+];
+
+const presetGrades: Record<GradeScale, string[]> = {
+  letter: ["A", "B", "C", "D"],
+  percentage: ["100", "95", "90", "85"],
+  points: ["10", "9", "8", "7"],
+  rubric: ["Exceeds", "Meets", "Developing", "Beginning"],
 };
 
-const summaryTabDetails: Record<SummaryTabValue, { icon: LucideIcon; label: string }> = {
-  classes: { icon: GraduationCap, label: "Classes awaiting updates" },
-  lessonPlans: { icon: SquarePen, label: "Lesson plans needing attention" },
-  savedPosts: { icon: Bookmark, label: "Saved posts to revisit" },
-  activity: { icon: Activity, label: "Recent interactions to review" },
-  security: { icon: ShieldCheck, label: "Security checks to complete" },
-  settings: { icon: Settings, label: "Review your preferences" },
+const formatDate = (value: string | null | undefined) => {
+  if (!value) return "—";
+  const parsed = parseISO(value);
+  if (!isValid(parsed)) return value;
+  return format(parsed, "PPP");
 };
-
-const RESEARCH_NOTIFICATION_KEY = "research_notifications_opt_in";
-
-const ISO_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
-const TIME_ONLY = /^\d{2}:\d{2}/;
-
-function isDashboardTabValue(value: string | null): value is DashboardTabValue {
-  return value !== null && (dashboardTabValues as readonly string[]).includes(value);
-}
-
-function parseDateValue(value: string): Date | null {
-  const trimmed = value.trim();
-
-  if (ISO_DATE_ONLY.test(trimmed)) {
-    const parsed = parse(trimmed, "yyyy-MM-dd", new Date());
-    return isValid(parsed) ? parsed : null;
-  }
-
-  try {
-    const parsed = parseISO(trimmed);
-    return isValid(parsed) ? parsed : null;
-  } catch (_error) {
-    return null;
-  }
-}
-
-function formatDateForDisplay(value: string | null): string {
-  if (!value) {
-    return "—";
-  }
-
-  const parsed = parseDateValue(value);
-  return parsed ? format(parsed, "PPP") : value;
-}
-
-function formatTimeForDisplay(value: string | null): string {
-  if (!value) {
-    return "—";
-  }
-
-  const trimmed = value.trim();
-
-  if (TIME_ONLY.test(trimmed)) {
-    const parsed = parse(trimmed, "HH:mm", new Date());
-    return isValid(parsed) ? format(parsed, "p") : trimmed;
-  }
-
-  const parsed = parseDateValue(trimmed);
-  return parsed ? format(parsed, "p") : trimmed;
-}
-
-const loadingSkeleton = (
-  <div className="container space-y-6 py-10">
-    <div className="h-10 w-48 animate-pulse rounded-md bg-muted" />
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div key={index} className="h-24 animate-pulse rounded-md bg-muted" />
-      ))}
-    </div>
-  </div>
-);
 
 const AccountDashboard = () => {
   const { user, loading } = useRequireAuth();
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
+  const { fullName } = useMyProfile();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [counts, setCounts] = useState<Record<SummaryTabValue, number> | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const { fullName: profileFullName, schoolName, schoolLogoUrl } = useMyProfile();
-  const [avatarReference, setAvatarReference] = useState<string | null>(null);
-  const [resolvedAvatarUrl, setResolvedAvatarUrl] = useState<string | null>(null);
-  const [isResearchNotificationsEnabled, setIsResearchNotificationsEnabled] = useState(false);
-  const [isResearchToggleSaving, setIsResearchToggleSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<DashboardTabValue>(() => {
+  const [activeTab, setActiveTab] = useState<DashboardTab>(() => {
     const initial = searchParams.get("tab");
-    return isDashboardTabValue(initial) ? initial : "overview";
+    return tabs.some(tab => tab.value === initial) ? (initial as DashboardTab) : "classes";
   });
+  const [isCreateClassOpen, setIsCreateClassOpen] = useState(false);
+  const [lessonPreset, setLessonPreset] = useState<LessonBuilderPreset>(null);
+  const [studentDialogOpen, setStudentDialogOpen] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [behaviorNote, setBehaviorNote] = useState("");
+  const [behaviorSentiment, setBehaviorSentiment] = useState<StudentBehaviorEntry["sentiment"]>("positive");
+  const [appraisalNote, setAppraisalNote] = useState("");
+  const [curriculumFilters, setCurriculumFilters] = useState({
+    classId: "all" as string | "all",
+    stage: "all" as string | "all",
+    subject: "all" as string | "all",
+    week: "all" as string | "all",
+    date: "",
+  });
+  const [assessmentDialogOpen, setAssessmentDialogOpen] = useState(false);
+  const [assessmentForm, setAssessmentForm] = useState({
+    title: "",
+    classId: "",
+    description: "",
+    dueDate: "",
+    scale: "letter" as GradeScale,
+  });
+  const [gradingDialogOpen, setGradingDialogOpen] = useState(false);
+  const [gradingContext, setGradingContext] = useState({
+    assessment: null as AssessmentTemplate | null,
+    studentId: "",
+    scale: "letter" as GradeScale,
+    grade: "",
+    numeric: "",
+    feedback: "",
+  });
+  const uploadRef = useRef<HTMLInputElement | null>(null);
 
   const classesQuery = useQuery({
-    queryKey: ["my-classes"],
-    queryFn: () => listMyClasses(),
+    queryKey: ["dashboard-classes"],
+    queryFn: () => listMyClassesWithPlanCount(),
     enabled: Boolean(user),
   });
 
-  useEffect(() => {
-    if (!user) return;
+  const studentsQuery = useQuery({
+    queryKey: ["dashboard-students"],
+    queryFn: () => listMyStudents(),
+    enabled: Boolean(user),
+  });
 
-    const timeout = setTimeout(() => {
-      setCounts(defaultCounts);
-    }, 300);
+  const curriculumQuery = useQuery({
+    queryKey: ["dashboard-curriculum"],
+    queryFn: () => listCurriculumItems(),
+    enabled: Boolean(user),
+  });
 
-    return () => clearTimeout(timeout);
-  }, [user]);
+  const assessmentsQuery = useQuery({
+    queryKey: ["dashboard-assessments"],
+    queryFn: () => listAssessments(),
+    enabled: Boolean(user),
+  });
 
-  useEffect(() => {
-    if (!user) {
-      setIsResearchNotificationsEnabled(false);
-      return;
-    }
+  const studentProfileQuery = useQuery<StudentProfile | null>({
+    queryKey: ["dashboard-student", selectedStudentId],
+    queryFn: () => (selectedStudentId ? getStudentProfile(selectedStudentId) : Promise.resolve(null)),
+    enabled: Boolean(selectedStudentId) && studentDialogOpen,
+  });
 
-    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
-    const stored = metadata[RESEARCH_NOTIFICATION_KEY];
-    const normalized =
-      typeof stored === "boolean"
-        ? stored
-        : typeof stored === "string"
-        ? stored.toLowerCase() === "true"
-        : false;
+  const assessmentGradesQuery = useQuery<AssessmentGrade[]>({
+    queryKey: ["dashboard-assessment-grades", gradingContext.assessment?.id],
+    queryFn: () =>
+      gradingContext.assessment?.id
+        ? listAssessmentGrades(gradingContext.assessment.id)
+        : Promise.resolve([]),
+    enabled: gradingDialogOpen && Boolean(gradingContext.assessment?.id),
+  });
 
-    setIsResearchNotificationsEnabled(normalized);
-  }, [user]);
+  const assessmentSubmissionsQuery = useQuery<AssessmentSubmission[]>({
+    queryKey: ["dashboard-assessment-submissions", gradingContext.assessment?.id],
+    queryFn: () =>
+      gradingContext.assessment?.id
+        ? listAssessmentSubmissions(gradingContext.assessment.id)
+        : Promise.resolve([]),
+    enabled: gradingDialogOpen && Boolean(gradingContext.assessment?.id),
+  });
 
-  useEffect(() => {
-    if (!user) {
-      setAvatarReference(null);
-      setResolvedAvatarUrl(null);
-      return;
-    }
+  const behaviorMutation = useMutation({
+    mutationFn: (payload: { studentId: string; note: string; sentiment: StudentBehaviorEntry["sentiment"] }) =>
+      saveStudentBehaviorNote({ studentId: payload.studentId, note: payload.note, sentiment: payload.sentiment }),
+    onSuccess: () => {
+      toast({ title: "Behavior note saved" });
+      void studentProfileQuery.refetch();
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: "Unable to save note",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
-    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
-    const { reference, url } = resolveAvatarReference(metadata);
+  const appraisalMutation = useMutation({
+    mutationFn: (payload: { studentId: string; highlight: string }) =>
+      saveStudentAppraisalNote({ studentId: payload.studentId, highlight: payload.highlight }),
+    onSuccess: () => {
+      toast({ title: "Appraisal saved" });
+      void studentProfileQuery.refetch();
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: "Unable to save appraisal",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
-    setAvatarReference(reference);
-    setResolvedAvatarUrl(url);
-  }, [user]);
+  const reportMutation = useMutation({
+    mutationFn: (studentId: string) => {
+      if (!user) throw new Error("Sign in required");
+      return recordStudentReportRequest({ studentId, requestedBy: user.id });
+    },
+    onSuccess: () => {
+      toast({ title: "AI report requested", description: "We'll email you when it's ready." });
+      void studentProfileQuery.refetch();
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: "Unable to request report",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
-  useEffect(() => {
-    const param = searchParams.get("tab");
-    const normalized = isDashboardTabValue(param) ? param : "overview";
+  const createAssessmentMutation = useMutation({
+    mutationFn: () =>
+      createAssessment({
+        classId: assessmentForm.classId,
+        title: assessmentForm.title,
+        description: assessmentForm.description,
+        dueDate: assessmentForm.dueDate || null,
+        gradingScale: assessmentForm.scale,
+      }),
+    onSuccess: () => {
+      toast({ title: "Assessment created" });
+      setAssessmentDialogOpen(false);
+      setAssessmentForm({ title: "", classId: "", description: "", dueDate: "", scale: "letter" });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-assessments"] });
+    },
+    onError: (error: unknown) => {
+      toast({
+        title: "Unable to create assessment",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
+    },
+  });
 
-    if (normalized !== activeTab) {
-      setActiveTab(normalized);
-    }
-  }, [activeTab, searchParams]);
-
-  useEffect(() => {
-    if (!avatarReference || isHttpUrl(avatarReference)) {
-      return;
-    }
-
-    let isCancelled = false;
-
-    const loadSignedUrl = async () => {
-      try {
-        const signedUrl = await createProfileImageSignedUrl(avatarReference);
-        if (!isCancelled) {
-          setResolvedAvatarUrl(signedUrl);
-        }
-      } catch (error) {
-        if (!isCancelled) {
-          console.error("Failed to resolve dashboard avatar", error);
-          setResolvedAvatarUrl(null);
-        }
+  const recordGradeMutation = useMutation({
+    mutationFn: () =>
+      recordAssessmentGrade({
+        assessmentId: gradingContext.assessment?.id ?? "",
+        studentId: gradingContext.studentId,
+        gradeValue: gradingContext.grade || null,
+        gradeNumeric: gradingContext.numeric ? Number(gradingContext.numeric) : null,
+        scale: gradingContext.scale,
+        feedback: gradingContext.feedback || null,
+      }),
+    onSuccess: () => {
+      toast({ title: "Grade recorded" });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-assessment-grades", gradingContext.assessment?.id] });
+      if (gradingContext.studentId) {
+        queryClient.invalidateQueries({ queryKey: ["dashboard-student", gradingContext.studentId] });
       }
-    };
-
-    void loadSignedUrl();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [avatarReference]);
-
-  const dashboardTabs = useMemo(
-    () => {
-      const labels = (t.account.tabs ?? {}) as Record<string, string>;
-      return dashboardTabValues.map(value => ({
-        value,
-        label: labels[value] ?? value,
-      }));
     },
-    [t.account.tabs],
-  );
-
-  const summaryTabs = useMemo(
-    () => {
-      const labels = (t.account.tabs ?? {}) as Record<string, string>;
-      return summaryTabValues.map(value => ({
-        value,
-        label: labels[value] ?? value,
-      }));
+    onError: (error: unknown) => {
+      toast({
+        title: "Unable to save grade",
+        description: error instanceof Error ? error.message : "Please try again",
+        variant: "destructive",
+      });
     },
-    [t.account.tabs],
-  );
+  });
+
+  const classes = useMemo(() => classesQuery.data ?? [], [classesQuery.data]);
+  const students = useMemo(() => studentsQuery.data ?? [], [studentsQuery.data]);
+  const curriculumItems = useMemo(() => curriculumQuery.data ?? [], [curriculumQuery.data]);
+  const assessments = useMemo(() => assessmentsQuery.data ?? [], [assessmentsQuery.data]);
+
+  const summary = useMemo(() => {
+    const upcomingLessons = curriculumItems.filter(item => item.date && parseISO(item.date) > new Date());
+    return {
+      classes: classes.length,
+      students: students.length,
+      lessons: upcomingLessons.length,
+      assessments: assessments.length,
+    };
+  }, [assessments.length, classes.length, curriculumItems, students.length]);
+
+  const curriculumOptions = useMemo(() => {
+    const stages = new Set<string>();
+    const subjects = new Set<string>();
+    const weeks = new Set<number>();
+    curriculumItems.forEach(item => {
+      if (item.stage) stages.add(item.stage);
+      if (item.subject) subjects.add(item.subject);
+      if (typeof item.week === "number") weeks.add(item.week);
+    });
+    return {
+      stages: Array.from(stages),
+      subjects: Array.from(subjects),
+      weeks: Array.from(weeks).sort((a, b) => a - b),
+    };
+  }, [curriculumItems]);
+
+  const filteredCurriculum = useMemo(() => {
+    return curriculumItems.filter(item => {
+      const matchesClass = curriculumFilters.classId === "all" || item.classId === curriculumFilters.classId;
+      const matchesStage = curriculumFilters.stage === "all" || item.stage === curriculumFilters.stage;
+      const matchesSubject = curriculumFilters.subject === "all" || item.subject === curriculumFilters.subject;
+      const matchesWeek =
+        curriculumFilters.week === "all" || String(item.week ?? "") === curriculumFilters.week;
+      const matchesDate = !curriculumFilters.date || (item.date && item.date.startsWith(curriculumFilters.date));
+      return matchesClass && matchesStage && matchesSubject && matchesWeek && matchesDate;
+    });
+  }, [curriculumFilters, curriculumItems]);
 
   const handleTabChange = (value: string) => {
-    if (!isDashboardTabValue(value)) {
-      return;
-    }
-
-    const nextValue = value as DashboardTabValue;
-
-    if (nextValue !== activeTab) {
-      setActiveTab(nextValue);
-    }
-
+    if (!tabs.some(tab => tab.value === value)) return;
+    setActiveTab(value as DashboardTab);
     const params = new URLSearchParams(searchParams);
-
-    if (nextValue === "overview") {
-      params.delete("tab");
-    } else {
-      params.set("tab", nextValue);
-    }
-
+    params.set("tab", value);
     setSearchParams(params, { replace: true });
   };
 
-  const greetingName = useMemo(() => {
-    if (!user) return "";
-    const metadataName =
-      typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "";
-    const resolvedName = (profileFullName ?? metadataName).trim();
-    if (resolvedName) {
-      return resolvedName.split(" ")[0];
-    }
-    return user.email ?? "there";
-  }, [profileFullName, user]);
+  const handleOpenLessonBuilder = (item?: CurriculumItem | null, classId?: string | null) => {
+    const meta: Partial<LessonPlanMetaDraft> = {
+      title: item?.title ?? "",
+      date: item?.date ?? null,
+      subject: (item?.subject as LessonPlanMetaDraft["subject"]) ?? null,
+    };
+    setLessonPreset({ meta, classId: classId ?? item?.classId ?? null, curriculumItem: item ?? null });
+    setActiveTab("lessonBuilder");
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", "lessonBuilder");
+    setSearchParams(params, { replace: true });
+  };
 
-  const roleDisplay = useMemo(() => {
-    const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
-    const metadataRole = typeof metadata.role === "string" ? metadata.role : null;
+  const handleDownloadCurriculum = () => {
+    const rows = filteredCurriculum.map(item => [
+      item.title,
+      item.topic ?? "",
+      item.subject ?? "",
+      item.stage ?? "",
+      item.week ?? "",
+      item.date ?? "",
+    ]);
+    const csv = [["Title", "Topic", "Subject", "Stage", "Week", "Date"], ...rows]
+      .map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "curriculum.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
-    const appMetadata = (user?.app_metadata ?? {}) as Record<string, unknown>;
-    const appRole = typeof appMetadata.role === "string" ? (appMetadata.role as string) : null;
+  const handleUploadCurriculum = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    console.info("Uploaded curriculum CSV", text.slice(0, 200));
+    toast({ title: "Curriculum upload received", description: "We'll map it to your planner." });
+    event.target.value = "";
+  };
 
-    const authRole = typeof user?.role === "string" ? user.role : null;
-    const selectedRole = metadataRole ?? appRole ?? authRole;
-
-    if (!selectedRole) {
-      return t.account.profile.rolePlaceholder;
-    }
-
-    const normalized = selectedRole.toString().trim();
-    const roleTranslations = (t.account.profile.roles ?? {}) as Record<string, string>;
-    const match = Object.entries(roleTranslations).find(
-      ([key]) => key.toLowerCase() === normalized.toLowerCase()
-    );
-
-    if (match) {
-      return match[1];
-    }
-
-    return normalized
-      .split(/[\s_]+/)
-      .filter(Boolean)
-      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
-  }, [t.account.profile.rolePlaceholder, t.account.profile.roles, user]);
-
-  const handleResearchNotificationChange = async (checked: boolean) => {
-    if (!user || isResearchToggleSaving) {
-      return;
-    }
-
-    const previous = isResearchNotificationsEnabled;
-    setIsResearchNotificationsEnabled(checked);
-    setIsResearchToggleSaving(true);
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        data: { [RESEARCH_NOTIFICATION_KEY]: checked },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: checked
-          ? t.account.research.notificationsEnabledTitle
-          : t.account.research.notificationsDisabledTitle,
-        description: checked
-          ? t.account.research.notificationsEnabledDescription
-          : t.account.research.notificationsDisabledDescription,
-      });
-    } catch (error) {
-      setIsResearchNotificationsEnabled(previous);
-      toast({
-        title: t.account.research.errorTitle,
-        description:
-          error instanceof Error
-            ? error.message
-            : t.account.research.errorDescription,
-        variant: "destructive",
-      });
-    } finally {
-      setIsResearchToggleSaving(false);
-    }
+  const handleSelectStudent = (student: StudentSummary) => {
+    setSelectedStudentId(student.id);
+    setStudentDialogOpen(true);
+    setBehaviorNote("");
+    setBehaviorSentiment("positive");
+    setAppraisalNote("");
   };
 
   if (loading) {
-    return loadingSkeleton;
+    return (
+      <div className="container space-y-6 py-10">
+        <div className="h-10 w-40 animate-pulse rounded bg-muted" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="h-24 animate-pulse rounded bg-muted" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
-    return <Navigate to={getLocalizedPath("/auth", language)} replace />;
+    return <Navigate to="/auth" replace state={{ from: `/account?tab=${activeTab}`, language }} />;
   }
-
-  const avatarUrl = resolvedAvatarUrl;
-
-  const fallbackName = "Mr Donald";
-  const fullDisplayName =
-    profileFullName?.trim() ||
-    (typeof user.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "") ||
-    greetingName ||
-    fallbackName;
-  const welcomeDisplayName = fullDisplayName || fallbackName;
-  const primaryInitial = welcomeDisplayName.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen bg-muted/10 pb-16">
       <SEO
-        title="My Dashboard | SchoolTech Hub"
-        description="Quickly review your SchoolTech Hub activity and jump into settings, classes, lesson plans, and more."
+        title="Teacher Workspace Dashboard"
+        description="Manage classes, students, curriculum, lessons, and assessments from a single workspace."
         canonicalUrl="https://schooltechhub.com/account"
       />
       <div className="container space-y-8 py-10">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">{t.account.overview.title}</h1>
-          <p className="text-muted-foreground">{t.account.overview.subtitle}</p>
-        </div>
-        <Card className="border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)]">
-          <CardContent className="flex flex-col gap-6 p-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20 border-2 border-primary/40 shadow-[0_0_25px_hsl(var(--glow-primary)/0.35)]">
-                  {avatarUrl ? (
-                    <AvatarImage src={avatarUrl} alt={`${welcomeDisplayName} avatar`} />
-                  ) : (
-                    <AvatarFallback className="text-2xl font-semibold text-primary">
-                      {primaryInitial || "S"}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Welcome back</p>
-                  <h2 className="text-2xl font-semibold text-foreground">{welcomeDisplayName}</h2>
-                  <p className="text-sm text-muted-foreground">{roleDisplay}</p>
-                </div>
-              </div>
-              <div className="space-y-4 text-sm">
-                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.25)]">
-                      <Building2 className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        {t.account.school.nameLabel}
-                      </p>
-                      <p className="text-sm font-medium text-foreground">
-                        {schoolName?.trim() || t.account.school.namePlaceholder}
-                      </p>
-                    </div>
-                  </div>
-                  {schoolLogoUrl ? (
-                    <div className="mt-4 flex items-center gap-3 rounded-md border border-border/50 bg-background/80 p-3">
-                      <div className="h-12 w-12 overflow-hidden rounded-md border border-primary/30 bg-white">
-                        <img
-                          src={schoolLogoUrl}
-                          alt={schoolName ? `${schoolName} logo` : t.account.school.logoAlt}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">Official logo</p>
-                        <p className="text-sm font-medium text-foreground">
-                          {schoolName?.trim() || t.account.school.namePlaceholder}
-                        </p>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {t.account.profile.roleLabel}
-                  </p>
-                  <p className="text-sm font-medium text-foreground">{roleDisplay}</p>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  We&apos;re glad to see you, {greetingName || fallbackName}.
-                </p>
-              </div>
+        <Card className="border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.15)]">
+          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle className="text-2xl font-semibold text-foreground">
+                Welcome back{fullName ? `, {fullName.split(" ")[0]}` : ""}
+              </CardTitle>
+              <CardDescription>Everything you need to run your classroom in one place.</CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2 lg:max-w-xs lg:flex-col">
-              <Button asChild size="sm" variant="secondary">
-                <Link to={getLocalizedPath("/lesson-builder", language)}>{t.nav.builder}</Link>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" asChild>
+                <Link to="/blog/new">Post a blog</Link>
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleTabChange("classes")}>
-                {t.account.tabs.classes}
+              <Button variant="outline" asChild>
+                <Link to="/forum/new">Ask a question</Link>
               </Button>
-              <Button asChild size="sm">
-                <Link to={getLocalizedPath("/blog/new", language)}>
-                  {t.account.overview.ctas.postBlog}
-                </Link>
+              <Button onClick={() => handleOpenLessonBuilder(null, null)}>
+                <NotebookPen className="mr-2 h-4 w-4" /> Plan a lesson
               </Button>
-              <Button asChild size="sm" variant="outline">
-                <Link to={getLocalizedPath("/forum/new", language)}>
-                  {t.account.overview.ctas.askQuestion}
-                </Link>
-              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <SummaryCard icon={GraduationCap} label="Active classes" value={summary.classes} />
+              <SummaryCard icon={Users} label="Enrolled students" value={summary.students} />
+              <SummaryCard icon={CalendarClock} label="Upcoming lessons" value={summary.lessons} />
+              <SummaryCard icon={ClipboardCheck} label="Assessments" value={summary.assessments} />
             </div>
           </CardContent>
         </Card>
+
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="flex w-full flex-wrap gap-2 border-none bg-transparent p-0 shadow-none h-auto backdrop-blur-0">
-            {dashboardTabs.map(tab => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="flex-1 whitespace-nowrap"
-                disabled={tab.value === "research"}
-              >
+          <TabsList className="flex w-full flex-wrap gap-2 bg-transparent p-0">
+            {tabs.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value} className="flex-1 whitespace-nowrap">
                 {tab.label}
               </TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent value="overview" className="space-y-6">
-            <div className="space-y-6">
-              <div className="grid gap-4 lg:grid-cols-2">
-                <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
-                  <CardHeader className="flex flex-row items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <CardTitle className="text-xl font-semibold">At a glance</CardTitle>
-                      <CardDescription>
-                        Review your latest activity across the SchoolTech Hub community.
-                      </CardDescription>
-                    </div>
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_25px_hsl(var(--glow-primary)/0.2)]">
-                      <Sparkles className="h-5 w-5 animate-pulse-glow" aria-hidden="true" />
-                    </span>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Stay informed with a quick overview of what&apos;s new since your last visit.
-                    </p>
-                  </CardContent>
-                </Card>
-                <UpcomingLessonsCard isEnabled={Boolean(user)} />
-                <Card className="border border-primary/30 bg-background/80 shadow-[0_0_30px_hsl(var(--glow-primary)/0.15)]">
-                  <CardHeader className="flex flex-row items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <CardTitle className="text-xl font-semibold">
-                        {t.account.research.cardTitle}
-                      </CardTitle>
-                      <CardDescription>{t.account.research.cardDescription}</CardDescription>
-                    </div>
-                    <Badge variant="outline" className="border-primary/40 bg-primary/5 text-primary">
-                      {t.account.research.badge}
-                    </Badge>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      {t.account.research.cardBody}
-                    </p>
-                    <div className="flex items-start justify-between gap-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-foreground">
-                          {t.account.research.toggleLabel}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {t.account.research.toggleDescription}
-                        </p>
-                      </div>
-                      <Switch
-                        checked={isResearchNotificationsEnabled}
-                        onCheckedChange={handleResearchNotificationChange}
-                        disabled={isResearchToggleSaving}
-                        aria-label={t.account.research.toggleAria}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              {counts ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {summaryTabs.map(tab => {
-                    const details = summaryTabDetails[tab.value];
-                    const Icon = details.icon;
 
-                    return (
-                      <Card
-                        key={tab.value}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`Open ${tab.label}`}
-                        onClick={() => handleTabChange(tab.value)}
-                        onKeyDown={event => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            handleTabChange(tab.value);
-                          }
-                        }}
-                        className="border border-primary/20 bg-background/80 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] transition hover:border-primary/40 hover:shadow-[0_0_35px_hsl(var(--glow-primary)/0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
-                      >
-                        <CardHeader className="flex flex-row items-start justify-between gap-4">
-                          <div className="space-y-1">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">{tab.label}</CardTitle>
-                            <p className="text-xs text-muted-foreground">{details.label}</p>
-                          </div>
-                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--glow-primary)/0.2)]">
-                            <Icon className="h-4 w-4 animate-pulse-glow" aria-hidden="true" />
-                          </span>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-3xl font-bold">{counts?.[tab.value] ?? 0}</div>
-                          <p className="text-sm text-muted-foreground">Items awaiting your attention</p>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={index} className="h-24 animate-pulse rounded-md bg-muted/60" />
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          <TabsContent value="classes">
-            <Card>
-              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-xl font-semibold">Classes</CardTitle>
-                  <CardDescription>
-                    Track the classes you lead and keep their key details up to date.
-                  </CardDescription>
-                </div>
-                <Button className="w-full sm:w-auto" onClick={() => setIsCreateDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Class
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {classesQuery.isPending ? (
-                  <div className="space-y-3">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
-                ) : classesQuery.isError ? (
-                  <Alert variant="destructive">
-                    <AlertTitle>Unable to load classes</AlertTitle>
-                    <AlertDescription>
-                      {classesQuery.error instanceof Error
-                        ? classesQuery.error.message
-                        : "Please try again later."}
-                      <div className="mt-4">
-                        <Button variant="outline" onClick={() => classesQuery.refetch()} size="sm">
-                          Try again
-                        </Button>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                ) : classesQuery.data && classesQuery.data.length > 0 ? (
-                  <div className="space-y-4">
-                    {classesQuery.data.map(classItem => (
-                      <Link
-                        key={classItem.id}
-                        to={getLocalizedPath(`/account/classes/${classItem.id}`, language)}
-                        className="block rounded-lg border bg-card p-4 shadow-sm transition hover:border-primary/60 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <h3 className="text-base font-semibold text-foreground">{classItem.title}</h3>
-                            {classItem.summary && (
-                              <p className="mt-1 text-sm text-muted-foreground">{classItem.summary}</p>
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            <p>
-                              <span className="font-medium text-foreground">Starts:</span>{" "}
-                              {formatDateForDisplay(classItem.startDate)}
-                            </p>
-                            <p>
-                              <span className="font-medium text-foreground">Ends:</span>{" "}
-                              {formatDateForDisplay(classItem.endDate)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-4 grid gap-3 text-sm md:grid-cols-2">
-                          <div>
-                            <p className="text-muted-foreground">Subject</p>
-                            <p className="font-medium text-foreground">{classItem.subject ?? "—"}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Stage</p>
-                            <p className="font-medium text-foreground">{classItem.stage ?? "—"}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Meeting schedule</p>
-                            <p className="font-medium text-foreground">{formatTimeForDisplay(classItem.meetingSchedule)}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Max capacity</p>
-                            <p className="font-medium text-foreground">
-                              {typeof classItem.maxCapacity === "number" ? classItem.maxCapacity : "—"}
-                            </p>
-                          </div>
-                        </div>
-                        {classItem.meetingLink && (
-                          <p className="mt-4 text-sm">
-                            <a
-                              href={classItem.meetingLink}
-                              target="_blank"
-                              rel="noreferrer noopener"
-                              className="text-primary underline"
-                              onClick={event => event.stopPropagation()}
-                              onMouseDown={event => event.stopPropagation()}
-                            >
-                              Join meeting
-                            </a>
-                          </p>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-lg border border-dashed bg-muted/50 p-8 text-center text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground">You haven't created any classes yet.</p>
-                    <p className="mt-2">Use the Add Class button above to get started.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="classes" className="space-y-6">
+            <ClassesPanel
+              classes={classes}
+              isLoading={classesQuery.isLoading}
+              error={classesQuery.error instanceof Error ? classesQuery.error : null}
+              onCreate={() => setIsCreateClassOpen(true)}
+              onPlanLesson={handleOpenLessonBuilder}
+            />
             <ClassCreateDialog
-              open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
-              onCreated={() => {
-                queryClient.invalidateQueries({ queryKey: ["my-classes"] });
+              open={isCreateClassOpen}
+              onOpenChange={setIsCreateClassOpen}
+              onCreated={() => queryClient.invalidateQueries({ queryKey: ["dashboard-classes"] })}
+            />
+          </TabsContent>
+
+          <TabsContent value="students" className="space-y-6">
+            <StudentsPanel
+              students={students}
+              isLoading={studentsQuery.isLoading}
+              error={studentsQuery.error instanceof Error ? studentsQuery.error : null}
+              onSelectStudent={handleSelectStudent}
+            />
+          </TabsContent>
+
+          <TabsContent value="curriculum" className="space-y-6">
+            <CurriculumPanel
+              classes={classes}
+              items={filteredCurriculum}
+              filters={curriculumFilters}
+              options={curriculumOptions}
+              onChangeFilters={setCurriculumFilters}
+              onDownloadCsv={handleDownloadCurriculum}
+              onUploadCsv={() => uploadRef.current?.click()}
+              onBuildLesson={handleOpenLessonBuilder}
+            />
+            <input
+              ref={uploadRef}
+              type="file"
+              accept=".csv"
+              onChange={handleUploadCurriculum}
+              className="hidden"
+            />
+          </TabsContent>
+
+          <TabsContent value="lessonBuilder" className="space-y-6">
+            {lessonPreset?.curriculumItem ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Lesson context</CardTitle>
+                  <CardDescription>Prefilled from {lessonPreset.curriculumItem.title}.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                  {lessonPreset.curriculumItem.subject ? (
+                    <Badge variant="outline">{lessonPreset.curriculumItem.subject}</Badge>
+                  ) : null}
+                  {lessonPreset.curriculumItem.stage ? (
+                    <Badge variant="outline">Stage {lessonPreset.curriculumItem.stage}</Badge>
+                  ) : null}
+                  {lessonPreset.curriculumItem.week ? (
+                    <Badge variant="outline">Week {lessonPreset.curriculumItem.week}</Badge>
+                  ) : null}
+                  {lessonPreset.curriculumItem.date ? (
+                    <Badge variant="outline">{formatDate(lessonPreset.curriculumItem.date)}</Badge>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ) : null}
+            <div className="rounded-xl border bg-background p-2 shadow-sm">
+              <LessonBuilderPage
+                layoutMode="embedded"
+                initialMeta={lessonPreset?.meta ?? undefined}
+                initialClassId={lessonPreset?.classId ?? null}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              When your AI co-pilot is ready we will generate summaries and attach them back to the curriculum item automatically.
+            </p>
+          </TabsContent>
+
+          <TabsContent value="assessments" className="space-y-6">
+            <AssessmentsPanel
+              assessments={assessments}
+              classes={classes}
+              isLoading={assessmentsQuery.isLoading}
+              error={assessmentsQuery.error instanceof Error ? assessmentsQuery.error : null}
+              onCreate={() => setAssessmentDialogOpen(true)}
+              onOpenGrades={assessment => {
+                setGradingContext(context => ({
+                  ...context,
+                  assessment,
+                  scale: assessment.gradingScale,
+                  studentId: "",
+                  grade: "",
+                  numeric: "",
+                  feedback: "",
+                }));
+                setGradingDialogOpen(true);
               }}
             />
           </TabsContent>
-          <TabsContent value="lessonPlans">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">Lesson Plans</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Review drafts, published plans, and collaborative projects. Soon you’ll be able to jump directly into editing
-                  from this tab.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="savedPosts">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">Saved Posts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Keep track of the blog posts and discussions you’ve bookmarked for later. Quick actions for sharing and
-                  organizing will be added here.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="activity">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">{t.account.activity.title}</CardTitle>
-                <CardDescription>{t.account.activity.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-lg border bg-muted/40 p-4">
-                    <p className="text-sm text-muted-foreground">{t.account.activity.comments}</p>
-                    <p className="text-2xl font-semibold text-foreground">{counts?.activity ?? 0}</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/40 p-4">
-                    <p className="text-sm text-muted-foreground">{t.account.activity.posts}</p>
-                    <p className="text-2xl font-semibold text-foreground">{counts?.savedPosts ?? 0}</p>
-                  </div>
-                </div>
-                <p className="mt-6 text-sm text-muted-foreground">
-                  {t.account.activity.lastLogin}:{" "}
-                  {user.last_sign_in_at
-                    ? format(parseISO(user.last_sign_in_at), "PPP p")
-                    : t.account.activity.neverLoggedIn}
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="security">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold">{t.account.security.title}</CardTitle>
-                <CardDescription>{t.account.security.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{t.account.securityTips.description}</p>
-                <ul className="list-disc space-y-2 pl-5 text-sm text-foreground">
-                  {(t.account.securityTips.tips ?? []).map((tip: string, index: number) => (
-                    <li key={index}>{tip}</li>
-                  ))}
-                </ul>
-                <div>
-                  <Button size="sm" variant="outline" onClick={() => handleTabChange("settings")}>
-                    {t.account.tabs.settings}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="settings">
-            <SettingsPanel user={user} />
-          </TabsContent>
-          <TabsContent value="research">
-            <Card>
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-xl font-semibold">{t.account.research.tabTitle}</CardTitle>
-                <CardDescription>{t.account.research.tabDescription}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Badge variant="outline" className="border-primary/40 bg-primary/5 text-primary">
-                    {t.account.research.badge}
-                  </Badge>
-                  <span>{t.account.research.tabHelper}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
+
+      <StudentDialog
+        open={studentDialogOpen}
+        onOpenChange={setStudentDialogOpen}
+        profile={studentProfileQuery.data}
+        isLoading={studentProfileQuery.isLoading}
+        behaviorNote={behaviorNote}
+        onBehaviorNoteChange={setBehaviorNote}
+        behaviorSentiment={behaviorSentiment}
+        onBehaviorSentimentChange={setBehaviorSentiment}
+        onSaveBehavior={() =>
+          selectedStudentId &&
+          behaviorNote.trim().length > 0 &&
+          behaviorMutation.mutate({ studentId: selectedStudentId, note: behaviorNote, sentiment: behaviorSentiment })
+        }
+        appraisalNote={appraisalNote}
+        onAppraisalNoteChange={setAppraisalNote}
+        onSaveAppraisal={() =>
+          selectedStudentId &&
+          appraisalNote.trim().length > 0 &&
+          appraisalMutation.mutate({ studentId: selectedStudentId, highlight: appraisalNote })
+        }
+        onGenerateReport={() => selectedStudentId && reportMutation.mutate(selectedStudentId)}
+      />
+
+      <AssessmentDialog
+        open={assessmentDialogOpen}
+        onOpenChange={setAssessmentDialogOpen}
+        classes={classes}
+        form={assessmentForm}
+        onChange={setAssessmentForm}
+        onSubmit={() => createAssessmentMutation.mutate()}
+        isSubmitting={createAssessmentMutation.isPending}
+      />
+
+      <GradingDialog
+        open={gradingDialogOpen}
+        onOpenChange={setGradingDialogOpen}
+        context={gradingContext}
+        onChange={setGradingContext}
+        presets={presetGrades}
+        gradeScales={gradeScales}
+        submissions={assessmentSubmissionsQuery.data ?? []}
+        grades={assessmentGradesQuery.data ?? []}
+        onSubmit={() => recordGradeMutation.mutate()}
+        isSubmitting={recordGradeMutation.isPending}
+      />
     </div>
+  );
+};
+
+interface SummaryCardProps {
+  icon: ComponentType<ComponentProps<typeof Activity>>;
+  label: string;
+  value: number;
+}
+
+const SummaryCard = ({ icon: Icon, label, value }: SummaryCardProps) => (
+  <div className="rounded-lg border bg-muted/30 p-4">
+    <div className="flex items-center gap-3">
+      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Icon className="h-5 w-5" />
+      </span>
+      <div>
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-2xl font-semibold text-foreground">{value}</p>
+      </div>
+    </div>
+  </div>
+);
+
+interface ClassesPanelProps {
+  classes: ClassWithPlanCount[];
+  isLoading: boolean;
+  error: Error | null;
+  onCreate: () => void;
+  onPlanLesson: (item?: CurriculumItem | null, classId?: string | null) => void;
+}
+
+const ClassesPanel = ({ classes, isLoading, error, onCreate, onPlanLesson }: ClassesPanelProps) => {
+  return (
+    <Card>
+      <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <CardTitle>My classes</CardTitle>
+          <CardDescription>Organise rosters, meeting details, and linked lesson plans.</CardDescription>
+        </div>
+        <Button variant="outline" onClick={onCreate}>
+          <Plus className="mr-2 h-4 w-4" /> New class
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+            {error.message}
+          </div>
+        ) : classes.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+            Create your first class to start planning lessons.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {classes.map(classItem => (
+              <div key={classItem.id} className="rounded-xl border bg-background/80 p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">{classItem.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {classItem.summary ?? "Keep attendance, assignments, and resources in sync."}
+                    </p>
+                  </div>
+                  <Badge variant="outline">{classItem.planCount} plans</Badge>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                  {classItem.stage ? <Badge variant="outline">{classItem.stage}</Badge> : null}
+                  {classItem.subject ? <Badge variant="outline">{classItem.subject}</Badge> : null}
+                  {classItem.startDate ? <Badge variant="outline">{formatDate(classItem.startDate)}</Badge> : null}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button size="sm" onClick={() => onPlanLesson(null, classItem.id)}>
+                    <BookOpen className="mr-2 h-4 w-4" /> Plan a lesson
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to={`/account/classes/${classItem.id}`}>Open dashboard</Link>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+interface StudentsPanelProps {
+  students: StudentSummary[];
+  isLoading: boolean;
+  error: Error | null;
+  onSelectStudent: (student: StudentSummary) => void;
+}
+
+const StudentsPanel = ({ students, isLoading, error, onSelectStudent }: StudentsPanelProps) => {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>My students</CardTitle>
+        <CardDescription>Click a learner to review assignments, behaviour, and appraisal notes.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+            {error.message}
+          </div>
+        ) : students.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+            Enrol students once your classes are ready.
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Classes</TableHead>
+                  <TableHead>Recent behaviour</TableHead>
+                  <TableHead>Latest achievement</TableHead>
+                  <TableHead className="w-[120px]" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {students.map(student => (
+                  <TableRow key={student.id}>
+                    <TableCell className="font-medium text-foreground">
+                      {student.firstName} {student.lastName}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {student.classes.map(cls => cls.title).join(", ") || "—"}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {student.latestBehaviorNote?.note ?? "No recent notes"}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {student.latestAppraisalNote?.highlight ?? "No highlights yet"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" onClick={() => onSelectStudent(student)}>
+                        View profile
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+interface CurriculumPanelProps {
+  classes: ClassWithPlanCount[];
+  items: CurriculumItem[];
+  filters: {
+    classId: string | "all";
+    stage: string | "all";
+    subject: string | "all";
+    week: string | "all";
+    date: string;
+  };
+  options: {
+    stages: string[];
+    subjects: string[];
+    weeks: number[];
+  };
+  onChangeFilters: (filters: CurriculumPanelProps["filters"]) => void;
+  onDownloadCsv: () => void;
+  onUploadCsv: () => void;
+  onBuildLesson: (item: CurriculumItem) => void;
+}
+
+const CurriculumPanel = ({
+  classes,
+  items,
+  filters,
+  options,
+  onChangeFilters,
+  onDownloadCsv,
+  onUploadCsv,
+  onBuildLesson,
+}: CurriculumPanelProps) => {
+  const updateFilters = (patch: Partial<CurriculumPanelProps["filters"]>) => {
+    onChangeFilters({ ...filters, ...patch });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Curriculum planner</CardTitle>
+        <CardDescription>Filter by class, stage, subject, or week to map your term.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Select
+            value={filters.classId === "all" ? "" : filters.classId}
+            onValueChange={value => updateFilters({ classId: value || "all" })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All classes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All classes</SelectItem>
+              {classes.map(cls => (
+                <SelectItem key={cls.id} value={cls.id}>
+                  {cls.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={filters.stage === "all" ? "" : filters.stage}
+            onValueChange={value => updateFilters({ stage: value || "all" })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All stages" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All stages</SelectItem>
+              {options.stages.map(stage => (
+                <SelectItem key={stage} value={stage}>
+                  {stage}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={filters.subject === "all" ? "" : filters.subject}
+            onValueChange={value => updateFilters({ subject: value || "all" })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All subjects" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All subjects</SelectItem>
+              {options.subjects.map(subject => (
+                <SelectItem key={subject} value={subject}>
+                  {subject}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={filters.week === "all" ? "" : filters.week}
+            onValueChange={value => updateFilters({ week: value || "all" })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All weeks" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All weeks</SelectItem>
+              {options.weeks.map(week => (
+                <SelectItem key={week} value={String(week)}>
+                  Week {week}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input type="date" value={filters.date} onChange={event => updateFilters({ date: event.target.value })} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onDownloadCsv}>
+            <FileDown className="mr-2 h-4 w-4" /> Download CSV
+          </Button>
+          <Button variant="outline" onClick={onUploadCsv}>
+            <FileSpreadsheet className="mr-2 h-4 w-4" /> Upload CSV
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => updateFilters({ classId: "all", stage: "all", subject: "all", week: "all", date: "" })}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" /> Reset filters
+          </Button>
+        </div>
+        <div className="overflow-hidden rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lesson</TableHead>
+                <TableHead>Topic</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Week</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="w-[160px]" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {items.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+                    Nothing scheduled yet—add curriculum items or import a CSV.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                items.map(item => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium text-foreground">{item.title}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{item.topic ?? "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{item.subject ?? "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{item.stage ?? "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{item.week ?? "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{formatDate(item.date)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={() => onBuildLesson(item)}>
+                          Build lesson
+                        </Button>
+                        <Button size="sm" variant="ghost">
+                          View lesson plan
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Calendar sync</CardTitle>
+              <CardDescription>Push lessons to Google Calendar once connected.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
+              <p>Keep your teaching schedule aligned across SchoolTech Hub and your calendar.</p>
+              <Button size="sm" variant="outline">
+                <Calendar className="mr-2 h-4 w-4" /> Connect Google Calendar
+              </Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Curriculum insights</CardTitle>
+              <CardDescription>See how your plan is balanced across subjects.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              <p>Science lessons scheduled: {items.filter(item => item.subject === "Science").length}</p>
+              <p>Literacy lessons scheduled: {items.filter(item => item.subject === "English").length}</p>
+              <p>Average week alignment: {items.reduce((acc, item) => acc + (item.week ?? 0), 0) / (items.length || 1)}</p>
+            </CardContent>
+          </Card>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+interface AssessmentsPanelProps {
+  assessments: AssessmentTemplate[];
+  classes: ClassWithPlanCount[];
+  isLoading: boolean;
+  error: Error | null;
+  onCreate: () => void;
+  onOpenGrades: (assessment: AssessmentTemplate) => void;
+}
+
+const AssessmentsPanel = ({ assessments, classes, isLoading, error, onCreate, onOpenGrades }: AssessmentsPanelProps) => {
+  const classMap = useMemo(() => {
+    const map = new Map<string, string>();
+    classes.forEach(cls => map.set(cls.id, cls.title));
+    return map;
+  }, [classes]);
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <CardTitle>Assessment tracking</CardTitle>
+          <CardDescription>Create assignments, track submissions, and grade with flexible scales.</CardDescription>
+        </div>
+        <Button onClick={onCreate}>
+          <Plus className="mr-2 h-4 w-4" /> New assessment
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+            {error.message}
+          </div>
+        ) : assessments.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+            No assessments yet—create one to begin tracking progress.
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Assessment</TableHead>
+                  <TableHead>Class</TableHead>
+                  <TableHead>Due</TableHead>
+                  <TableHead>Scale</TableHead>
+                  <TableHead className="w-[140px]" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {assessments.map(assessment => (
+                  <TableRow key={assessment.id}>
+                    <TableCell className="font-medium text-foreground">{assessment.title}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {classMap.get(assessment.classId) ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{formatDate(assessment.dueDate)}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{assessment.gradingScale}</TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" onClick={() => onOpenGrades(assessment)}>
+                        Record grades
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+interface StudentDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  profile: StudentProfile | null | undefined;
+  isLoading: boolean;
+  behaviorNote: string;
+  onBehaviorNoteChange: (value: string) => void;
+  behaviorSentiment: StudentBehaviorEntry["sentiment"];
+  onBehaviorSentimentChange: (value: StudentBehaviorEntry["sentiment"]) => void;
+  onSaveBehavior: () => void;
+  appraisalNote: string;
+  onAppraisalNoteChange: (value: string) => void;
+  onSaveAppraisal: () => void;
+  onGenerateReport: () => void;
+}
+
+const StudentDialog = ({
+  open,
+  onOpenChange,
+  profile,
+  isLoading,
+  behaviorNote,
+  onBehaviorNoteChange,
+  behaviorSentiment,
+  onBehaviorSentimentChange,
+  onSaveBehavior,
+  appraisalNote,
+  onAppraisalNoteChange,
+  onSaveAppraisal,
+  onGenerateReport,
+}: StudentDialogProps) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Student profile</DialogTitle>
+          <DialogDescription>Blend class assignments, behaviour observations, and AI reporting in one view.</DialogDescription>
+        </DialogHeader>
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : !profile ? (
+          <p className="text-sm text-muted-foreground">Select a learner to view details.</p>
+        ) : (
+          <div className="space-y-6">
+            <div className="rounded-lg border bg-muted/20 p-4">
+              <h3 className="text-lg font-semibold text-foreground">
+                {profile.student.firstName} {profile.student.lastName}
+              </h3>
+              <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
+                {profile.classes.map(cls => (
+                  <Badge key={cls.id} variant="outline">
+                    {cls.title}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <section className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-lg border bg-background/70 p-4 shadow-sm">
+                <h4 className="text-sm font-semibold text-foreground">Assignments</h4>
+                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                  {profile.assignments.length ? (
+                    profile.assignments.map(assignment => (
+                      <li key={assignment.id}>
+                        <span className="font-medium text-foreground">{assignment.title}</span>
+                        {assignment.dueDate ? ` • Due ${formatDate(assignment.dueDate)}` : ""}
+                        {assignment.grade ? ` • ${assignment.grade}` : ""}
+                      </li>
+                    ))
+                  ) : (
+                    <li>No assignments recorded yet.</li>
+                  )}
+                </ul>
+              </div>
+              <div className="rounded-lg border bg-background/70 p-4 shadow-sm">
+                <h4 className="text-sm font-semibold text-foreground">Progress</h4>
+                <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                  {profile.progress.length ? (
+                    profile.progress.map(metric => (
+                      <li key={`${metric.metric}-${metric.capturedAt}`}>
+                        <span className="font-medium text-foreground">{metric.metric}:</span> {metric.value}% ({metric.trend})
+                      </li>
+                    ))
+                  ) : (
+                    <li>No progress metrics yet.</li>
+                  )}
+                </ul>
+              </div>
+            </section>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-3 rounded-lg border bg-background/70 p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-foreground">Behaviour notes</h4>
+                  <Badge variant="outline">{profile.behaviorNotes.length}</Badge>
+                </div>
+                <Textarea
+                  placeholder="Record behaviour notes"
+                  value={behaviorNote}
+                  onChange={event => onBehaviorNoteChange(event.target.value)}
+                />
+                <Select
+                  value={behaviorSentiment}
+                  onValueChange={value =>
+                    onBehaviorSentimentChange(value as StudentBehaviorEntry["sentiment"])
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sentimentOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  onClick={onSaveBehavior}
+                  disabled={!behaviorNote.trim().length}
+                >
+                  Save behaviour note
+                </Button>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  {profile.behaviorNotes.slice(0, 3).map(note => (
+                    <p key={note.id}>
+                      {formatDate(note.recordedAt)} — {note.note}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3 rounded-lg border bg-background/70 p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-foreground">Appraisal notes</h4>
+                  <Badge variant="outline">{profile.appraisalNotes.length}</Badge>
+                </div>
+                <Textarea
+                  placeholder="Celebrate achievements and participation"
+                  value={appraisalNote}
+                  onChange={event => onAppraisalNoteChange(event.target.value)}
+                />
+                <Button size="sm" onClick={onSaveAppraisal} disabled={!appraisalNote.trim().length}>
+                  Save appraisal
+                </Button>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  {profile.appraisalNotes.slice(0, 3).map(note => (
+                    <p key={note.id}>
+                      {formatDate(note.recordedAt)} — {note.highlight}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="rounded-lg border bg-background/70 p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground">AI progress reports</h4>
+                  <p className="text-xs text-muted-foreground">
+                    Generate a personalised progress summary using your notes and assessment data.
+                  </p>
+                </div>
+                <Button size="sm" onClick={onGenerateReport} disabled={profile.reportStatus?.status === "processing"}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  {profile.reportStatus?.status === "ready" ? "Regenerate report" : "Generate report"}
+                </Button>
+              </div>
+              {profile.reportStatus ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Status: {profile.reportStatus.status} — requested {formatDate(profile.reportStatus.requestedAt)}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+interface AssessmentDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  classes: ClassWithPlanCount[];
+  form: {
+    title: string;
+    classId: string;
+    description: string;
+    dueDate: string;
+    scale: GradeScale;
+  };
+  onChange: (form: AssessmentDialogProps["form"]) => void;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+}
+
+const AssessmentDialog = ({ open, onOpenChange, classes, form, onChange, onSubmit, isSubmitting }: AssessmentDialogProps) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Create assessment</DialogTitle>
+          <DialogDescription>
+            Capture projects, quizzes, or homework assignments and share expectations with your class.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="assessment-title">Title</Label>
+            <Input
+              id="assessment-title"
+              value={form.title}
+              onChange={event => onChange({ ...form, title: event.target.value })}
+              placeholder="Forces and motion quiz"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="assessment-class">Class</Label>
+            <Select value={form.classId} onValueChange={value => onChange({ ...form, classId: value })}>
+              <SelectTrigger id="assessment-class">
+                <SelectValue placeholder="Select a class" />
+              </SelectTrigger>
+              <SelectContent>
+                {classes.map(cls => (
+                  <SelectItem key={cls.id} value={cls.id}>
+                    {cls.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="assessment-description">Instructions</Label>
+            <Textarea
+              id="assessment-description"
+              value={form.description}
+              onChange={event => onChange({ ...form, description: event.target.value })}
+              placeholder="Outline objectives, required materials, and success criteria"
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="assessment-due">Due date</Label>
+              <Input
+                id="assessment-due"
+                type="date"
+                value={form.dueDate}
+                onChange={event => onChange({ ...form, dueDate: event.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Grading scale</Label>
+              <Select value={form.scale} onValueChange={value => onChange({ ...form, scale: value as GradeScale })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {gradeScales.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={onSubmit} disabled={!form.title || !form.classId || isSubmitting}>
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Create assessment
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+interface GradingDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  context: {
+    assessment: AssessmentTemplate | null;
+    studentId: string;
+    scale: GradeScale;
+    grade: string;
+    numeric: string;
+    feedback: string;
+  };
+  onChange: (context: GradingDialogProps["context"]) => void;
+  presets: Record<GradeScale, string[]>;
+  gradeScales: Array<{ value: GradeScale; label: string }>;
+  submissions: AssessmentSubmission[];
+  grades: AssessmentGrade[];
+  onSubmit: () => void;
+  isSubmitting: boolean;
+}
+
+const GradingDialog = ({
+  open,
+  onOpenChange,
+  context,
+  onChange,
+  presets,
+  gradeScales,
+  submissions,
+  grades,
+  onSubmit,
+  isSubmitting,
+}: GradingDialogProps) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Grade submissions</DialogTitle>
+          <DialogDescription>Record progress and share personalised feedback.</DialogDescription>
+        </DialogHeader>
+        {context.assessment ? (
+          <div className="space-y-6">
+            <div className="rounded-lg border bg-muted/20 p-4">
+              <p className="text-sm font-medium text-foreground">{context.assessment.title}</p>
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                {context.assessment.dueDate ? (
+                  <Badge variant="outline">Due {formatDate(context.assessment.dueDate)}</Badge>
+                ) : null}
+                <Badge variant="outline">Scale: {context.assessment.gradingScale}</Badge>
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="grade-student">Student ID</Label>
+                <Input
+                  id="grade-student"
+                  value={context.studentId}
+                  onChange={event => onChange({ ...context, studentId: event.target.value })}
+                  placeholder="Enter student identifier"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Scale</Label>
+                <Select value={context.scale} onValueChange={value => onChange({ ...context, scale: value as GradeScale })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gradeScales.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="grade-value">Grade</Label>
+                <Select value={context.grade} onValueChange={value => onChange({ ...context, grade: value })}>
+                  <SelectTrigger id="grade-value">
+                    <SelectValue placeholder="Select or type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {presets[context.scale].map(option => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  className="mt-2"
+                  placeholder="Custom grade"
+                  value={context.grade}
+                  onChange={event => onChange({ ...context, grade: event.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="grade-numeric">Numeric value</Label>
+                <Input
+                  id="grade-numeric"
+                  type="number"
+                  value={context.numeric}
+                  onChange={event => onChange({ ...context, numeric: event.target.value })}
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="grade-feedback">Feedback</Label>
+              <Textarea
+                id="grade-feedback"
+                value={context.feedback}
+                onChange={event => onChange({ ...context, feedback: event.target.value })}
+                placeholder="Celebrate wins and outline next steps"
+              />
+            </div>
+            <div className="rounded-lg border bg-muted/20 p-4">
+              <p className="text-sm font-medium text-foreground">Recent submissions</p>
+              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                {submissions.length ? (
+                  submissions.map(item => (
+                    <li key={item.id}>
+                      {item.studentId} — {item.status}
+                      {item.submittedAt ? ` • ${formatDate(item.submittedAt)}` : ""}
+                    </li>
+                  ))
+                ) : (
+                  <li>No submissions yet.</li>
+                )}
+              </ul>
+            </div>
+            <div className="rounded-lg border bg-muted/20 p-4">
+              <p className="text-sm font-medium text-foreground">Recent grades</p>
+              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                {grades.length ? (
+                  grades.map(grade => (
+                    <li key={grade.id}>
+                      {grade.studentId} — {grade.gradeValue ?? grade.gradeNumeric ?? "Pending"}
+                    </li>
+                  ))
+                ) : (
+                  <li>No grades recorded yet.</li>
+                )}
+              </ul>
+            </div>
+          </div>
+        ) : null}
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          <Button onClick={onSubmit} disabled={!context.assessment || !context.studentId || isSubmitting}>
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Save grade
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
