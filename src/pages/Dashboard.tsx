@@ -204,9 +204,6 @@ export default function DashboardPage() {
           <TabsTrigger value="lessonPlans" disabled>
             {t.dashboard.tabs.lessonPlans}
           </TabsTrigger>
-          <TabsTrigger value="resources" disabled>
-            {t.dashboard.tabs.resources}
-          </TabsTrigger>
           <TabsTrigger value="activity" disabled>
             {t.dashboard.tabs.activity}
           </TabsTrigger>

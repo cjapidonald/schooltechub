@@ -66,7 +66,6 @@ export const en = {
       curriculum: "Curriculum",
       classes: "My Classes",
       lessonPlans: "Lesson Plans",
-      resources: "Resources",
       activity: "Activity",
     },
     common: {
