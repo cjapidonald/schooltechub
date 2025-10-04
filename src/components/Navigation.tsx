@@ -49,7 +49,7 @@ const Navigation = () => {
       { name: t.nav.dashboard ?? t.nav.profile, path: "/profile" },
       { name: t.nav.home, path: "/" },
       { name: t.nav.blog, path: "/blog" },
-      { name: t.nav.curriculum ?? "Curriculum", path: "/curriculum" },
+      { name: t.nav.curriculum ?? "Curriculum", path: "/account?tab=curriculum" },
       { name: t.nav.events, path: "/events" },
       { name: t.nav.services, path: "/services" },
       { name: t.nav.about, path: "/about" },
@@ -116,11 +116,18 @@ const Navigation = () => {
 
           {/* Desktop navigation links */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const localizedPath = getLocalizedNavPath(item.path);
-              const isActive =
-                location.pathname === localizedPath ||
-                (item.path !== "/" && location.pathname.startsWith(localizedPath));
+              const [targetPath, queryString] = localizedPath.split("?");
+              const matchesPath =
+                location.pathname === targetPath ||
+                (item.path !== "/" && targetPath && location.pathname.startsWith(targetPath));
+              const targetParams = new URLSearchParams(queryString ?? "");
+              const currentParams = new URLSearchParams(location.search);
+              const matchesQuery =
+                targetParams.toString().length === 0 ||
+                Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
+              const isActive = matchesPath && matchesQuery;
 
               return (
                 <Link
@@ -207,11 +214,18 @@ const Navigation = () => {
                   />
                 </form>
 
-                {navItems.map((item) => {
+                {navItems.map(item => {
                   const localizedPath = getLocalizedNavPath(item.path);
-                  const isActive =
-                    location.pathname === localizedPath ||
-                    (item.path !== "/" && location.pathname.startsWith(localizedPath));
+                  const [targetPath, queryString] = localizedPath.split("?");
+                  const matchesPath =
+                    location.pathname === targetPath ||
+                    (item.path !== "/" && targetPath && location.pathname.startsWith(targetPath));
+                  const targetParams = new URLSearchParams(queryString ?? "");
+                  const currentParams = new URLSearchParams(location.search);
+                  const matchesQuery =
+                    targetParams.toString().length === 0 ||
+                    Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
+                  const isActive = matchesPath && matchesQuery;
 
                   return (
                     <Link
