@@ -23,7 +23,7 @@ export function StructuredData({ type, data }: StructuredDataProps) {
             "telephone": "+355-69-123-4567",
             "contactType": "customer service",
             "areaServed": ["AL", "XK", "MK", "ME"],
-            "availableLanguage": ["English", "Albanian"]
+          "availableLanguage": ["English"]
           },
           "sameAs": [
             "https://facebook.com/schooltechhub",

@@ -1,10 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { en } from '../translations/en';
-import { sq } from '../translations/sq';
-import { vi } from '../translations/vi';
 
-type Language = 'en' | 'sq' | 'vi';
+type Language = 'en';
 type Translations = typeof en;
 
 interface LanguageContextType {
@@ -15,10 +13,7 @@ interface LanguageContextType {
 
 const translations: Record<Language, Translations> = {
   en,
-  sq,
-  vi
 };
-const supportedLanguages = Object.keys(translations) as Language[];
 
 const defaultLanguageContext: LanguageContextType = {
   language: 'en',
@@ -36,47 +31,29 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const navigate = useNavigate();
   const location = useLocation();
 
-  const getLanguageFromPath = (pathname: string): Language => {
-    const [, maybeLang] = pathname.split('/');
-    return supportedLanguages.includes(maybeLang as Language)
-      ? (maybeLang as Language)
-      : 'en';
-  };
+  const getLanguageFromPath = () => 'en';
 
-  const [language, setLanguageState] = useState<Language>(() => getLanguageFromPath(location.pathname));
+  const [language, setLanguageState] = useState<Language>(() => getLanguageFromPath());
 
   useEffect(() => {
     setLanguageState((current) => {
-      const urlLang = getLanguageFromPath(location.pathname);
+      const urlLang = getLanguageFromPath();
       return current === urlLang ? current : urlLang;
     });
   }, [location.pathname]);
 
-  const setLanguage = (newLang: Language) => {
-    if (newLang === language) {
-      return;
-    }
-
-    setLanguageState(newLang);
-
-    // Get current path without language prefix
+  const setLanguage = (_newLang: Language) => {
+    setLanguageState('en');
+    // Only English is supported, so we simply ensure the URL does not contain
+    // any legacy language prefixes and keep the navigation within the current path.
     let currentPath = location.pathname;
-    
-    // Remove existing language prefix if present
-    const langPrefixRegex = new RegExp(`^/(${supportedLanguages.join('|')})(/|$)`);
+    const langPrefixRegex = new RegExp('^/(sq|vi)(/|$)');
     if (langPrefixRegex.test(currentPath)) {
       currentPath = currentPath.replace(langPrefixRegex, '/');
     }
 
     const searchAndHash = `${location.search}${location.hash}`;
-
-    // Navigate to new language path
-    if (newLang === 'en') {
-      navigate(`${currentPath}${searchAndHash}`);
-    } else {
-      const localizedPath = currentPath === '/' ? `/${newLang}` : `/${newLang}${currentPath}`;
-      navigate(`${localizedPath}${searchAndHash}`);
-    }
+    navigate(`${currentPath}${searchAndHash}`);
   };
 
   const t = translations[language];

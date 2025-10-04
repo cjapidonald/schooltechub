@@ -7,7 +7,6 @@ import {
   Search,
   User,
   LogOut,
-  Languages,
   BookOpen,
   LayoutDashboard,
   SquarePen,
@@ -24,7 +23,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 const Navigation = () => {
@@ -33,7 +31,7 @@ const Navigation = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -64,9 +62,7 @@ const Navigation = () => {
     return items;
   }, [t.nav.about, t.nav.blog, t.nav.builder, t.nav.events, t.nav.home, t.nav.profile, t.nav.services, user]);
   
-  const getLocalizedNavPath = (path: string) => {
-    return getLocalizedPath(path, language);
-  };
+  const getLocalizedNavPath = (path: string) => getLocalizedPath(path, "en");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,25 +138,6 @@ const Navigation = () => {
 
           {/* Desktop actions */}
           <div className="hidden items-center gap-3 md:flex">
-            <Select
-              value={language}
-              onValueChange={(val) => {
-                setLanguage(val as "en" | "sq" | "vi");
-              }}
-            >
-              <SelectTrigger className="h-10 min-w-[5.5rem] px-3 lg:min-w-[6.5rem]">
-                <div className="flex items-center gap-1">
-                  <Languages className="h-4 w-4" />
-                  <SelectValue placeholder="Lang" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="sq">Shqip</SelectItem>
-                <SelectItem value="vi">Tiếng Việt</SelectItem>
-              </SelectContent>
-            </Select>
-
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -254,29 +231,6 @@ const Navigation = () => {
                     </Link>
                   );
                 })}
-
-                {/* Language Select mobile */}
-                <div className="pt-2">
-                  <Select
-                    value={language}
-                    onValueChange={(val) => {
-                      setLanguage(val as "en" | "sq" | "vi");
-                      setIsOpen(false);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <div className="flex items-center gap-2">
-                        <Languages className="h-4 w-4" />
-                        <SelectValue placeholder="Language" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="sq">Shqip</SelectItem>
-                      <SelectItem value="vi">Tiếng Việt</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
                 {user ? (
                   <div className="border-t pt-4 space-y-3">

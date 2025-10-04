@@ -27,30 +27,19 @@ import Footer from '@/components/Footer';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminPage from '@/pages/admin/AdminPage';
 
-const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { lang } = useParams<{ lang?: string }>();
-  const validLangs = ['en', 'sq', 'vi'];
-  
-  // If lang is provided but invalid, redirect to English version
-  if (lang && !validLangs.includes(lang)) {
-    return <Navigate to="/" replace />;
-  }
-  
-  return (
-    <>
-      <Navigation />
-      {children}
-      <Footer />
-    </>
-  );
-};
+const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <>
+    <Navigation />
+    {children}
+    <Footer />
+  </>
+);
 
-const LegacyBuilderRedirect: React.FC<{ includeLanguage?: boolean }> = ({ includeLanguage = false }) => {
-  const params = useParams<{ lang?: string; id?: string }>();
-  const langPrefix = includeLanguage && params.lang ? `/${params.lang}` : '';
+const LegacyBuilderRedirect: React.FC = () => {
+  const params = useParams<{ id?: string }>();
   const destination = params.id
-    ? `${langPrefix}/builder/lesson-plans/${params.id}`
-    : `${langPrefix}/builder/lesson-plans`;
+    ? `/builder/lesson-plans/${params.id}`
+    : `/builder/lesson-plans`;
 
   return <Navigate to={destination} replace />;
 };
@@ -160,104 +149,11 @@ export const LocalizedRoutes = () => {
         <Route path=":segment/:subSegment/:child" element={<AdminPage />} />
       </Route>
 
-      {/* Localized routes for Albanian and Vietnamese */}
-      <Route path="/:lang">
-        <Route index element={<RouteWrapper><Index /></RouteWrapper>} />
-        <Route path="about" element={<RouteWrapper><About /></RouteWrapper>} />
-        <Route path="services" element={<RouteWrapper><Services /></RouteWrapper>} />
-        <Route path="blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
-        <Route path="blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-        <Route
-          path="builder/lesson-plans"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <BuilderLessonPlan />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route
-          path="builder/lesson-plans/:id"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <BuilderLessonPlanDetail />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route path="lesson-plans/builder" element={<LegacyBuilderRedirect includeLanguage />} />
-        <Route path="lesson-plans/builder/:id" element={<LegacyBuilderRedirect includeLanguage />} />
-        <Route
-          path="lesson-builder"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <LessonBuilderPage />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route path="resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
-        <Route path="events" element={<RouteWrapper><Events /></RouteWrapper>} />
-        <Route path="events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
-        <Route path="contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
-        <Route path="faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
-        <Route path="auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
-        <Route
-          path="account"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <Account />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route
-          path="account/classes/:id"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <ClassDashboard />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route
-          path="account/resources"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <AccountResources />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route
-          path="account/resources/new"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <AccountResourceNew />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route
-          path="account/resources/:id"
-          element={
-            <RouteWrapper>
-              <AuthGuard>
-                <AccountResourceEdit />
-              </AuthGuard>
-            </RouteWrapper>
-          }
-        />
-        <Route path="sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
-      </Route>
-      
+      <Route path="/sq" element={<Navigate to="/" replace />} />
+      <Route path="/sq/*" element={<Navigate to="/" replace />} />
+      <Route path="/vi" element={<Navigate to="/" replace />} />
+      <Route path="/vi/*" element={<Navigate to="/" replace />} />
+
       <Route path="*" element={<RouteWrapper><NotFound /></RouteWrapper>} />
     </Routes>
   );

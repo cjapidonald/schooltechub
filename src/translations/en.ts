@@ -1166,9 +1166,7 @@ export const en = {
       sitemap: "Sitemap"
     },
     languages: {
-      en: "English",
-      sq: "Albanian",
-      vi: "Vietnamese"
+      en: "English"
     }
   },
   lessonBuilder: {
