@@ -701,23 +701,13 @@ const Blog = () => {
         <section className="container py-12">
           <div className="flex flex-col gap-10 lg:flex-row">
             <aside className="space-y-8 rounded-3xl border border-border/40 bg-background/40 p-6 backdrop-blur lg:w-80 lg:flex-shrink-0">
-              <div className="space-y-3">
-                <div>
-                  <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                    {t.blog.filters.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {t.blog.filters.helper ?? t.blog.subtitle}
-                  </p>
-                </div>
+              <div className="space-y-6">
                 {hasActiveFilters ? (
                   <Button variant="outline" size="sm" onClick={clearFilters} className="w-full">
                     {t.blog.filters.clear}
                   </Button>
                 ) : null}
-              </div>
 
-              <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="blog-category-filter" className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     {t.blog.filters.category}
