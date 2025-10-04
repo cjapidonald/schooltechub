@@ -22,6 +22,7 @@ import {
   Activity,
   ArrowRight,
   FlaskConical,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
@@ -543,21 +544,21 @@ const Blog = () => {
             <p className="text-white">{t.blog.hero.subtitle}</p>
           </div>
 
-          <div className="mb-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Bookmark className="h-4 w-4 text-primary" />
-                    Saved posts
-                  </CardTitle>
-                  <CardDescription>Pick up reading where you left off.</CardDescription>
-                </div>
-                {user ? <Badge variant="secondary">{savedPosts.length}</Badge> : null}
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                {user ? (
-                  savedPosts.length ? (
+          {user ? (
+            <div className="mb-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
+                <CardHeader className="flex flex-row items-start justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Bookmark className="h-4 w-4 text-primary" />
+                      {t.blog.savedPosts.title}
+                    </CardTitle>
+                    <CardDescription>{t.blog.savedPosts.subtitle}</CardDescription>
+                  </div>
+                  <Badge variant="secondary">{savedPosts.length}</Badge>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  {savedPosts.length ? (
                     savedPosts.slice(0, 3).map(post => (
                       <div key={post.id} className="space-y-1">
                         <Link
@@ -570,101 +571,87 @@ const Blog = () => {
                           <p className="text-xs text-muted-foreground">{post.excerpt}</p>
                         ) : null}
                         <p className="text-xs text-muted-foreground">
-                          Saved {formatDisplayDate(post.createdAt)}
+                          {t.blog.savedPosts.savedOn.replace("{date}", formatDisplayDate(post.createdAt))}
                         </p>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Save any article to revisit it here.
-                    </p>
-                  )
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Sign in to bookmark your favourite reads and build a personal library.
-                  </p>
-                )}
-                <div className="pt-2">
+                    <p className="text-sm text-muted-foreground">{t.blog.savedPosts.empty}</p>
+                  )}
+                  <div className="pt-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to={getLocalizedPath("/account?tab=savedPosts", language)}>
+                        {t.blog.savedPosts.manage}
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
+                <CardHeader className="flex flex-row items-start justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Activity className="h-4 w-4 text-primary" />
+                      {t.blog.communityActivity.title}
+                    </CardTitle>
+                    <CardDescription>{t.blog.communityActivity.subtitle}</CardDescription>
+                  </div>
                   <Button size="sm" variant="outline" asChild>
-                    <Link to={user ? getLocalizedPath("/account?tab=savedPosts", language) : getLocalizedPath("/auth", language)}>
-                      Manage saved posts
+                    <Link to={getLocalizedPath("/forum/new", language)}>
+                      <MessageSquare className="mr-2 h-4 w-4" /> {t.blog.communityActivity.askQuestion}
                     </Link>
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Activity className="h-4 w-4 text-primary" />
-                    Community activity
-                  </CardTitle>
-                  <CardDescription>Track your latest interactions around the hub.</CardDescription>
-                </div>
-                <Button size="sm" variant="outline" asChild>
-                  <Link to={getLocalizedPath("/forum/new", language)}>
-                    <MessageSquare className="mr-2 h-4 w-4" /> Ask a question
-                  </Link>
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                {user ? (
-                  activityEntries.slice(0, 4).map(entry => (
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  {activityEntries.slice(0, 4).map(entry => (
                     <div key={entry.id} className="space-y-1">
                       <p className="font-medium text-foreground">{entry.description}</p>
                       <p className="text-xs text-muted-foreground">{formatDisplayDate(entry.createdAt)}</p>
                     </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Join SchoolTech Hub to see lesson drafts, saved posts, and forum replies in one feed.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                  ))}
+                </CardContent>
+              </Card>
 
-            <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <FlaskConical className="h-4 w-4 text-primary" />
-                  Research highlights
-                </CardTitle>
-                <CardDescription>
-                  Discover emerging practice and contribute your own classroom research.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                {researchHighlights.slice(0, 3).map(item => (
-                  <div key={item.id} className="space-y-1">
-                    <Link
-                      to={item.slug ? getLocalizedPath(`/blog/${item.slug}`, language) : getLocalizedPath("/blog", language)}
-                      className="font-medium text-foreground hover:underline"
-                    >
-                      {item.title}
-                    </Link>
-                    {item.summary ? (
-                      <p className="text-xs text-muted-foreground">{item.summary}</p>
-                    ) : null}
-                    <p className="text-xs text-muted-foreground">{formatDisplayDate(item.publishedAt)}</p>
+              <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FlaskConical className="h-4 w-4 text-primary" />
+                    {t.blog.researchHighlights.title}
+                  </CardTitle>
+                  <CardDescription>{t.blog.researchHighlights.subtitle}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  {researchHighlights.slice(0, 3).map(item => (
+                    <div key={item.id} className="space-y-1">
+                      <Link
+                        to={item.slug ? getLocalizedPath(`/blog/${item.slug}`, language) : getLocalizedPath("/blog", language)}
+                        className="font-medium text-foreground hover:underline"
+                      >
+                        {item.title}
+                      </Link>
+                      {item.summary ? (
+                        <p className="text-xs text-muted-foreground">{item.summary}</p>
+                      ) : null}
+                      <p className="text-xs text-muted-foreground">{formatDisplayDate(item.publishedAt)}</p>
+                    </div>
+                  ))}
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to={getLocalizedPath("/blog/new", language)}>
+                        <ArrowRight className="mr-2 h-4 w-4" /> {t.blog.researchHighlights.share}
+                      </Link>
+                    </Button>
+                    <Button size="sm" variant="ghost" asChild>
+                      <Link to={getLocalizedPath("/research", language)}>
+                        {t.blog.researchHighlights.explore}
+                      </Link>
+                    </Button>
                   </div>
-                ))}
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to={getLocalizedPath("/blog/new", language)}>
-                      <ArrowRight className="mr-2 h-4 w-4" /> Share a research post
-                    </Link>
-                  </Button>
-                  <Button size="sm" variant="ghost" asChild>
-                    <Link to={getLocalizedPath("/research", language)}>
-                      Explore research hub
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : null}
 
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Left Sidebar - Filters */}
@@ -1033,6 +1020,58 @@ const Blog = () => {
               )}
             </div>
           </div>
+
+          {!user ? (
+            <section className="mt-16">
+              <Card className="border border-primary/30 bg-background/80 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)]">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    {t.blog.lockedFeatures.title}
+                  </CardTitle>
+                  <CardDescription>{t.blog.lockedFeatures.subtitle}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {[
+                      {
+                        icon: <Bookmark className="h-4 w-4" />,
+                        title: t.blog.lockedFeatures.savedPosts.title,
+                        description: t.blog.lockedFeatures.savedPosts.description,
+                      },
+                      {
+                        icon: <Activity className="h-4 w-4" />,
+                        title: t.blog.lockedFeatures.communityActivity.title,
+                        description: t.blog.lockedFeatures.communityActivity.description,
+                      },
+                      {
+                        icon: <FlaskConical className="h-4 w-4" />,
+                        title: t.blog.lockedFeatures.researchHighlights.title,
+                        description: t.blog.lockedFeatures.researchHighlights.description,
+                      },
+                    ].map(feature => (
+                      <Button
+                        key={feature.title}
+                        variant="outline"
+                        className="h-full flex flex-col items-start gap-2 border-dashed"
+                        asChild
+                      >
+                        <Link to={getLocalizedPath("/auth?intent=signup", language)}>
+                          <span className="flex items-center gap-2 text-base font-semibold">
+                            {feature.icon}
+                            {feature.title}
+                          </span>
+                          <span className="text-sm text-muted-foreground text-left block">
+                            {feature.description}
+                          </span>
+                        </Link>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          ) : null}
         </div>
       </main>
 
