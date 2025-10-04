@@ -48,38 +48,39 @@ export const vi = {
     },
   },
   hero: {
-    title: "Trao quyền cho giáo dục thông qua đổi mới",
-    subtitle: "Chuyển đổi trường học của bạn với các giải pháp công nghệ tiên tiến",
-    description: "Chúng tôi cung cấp các giải pháp công nghệ giáo dục toàn diện giúp cách mạng hóa trải nghiệm học tập và tối ưu hóa hoạt động của trường học.",
-    getStarted: "Bắt đầu",
-    learnMore: "Tìm hiểu thêm"
+    title: "Không gian làm việc toàn diện dành cho giáo viên",
+    subtitle: "Lên kế hoạch, cộng tác và phát triển cùng SchoolTech Hub",
+    description:
+      "SchoolTech Hub mang đến cho giáo viên một phòng sinh hoạt trực tuyến để lập kế hoạch bài học, tuyển chọn tài nguyên, chia sẻ nghiên cứu và bắt kịp xu hướng EdTech mới nhất.",
+    getStarted: "Bắt đầu lập kế hoạch",
+    learnMore: "Khám phá không gian"
   },
   features: {
-    title: "Tại sao chọn School Tech Hub Solutions?",
-    subtitle: "Giải pháp toàn diện cho giáo dục hiện đại",
+    title: "Mọi công cụ giáo viên cần chỉ trong một nơi",
+    subtitle: "Giải pháp được tuyển chọn giúp bạn dạy học, hợp tác và lãnh đạo tự tin",
     feature1: {
-      title: "Quản lý học tập thông minh",
-      description: "Nền tảng LMS tiên tiến với cá nhân hóa bằng AI và theo dõi tiến độ thời gian thực"
+      title: "Lập kế hoạch bài học chiến lược",
+      description: "Mẫu hướng dẫn, gợi ý từ AI và căn chỉnh chương trình học để mỗi tiết dạy đều có mục tiêu rõ ràng"
     },
     feature2: {
-      title: "Giải pháp lớp học ảo",
-      description: "Môi trường học tập trực tuyến với công cụ tương tác và tính năng cộng tác"
+      title: "Thư viện tài nguyên được tuyển chọn",
+      description: "Tìm kiếm nhanh công cụ đã kiểm chứng, tài liệu tải xuống và khuyến nghị công nghệ lớp học"
     },
     feature3: {
-      title: "Bảng điều khiển phân tích dữ liệu",
-      description: "Thông tin chi tiết toàn diện về hiệu suất học sinh và số liệu tổ chức"
+      title: "Trung tâm phát triển chuyên môn",
+      description: "Theo dõi blog giáo dục, bản tóm tắt nghiên cứu và hướng dẫn triển khai ngay trong không gian của bạn"
     },
     feature4: {
-      title: "Hạ tầng đám mây",
-      description: "Giải pháp đám mây an toàn, có thể mở rộng đảm bảo thời gian hoạt động 99,9% và bảo vệ dữ liệu"
+      title: "Mẫu sẵn sàng cho dữ liệu",
+      description: "Truy cập bảng theo dõi tiến độ, nhật ký phản tư và báo cáo xuất ra phục vụ họp hành, thanh tra"
     },
     feature5: {
-      title: "Ứng dụng học tập di động",
-      description: "Ứng dụng di động gốc để học liền mạch trên mọi thiết bị"
+      title: "Không gian cộng tác",
+      description: "Chia sẻ kế hoạch, đặt câu hỏi và đồng xây dựng học phần với đồng nghiệp hoặc mạng lưới giáo viên của bạn"
     },
     feature6: {
-      title: "Hỗ trợ kỹ thuật 24/7",
-      description: "Hỗ trợ suốt ngày đêm từ đội ngũ kỹ thuật chuyên gia của chúng tôi"
+      title: "Hỗ trợ được hướng dẫn",
+      description: "Buổi hướng dẫn cá nhân hóa, giờ trực tuyến và tài nguyên trợ giúp giúp bạn duy trì nhịp độ"
     }
   },
   about: {
@@ -1155,21 +1156,21 @@ export const vi = {
   },
   home: {
     highlights: {
-      aiPowered: "Ứng dụng AI",
-      vrClassrooms: "Lớp học VR",
-      realTimeAnalytics: "Phân tích thời gian thực"
+      workspace: "Bảng lập kế hoạch bài học cộng tác",
+      resourceLibrary: "Thư viện công cụ và tài nguyên được tuyển chọn",
+      community: "Cộng đồng giáo viên sôi động & hỏi đáp"
     },
     stats: {
-      aiLessons: "Bài học ứng dụng AI",
-      vrExperiences: "Trải nghiệm VR",
-      engagementRate: "Tỷ lệ tương tác",
-      supportAvailable: "Hỗ trợ sẵn sàng"
+      lessonPlans: "Kế hoạch bài học đã tổ chức",
+      resourceDownloads: "Tài nguyên chia sẻ cho giáo viên",
+      teacherSatisfaction: "Mức độ hài lòng của giáo viên",
+      supportAvailable: "Giờ hỗ trợ trực tuyến mỗi tuần"
     },
     cta: {
-      title: "Sẵn sàng chuyển đổi trường học của bạn?",
-      description: "Tham gia cùng hàng nghìn nhà giáo dục đã sử dụng nền tảng của chúng tôi để tạo ra trải nghiệm học tập tốt hơn.",
-      primary: "Bắt đầu",
-      secondary: "Xem bảng giá",
+      title: "Xây dựng không gian làm việc cho giáo viên ngay hôm nay",
+      description: "Tập trung hóa việc lập kế hoạch, tài nguyên và phát triển nghề nghiệp chỉ trong vài phút.",
+      primary: "Đặt lịch giới thiệu",
+      secondary: "Khám phá tài nguyên cho giáo viên",
       social: {
         facebook: "Facebook",
         instagram: "Instagram",

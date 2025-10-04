@@ -48,38 +48,39 @@ export const en = {
     },
   },
   hero: {
-    title: "Empowering Education Through Innovation",
-    subtitle: "Transform Your School with Cutting-Edge Technology Solutions",
-    description: "We provide comprehensive educational technology solutions that revolutionize learning experiences and streamline school operations.",
-    getStarted: "Get Started",
-    learnMore: "Learn More"
+    title: "Your All-in-One Teacher Workspace",
+    subtitle: "Plan, collaborate, and grow with SchoolTech Hub",
+    description:
+      "SchoolTech Hub gives educators a centralized digital staff room to plan lessons, curate resources, share research, and stay ahead of emerging EdTech trends.",
+    getStarted: "Start planning",
+    learnMore: "Explore the workspace"
   },
   features: {
-    title: "Why Choose School Tech Hub Solutions?",
-    subtitle: "Comprehensive Solutions for Modern Education",
+    title: "Everything teachers need in one workspace",
+    subtitle: "Curated tools to help you teach, learn, and lead with confidence",
     feature1: {
-      title: "Smart Learning Management",
-      description: "Advanced LMS platform with AI-powered personalization and real-time progress tracking"
+      title: "Strategic lesson planning",
+      description: "Guided templates, AI suggestions, and curriculum alignment that keep every lesson purposeful"
     },
     feature2: {
-      title: "Virtual Classroom Solutions",
-      description: "Immersive online learning environments with interactive tools and collaboration features"
+      title: "Curated resource library",
+      description: "Search classroom-tested tools, downloads, and technology recommendations in seconds"
     },
     feature3: {
-      title: "Data Analytics Dashboard",
-      description: "Comprehensive insights into student performance and institutional metrics"
+      title: "Professional learning hub",
+      description: "Follow educator blogs, research summaries, and implementation guides without leaving your workspace"
     },
     feature4: {
-      title: "Cloud Infrastructure",
-      description: "Secure, scalable cloud solutions ensuring 99.9% uptime and data protection"
+      title: "Data-ready templates",
+      description: "Access progress trackers, reflection journals, and reporting exports for meetings and inspections"
     },
     feature5: {
-      title: "Mobile Learning Apps",
-      description: "Native mobile applications for seamless learning on any device"
+      title: "Collaboration spaces",
+      description: "Share lesson plans, pose questions, and co-create units with colleagues or your wider PLN"
     },
     feature6: {
-      title: "24/7 Technical Support",
-      description: "Round-the-clock support from our expert technical team"
+      title: "Guided onboarding & support",
+      description: "Personalized walkthroughs, office hours, and help center resources to keep momentum going"
     }
   },
   about: {
@@ -1189,21 +1190,21 @@ export const en = {
   },
   home: {
     highlights: {
-      aiPowered: "AI-Powered",
-      vrClassrooms: "VR Classrooms",
-      realTimeAnalytics: "Real-Time Analytics"
+      workspace: "Collaborative lesson planning boards",
+      resourceLibrary: "Curated teaching tools & resources",
+      community: "Active teacher community and Q&A"
     },
     stats: {
-      aiLessons: "AI-Powered Lessons",
-      vrExperiences: "VR Experiences",
-      engagementRate: "Engagement Rate",
-      supportAvailable: "Support Available"
+      lessonPlans: "Lesson plans organized",
+      resourceDownloads: "Resources shared with teachers",
+      teacherSatisfaction: "Teacher satisfaction rating",
+      supportAvailable: "Live support hours each week"
     },
     cta: {
-      title: "Ready to Transform Your School?",
-      description: "Join thousands of educators who are already using our platform to create better learning experiences.",
-      primary: "Get Started",
-      secondary: "View Pricing",
+      title: "Build your teacher workspace today",
+      description: "Centralize planning, resources, and professional learning in minutes.",
+      primary: "Book a walkthrough",
+      secondary: "Browse teacher resources",
       social: {
         facebook: "Facebook",
         instagram: "Instagram",

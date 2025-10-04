@@ -2,21 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Cpu,
-  Brain,
-  Zap,
-  Shield,
   ArrowRight,
   Rocket,
-  Globe,
   ChevronRight,
-  Gamepad2,
-  Database,
-  Layout,
+  NotebookPen,
+  Library,
+  MessageCircle,
+  GraduationCap,
+  BarChart3,
+  Users,
+  Sparkles,
+  LifeBuoy,
   Facebook,
   Instagram,
   Linkedin,
   Mail,
-  Book,
 } from "lucide-react";
 
 import MouseGlowEffect from "@/components/MouseGlowEffect";
@@ -35,7 +35,7 @@ type HomeLandingProps = {
 };
 
 export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schooltechhub.com" }: HomeLandingProps) => {
-  const [counters, setCounters] = useState({ lessons: 0, vr: 0, engagement: 0 });
+  const [counters, setCounters] = useState({ lessons: 0, resources: 0, satisfaction: 0 });
   const statsRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
   const { t, language } = useLanguage();
@@ -56,9 +56,9 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
               const progress = currentStep / steps;
 
               setCounters({
-                lessons: Math.floor(10000 * progress),
-                vr: Math.floor(500 * progress),
-                engagement: Math.floor(98 * progress),
+                lessons: Math.floor(12000 * progress),
+                resources: Math.floor(4500 * progress),
+                satisfaction: Math.floor(97 * progress),
               });
 
               if (currentStep >= steps) {
@@ -79,16 +79,16 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
   }, [hasAnimated]);
 
   const highlights = [
-    { icon: Brain, text: t.home.highlights.aiPowered, iconColor: "text-primary" },
-    { icon: Globe, text: t.home.highlights.vrClassrooms, iconColor: "text-accent" },
-    { icon: Zap, text: t.home.highlights.realTimeAnalytics, iconColor: "text-secondary" },
+    { icon: NotebookPen, text: t.home.highlights.workspace, iconColor: "text-primary" },
+    { icon: Library, text: t.home.highlights.resourceLibrary, iconColor: "text-accent" },
+    { icon: MessageCircle, text: t.home.highlights.community, iconColor: "text-secondary" },
   ];
 
   const statsData = [
-    { value: `${counters.lessons.toLocaleString()}+`, label: t.home.stats.aiLessons, icon: Brain },
-    { value: `${counters.vr}+`, label: t.home.stats.vrExperiences, icon: Globe },
-    { value: `${counters.engagement}%`, label: t.home.stats.engagementRate, icon: Zap },
-    { value: "24/7", label: t.home.stats.supportAvailable, icon: Shield },
+    { value: `${counters.lessons.toLocaleString()}+`, label: t.home.stats.lessonPlans, icon: NotebookPen },
+    { value: `${counters.resources.toLocaleString()}+`, label: t.home.stats.resourceDownloads, icon: Library },
+    { value: `${counters.satisfaction}%`, label: t.home.stats.teacherSatisfaction, icon: Sparkles },
+    { value: "40+", label: t.home.stats.supportAvailable, icon: LifeBuoy },
   ];
 
   const socialLinks = [
@@ -125,12 +125,32 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
       {!embedded && (
         <>
           <SEO
-            title="Home"
-            description="Transform your classroom with SchoolTech Hub's AI-powered educational technology. Explore VR labs, gamification tools, and teacher management software. Get started for free today"
-            keywords="AI education platform, virtual reality classroom, gamification in education, teacher management software, student tracking system, curriculum development tools, educational technology Albania, auto graded homework, classroom management software"
+            title="Teacher Workspace for Lesson Planning | SchoolTech Hub"
+            description="SchoolTech Hub is the collaborative teacher workspace for planning lessons, curating classroom technology resources, sharing research, and staying on top of emerging EdTech trends."
+            keywords="teacher workspace, lesson planning platform, teaching resources hub, teacher community, collaborative lesson planning, education technology for teachers, professional learning network"
             canonicalUrl={canonicalUrl}
           />
-          <StructuredData type="Organization" data={{}} />
+          <StructuredData
+            type="Organization"
+            data={{
+              "@type": "EducationalOrganization",
+              name: "SchoolTech Hub",
+              url: canonicalUrl,
+              description:
+                "Collaborative teacher workspace for lesson planning, resource discovery, and professional learning.",
+              sameAs: [
+                "https://www.facebook.com/share/g/1NukWcXVpp/",
+                "https://www.instagram.com/schooltechhub/",
+                "https://www.linkedin.com/in/donald-cjapi-b7800a383/",
+              ],
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                email: "hello@schooltechhub.com",
+                availableLanguage: ["English"],
+              },
+            }}
+          />
         </>
       )}
       <MouseGlowEffect />
@@ -232,37 +252,37 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                icon: Brain,
+                icon: NotebookPen,
                 title: t.features.feature1.title,
                 description: t.features.feature1.description,
                 color: "primary",
               },
               {
-                icon: Globe,
+                icon: Library,
                 title: t.features.feature2.title,
                 description: t.features.feature2.description,
                 color: "accent",
               },
               {
-                icon: Gamepad2,
+                icon: GraduationCap,
                 title: t.features.feature3.title,
                 description: t.features.feature3.description,
                 color: "secondary",
               },
               {
-                icon: Database,
+                icon: BarChart3,
                 title: t.features.feature4.title,
                 description: t.features.feature4.description,
                 color: "primary",
               },
               {
-                icon: Layout,
+                icon: Users,
                 title: t.features.feature5.title,
                 description: t.features.feature5.description,
                 color: "accent",
               },
               {
-                icon: Book,
+                icon: LifeBuoy,
                 title: t.features.feature6.title,
                 description: t.features.feature6.description,
                 color: "secondary",

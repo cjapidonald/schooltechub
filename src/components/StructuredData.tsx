@@ -8,8 +8,8 @@ interface StructuredDataProps {
 export function StructuredData({ type, data }: StructuredDataProps) {
   const generateSchema = () => {
     switch (type) {
-      case 'Organization':
-        return {
+      case 'Organization': {
+        const defaultOrganization = {
           "@context": "https://schema.org",
           "@type": "Organization",
           "name": "SchoolTech Hub",
@@ -23,13 +23,13 @@ export function StructuredData({ type, data }: StructuredDataProps) {
             "telephone": "+355-69-123-4567",
             "contactType": "customer service",
             "areaServed": ["AL", "XK", "MK", "ME"],
-          "availableLanguage": ["English"]
+            "availableLanguage": ["English"],
           },
           "sameAs": [
             "https://facebook.com/schooltechhub",
             "https://twitter.com/schooltechhub",
             "https://linkedin.com/company/schooltechhub",
-            "https://instagram.com/schooltechhub"
+            "https://instagram.com/schooltechhub",
           ],
           "address": {
             "@type": "PostalAddress",
@@ -37,9 +37,35 @@ export function StructuredData({ type, data }: StructuredDataProps) {
             "addressLocality": "Tirana",
             "addressRegion": "Tirana",
             "postalCode": "1001",
-            "addressCountry": "AL"
-          }
+            "addressCountry": "AL",
+          },
         };
+
+        const mergedOrganization = {
+          ...defaultOrganization,
+          ...data,
+        };
+
+        if (data?.contactPoint) {
+          mergedOrganization.contactPoint = {
+            ...defaultOrganization.contactPoint,
+            ...data.contactPoint,
+          };
+        }
+
+        if (data?.address) {
+          mergedOrganization.address = {
+            ...defaultOrganization.address,
+            ...data.address,
+          };
+        }
+
+        if (data?.sameAs) {
+          mergedOrganization.sameAs = data.sameAs;
+        }
+
+        return mergedOrganization;
+      }
       
       case 'Service':
         return {
