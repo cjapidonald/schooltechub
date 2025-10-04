@@ -48,39 +48,39 @@ export const vi = {
     },
   },
   hero: {
-    title: "Không gian làm việc toàn diện dành cho giáo viên",
-    subtitle: "Lên kế hoạch, cộng tác và phát triển cùng SchoolTech Hub",
+    title: "The Digital Staffroom Built for Teachers",
+    subtitle: "Plan lessons, track progress, and assign homework with confidence",
     description:
-      "SchoolTech Hub mang đến cho giáo viên một phòng sinh hoạt trực tuyến để lập kế hoạch bài học, tuyển chọn tài nguyên, chia sẻ nghiên cứu và bắt kịp xu hướng EdTech mới nhất.",
-    getStarted: "Bắt đầu lập kế hoạch",
-    learnMore: "Khám phá không gian"
+      "SchoolTech Hub unites lesson planning, student analytics, and classroom technology guidance in one secure workspace designed for teachers.",
+    getStarted: "Build my workspace",
+    learnMore: "See everything included"
   },
   features: {
-    title: "Mọi công cụ giáo viên cần chỉ trong một nơi",
-    subtitle: "Giải pháp được tuyển chọn giúp bạn dạy học, hợp tác và lãnh đạo tự tin",
+    title: "An AI-ready teacher workspace",
+    subtitle: "Bring planning, reporting, and classroom technology together in one place",
     feature1: {
-      title: "Lập kế hoạch bài học chiến lược",
-      description: "Mẫu hướng dẫn, gợi ý từ AI và căn chỉnh chương trình học để mỗi tiết dạy đều có mục tiêu rõ ràng"
+      title: "Guided lesson planning",
+      description: "Blueprint every lesson with ready-made templates, curriculum alignment, and AI-powered suggestions"
     },
     feature2: {
-      title: "Thư viện tài nguyên được tuyển chọn",
-      description: "Tìm kiếm nhanh công cụ đã kiểm chứng, tài liệu tải xuống và khuyến nghị công nghệ lớp học"
+      title: "Automated student reports",
+      description: "Turn classroom data into parent-friendly summaries, growth snapshots, and inspection-ready evidence"
     },
     feature3: {
-      title: "Trung tâm phát triển chuyên môn",
-      description: "Theo dõi blog giáo dục, bản tóm tắt nghiên cứu và hướng dẫn triển khai ngay trong không gian của bạn"
+      title: "Skill tracking dashboards",
+      description: "Monitor mastery, intervene early, and celebrate wins with visual progress insights for every learner"
     },
     feature4: {
-      title: "Mẫu sẵn sàng cho dữ liệu",
-      description: "Truy cập bảng theo dõi tiến độ, nhật ký phản tư và báo cáo xuất ra phục vụ họp hành, thanh tra"
+      title: "Digital homework hub",
+      description: "Assign interactive activities, collect submissions, and give feedback from the same workspace"
     },
     feature5: {
-      title: "Không gian cộng tác",
-      description: "Chia sẻ kế hoạch, đặt câu hỏi và đồng xây dựng học phần với đồng nghiệp hoặc mạng lưới giáo viên của bạn"
+      title: "Technology coaching",
+      description: "Follow practical guides and micro-courses on using EdTech tools to energize your classroom"
     },
     feature6: {
-      title: "Hỗ trợ được hướng dẫn",
-      description: "Buổi hướng dẫn cá nhân hóa, giờ trực tuyến và tài nguyên trợ giúp giúp bạn duy trì nhịp độ"
+      title: "On-demand support",
+      description: "Join live clinics, office hours, and a peer community whenever you need a co-teacher"
     }
   },
   about: {
@@ -1156,27 +1156,71 @@ export const vi = {
   },
   home: {
     highlights: {
-      workspace: "Bảng lập kế hoạch bài học cộng tác",
-      resourceLibrary: "Thư viện công cụ và tài nguyên được tuyển chọn",
-      community: "Cộng đồng giáo viên sôi động & hỏi đáp"
+      workspace: "Plan purposeful lessons in minutes",
+      resourceLibrary: "Generate insight-rich student reports",
+      community: "Assign interactive homework & track progress"
     },
     stats: {
-      lessonPlans: "Kế hoạch bài học đã tổ chức",
-      resourceDownloads: "Tài nguyên chia sẻ cho giáo viên",
-      teacherSatisfaction: "Mức độ hài lòng của giáo viên",
-      supportAvailable: "Giờ hỗ trợ trực tuyến mỗi tuần"
+      lessonPlans: "Lesson plans organized",
+      resourceDownloads: "Resources shared with teachers",
+      teacherSatisfaction: "Teacher satisfaction rating",
+      supportAvailable: "Live support hours each week"
     },
     cta: {
-      title: "Xây dựng không gian làm việc cho giáo viên ngay hôm nay",
-      description: "Tập trung hóa việc lập kế hoạch, tài nguyên và phát triển nghề nghiệp chỉ trong vài phút.",
-      primary: "Đặt lịch giới thiệu",
-      secondary: "Khám phá tài nguyên cho giáo viên",
+      title: "Launch your SchoolTech Hub workspace",
+      description: "Bring lesson planning, student insights, and digital homework together for your whole class.",
+      primary: "Start my free tour",
+      secondary: "Discover teacher resources",
       social: {
         facebook: "Facebook",
         instagram: "Instagram",
         linkedin: "LinkedIn",
         email: "Email"
       }
+    },
+    workflow: {
+      title: "Everything you need for the modern classroom",
+      subtitle: "Follow an intuitive flow from planning to reporting, built around the way teachers work.",
+      items: [
+        {
+          badge: "Plan",
+          title: "Craft lessons with smart templates",
+          description: "Start with standards-aligned templates, add your strategies, and let AI suggest differentiation."
+        },
+        {
+          badge: "Report",
+          title: "Generate student-ready insights",
+          description: "Transform attendance, assessment, and behaviour data into clear progress reports instantly."
+        },
+        {
+          badge: "Assign",
+          title: "Deliver digital homework with ease",
+          description: "Send interactive tasks, collect evidence, and monitor completion without juggling extra tools."
+        }
+      ]
+    },
+    techTopics: {
+      title: "Technology inspiration for your next lesson",
+      subtitle: "Browse trending topics from our blog to help you blend pedagogy and innovation.",
+      action: "Read the guide",
+      items: [
+        {
+          title: "AI coaching for personalised learning",
+          description: "Discover how to pair teacher intuition with AI prompts that adapt to every student's pace."
+        },
+        {
+          title: "Interactive whiteboard workflows",
+          description: "Turn devices into collaborative spaces with ready-to-use routines and classroom management tips."
+        },
+        {
+          title: "Data dashboards that inform instruction",
+          description: "Learn how to connect your gradebook and formative checks to spot trends faster."
+        },
+        {
+          title: "Digital homework that sparks curiosity",
+          description: "Explore platforms and app smash ideas that keep students practicing between lessons."
+        }
+      ]
     }
   },
   sitemap: {
