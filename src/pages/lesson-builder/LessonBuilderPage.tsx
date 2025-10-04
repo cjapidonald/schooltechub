@@ -52,14 +52,28 @@ function mapSubject(value: string | null): Subject | null {
   return match ?? null;
 }
 
-const LessonBuilderPage = () => {
-  const [meta, setMeta] = useState<LessonPlanMetaDraft>(createInitialMeta);
+interface LessonBuilderPageProps {
+  layoutMode?: "standalone" | "embedded";
+  initialMeta?: Partial<LessonPlanMetaDraft> | null;
+  initialClassId?: string | null;
+}
+
+const LessonBuilderPage = ({
+  layoutMode = "standalone",
+  initialMeta = null,
+  initialClassId = null,
+}: LessonBuilderPageProps = {}) => {
+  const [meta, setMeta] = useState<LessonPlanMetaDraft>(() => ({
+    ...createInitialMeta(),
+    ...(initialMeta ?? {}),
+  }));
   const [planId, setPlanId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [searchParams] = useSearchParams();
-  const planParam = searchParams.get("id");
-  const initialClassParam = searchParams.get("classId");
+  const planParam = layoutMode === "standalone" ? searchParams.get("id") : null;
+  const searchParamClassId = layoutMode === "standalone" ? searchParams.get("classId") : null;
+  const resolvedInitialClassId = initialClassId ?? searchParamClassId;
   const { language, t } = useLanguage();
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
   const { toast } = useToast();
@@ -77,8 +91,37 @@ const LessonBuilderPage = () => {
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
   const [isLinkingClass, setIsLinkingClass] = useState(false);
-  const [preselectedClassId] = useState<string | undefined>(initialClassParam ?? undefined);
-  const [selectedClassId, setSelectedClassId] = useState<string | undefined>(undefined);
+  const [preselectedClassId, setPreselectedClassId] = useState<string | undefined>(
+    resolvedInitialClassId ?? undefined,
+  );
+  const [selectedClassId, setSelectedClassId] = useState<string | undefined>(
+    resolvedInitialClassId ?? undefined,
+  );
+
+  useEffect(() => {
+    if (!initialMeta) {
+      return;
+    }
+
+    setMeta(prev => ({
+      ...prev,
+      ...initialMeta,
+    }));
+  }, [initialMeta]);
+
+  useEffect(() => {
+    if (!resolvedInitialClassId) {
+      return;
+    }
+
+    setPreselectedClassId(resolvedInitialClassId ?? undefined);
+    setSelectedClassId(current => {
+      if (current === resolvedInitialClassId) {
+        return current;
+      }
+      return resolvedInitialClassId ?? undefined;
+    });
+  }, [resolvedInitialClassId]);
 
   useEffect(() => {
     latestMeta.current = meta;
@@ -463,13 +506,22 @@ const LessonBuilderPage = () => {
     return unsubscribe;
   }, [attachResource, draftId]);
 
+  const containerClasses =
+    layoutMode === "embedded" ? "space-y-10" : "min-h-screen bg-muted/20 py-10";
+  const mainClasses =
+    layoutMode === "embedded"
+      ? "space-y-10"
+      : "container mx-auto space-y-10 px-4";
+
   return (
-    <div className="min-h-screen bg-muted/20 py-10">
-      <SEO
-        title="Lesson Builder"
-        description="Plan lesson logistics and craft each instructional step from a single workspace."
-      />
-      <main className="container mx-auto space-y-10 px-4">
+    <div className={containerClasses}>
+      {layoutMode === "standalone" ? (
+        <SEO
+          title="Lesson Builder"
+          description="Plan lesson logistics and craft each instructional step from a single workspace."
+        />
+      ) : null}
+      <main className={mainClasses}>
         <header className="mx-auto max-w-3xl space-y-3 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Lesson Builder</h1>
           <div className="flex justify-center text-sm text-muted-foreground">

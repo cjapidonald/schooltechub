@@ -25,6 +25,27 @@ The following schema powers the SchoolTech Hub teacher dashboard. It keeps lesso
 | `notes` | `text` | Private teacher notes. |
 | `created_at` | `timestamptz` | Defaults to `now()`. |
 
+### `student_behavior_logs`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `student_id` | `uuid` | References `students.id`. |
+| `class_id` | `uuid` | Optional reference to `classes.id`. |
+| `note` | `text` | Behaviour observation or context. |
+| `sentiment` | `text` | Enum: `positive`, `neutral`, `needs_support`. |
+| `recorded_by` | `uuid` | Teacher author, references `teachers.id`. |
+| `recorded_at` | `timestamptz` | Defaults to `now()`. |
+
+### `student_appraisals`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `student_id` | `uuid` | References `students.id`. |
+| `class_id` | `uuid` | Optional reference to `classes.id`. |
+| `highlight` | `text` | Celebration or note about achievement. |
+| `recorded_by` | `uuid` | Teacher author, references `teachers.id`. |
+| `recorded_at` | `timestamptz` | Defaults to `now()`. |
+
 ### `classes`
 | Column | Type | Description |
 | --- | --- | --- |
@@ -109,6 +130,17 @@ The following schema powers the SchoolTech Hub teacher dashboard. It keeps lesso
 | `note` | `text` | Reflection or qualitative feedback. |
 | `recorded_at` | `timestamptz` | Defaults to `now()`. |
 
+### `student_reports`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `student_id` | `uuid` | References `students.id`. |
+| `requested_by` | `uuid` | Teacher requesting report. |
+| `status` | `text` | Enum: `pending`, `processing`, `ready`, `failed`. |
+| `generated_url` | `text` | Optional link to generated document. |
+| `requested_at` | `timestamptz` | Defaults to `now()`. |
+| `completed_at` | `timestamptz` | Set when report is ready. |
+
 ## Content Publishing & Resources
 
 ### `resources`
@@ -141,6 +173,14 @@ The following schema powers the SchoolTech Hub teacher dashboard. It keeps lesso
 | `id` | `uuid` | Primary key. |
 | `blog_post_id` | `uuid` | References `blog_posts.id`. |
 | `tag` | `text` | Individual tag value. |
+
+### `saved_posts`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `user_id` | `uuid` | References `teachers.id`/`auth.users.id`. |
+| `post_id` | `uuid` | References `blog_posts.id`. |
+| `created_at` | `timestamptz` | Defaults to `now()`. |
 
 ## Teacher Queries & Collaboration
 
@@ -193,6 +233,51 @@ The following schema powers the SchoolTech Hub teacher dashboard. It keeps lesso
 | `action` | `text` | Enum: `lesson_created`, `calendar_updated`, `query_posted`, etc. |
 | `metadata` | `jsonb` | Context payload. |
 | `created_at` | `timestamptz` | Defaults to `now()`. |
+
+### `curriculum_items`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `class_id` | `uuid` | References `classes.id`. |
+| `title` | `text` | Lesson or unit title. |
+| `topic` | `text` | Focus area for the week. |
+| `stage` | `text` | Curriculum stage or key stage. |
+| `subject` | `text` | Subject name. |
+| `week` | `integer` | Term week number. |
+| `date` | `date` | Scheduled delivery date. |
+| `created_at` | `timestamptz` | Defaults to `now()`. |
+
+### `curriculum_lessons`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `curriculum_item_id` | `uuid` | References `curriculum_items.id`. |
+| `lesson_plan_id` | `uuid` | References `lesson_plans.id`. |
+| `status` | `text` | Enum: `draft`, `published`, `archived`. |
+| `view_url` | `text` | Optional link to public view. |
+| `created_at` | `timestamptz` | Defaults to `now()`. |
+
+### `assessments`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `class_id` | `uuid` | References `classes.id`. |
+| `title` | `text` | Assessment title. |
+| `description` | `text` | Instructions or guidance. |
+| `due_date` | `date` | Optional due date. |
+| `grading_scale` | `text` | Enum: `letter`, `percentage`, `points`, `rubric`. |
+| `created_at` | `timestamptz` | Defaults to `now()`. |
+| `updated_at` | `timestamptz` | Updated via trigger. |
+
+### `assessment_submissions`
+| Column | Type | Description |
+| --- | --- | --- |
+| `id` | `uuid` | Primary key. |
+| `assessment_id` | `uuid` | References `assessments.id`. |
+| `student_id` | `uuid` | References `students.id`. |
+| `status` | `text` | Enum: `not_started`, `in_progress`, `submitted`. |
+| `submitted_at` | `timestamptz` | Timestamp of submission. |
+| `attachments` | `jsonb` | Array of uploaded artefacts. |
 
 ## Suggested Views & Policies
 

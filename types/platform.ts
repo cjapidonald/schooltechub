@@ -34,6 +34,90 @@ export interface Class {
   updatedAt: string | null;
 }
 
+export interface Student {
+  id: string;
+  firstName: string;
+  lastName: string;
+  preferredName: string | null;
+  email: string | null;
+  avatarUrl: string | null;
+  classIds: string[];
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface StudentSummary extends Student {
+  classes: Array<{
+    id: string;
+    title: string;
+    stage: string | null;
+    subject: string | null;
+  }>;
+  latestBehaviorNote: StudentBehaviorEntry | null;
+  latestAppraisalNote: StudentAppraisalEntry | null;
+  latestAssessment: AssessmentGrade | null;
+}
+
+export interface StudentAssignmentSummary {
+  id: string;
+  title: string;
+  status: "assigned" | "submitted" | "graded" | "missing";
+  dueDate: string | null;
+  grade: string | null;
+  gradeScale: GradeScale | null;
+}
+
+export interface StudentProgressSnapshot {
+  metric: string;
+  value: number;
+  trend: "up" | "down" | "steady";
+  capturedAt: string;
+}
+
+export interface StudentBehaviorEntry {
+  id: string;
+  studentId: string;
+  classId: string | null;
+  note: string;
+  recordedAt: string;
+  recordedBy: string | null;
+  sentiment: "positive" | "neutral" | "needs_support";
+}
+
+export interface StudentAppraisalEntry {
+  id: string;
+  studentId: string;
+  classId: string | null;
+  highlight: string;
+  recordedAt: string;
+  recordedBy: string | null;
+}
+
+export interface StudentProfile {
+  student: Student;
+  classes: Array<{
+    id: string;
+    title: string;
+    stage: string | null;
+    subject: string | null;
+  }>;
+  assignments: StudentAssignmentSummary[];
+  progress: StudentProgressSnapshot[];
+  behaviorNotes: StudentBehaviorEntry[];
+  appraisalNotes: StudentAppraisalEntry[];
+  reportStatus: StudentReport | null;
+}
+
+export interface StudentReport {
+  id: string;
+  studentId: string;
+  requestedBy: string;
+  status: "pending" | "processing" | "ready" | "failed";
+  generatedUrl: string | null;
+  requestedAt: string;
+  completedAt: string | null;
+}
+
 export interface LessonPlan {
   id: string;
   ownerId: string;
@@ -162,4 +246,68 @@ export interface ResearchSubmission {
   reviewedAt: string | null;
   reviewNote: string | null;
   submittedAt: string | null;
+}
+
+export interface CurriculumItem {
+  id: string;
+  classId: string;
+  title: string;
+  stage: string | null;
+  subject: string | null;
+  week: number | null;
+  topic: string | null;
+  date: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface CurriculumLessonLink {
+  id: string;
+  curriculumItemId: string;
+  lessonPlanId: string;
+  status: "draft" | "published" | "archived";
+  viewUrl: string | null;
+  createdAt: string | null;
+}
+
+export type GradeScale = "letter" | "percentage" | "points" | "rubric";
+
+export interface GradeScaleOption {
+  id: string;
+  scale: GradeScale;
+  label: string;
+  value: string;
+  numericValue: number | null;
+}
+
+export interface AssessmentTemplate {
+  id: string;
+  classId: string;
+  title: string;
+  description: string | null;
+  dueDate: string | null;
+  gradingScale: GradeScale;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AssessmentGrade {
+  id: string;
+  assessmentId: string;
+  studentId: string;
+  gradeValue: string | null;
+  gradeNumeric: number | null;
+  scale: GradeScale;
+  gradedAt: string | null;
+  feedback: string | null;
+  recordedBy: string | null;
+}
+
+export interface AssessmentSubmission {
+  id: string;
+  assessmentId: string;
+  studentId: string;
+  status: "not_started" | "in_progress" | "submitted";
+  submittedAt: string | null;
+  attachments: Array<{ id: string; name: string; url: string | null }>;
 }
