@@ -26,7 +26,7 @@ interface DashboardSummary {
 
 interface FailedEmailRecord {
   id: string;
-  userId: string;
+  userId: string | null;
   userEmail: string | null;
   userName: string | null;
   type: string;
@@ -36,7 +36,7 @@ interface FailedEmailRecord {
 
 interface NotificationRow {
   id: string;
-  user_id: string;
+  user_id: string | null;
   type: string;
   created_at: string;
   payload: unknown;
@@ -172,20 +172,25 @@ async function loadFailedEmails(supabase: SupabaseClient): Promise<FailedEmailRe
     return [];
   }
 
-  const userIds = Array.from(new Set(notifications.map(item => item.user_id)));
-  const { data: profileRows, error: profileError } = await supabase
-    .from("profiles")
-    .select<ProfileRow>("id,email,full_name")
-    .in("id", userIds);
+  const userIds = Array.from(new Set(notifications.map(item => item.user_id).filter((id): id is string => Boolean(id))));
 
-  if (profileError) {
-    throw new Error(profileError.message || "Failed to load user profiles");
+  let profiles = new Map<string, ProfileRow>();
+
+  if (userIds.length > 0) {
+    const { data: profileRows, error: profileError } = await supabase
+      .from("profiles")
+      .select<ProfileRow>("id,email,full_name")
+      .in("id", userIds);
+
+    if (profileError) {
+      throw new Error(profileError.message || "Failed to load user profiles");
+    }
+
+    profiles = new Map((profileRows ?? []).map(row => [row.id, row]));
   }
 
-  const profiles = new Map((profileRows ?? []).map(row => [row.id, row]));
-
   return notifications.map(notification => {
-    const profile = profiles.get(notification.user_id);
+    const profile = notification.user_id ? profiles.get(notification.user_id) : undefined;
     return {
       id: notification.id,
       userId: notification.user_id,
