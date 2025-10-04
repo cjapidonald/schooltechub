@@ -73,13 +73,19 @@ export const en = {
       signInPrompt: "Sign in to manage your dashboard.",
       exampleTag: "Example",
       exampleDescription: "Preview data to show how your workspace will look.",
-      exampleActionsDisabled: "Actions are disabled for example items.",
+      exampleActionsDisabled:
+        "Actions are disabled for example items. Add them to your workspace to enable full functionality.",
+      exampleActionsTitle: "Make the example data editable",
+      exampleActionsDescription:
+        "We'll copy the example class and curriculum into your account so you can try every action without starting from scratch.",
+      exampleActionsCta: "Add example data to my workspace",
     },
     toasts: {
       classCreated: "Class created",
       curriculumCreated: "Curriculum created",
       lessonPlanCreated: "Lesson plan created",
       exportUnavailable: "CSV export will be available soon.",
+      exampleDataCreated: "Example data added to your workspace.",
       error: "Something went wrong. Please try again.",
     },
     classes: {
