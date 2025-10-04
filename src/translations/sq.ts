@@ -1,5 +1,6 @@
 export const sq = {
   nav: {
+    dashboard: "Pulti",
     home: "Ballina",
     about: "Rreth Nesh",
     services: "Shërbimet",

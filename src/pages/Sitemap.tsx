@@ -20,7 +20,8 @@ type DynamicLink = RouteLink & {
 type TranslationDictionary = typeof en;
 
 const createStaticRoutes = (dictionary: TranslationDictionary): RouteLink[] => [
-  { title: dictionary.nav.home, url: "/" },
+  { title: dictionary.nav.dashboard, url: "/" },
+  { title: dictionary.nav.home, url: "/home" },
   { title: dictionary.nav.about, url: "/about" },
   { title: dictionary.nav.services, url: "/services" },
   { title: dictionary.nav.blog, url: "/blog" },
