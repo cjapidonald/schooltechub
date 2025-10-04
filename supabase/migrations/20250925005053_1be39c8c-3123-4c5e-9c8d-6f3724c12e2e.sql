@@ -109,22 +109,6 @@ INSERT INTO public.resources (
   is_active
 ) VALUES
 (
-  'Interactive Math Worksheets',
-  'Collection of printable and interactive math worksheets for primary students',
-  'https://example.com/math-worksheets',
-  'Worksheet',
-  'Math',
-  'Primary',
-  ARRAY['mathematics', 'worksheets', 'interactive'],
-  'https://images.unsplash.com/photo-1509228468518-180dd4864904',
-  'approved',
-  'Worksheet',
-  'Grade 3-5',
-  'PDF',
-  'Use these worksheets for daily practice or homework assignments',
-  true
-),
-(
   'Science Experiment Videos',
   'Engaging video demonstrations of simple science experiments',
   'https://example.com/science-videos',

@@ -43,9 +43,6 @@ VALUES
 -- Sample data for resources table
 INSERT INTO public.resources (title, description, type, subject, stage, resource_type, grade_level, format, tags, status, is_active)
 VALUES 
-  ('Fraction Worksheets Pack', 'Comprehensive worksheets for teaching fractions', 'document', 'Math', 'Primary', 'Worksheets', 'Grade 3-5', 'PDF',
-   ARRAY['fractions', 'practice', 'printable'], 'approved', true),
-  
   ('Solar System Presentation', 'Interactive slides about planets and space', 'presentation', 'Science', 'Secondary', 'Slides', 'Grade 6-8', 'PowerPoint',
    ARRAY['space', 'planets', 'astronomy'], 'approved', true),
   
