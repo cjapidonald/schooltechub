@@ -41,11 +41,25 @@ type SettingsPanelProps = {
 const isThemePreference = (value: unknown): value is ThemePreference =>
   value === "light" || value === "dark" || value === "system";
 
+const getMetadataString = (metadata: Record<string, unknown> | undefined, key: string) => {
+  const rawValue = metadata?.[key];
+  if (typeof rawValue !== "string") {
+    return "";
+  }
+
+  const trimmed = rawValue.trim();
+  return trimmed.length > 0 ? trimmed : "";
+};
+
 export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const metadata = user.user_metadata as Record<string, unknown> | undefined;
+  const [firstName, setFirstName] = useState<string>(getMetadataString(metadata, "first_name"));
+  const [lastName, setLastName] = useState<string>(getMetadataString(metadata, "last_name"));
+  const [subject, setSubject] = useState<string>(getMetadataString(metadata, "subject"));
+  const [phoneNumber, setPhoneNumber] = useState<string>(getMetadataString(metadata, "phone"));
   const initialSchoolName =
     typeof metadata?.school_name === "string" && metadata.school_name.trim().length > 0
       ? metadata.school_name.trim()
@@ -77,6 +91,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false);
 
   const [timezone, setTimezone] = useState<string>(() => {
     const stored = (user.user_metadata as Record<string, unknown> | undefined)?.timezone;
@@ -99,6 +114,11 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
 
     setCurrentAvatarReference(reference);
     setCurrentAvatarUrl(url);
+
+    setFirstName(getMetadataString(metadata, "first_name"));
+    setLastName(getMetadataString(metadata, "last_name"));
+    setSubject(getMetadataString(metadata, "subject"));
+    setPhoneNumber(getMetadataString(metadata, "phone"));
 
     const storedTimezone = metadata?.timezone;
     const storedTheme = metadata?.theme;
@@ -319,6 +339,74 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     }
   };
 
+  const handlePersonalInfoSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSavingPersonalInfo) {
+      return;
+    }
+
+    setIsSavingPersonalInfo(true);
+
+    try {
+      const trimmedFirstName = firstName.trim();
+      const trimmedLastName = lastName.trim();
+      const trimmedSubject = subject.trim();
+      const trimmedPhone = phoneNumber.trim();
+
+      const normalizedFirstName = trimmedFirstName.length > 0 ? trimmedFirstName : null;
+      const normalizedLastName = trimmedLastName.length > 0 ? trimmedLastName : null;
+      const normalizedSubject = trimmedSubject.length > 0 ? trimmedSubject : null;
+      const normalizedPhone = trimmedPhone.length > 0 ? trimmedPhone : null;
+
+      const fullNameParts = [normalizedFirstName, normalizedLastName].filter(Boolean) as string[];
+      const combinedFullName = fullNameParts.join(" ").trim();
+      const normalizedFullName = combinedFullName.length > 0 ? combinedFullName : null;
+
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          first_name: normalizedFirstName,
+          last_name: normalizedLastName,
+          full_name: normalizedFullName,
+          subject: normalizedSubject,
+          phone: normalizedPhone,
+        },
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({ id: user.id, full_name: normalizedFullName }, { onConflict: "id" });
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      setFirstName(normalizedFirstName ?? "");
+      setLastName(normalizedLastName ?? "");
+      setSubject(normalizedSubject ?? "");
+      setPhoneNumber(normalizedPhone ?? "");
+
+      toast({
+        title: t.account.toast.profileUpdated,
+      });
+
+      void refreshProfile();
+    } catch (error) {
+      console.error("Failed to update personal info", error);
+      toast({
+        variant: "destructive",
+        title: t.common.error,
+        description: t.common.tryAgain,
+      });
+    } finally {
+      setIsSavingPersonalInfo(false);
+    }
+  };
+
   const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -529,6 +617,71 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
             </div>
           </div>
         </CardContent>
+      </Card>
+
+      <Card>
+        <form onSubmit={handlePersonalInfoSubmit} className="space-y-0">
+          <CardHeader>
+            <CardTitle>{t.account.personal.title}</CardTitle>
+            <CardDescription>{t.account.personal.description}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="first-name">{t.account.personal.firstNameLabel}</Label>
+                <Input
+                  id="first-name"
+                  value={firstName}
+                  onChange={event => setFirstName(event.target.value)}
+                  placeholder={t.account.personal.firstNamePlaceholder}
+                  disabled={isSavingPersonalInfo}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="last-name">{t.account.personal.lastNameLabel}</Label>
+                <Input
+                  id="last-name"
+                  value={lastName}
+                  onChange={event => setLastName(event.target.value)}
+                  placeholder={t.account.personal.lastNamePlaceholder}
+                  disabled={isSavingPersonalInfo}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="subject">{t.account.personal.subjectLabel}</Label>
+              <Input
+                id="subject"
+                value={subject}
+                onChange={event => setSubject(event.target.value)}
+                placeholder={t.account.personal.subjectPlaceholder}
+                disabled={isSavingPersonalInfo}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">{t.account.personal.phoneLabel}</Label>
+              <Input
+                id="phone"
+                value={phoneNumber}
+                onChange={event => setPhoneNumber(event.target.value)}
+                placeholder={t.account.personal.phonePlaceholder}
+                disabled={isSavingPersonalInfo}
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isSavingPersonalInfo}>
+              {isSavingPersonalInfo ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t.common.loading}
+                </>
+              ) : (
+                t.account.personal.saveButton
+              )}
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
 
       <Card>
