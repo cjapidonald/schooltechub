@@ -68,6 +68,7 @@ export default async function handler(request: Request): Promise<Response> {
     const [
       pendingResourcesResult,
       pendingBlogpostsResult,
+      pendingBlogDraftsResult,
       pendingResearchAppsResult,
       activeProjectsResult,
       newUsers7DaysResult,
@@ -82,6 +83,10 @@ export default async function handler(request: Request): Promise<Response> {
         .select<{ id: string }>("id", { count: "exact", head: true })
         .eq("status", "pending")
         .in("page", ["research_blog", "edutech", "teacher_diary"]),
+      supabase
+        .from("blogs")
+        .select<{ id: string }>("id", { count: "exact", head: true })
+        .eq("is_published", false),
       supabase
         .from("research_applications")
         .select<{ id: string }>("id", { count: "exact", head: true })
@@ -101,7 +106,9 @@ export default async function handler(request: Request): Promise<Response> {
     ]);
 
     const pendingResources = extractCount(pendingResourcesResult, "pending resources");
-    const pendingBlogposts = extractCount(pendingBlogpostsResult, "pending blogposts");
+    const legacyPendingBlogposts = extractCount(pendingBlogpostsResult, "pending blogposts");
+    const pendingBlogDrafts = extractCount(pendingBlogDraftsResult, "pending submitted blogs");
+    const pendingBlogposts = legacyPendingBlogposts + pendingBlogDrafts;
     const pendingResearchApps = extractCount(pendingResearchAppsResult, "pending research applications");
     const activeProjects = extractCount(activeProjectsResult, "active research projects");
     const newUsers7Days = extractCount(newUsers7DaysResult, "new users (7 days)");

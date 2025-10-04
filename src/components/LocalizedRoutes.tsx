@@ -5,6 +5,7 @@ import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
 import BlogPost from '@/pages/BlogPost';
+import BlogBuilderPage from '@/pages/BlogBuilderPage';
 import Resources from '@/pages/resources';
 import Events from '@/pages/Events';
 import EventDetail from '@/pages/EventDetail';
@@ -52,6 +53,7 @@ export const LocalizedRoutes = () => {
       <Route path="/home" element={<RouteWrapper><Home /></RouteWrapper>} />
       <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
+      <Route path="/blog/new" element={<RouteWrapper><BlogBuilderPage /></RouteWrapper>} />
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
       <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />

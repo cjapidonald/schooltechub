@@ -8,6 +8,7 @@ import AdminUserDirectoryPage from "./users/AdminUserDirectoryPage";
 import AdminUserInvitationsPage from "./users/AdminUserInvitationsPage";
 import AdminUserRolesPage from "./users/AdminUserRolesPage";
 import AdminDashboardPage from "./dashboard/AdminDashboardPage";
+import AdminBlogModerationPage from "./moderation/AdminBlogModerationPage";
 
 const PAGE_COMPONENTS: Record<string, () => JSX.Element> = {
   "": AdminDashboardPage,
@@ -16,6 +17,7 @@ const PAGE_COMPONENTS: Record<string, () => JSX.Element> = {
   "users/directory": AdminUserDirectoryPage,
   "users/invitations": AdminUserInvitationsPage,
   "users/roles": AdminUserRolesPage,
+  "moderation/blogposts": AdminBlogModerationPage,
 };
 
 export default function AdminPage() {
