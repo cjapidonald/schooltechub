@@ -1,3 +1,4 @@
+codex/refine-website-structure-and-dashboard
 import {
   useEffect,
   useMemo,
@@ -8,10 +9,14 @@ import {
   type ComponentProps,
   type ComponentType,
 } from "react";
+
+import { useEffect, useMemo, useRef, useState, type ComponentProps, type ComponentType } from "react";
+main
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
+  ArrowLeft,
   BookOpen,
   Calendar,
   CalendarClock,
@@ -19,11 +24,15 @@ import {
   FileDown,
   FileSpreadsheet,
   FileText,
+  ListChecks,
   GraduationCap,
   Loader2,
   NotebookPen,
   Plus,
   RefreshCw,
+  Share2,
+  Sparkles,
+  Target,
   Users,
 } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
@@ -109,7 +118,6 @@ const tabs = [
   { value: "classes", label: "My Classes" },
   { value: "students", label: "My Students" },
   { value: "curriculum", label: "Curriculum" },
-  { value: "lessonBuilder", label: "Lesson Builder" },
   { value: "assessments", label: "Assessment Tracking" },
 ] as const;
 
@@ -120,6 +128,52 @@ type LessonBuilderPreset = {
   classId: string | null;
   curriculumItem?: CurriculumItem | null;
 } | null;
+
+type DraftCurriculumModule = {
+  id: number;
+  week: string;
+  focus: string;
+  activities: string;
+  assessment: string;
+  resources: string;
+};
+
+type DraftCurriculum = {
+  title: string;
+  subject: string;
+  stage: string;
+  term: string;
+  duration: string;
+  goals: string;
+  standards: string;
+  assessmentPlan: string;
+  differentiation: string;
+  collaboration: string;
+  modules: DraftCurriculumModule[];
+};
+
+const createDraftModule = (index: number): DraftCurriculumModule => ({
+  id: Date.now() + index + Math.floor(Math.random() * 1000),
+  week: `Week ${index + 1}`,
+  focus: "",
+  activities: "",
+  assessment: "",
+  resources: "",
+});
+
+const createInitialDraftCurriculum = (): DraftCurriculum => ({
+  title: "",
+  subject: "",
+  stage: "",
+  term: "",
+  duration: "10 weeks",
+  goals: "",
+  standards: "",
+  assessmentPlan: "",
+  differentiation: "",
+  collaboration: "",
+  modules: Array.from({ length: 4 }).map((_, index) => createDraftModule(index)),
+});
 
 const sentimentOptions: Array<{ value: StudentBehaviorEntry["sentiment"]; label: string }> = [
   { value: "positive", label: "Positive" },
@@ -160,6 +214,7 @@ const AccountDashboard = () => {
     return tabs.some(tab => tab.value === initial) ? (initial as DashboardTab) : "classes";
   });
   const [lessonPreset, setLessonPreset] = useState<LessonBuilderPreset>(null);
+  const [isLessonBuilderOpen, setIsLessonBuilderOpen] = useState(false);
   const [studentDialogOpen, setStudentDialogOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [behaviorNote, setBehaviorNote] = useState("");
@@ -171,14 +226,6 @@ const AccountDashboard = () => {
     subject: "all" as string | "all",
     week: "all" as string | "all",
     date: "",
-  });
-  const [assessmentDialogOpen, setAssessmentDialogOpen] = useState(false);
-  const [assessmentForm, setAssessmentForm] = useState({
-    title: "",
-    classId: "",
-    description: "",
-    dueDate: "",
-    scale: "letter" as GradeScale,
   });
   const [gradingDialogOpen, setGradingDialogOpen] = useState(false);
   const [gradingContext, setGradingContext] = useState({
@@ -432,18 +479,22 @@ const AccountDashboard = () => {
   });
 
   const createAssessmentMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (payload: {
+      classId: string;
+      title: string;
+      description: string;
+      dueDate: string;
+      scale: GradeScale;
+    }) =>
       createAssessment({
-        classId: assessmentForm.classId,
-        title: assessmentForm.title,
-        description: assessmentForm.description,
-        dueDate: assessmentForm.dueDate || null,
-        gradingScale: assessmentForm.scale,
+        classId: payload.classId,
+        title: payload.title,
+        description: payload.description,
+        dueDate: payload.dueDate || null,
+        gradingScale: payload.scale,
       }),
     onSuccess: () => {
       toast({ title: "Assessment created" });
-      setAssessmentDialogOpen(false);
-      setAssessmentForm({ title: "", classId: "", description: "", dueDate: "", scale: "letter" });
       queryClient.invalidateQueries({ queryKey: ["dashboard-assessments"] });
     },
     onError: (error: unknown) => {
@@ -539,10 +590,7 @@ const AccountDashboard = () => {
       subject: (item?.subject as LessonPlanMetaDraft["subject"]) ?? null,
     };
     setLessonPreset({ meta, classId: classId ?? item?.classId ?? null, curriculumItem: item ?? null });
-    setActiveTab("lessonBuilder");
-    const params = new URLSearchParams(searchParams);
-    params.set("tab", "lessonBuilder");
-    setSearchParams(params, { replace: true });
+    setIsLessonBuilderOpen(true);
   };
 
   const handleDownloadCurriculum = () => {
@@ -724,48 +772,14 @@ const AccountDashboard = () => {
             />
           </TabsContent>
 
-          <TabsContent value="lessonBuilder" className="space-y-6">
-            {lessonPreset?.curriculumItem ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Lesson context</CardTitle>
-                  <CardDescription>Prefilled from {lessonPreset.curriculumItem.title}.</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                  {lessonPreset.curriculumItem.subject ? (
-                    <Badge variant="outline">{lessonPreset.curriculumItem.subject}</Badge>
-                  ) : null}
-                  {lessonPreset.curriculumItem.stage ? (
-                    <Badge variant="outline">Stage {lessonPreset.curriculumItem.stage}</Badge>
-                  ) : null}
-                  {lessonPreset.curriculumItem.week ? (
-                    <Badge variant="outline">Week {lessonPreset.curriculumItem.week}</Badge>
-                  ) : null}
-                  {lessonPreset.curriculumItem.date ? (
-                    <Badge variant="outline">{formatDate(lessonPreset.curriculumItem.date)}</Badge>
-                  ) : null}
-                </CardContent>
-              </Card>
-            ) : null}
-            <div className="rounded-xl border bg-background p-2 shadow-sm">
-              <LessonBuilderPage
-                layoutMode="embedded"
-                initialMeta={lessonPreset?.meta ?? undefined}
-                initialClassId={lessonPreset?.classId ?? null}
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              When your AI co-pilot is ready we will generate summaries and attach them back to the curriculum item automatically.
-            </p>
-          </TabsContent>
-
           <TabsContent value="assessments" className="space-y-6">
             <AssessmentsPanel
               assessments={assessments}
               classes={classes}
               isLoading={assessmentsQuery.isLoading}
               error={assessmentsQuery.error instanceof Error ? assessmentsQuery.error : null}
-              onCreate={() => setAssessmentDialogOpen(true)}
+              onCreate={createAssessmentMutation.mutateAsync}
+              isCreating={createAssessmentMutation.isPending}
               onOpenGrades={assessment => {
                 setGradingContext(context => ({
                   ...context,
@@ -830,16 +844,6 @@ const AccountDashboard = () => {
         onGenerateReport={() => selectedStudentId && reportMutation.mutate(selectedStudentId)}
       />
 
-      <AssessmentDialog
-        open={assessmentDialogOpen}
-        onOpenChange={setAssessmentDialogOpen}
-        classes={classes}
-        form={assessmentForm}
-        onChange={setAssessmentForm}
-        onSubmit={() => createAssessmentMutation.mutate()}
-        isSubmitting={createAssessmentMutation.isPending}
-      />
-
       <GradingDialog
         open={gradingDialogOpen}
         onOpenChange={setGradingDialogOpen}
@@ -852,6 +856,43 @@ const AccountDashboard = () => {
         onSubmit={() => recordGradeMutation.mutate()}
         isSubmitting={recordGradeMutation.isPending}
       />
+
+      <Dialog
+        open={isLessonBuilderOpen}
+        onOpenChange={open => {
+          setIsLessonBuilderOpen(open);
+          if (!open) {
+            setLessonPreset(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-5xl overflow-hidden border-0 p-0">
+          <DialogHeader className="border-b bg-background/90 px-6 py-4">
+            <DialogTitle>Lesson builder</DialogTitle>
+            <DialogDescription>
+              Draft lesson plans with AI assistance and sync them back to your curriculum items.
+            </DialogDescription>
+          </DialogHeader>
+          {lessonPreset?.curriculumItem ? (
+            <div className="border-b bg-muted/40 px-6 py-3 text-xs text-muted-foreground">
+              Prefilled from {lessonPreset.curriculumItem.title}
+            </div>
+          ) : null}
+          <div className="flex h-[70vh] flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-2">
+              <LessonBuilderPage
+                layoutMode="embedded"
+                initialMeta={lessonPreset?.meta ?? undefined}
+                initialClassId={lessonPreset?.classId ?? null}
+              />
+            </div>
+            <div className="border-t bg-muted/40 px-6 py-3 text-xs text-muted-foreground">
+              When your AI co-pilot is ready we will generate summaries and attach them back to the curriculum item
+              automatically.
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -1333,170 +1374,525 @@ const CurriculumPanel = ({
   onUploadCsv,
   onBuildLesson,
 }: CurriculumPanelProps) => {
+  const { toast } = useToast();
+  const [newCurriculum, setNewCurriculum] = useState<DraftCurriculum>(() => createInitialDraftCurriculum());
+
   const updateFilters = (patch: Partial<CurriculumPanelProps["filters"]>) => {
     onChangeFilters({ ...filters, ...patch });
   };
 
+  const handleCurriculumFieldChange = <K extends keyof DraftCurriculum>(
+    field: K,
+    value: DraftCurriculum[K],
+  ) => {
+    setNewCurriculum(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleModuleChange = <K extends keyof DraftCurriculumModule>(
+    id: number,
+    field: K,
+    value: DraftCurriculumModule[K],
+  ) => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: prev.modules.map(module => (module.id === id ? { ...module, [field]: value } : module)),
+    }));
+  };
+
+  const handleAddModule = () => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: [...prev.modules, createDraftModule(prev.modules.length)],
+    }));
+  };
+
+  const handleRemoveModule = (id: number) => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: prev.modules.length > 1 ? prev.modules.filter(module => module.id !== id) : prev.modules,
+    }));
+  };
+
+  const handleResetCurriculum = () => {
+    setNewCurriculum(createInitialDraftCurriculum());
+    toast({ title: "Draft cleared", description: "Start again with a fresh curriculum canvas." });
+  };
+
+  const handleAutoOutline = () => {
+    setNewCurriculum(prev => ({
+      ...prev,
+      modules: prev.modules.map((module, index) => ({
+        ...module,
+        focus: module.focus || `Deep dive into ${(prev.subject || "core concept").toLowerCase()} ${index + 1}`,
+        activities:
+          module.activities ||
+          "Launch with an inquiry hook, facilitate collaborative exploration, and close with reflection prompts.",
+        assessment: module.assessment || (index % 2 === 0 ? "Exit ticket" : "Project checkpoint"),
+        resources: module.resources || "Slides, printable worksheet, interactive simulation",
+      })),
+    }));
+    toast({
+      title: "Outline generated",
+      description: "We filled each week with a suggested focus and activity mix.",
+    });
+  };
+
+  const handleSaveCurriculum = () => {
+    toast({
+      title: "Curriculum draft saved",
+      description: `${newCurriculum.title || "Untitled curriculum"} is ready in your planning workspace.`,
+    });
+  };
+
+  const previewStats = useMemo(() => {
+    const populated = newCurriculum.modules.filter(module =>
+      module.focus.trim() || module.activities.trim() || module.assessment.trim(),
+    ).length;
+    const coverage = newCurriculum.modules.length
+      ? Math.round((populated / newCurriculum.modules.length) * 100)
+      : 0;
+    const goalsWordCount = newCurriculum.goals.trim()
+      ? newCurriculum.goals.trim().split(/\s+/).length
+      : 0;
+    return { populated, coverage, goalsWordCount };
+  }, [newCurriculum]);
+
+  const suggestedCollaborators = useMemo(() => {
+    if (!classes.length) return [];
+    return classes.slice(0, 3).map(cls => cls.title);
+  }, [classes]);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Curriculum planner</CardTitle>
-        <CardDescription>Filter by class, stage, subject, or week to map your term.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Select
-            value={filters.classId === "all" ? "" : filters.classId}
-            onValueChange={value => updateFilters({ classId: value || "all" })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All classes" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All classes</SelectItem>
-              {classes.map(cls => (
-                <SelectItem key={cls.id} value={cls.id}>
-                  {cls.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filters.stage === "all" ? "" : filters.stage}
-            onValueChange={value => updateFilters({ stage: value || "all" })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All stages" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All stages</SelectItem>
-              {options.stages.map(stage => (
-                <SelectItem key={stage} value={stage}>
-                  {stage}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filters.subject === "all" ? "" : filters.subject}
-            onValueChange={value => updateFilters({ subject: value || "all" })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All subjects" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All subjects</SelectItem>
-              {options.subjects.map(subject => (
-                <SelectItem key={subject} value={subject}>
-                  {subject}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filters.week === "all" ? "" : filters.week}
-            onValueChange={value => updateFilters({ week: value || "all" })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All weeks" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All weeks</SelectItem>
-              {options.weeks.map(week => (
-                <SelectItem key={week} value={String(week)}>
-                  Week {week}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input type="date" value={filters.date} onChange={event => updateFilters({ date: event.target.value })} />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={onDownloadCsv}>
-            <FileDown className="mr-2 h-4 w-4" /> Download CSV
-          </Button>
-          <Button variant="outline" onClick={onUploadCsv}>
-            <FileSpreadsheet className="mr-2 h-4 w-4" /> Upload CSV
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => updateFilters({ classId: "all", stage: "all", subject: "all", week: "all", date: "" })}
-          >
-            <RefreshCw className="mr-2 h-4 w-4" /> Reset filters
-          </Button>
-        </div>
-        <div className="overflow-hidden rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Lesson</TableHead>
-                <TableHead>Topic</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Week</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-[160px]" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.length === 0 ? (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Curriculum planner</CardTitle>
+          <CardDescription>Filter by class, stage, subject, or week to map your term.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Select
+              value={filters.classId === "all" ? "" : filters.classId}
+              onValueChange={value => updateFilters({ classId: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All classes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All classes</SelectItem>
+                {classes.map(cls => (
+                  <SelectItem key={cls.id} value={cls.id}>
+                    {cls.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.stage === "all" ? "" : filters.stage}
+              onValueChange={value => updateFilters({ stage: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All stages</SelectItem>
+                {options.stages.map(stage => (
+                  <SelectItem key={stage} value={stage}>
+                    {stage}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.subject === "all" ? "" : filters.subject}
+              onValueChange={value => updateFilters({ subject: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All subjects" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All subjects</SelectItem>
+                {options.subjects.map(subject => (
+                  <SelectItem key={subject} value={subject}>
+                    {subject}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.week === "all" ? "" : filters.week}
+              onValueChange={value => updateFilters({ week: value || "all" })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All weeks" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All weeks</SelectItem>
+                {options.weeks.map(week => (
+                  <SelectItem key={week} value={String(week)}>
+                    Week {week}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input type="date" value={filters.date} onChange={event => updateFilters({ date: event.target.value })} />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={onDownloadCsv}>
+              <FileDown className="mr-2 h-4 w-4" /> Download CSV
+            </Button>
+            <Button variant="outline" onClick={onUploadCsv}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" /> Upload CSV
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => updateFilters({ classId: "all", stage: "all", subject: "all", week: "all", date: "" })}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" /> Reset filters
+            </Button>
+          </div>
+          <div className="overflow-hidden rounded-lg border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
-                    Nothing scheduled yet—add curriculum items or import a CSV.
-                  </TableCell>
+                  <TableHead>Lesson</TableHead>
+                  <TableHead>Topic</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Stage</TableHead>
+                  <TableHead>Week</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="w-[160px]" />
                 </TableRow>
-              ) : (
-                items.map(item => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium text-foreground">{item.title}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{item.topic ?? "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{item.subject ?? "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{item.stage ?? "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{item.week ?? "—"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{formatDate(item.date)}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button size="sm" variant="outline" onClick={() => onBuildLesson(item)}>
-                          Build lesson
-                        </Button>
-                        <Button size="sm" variant="ghost">
-                          View lesson plan
-                        </Button>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {items.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-sm text-muted-foreground">
+                      Nothing scheduled yet—add curriculum items or import a CSV.
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Calendar sync</CardTitle>
-              <CardDescription>Push lessons to Google Calendar once connected.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>Keep your teaching schedule aligned across SchoolTech Hub and your calendar.</p>
-              <Button size="sm" variant="outline">
-                <Calendar className="mr-2 h-4 w-4" /> Connect Google Calendar
-              </Button>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Curriculum insights</CardTitle>
-              <CardDescription>See how your plan is balanced across subjects.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>Science lessons scheduled: {items.filter(item => item.subject === "Science").length}</p>
-              <p>Literacy lessons scheduled: {items.filter(item => item.subject === "English").length}</p>
-              <p>Average week alignment: {items.reduce((acc, item) => acc + (item.week ?? 0), 0) / (items.length || 1)}</p>
-            </CardContent>
-          </Card>
-        </div>
-      </CardContent>
-    </Card>
+                ) : (
+                  items.map(item => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium text-foreground">{item.title}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.topic ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.subject ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.stage ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{item.week ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{formatDate(item.date)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" variant="outline" onClick={() => onBuildLesson(item)}>
+                            Build lesson
+                          </Button>
+                          <Button size="sm" variant="ghost">
+                            View lesson plan
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendar sync</CardTitle>
+                <CardDescription>Push lessons to Google Calendar once connected.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>Keep your teaching schedule aligned across SchoolTech Hub and your calendar.</p>
+                <Button size="sm" variant="outline">
+                  <Calendar className="mr-2 h-4 w-4" /> Connect Google Calendar
+                </Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Curriculum insights</CardTitle>
+                <CardDescription>See how your plan is balanced across subjects.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <p>Science lessons scheduled: {items.filter(item => item.subject === "Science").length}</p>
+                <p>Literacy lessons scheduled: {items.filter(item => item.subject === "English").length}</p>
+                <p>Average week alignment: {items.reduce((acc, item) => acc + (item.week ?? 0), 0) / (items.length || 1)}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle>Create a new curriculum</CardTitle>
+            <CardDescription>
+              Design scope and sequence, align standards, and prepare resources without leaving your dashboard.
+            </CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={handleResetCurriculum}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Reset draft
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleAutoOutline}>
+              <Sparkles className="mr-2 h-4 w-4" /> Generate outline
+            </Button>
+            <Button size="sm" onClick={handleSaveCurriculum}>
+              <Share2 className="mr-2 h-4 w-4" /> Save &amp; share
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-title">Curriculum title</Label>
+                  <Input
+                    id="curriculum-title"
+                    value={newCurriculum.title}
+                    onChange={event => handleCurriculumFieldChange("title", event.target.value)}
+                    placeholder="e.g. STEM Innovators Term 2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-subject">Subject focus</Label>
+                  <Input
+                    id="curriculum-subject"
+                    value={newCurriculum.subject}
+                    onChange={event => handleCurriculumFieldChange("subject", event.target.value)}
+                    placeholder="Science, Technology, Humanities..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-stage">Stage / year level</Label>
+                  <Input
+                    id="curriculum-stage"
+                    value={newCurriculum.stage}
+                    onChange={event => handleCurriculumFieldChange("stage", event.target.value)}
+                    placeholder="Stage 3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-term">Term</Label>
+                  <Input
+                    id="curriculum-term"
+                    value={newCurriculum.term}
+                    onChange={event => handleCurriculumFieldChange("term", event.target.value)}
+                    placeholder="Term 2"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-duration">Duration</Label>
+                  <Input
+                    id="curriculum-duration"
+                    value={newCurriculum.duration}
+                    onChange={event => handleCurriculumFieldChange("duration", event.target.value)}
+                    placeholder="10 weeks"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-collaboration">Collaboration plan</Label>
+                  <Input
+                    id="curriculum-collaboration"
+                    value={newCurriculum.collaboration}
+                    onChange={event => handleCurriculumFieldChange("collaboration", event.target.value)}
+                    placeholder="Co-teach with..."
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-goals">Learning goals &amp; big ideas</Label>
+                  <Textarea
+                    id="curriculum-goals"
+                    value={newCurriculum.goals}
+                    onChange={event => handleCurriculumFieldChange("goals", event.target.value)}
+                    placeholder="Outline the overarching understandings and success criteria."
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-standards">Standards alignment</Label>
+                  <Textarea
+                    id="curriculum-standards"
+                    value={newCurriculum.standards}
+                    onChange={event => handleCurriculumFieldChange("standards", event.target.value)}
+                    placeholder="List curriculum codes or frameworks to target."
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-assessment">Assessment strategy</Label>
+                  <Textarea
+                    id="curriculum-assessment"
+                    value={newCurriculum.assessmentPlan}
+                    onChange={event => handleCurriculumFieldChange("assessmentPlan", event.target.value)}
+                    placeholder="Diagnostic, formative, and summative checkpoints."
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="curriculum-differentiation">Differentiation &amp; support</Label>
+                  <Textarea
+                    id="curriculum-differentiation"
+                    value={newCurriculum.differentiation}
+                    onChange={event => handleCurriculumFieldChange("differentiation", event.target.value)}
+                    placeholder="How will you scaffold, extend, and personalise experiences?"
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <ListChecks className="h-4 w-4 text-primary" /> Scope &amp; sequence
+                  </div>
+                  <Button size="sm" variant="outline" onClick={handleAddModule}>
+                    <Plus className="mr-2 h-4 w-4" /> Add week
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {newCurriculum.modules.map((module, index) => (
+                    <div key={module.id} className="space-y-4 rounded-lg border bg-background/70 p-4 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{module.week || `Week ${index + 1}`}</p>
+                          <p className="text-xs text-muted-foreground">Outline focus, learning sequence, and resources.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleModuleChange(module.id, "week", `Week ${index + 1}`)}
+                          >
+                            <Target className="mr-2 h-4 w-4" /> Label week
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={newCurriculum.modules.length === 1}
+                            onClick={() => handleRemoveModule(module.id)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-week-${module.id}`}>Week label</Label>
+                          <Input
+                            id={`module-week-${module.id}`}
+                            value={module.week}
+                            onChange={event => handleModuleChange(module.id, "week", event.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-focus-${module.id}`}>Focus concept</Label>
+                          <Input
+                            id={`module-focus-${module.id}`}
+                            value={module.focus}
+                            onChange={event => handleModuleChange(module.id, "focus", event.target.value)}
+                            placeholder="Inquiry question or theme"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-activities-${module.id}`}>Learning sequence</Label>
+                          <Textarea
+                            id={`module-activities-${module.id}`}
+                            value={module.activities}
+                            onChange={event => handleModuleChange(module.id, "activities", event.target.value)}
+                            placeholder="Hook, guided practice, collaborative task, reflection."
+                            rows={3}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`module-assessment-${module.id}`}>Assessment moments</Label>
+                          <Textarea
+                            id={`module-assessment-${module.id}`}
+                            value={module.assessment}
+                            onChange={event => handleModuleChange(module.id, "assessment", event.target.value)}
+                            placeholder="Exit ticket, rubric, peer feedback..."
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`module-resources-${module.id}`}>Key resources &amp; tech tools</Label>
+                        <Textarea
+                          id={`module-resources-${module.id}`}
+                          value={module.resources}
+                          onChange={event => handleModuleChange(module.id, "resources", event.target.value)}
+                          placeholder="Links, manipulatives, assistive tech, community partners."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-lg border bg-muted/20 p-4">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Live preview</p>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {newCurriculum.title || "Untitled curriculum"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {(newCurriculum.stage || "Stage ?") + " • " + (newCurriculum.subject || "Subject TBD")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {(newCurriculum.term || "Term ?") + " • " + (newCurriculum.duration || "Duration TBD")}
+                </p>
+              </div>
+              <div className="space-y-3 rounded-lg border bg-background/80 p-4">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Weekly coverage</span>
+                  <span className="font-semibold text-foreground">{previewStats.coverage}% mapped</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted">
+                  <div
+                    className="h-2 rounded-full bg-primary transition-all"
+                    style={{ width: `${previewStats.coverage}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previewStats.populated} of {newCurriculum.modules.length} weeks include detail.
+                </p>
+              </div>
+              <div className="space-y-3 rounded-lg border bg-background/80 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Target className="h-4 w-4 text-primary" /> Outcomes snapshot
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {previewStats.goalsWordCount} words describing learning goals. Aim for 60-120 to keep focus tight.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Suggested collaborators: {suggestedCollaborators.length ? suggestedCollaborators.join(", ") : "invite a colleague"}.
+                </p>
+              </div>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Use "Generate outline" to auto-fill focus areas and activities for each week.
+                </p>
+                <p className="flex items-center gap-2">
+                  <Share2 className="h-4 w-4 text-primary" />
+                  "Save &amp; share" will push the draft to your team workspace and attach it to selected classes soon.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
@@ -1505,71 +1901,269 @@ interface AssessmentsPanelProps {
   classes: ClassWithPlanCount[];
   isLoading: boolean;
   error: Error | null;
-  onCreate: () => void;
+  onCreate: (input: {
+    classId: string;
+    title: string;
+    description: string;
+    dueDate: string;
+    scale: GradeScale;
+  }) => Promise<unknown>;
+  isCreating: boolean;
   onOpenGrades: (assessment: AssessmentTemplate) => void;
 }
 
-const AssessmentsPanel = ({ assessments, classes, isLoading, error, onCreate, onOpenGrades }: AssessmentsPanelProps) => {
-  const classMap = useMemo(() => {
-    const map = new Map<string, string>();
-    classes.forEach(cls => map.set(cls.id, cls.title));
+const AssessmentsPanel = ({
+  assessments,
+  classes,
+  isLoading,
+  error,
+  onCreate,
+  isCreating,
+  onOpenGrades,
+}: AssessmentsPanelProps) => {
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    dueDate: "",
+    scale: "letter" as GradeScale,
+  });
+
+  useEffect(() => {
+    if (selectedClassId && !classes.some(cls => cls.id === selectedClassId)) {
+      setSelectedClassId(null);
+    }
+  }, [classes, selectedClassId]);
+
+  useEffect(() => {
+    setForm({ title: "", description: "", dueDate: "", scale: "letter" });
+  }, [selectedClassId]);
+
+  const assessmentCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    assessments.forEach(assessment => {
+      map.set(assessment.classId, (map.get(assessment.classId) ?? 0) + 1);
+    });
     return map;
-  }, [classes]);
+  }, [assessments]);
+
+  const selectedClass = useMemo(
+    () => (selectedClassId ? classes.find(cls => cls.id === selectedClassId) ?? null : null),
+    [classes, selectedClassId],
+  );
+
+  const classAssessments = useMemo(
+    () => (selectedClassId ? assessments.filter(assessment => assessment.classId === selectedClassId) : []),
+    [assessments, selectedClassId],
+  );
+
+  const handleSubmit = async () => {
+    if (!selectedClassId || !form.title.trim()) {
+      return;
+    }
+    try {
+      await onCreate({
+        classId: selectedClassId,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        dueDate: form.dueDate,
+        scale: form.scale,
+      });
+      setForm({ title: "", description: "", dueDate: "", scale: "letter" });
+    } catch (_error) {
+      // Notification handled by caller
+    }
+  };
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <CardTitle>Assessment tracking</CardTitle>
-          <CardDescription>Create assignments, track submissions, and grade with flexible scales.</CardDescription>
-        </div>
-        <Button onClick={onCreate}>
-          <Plus className="mr-2 h-4 w-4" /> New assessment
-        </Button>
+      <CardHeader className="flex flex-col gap-3">
+        {selectedClass ? (
+          <>
+            <Button variant="ghost" size="sm" className="w-fit pl-0" onClick={() => setSelectedClassId(null)}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to classes
+            </Button>
+            <div>
+              <CardTitle>{selectedClass.title}</CardTitle>
+              <CardDescription>
+                Review assessments, track submissions, and record grades for this class.
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+              {selectedClass.stage ? <Badge variant="outline">{selectedClass.stage}</Badge> : null}
+              {selectedClass.subject ? <Badge variant="outline">{selectedClass.subject}</Badge> : null}
+              {selectedClass.startDate ? (
+                <Badge variant="outline">Started {formatDate(selectedClass.startDate)}</Badge>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <>
+            <CardTitle>Assessment tracking</CardTitle>
+            <CardDescription>
+              Choose a class to review assessments, track submissions, and add new ones.
+            </CardDescription>
+          </>
+        )}
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : error ? (
-          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
-            {error.message}
-          </div>
-        ) : assessments.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-            No assessments yet—create one to begin tracking progress.
+        {selectedClass ? (
+          <div className="space-y-6">
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+                {error.message}
+              </div>
+            ) : classAssessments.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                No assessments for this class yet. Use the form below to create one.
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Assessment</TableHead>
+                      <TableHead>Due</TableHead>
+                      <TableHead>Scale</TableHead>
+                      <TableHead className="w-[140px]" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {classAssessments.map(assessment => (
+                      <TableRow key={assessment.id}>
+                        <TableCell className="font-medium text-foreground">{assessment.title}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{formatDate(assessment.dueDate)}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{assessment.gradingScale}</TableCell>
+                        <TableCell className="text-right">
+                          <Button size="sm" onClick={() => onOpenGrades(assessment)}>
+                            Record grades
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            <section className="rounded-lg border bg-muted/20 p-4">
+              <h3 className="text-sm font-semibold text-foreground">Add new assessment</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Share expectations, due dates, and grading scales with your class.
+              </p>
+              <div className="mt-4 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="assessment-title">Title</Label>
+                  <Input
+                    id="assessment-title"
+                    value={form.title}
+                    onChange={event => setForm(current => ({ ...current, title: event.target.value }))}
+                    placeholder="Forces and motion quiz"
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="assessment-due">Due date</Label>
+                    <Input
+                      id="assessment-due"
+                      type="date"
+                      value={form.dueDate}
+                      onChange={event => setForm(current => ({ ...current, dueDate: event.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="assessment-scale">Grading scale</Label>
+                    <Select
+                      value={form.scale}
+                      onValueChange={value =>
+                        setForm(current => ({ ...current, scale: value as GradeScale }))
+                      }
+                    >
+                      <SelectTrigger id="assessment-scale">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gradeScales.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assessment-description">Instructions</Label>
+                  <Textarea
+                    id="assessment-description"
+                    value={form.description}
+                    onChange={event => setForm(current => ({ ...current, description: event.target.value }))}
+                    placeholder="Outline objectives, required materials, and success criteria"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!form.title.trim() || isCreating}
+                  >
+                    {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Add assessment
+                  </Button>
+                </div>
+              </div>
+            </section>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Assessment</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Due</TableHead>
-                  <TableHead>Scale</TableHead>
-                  <TableHead className="w-[140px]" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assessments.map(assessment => (
-                  <TableRow key={assessment.id}>
-                    <TableCell className="font-medium text-foreground">{assessment.title}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {classMap.get(assessment.classId) ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{formatDate(assessment.dueDate)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{assessment.gradingScale}</TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" onClick={() => onOpenGrades(assessment)}>
-                        Record grades
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+          <div className="space-y-4">
+            {error ? (
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+                {error.message}
+              </div>
+            ) : null}
+            {classes.length === 0 ? (
+              <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                Create a class to start tracking assessments.
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {classes.map(classItem => (
+                  <button
+                    key={classItem.id}
+                    type="button"
+                    onClick={() => setSelectedClassId(classItem.id)}
+                    className="flex w-full flex-col items-start gap-3 rounded-xl border bg-background/80 p-4 text-left shadow-sm transition hover:border-primary/60 hover:shadow"
+                  >
+                    <div className="flex w-full items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground">{classItem.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {classItem.summary ?? "Track assignments, submissions, and feedback in one place."}
+                        </p>
+                      </div>
+                      <Badge variant="outline">
+                        {assessmentCounts.get(classItem.id) ?? 0} assessments
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      {classItem.stage ? <Badge variant="outline">{classItem.stage}</Badge> : null}
+                      {classItem.subject ? <Badge variant="outline">{classItem.subject}</Badge> : null}
+                      {classItem.startDate ? (
+                        <Badge variant="outline">Starts {formatDate(classItem.startDate)}</Badge>
+                      ) : null}
+                    </div>
+                  </button>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            )}
+            {isLoading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            ) : null}
           </div>
         )}
       </CardContent>
@@ -1753,107 +2347,6 @@ const StudentDialog = ({
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-interface AssessmentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  classes: ClassWithPlanCount[];
-  form: {
-    title: string;
-    classId: string;
-    description: string;
-    dueDate: string;
-    scale: GradeScale;
-  };
-  onChange: (form: AssessmentDialogProps["form"]) => void;
-  onSubmit: () => void;
-  isSubmitting: boolean;
-}
-
-const AssessmentDialog = ({ open, onOpenChange, classes, form, onChange, onSubmit, isSubmitting }: AssessmentDialogProps) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Create assessment</DialogTitle>
-          <DialogDescription>
-            Capture projects, quizzes, or homework assignments and share expectations with your class.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="assessment-title">Title</Label>
-            <Input
-              id="assessment-title"
-              value={form.title}
-              onChange={event => onChange({ ...form, title: event.target.value })}
-              placeholder="Forces and motion quiz"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="assessment-class">Class</Label>
-            <Select value={form.classId} onValueChange={value => onChange({ ...form, classId: value })}>
-              <SelectTrigger id="assessment-class">
-                <SelectValue placeholder="Select a class" />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map(cls => (
-                  <SelectItem key={cls.id} value={cls.id}>
-                    {cls.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="assessment-description">Instructions</Label>
-            <Textarea
-              id="assessment-description"
-              value={form.description}
-              onChange={event => onChange({ ...form, description: event.target.value })}
-              placeholder="Outline objectives, required materials, and success criteria"
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="assessment-due">Due date</Label>
-              <Input
-                id="assessment-due"
-                type="date"
-                value={form.dueDate}
-                onChange={event => onChange({ ...form, dueDate: event.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Grading scale</Label>
-              <Select value={form.scale} onValueChange={value => onChange({ ...form, scale: value as GradeScale })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {gradeScales.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={onSubmit} disabled={!form.title || !form.classId || isSubmitting}>
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Create assessment
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -494,6 +494,40 @@ export const en = {
         errorTitle: "Error",
         errorDescription: "Failed to subscribe. Please try again."
       }
+    },
+    savedPosts: {
+      title: "Saved posts",
+      subtitle: "Pick up reading where you left off.",
+      empty: "Save any article to revisit it here.",
+      savedOn: "Saved {date}",
+      manage: "Manage saved posts"
+    },
+    communityActivity: {
+      title: "Community activity",
+      subtitle: "Track your latest interactions around the hub.",
+      askQuestion: "Ask a question"
+    },
+    researchHighlights: {
+      title: "Research highlights",
+      subtitle: "Discover emerging practice and contribute your own classroom research.",
+      share: "Share a research post",
+      explore: "Explore research hub"
+    },
+    lockedFeatures: {
+      title: "Create a free account to unlock more",
+      subtitle: "Join SchoolTech Hub to bookmark posts, follow conversations, and explore our research community.",
+      savedPosts: {
+        title: "Saved posts",
+        description: "Bookmark resources to return to them anytime."
+      },
+      communityActivity: {
+        title: "Community activity",
+        description: "See your lesson drafts, replies, and forum conversations in one feed."
+      },
+      researchHighlights: {
+        title: "Research highlights",
+        description: "Dive deeper into collaborative classroom research and educator insights."
+      }
     }
   },
   lessonPlans: {
