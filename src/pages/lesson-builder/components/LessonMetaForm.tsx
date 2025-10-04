@@ -17,6 +17,7 @@ const NO_SUBJECT_VALUE = "__no_subject__";
 
 export interface LessonMetaFormValue {
   title: string;
+  teacher: string | null;
   subject: Subject | null;
   date: string | null;
 }
@@ -100,6 +101,16 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
           onChange={event => handleTitleChange(event.target.value)}
           placeholder="e.g. Exploring fractions"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="lesson-meta-teacher">Teacher</Label>
+        <Input
+          id="lesson-meta-teacher"
+          value={value.teacher ?? ""}
+          onChange={event => onChange({ ...value, teacher: event.target.value })}
+          placeholder="Prefilled from curriculum"
         />
       </div>
 
