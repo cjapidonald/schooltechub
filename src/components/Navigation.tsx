@@ -8,7 +8,7 @@ import {
   User,
   LogOut,
   BookOpen,
-  LayoutDashboard,
+  IdCard,
   GraduationCap,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -46,7 +46,7 @@ const Navigation = () => {
 
   const navItems = useMemo(() => {
     const items = [
-      { name: t.nav.profile, path: "/account" },
+      { name: t.nav.profile, path: "/profile" },
       { name: t.nav.home, path: "/" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.curriculum ?? "Curriculum", path: "/curriculum" },
@@ -155,9 +155,9 @@ const Navigation = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => navigate(getLocalizedNavPath("/account"))}
+                    onClick={() => navigate(getLocalizedNavPath("/profile"))}
                   >
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <IdCard className="mr-2 h-4 w-4" />
                     {t.nav.profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
