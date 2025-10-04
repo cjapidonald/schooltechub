@@ -225,21 +225,18 @@ const AccountDashboard = () => {
   }, [fullName, user, defaultSalutation]);
 
   const classesQuery = useQuery({
-    queryKey: ["dashboard-classes"],
+    queryKey: ["dashboard-classes", user?.id ?? "guest"],
     queryFn: () => listMyClassesWithPlanCount(),
-    enabled: Boolean(user),
   });
 
   const studentsQuery = useQuery({
-    queryKey: ["dashboard-students"],
+    queryKey: ["dashboard-students", user?.id ?? "guest"],
     queryFn: () => listMyStudents(),
-    enabled: Boolean(user),
   });
 
   const assessmentsQuery = useQuery({
-    queryKey: ["dashboard-assessments"],
+    queryKey: ["dashboard-assessments", user?.id ?? "guest"],
     queryFn: () => listAssessments(),
-    enabled: Boolean(user),
   });
 
   const studentProfileQuery = useQuery<StudentProfile | null>({

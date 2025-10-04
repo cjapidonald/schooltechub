@@ -93,6 +93,28 @@ export interface ClassLessonPlanLinkSummary {
   addedAt: string | null;
 }
 
+const DEMO_CLASSES: ClassWithPlanCount[] = [
+  {
+    id: "demo-class-1",
+    title: "Year 5 Science",
+    summary: "Preview this sample roster while you explore the workspace.",
+    subject: "Science",
+    stage: "Primary",
+    status: "active",
+    startDate: "2024-09-02",
+    endDate: "2025-06-30",
+    meetingSchedule: "Mon & Wed · 10:00",
+    meetingLink: null,
+    imageUrl: null,
+    currentEnrollment: 28,
+    maxCapacity: 30,
+    ownerId: null,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString(),
+    updatedAt: new Date().toISOString(),
+    planCount: 3,
+  },
+];
+
 async function requireUserId(client: Client, action: string): Promise<string> {
   const { data, error } = await client.auth.getSession();
 
@@ -221,7 +243,12 @@ async function insertClassRecord(
 }
 
 export async function listMyClasses(client: Client = supabase): Promise<Class[]> {
-  await requireUserId(client, "view classes");
+  try {
+    await requireUserId(client, "view classes");
+  } catch (error) {
+    console.warn("listMyClasses returning demo data", error);
+    return DEMO_CLASSES;
+  }
 
   const { data, error } = await client
     .from("classes")
@@ -238,7 +265,12 @@ export async function listMyClasses(client: Client = supabase): Promise<Class[]>
 export async function listMyClassesWithPlanCount(
   client: Client = supabase,
 ): Promise<ClassWithPlanCount[]> {
-  await requireUserId(client, "view classes");
+  try {
+    await requireUserId(client, "view classes");
+  } catch (error) {
+    console.warn("listMyClassesWithPlanCount returning demo data", error);
+    return DEMO_CLASSES;
+  }
 
   const { data, error } = await client
     .from("classes")
@@ -267,7 +299,17 @@ export async function getClass(
   id: string,
   client: Client = supabase,
 ): Promise<Class | null> {
-  await requireUserId(client, "view classes");
+  try {
+    await requireUserId(client, "view classes");
+  } catch (error) {
+    const demoClass = DEMO_CLASSES.find(cls => cls.id === id) ?? null;
+    if (demoClass) {
+      console.warn("getClass returning demo data", error);
+      return demoClass;
+    }
+    console.warn("getClass returning null (demo fallback not found)", error);
+    return null;
+  }
 
   const { data, error } = await client
     .from("classes")
