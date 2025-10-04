@@ -47,6 +47,7 @@ const Navigation = () => {
 
   const navItems = useMemo(() => {
     const items = [
+      { name: t.dashboard.header.title, path: "/dashboard" },
       { name: t.nav.home, path: "/" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.events, path: "/events" },
@@ -56,6 +57,7 @@ const Navigation = () => {
 
     return items;
   }, [
+    t.dashboard.header.title,
     t.nav.about,
     t.nav.blog,
     t.nav.events,
