@@ -643,7 +643,7 @@ export const en = {
     minRead: "min read",
     postedBy: "Posted by",
     hero: {
-      title: "Blog & Resources",
+      title: "",
       subtitle: "Ideas, research, teaching techniques, and resources for K-12 educators."
     },
     seo: {
@@ -665,6 +665,7 @@ export const en = {
       title: "Filters",
       helper: "Refine posts by topic, stage, subject, and format.",
       clear: "Clear filters",
+      all: "All",
       category: "Category",
       stage: "Stage",
       subject: "Subject",

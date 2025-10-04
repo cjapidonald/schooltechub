@@ -31,11 +31,9 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
-import { cn } from "@/lib/utils";
 
 interface AuthorInfo {
   name?: string | null;
@@ -246,30 +244,6 @@ const createNormalizer = (options: Record<string, string>) => {
     };
   };
 };
-
-const FilterChip = ({
-  active,
-  label,
-  onToggle,
-}: {
-  active: boolean;
-  label: string;
-  onToggle: () => void;
-}) => (
-  <button
-    type="button"
-    onClick={onToggle}
-    className={cn(
-      "rounded-full border px-3 py-1 text-sm font-medium transition",
-      active
-        ? "border-primary/70 bg-primary/10 text-primary shadow-sm"
-        : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary"
-    )}
-    aria-pressed={active}
-  >
-    {label}
-  </button>
-);
 
 const getAuthorName = (post: BlogPost): string => {
   const { author, author_name } = post;
@@ -552,6 +526,9 @@ const Blog = () => {
     return { postsWithMetadata, optionEntries };
   }, [posts, filterOptions]);
 
+  const categoryTabs = optionEntries.category ?? [];
+  const activeCategory = filters.category[0] ?? "all";
+
   const filteredPosts = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
 
@@ -591,22 +568,15 @@ const Blog = () => {
       .map(item => item.post);
   }, [filters, postsWithMetadata, searchValue]);
 
-  const toggleFilter = useCallback((key: BlogFilterKey, value: string) => {
-    setFilters(prev => {
-      const current = prev[key];
-      const exists = current.includes(value);
-      const nextValues = exists ? current.filter(item => item !== value) : [...current, value];
-      return { ...prev, [key]: nextValues };
-    });
-  }, []);
-
-  const clearFilters = useCallback(() => {
-    setFilters(createEmptyFilters());
-  }, []);
-
-  const hasActiveFilters = useMemo(() => {
-    return BLOG_FILTER_KEYS.some(key => filters[key].length > 0);
-  }, [filters]);
+  const handleCategoryTabChange = useCallback(
+    (value: string) => {
+      setFilters(prev => ({
+        ...prev,
+        category: value === "all" ? [] : [value],
+      }));
+    },
+    []
+  );
 
   const featuredPosts = filteredPosts.filter(post => {
     if (post.is_featured) {
@@ -690,16 +660,6 @@ const Blog = () => {
       {structuredData ? <StructuredData data={structuredData} /> : null}
 
       <main className="flex-1">
-        <section className="relative overflow-hidden border-b border-primary/10 bg-gradient-to-br from-primary/10 via-background to-background">
-          <div className="container py-16">
-            <div className="max-w-3xl space-y-4">
-              <Badge variant="secondary" className="w-fit rounded-full bg-primary/10 text-primary">
-                {t.blog.hero.title}
-              </Badge>
-            </div>
-          </div>
-        </section>
-
         <section className="border-b border-border/50 bg-background/60 backdrop-blur">
           <div className="container py-8">
             <div className="mx-auto max-w-2xl">
@@ -717,125 +677,42 @@ const Blog = () => {
           </div>
         </section>
 
-        <section className="container py-12">
-          <div className="flex flex-col gap-10 lg:flex-row">
-            <aside className="space-y-8 rounded-3xl border border-border/40 bg-background/40 p-6 backdrop-blur lg:w-80 lg:flex-shrink-0">
-              <div className="space-y-6">
-                {hasActiveFilters ? (
-                  <Button variant="outline" size="sm" onClick={clearFilters} className="w-full">
-                    {t.blog.filters.clear}
-                  </Button>
-                ) : null}
+        <section className="container space-y-10 py-12">
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t.blog.title}</h1>
+            <p className="text-muted-foreground">{t.blog.subtitle}</p>
+          </div>
 
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                    {t.blog.filters.category}
-                  </Label>
-                  <div className="flex flex-col gap-1">
-                    {optionEntries.category?.map(([value, label]) => {
-                      const Icon = categoryIcons[value] ?? Tag;
-                      const isActive = filters.category.includes(value);
+          {categoryTabs.length > 0 ? (
+            <Tabs value={activeCategory} onValueChange={handleCategoryTabChange} className="w-full">
+              <TabsList className="flex w-full flex-wrap gap-2 overflow-x-auto border border-border/40 bg-background/80 py-1">
+                <TabsTrigger value="all" className="rounded-full px-4 py-2">
+                  {t.blog.filters.all ?? "All"}
+                </TabsTrigger>
+                {categoryTabs.map(([value, label]) => {
+                  const Icon = categoryIcons[value] ?? Tag;
+                  return (
+                    <TabsTrigger key={value} value={value} className="gap-2 rounded-full px-4 py-2">
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      <span className="whitespace-nowrap">{label}</span>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+            </Tabs>
+          ) : null}
 
-                      return (
-                        <button
-                          key={`category-${value}`}
-                          type="button"
-                          onClick={() =>
-                            setFilters(prev => ({
-                              ...prev,
-                              category: isActive ? [] : [value],
-                            }))
-                          }
-                          className={cn(
-                            "flex w-full items-center gap-3 rounded-full border border-transparent bg-background/80 px-3 py-2 text-left text-sm transition",
-                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
-                            isActive
-                              ? "border-primary bg-primary/10 text-primary shadow-sm"
-                              : "text-muted-foreground hover:bg-muted/60"
-                          )}
-                          aria-pressed={isActive}
-                        >
-                          <span
-                            className={cn(
-                              "flex h-2.5 w-2.5 items-center justify-center rounded-full border",
-                              isActive ? "border-primary bg-primary" : "border-muted-foreground/40"
-                            )}
-                            aria-hidden="true"
-                          />
-                          <Icon
-                            className={cn(
-                              "h-4 w-4 shrink-0",
-                              isActive ? "text-primary" : "text-muted-foreground"
-                            )}
-                            aria-hidden="true"
-                          />
-                          <span className="flex-1 truncate">{label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {filters.category.length > 0 ? (
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="h-auto px-0 text-xs text-muted-foreground"
-                      onClick={() => setFilters(prev => ({ ...prev, category: [] }))}
-                    >
-                      {t.blog.filters.clear}
-                    </Button>
-                  ) : null}
-                </div>
+          <div className="space-y-8">
+            {error ? (
+              <Alert variant="destructive">
+                <AlertTitle>Something went wrong</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
 
-                <Accordion type="multiple" className="space-y-1">
-                  {BLOG_FILTER_KEYS.filter((key): key is Exclude<BlogFilterKey, "category"> => key !== "category").map(key => {
-                    const options = optionEntries[key] ?? [];
-                    if (!options.length) {
-                      return null;
-                    }
-
-                    const sectionLabel = {
-                      stage: t.blog.filters.stage,
-                      subject: t.blog.filters.subject,
-                      delivery: t.blog.filters.delivery,
-                      payment: t.blog.filters.payment,
-                      platform: t.blog.filters.platform,
-                    }[key];
-
-                    return (
-                      <AccordionItem key={key} value={key} className="border-border/40">
-                        <AccordionTrigger className="text-sm font-semibold text-left">
-                          {sectionLabel}
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="flex flex-wrap gap-2 pt-2">
-                            {options.map(([value, label]) => (
-                              <FilterChip
-                                key={`${key}-${value}`}
-                                label={label}
-                                active={filters[key].includes(value)}
-                                onToggle={() => toggleFilter(key, value)}
-                              />
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    );
-                  })}
-                </Accordion>
-              </div>
-            </aside>
-
-            <div className="flex-1 space-y-8">
-              {error ? (
-                <Alert variant="destructive">
-                  <AlertTitle>Something went wrong</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              ) : null}
-
-              {loading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
+            {loading ? (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, index) => (
                     <Card key={index} className="overflow-hidden border-border/40">
                       <Skeleton className="h-48 w-full" />
                       <CardHeader className="space-y-3">
@@ -1011,7 +888,6 @@ const Blog = () => {
                   ) : null}
                   </div>
                 )}
-            </div>
           </div>
         </section>
       </main>
