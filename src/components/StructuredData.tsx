@@ -1,7 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 
 interface StructuredDataProps {
-  type: 'Organization' | 'Service' | 'FAQPage' | 'BreadcrumbList' | 'Article' | 'Course';
+  type:
+    | 'Organization'
+    | 'Service'
+    | 'FAQPage'
+    | 'BreadcrumbList'
+    | 'Article'
+    | 'Course'
+    | 'CollectionPage';
   data: any;
 }
 
@@ -141,7 +148,31 @@ export function StructuredData({ type, data }: StructuredDataProps) {
             "duration": data.duration || "P1M"
           }
         };
-      
+
+      case 'CollectionPage':
+        return {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": data.name,
+          "description": data.description,
+          "url": data.url,
+          "mainEntity": Array.isArray(data.items)
+            ? data.items.map((item: any) => ({
+                "@type": "Article",
+                "name": item.name,
+                "url": item.url,
+                "image": item.image,
+                "datePublished": item.datePublished,
+                "author": item.author
+                  ? {
+                      "@type": "Person",
+                      "name": item.author,
+                    }
+                  : undefined,
+              }))
+            : undefined,
+        };
+
       default:
         return null;
     }
