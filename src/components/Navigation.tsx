@@ -9,7 +9,6 @@ import {
   LogOut,
   BookOpen,
   LayoutDashboard,
-  SquarePen,
   GraduationCap,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -49,7 +48,6 @@ const Navigation = () => {
     const items = [
       { name: t.nav.home, path: "/" },
       { name: t.nav.blog, path: "/blog" },
-      { name: t.nav.builder, path: "/lesson-builder" },
       { name: t.nav.events, path: "/events" },
       { name: t.nav.services, path: "/services" },
       { name: t.nav.about, path: "/about" },
@@ -60,7 +58,7 @@ const Navigation = () => {
     }
 
     return items;
-  }, [t.nav.about, t.nav.blog, t.nav.builder, t.nav.events, t.nav.home, t.nav.profile, t.nav.services, user]);
+  }, [t.nav.about, t.nav.blog, t.nav.events, t.nav.home, t.nav.profile, t.nav.services, user]);
   
   const getLocalizedNavPath = (path: string) => getLocalizedPath(path, "en");
 
@@ -157,12 +155,6 @@ const Navigation = () => {
                     {t.nav.profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => navigate(getLocalizedNavPath("/lesson-builder"))}
-                  >
-                    <SquarePen className="mr-2 h-4 w-4" />
-                    {t.nav.builder}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}
                   >
                     <GraduationCap className="mr-2 h-4 w-4" />
@@ -241,14 +233,6 @@ const Navigation = () => {
                     >
                       <Button className="w-full" variant="secondary">
                         {t.nav.profile}
-                      </Button>
-                    </Link>
-                    <Link
-                      to={getLocalizedNavPath("/lesson-builder")}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Button className="w-full" variant="outline">
-                        {t.nav.builder}
                       </Button>
                     </Link>
                     <Link
