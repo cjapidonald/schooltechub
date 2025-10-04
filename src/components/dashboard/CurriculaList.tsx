@@ -1,0 +1,108 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { Class, Curriculum } from "../../../types/supabase-tables";
+import { format } from "date-fns";
+
+interface CurriculumSummary extends Curriculum {
+  class: Class | null;
+  items_count: number;
+  created_at?: string;
+}
+
+interface CurriculaListProps {
+  curricula: CurriculumSummary[];
+  loading?: boolean;
+  onNewCurriculum: () => void;
+  onOpenCurriculum: (curriculumId: string) => void;
+  onExportCurriculum: (curriculumId: string) => void;
+}
+
+const formatYear = (value?: string | null) => (value ? value : "—");
+const formatCreatedAt = (value?: string) => {
+  if (!value) return "";
+  try {
+    return format(new Date(value), "PP");
+  } catch (error) {
+    console.warn("Could not format curriculum created_at", error);
+    return value;
+  }
+};
+
+export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurriculum, onExportCurriculum }: CurriculaListProps) {
+  const { t } = useLanguage();
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">{t.dashboard.curriculum.title}</h2>
+          <p className="text-sm text-muted-foreground">{t.dashboard.curriculum.subtitle}</p>
+        </div>
+        <Button onClick={onNewCurriculum} aria-label={t.dashboard.quickActions.newCurriculum}>
+          {t.dashboard.quickActions.newCurriculum}
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="rounded-lg border bg-muted/20 p-8 text-center text-sm text-muted-foreground">
+          {t.dashboard.common.loading}
+        </div>
+      ) : curricula.length === 0 ? (
+        <div className="rounded-lg border border-dashed bg-muted/10 p-10 text-center">
+          <h3 className="text-lg font-semibold">{t.dashboard.curriculum.empty.title}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{t.dashboard.curriculum.empty.description}</p>
+          <Button className="mt-4" onClick={onNewCurriculum} aria-label={t.dashboard.curriculum.empty.cta}>
+            {t.dashboard.curriculum.empty.cta}
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {curricula.map(item => (
+            <Card key={item.id} className="flex flex-col justify-between">
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold leading-tight">
+                  {item.title}
+                </CardTitle>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  {item.class ? (
+                    <Badge variant="secondary">{item.class.title}</Badge>
+                  ) : null}
+                  <span>{item.subject}</span>
+                  {item.class?.stage ? <span>· {item.class.stage}</span> : null}
+                </div>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{t.dashboard.curriculum.labels.academicYear}</span>
+                  <span>{formatYear(item.academic_year)}</span>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{t.dashboard.curriculum.labels.itemsCount}</span>
+                  <span>{item.items_count}</span>
+                </div>
+                {item.created_at ? (
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>{t.dashboard.curriculum.labels.createdOn}</span>
+                    <span>{formatCreatedAt(item.created_at)}</span>
+                  </div>
+                ) : null}
+              </CardContent>
+              <CardFooter className="flex items-center justify-between gap-2">
+                <Button variant="ghost" onClick={() => onOpenCurriculum(item.id)} aria-label={t.dashboard.curriculum.actions.open}>
+                  {t.dashboard.curriculum.actions.open}
+                </Button>
+                <Button variant="outline" onClick={() => onExportCurriculum(item.id)} aria-label={t.dashboard.curriculum.actions.exportCsv}>
+                  {t.dashboard.curriculum.actions.exportCsv}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}

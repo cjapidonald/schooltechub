@@ -1,0 +1,350 @@
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Class,
+  Curriculum,
+  CurriculumItem,
+  LessonPlan,
+  Profile,
+  Resource,
+} from "../../../types/supabase-tables";
+
+export type LessonPlanWithRelations = LessonPlan & {
+  class?: Class | null;
+  curriculum_item?: (CurriculumItem & { curriculum?: Curriculum | null }) | null;
+};
+
+export async function fetchMyProfile(userId: string): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id,salutation,first_name,last_name,display_name,avatar_url")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to load profile", error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function fetchMyClasses(userId: string): Promise<Class[]> {
+  const { data, error } = await supabase
+    .from("classes")
+    .select("id,title,stage,subject,start_date,end_date")
+    .eq("owner_id", userId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Failed to load classes", error);
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+export async function createClass(input: {
+  ownerId: string;
+  title: string;
+  stage?: string;
+  subject?: string;
+  start_date?: string;
+  end_date?: string;
+}): Promise<Class> {
+  const { data, error } = await supabase
+    .from("classes")
+    .insert({
+      owner_id: input.ownerId,
+      title: input.title,
+      stage: input.stage ?? null,
+      subject: input.subject ?? null,
+      start_date: input.start_date ?? null,
+      end_date: input.end_date ?? null,
+    })
+    .select("id,title,stage,subject,start_date,end_date")
+    .single();
+
+  if (error) {
+    console.error("Failed to create class", error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function fetchCurricula(
+  userId: string,
+): Promise<Array<Curriculum & { class: Class | null; items_count: number; created_at?: string }>> {
+  const { data, error } = await supabase
+    .from("curricula")
+    .select(
+      "id,title,subject,academic_year,class_id,created_at,classes(id,title,stage,subject,start_date,end_date),curriculum_items(count)"
+    )
+    .eq("owner_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to load curricula", error);
+    throw error;
+  }
+
+  return (
+    data ?? []
+  ).map(curriculum => ({
+    id: curriculum.id,
+    title: curriculum.title,
+    subject: curriculum.subject,
+    academic_year: curriculum.academic_year ?? undefined,
+    class_id: curriculum.class_id,
+    created_at: curriculum.created_at ?? undefined,
+    class: curriculum.classes
+      ? {
+          id: curriculum.classes.id,
+          title: curriculum.classes.title,
+          stage: curriculum.classes.stage ?? undefined,
+          subject: curriculum.classes.subject ?? undefined,
+          start_date: curriculum.classes.start_date ?? undefined,
+          end_date: curriculum.classes.end_date ?? undefined,
+        }
+      : null,
+    items_count: Array.isArray(curriculum.curriculum_items)
+      ? curriculum.curriculum_items[0]?.count ?? 0
+      : 0,
+  }));
+}
+
+export async function createCurriculum(input: {
+  ownerId: string;
+  classId: string;
+  subject: string;
+  title: string;
+  academicYear?: string;
+  lessonTitles: string[];
+}): Promise<{ curriculum: Curriculum; items: CurriculumItem[] }> {
+  const { data: curriculum, error } = await supabase
+    .from("curricula")
+    .insert({
+      owner_id: input.ownerId,
+      class_id: input.classId,
+      subject: input.subject,
+      title: input.title,
+      academic_year: input.academicYear ?? null,
+    })
+    .select("id,class_id,subject,title,academic_year")
+    .single();
+
+  if (error) {
+    console.error("Failed to create curriculum", error);
+    throw error;
+  }
+
+  const itemsPayload = input.lessonTitles.map((lessonTitle, index) => ({
+    curriculum_id: curriculum.id,
+    position: index + 1,
+    lesson_title: lessonTitle,
+  }));
+
+  const { data: items, error: itemsError } = await supabase
+    .from("curriculum_items")
+    .insert(itemsPayload)
+    .select("id,curriculum_id,position,lesson_title,stage,scheduled_on,status");
+
+  if (itemsError) {
+    console.error("Failed to create curriculum items", itemsError);
+    throw itemsError;
+  }
+
+  return {
+    curriculum,
+    items: items ?? [],
+  };
+}
+
+export async function fetchCurriculumItems(curriculumId: string): Promise<CurriculumItem[]> {
+  const { data, error } = await supabase
+    .from("curriculum_items")
+    .select("id,curriculum_id,position,lesson_title,stage,scheduled_on,status")
+    .eq("curriculum_id", curriculumId)
+    .order("position", { ascending: true });
+
+  if (error) {
+    console.error("Failed to load curriculum items", error);
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+export async function createLessonPlanFromItem(input: {
+  ownerId: string;
+  curriculumItemId: string;
+}): Promise<LessonPlan> {
+  const { data: item, error: itemError } = await supabase
+    .from("curriculum_items")
+    .select("id,lesson_title,stage,scheduled_on,curricula(class_id)")
+    .eq("id", input.curriculumItemId)
+    .single();
+
+  if (itemError) {
+    console.error("Failed to load curriculum item", itemError);
+    throw itemError;
+  }
+
+  if (!item?.curricula) {
+    throw new Error("Curriculum item missing parent curriculum");
+  }
+
+  const { data: lessonPlan, error } = await supabase
+    .from("lesson_plans")
+    .insert({
+      owner_id: input.ownerId,
+      curriculum_item_id: item.id,
+      title: item.lesson_title,
+      class_id: item.curricula.class_id,
+      stage: item.stage ?? null,
+      planned_date: item.scheduled_on ?? null,
+    })
+    .select("id,curriculum_item_id,title,class_id,stage,planned_date,body_md,exported_pdf_url,exported_docx_url")
+    .single();
+
+  if (error) {
+    console.error("Failed to create lesson plan", error);
+    throw error;
+  }
+
+  return lessonPlan;
+}
+
+export async function fetchLessonPlan(id: string): Promise<LessonPlanWithRelations | null> {
+  const { data, error } = await supabase
+    .from("lesson_plans")
+    .select(
+      "id,curriculum_item_id,title,class_id,stage,planned_date,body_md,exported_pdf_url,exported_docx_url," +
+        "classes(id,title,stage,subject,start_date,end_date)," +
+        "curriculum_items(id,curriculum_id,position,lesson_title,stage,scheduled_on,status,curricula(id,title,class_id,subject,academic_year))",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to load lesson plan", error);
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    curriculum_item_id: data.curriculum_item_id,
+    title: data.title,
+    class_id: data.class_id,
+    stage: data.stage ?? undefined,
+    planned_date: data.planned_date ?? undefined,
+    body_md: data.body_md ?? "",
+    exported_pdf_url: data.exported_pdf_url ?? undefined,
+    exported_docx_url: data.exported_docx_url ?? undefined,
+    class: data.classes
+      ? {
+          id: data.classes.id,
+          title: data.classes.title,
+          stage: data.classes.stage ?? undefined,
+          subject: data.classes.subject ?? undefined,
+          start_date: data.classes.start_date ?? undefined,
+          end_date: data.classes.end_date ?? undefined,
+        }
+      : null,
+    curriculum_item: data.curriculum_items
+      ? {
+          id: data.curriculum_items.id,
+          curriculum_id: data.curriculum_items.curricula?.id ?? data.curriculum_items.curriculum_id,
+          position: data.curriculum_items.position,
+          lesson_title: data.curriculum_items.lesson_title,
+          stage: data.curriculum_items.stage ?? undefined,
+          scheduled_on: data.curriculum_items.scheduled_on ?? undefined,
+          status: (data.curriculum_items.status ?? "planned") as CurriculumItem["status"],
+          curriculum: data.curriculum_items.curricula
+            ? {
+                id: data.curriculum_items.curricula.id,
+                class_id: data.curriculum_items.curricula.class_id,
+                subject: data.curriculum_items.curricula.subject,
+                title: data.curriculum_items.curricula.title,
+                academic_year: data.curriculum_items.curricula.academic_year ?? undefined,
+              }
+            : undefined,
+        }
+      : null,
+  };
+}
+
+export async function updateLessonPlanBody(id: string, body: string): Promise<void> {
+  const { error } = await supabase
+    .from("lesson_plans")
+    .update({ body_md: body })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to update lesson plan body", error);
+    throw error;
+  }
+}
+
+export type ResourceSearchFilters = {
+  query?: string;
+  types?: Resource["type"][];
+  subject?: string;
+  stage?: string;
+  cost?: "free" | "paid" | "both";
+};
+
+export async function searchResources(filters: ResourceSearchFilters): Promise<Resource[]> {
+  const query = supabase.from("resources").select("id,type,title,instructions,url,file_path,meta");
+
+  if (filters.query) {
+    query.ilike("title", `%${filters.query}%`);
+  }
+
+  if (filters.types && filters.types.length > 0) {
+    query.in("type", filters.types);
+  }
+
+  if (filters.subject) {
+    query.ilike("meta->>subject", `%${filters.subject}%`);
+  }
+
+  if (filters.stage) {
+    query.ilike("meta->>stage", `%${filters.stage}%`);
+  }
+
+  if (filters.cost && filters.cost !== "both") {
+    const isFree = filters.cost === "free";
+    query.eq("meta->>cost", isFree ? "free" : "paid");
+  }
+
+  const { data, error } = await query.limit(50);
+
+  if (error) {
+    console.error("Failed to search resources", error);
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+export async function attachResourceToLessonPlan(input: {
+  lessonPlanId: string;
+  resourceId: string;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("lesson_plan_resources")
+    .insert({
+      lesson_plan_id: input.lessonPlanId,
+      resource_id: input.resourceId,
+    });
+
+  if (error) {
+    console.error("Failed to link resource", error);
+    throw error;
+  }
+}

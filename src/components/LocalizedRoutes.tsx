@@ -22,12 +22,14 @@ import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
 import AccountResourceEdit from '@/pages/AccountResourceEdit';
 import LessonBuilderPage from '@/pages/lesson-builder/LessonBuilderPage';
+import LessonBuilderWorkspace from '@/pages/lesson-builder/LessonBuilderWorkspace';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminPage from '@/pages/admin/AdminPage';
+import DashboardPage from '@/pages/Dashboard';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>
@@ -63,6 +65,7 @@ export const LocalizedRoutes = () => {
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
+      <Route path="/lesson-builder/:id" element={<RouteWrapper><LessonBuilderWorkspace /></RouteWrapper>} />
       <Route path="/resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
       <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
@@ -92,3 +95,4 @@ export const LocalizedRoutes = () => {
     </Routes>
   );
 };
+      <Route path="/dashboard" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />

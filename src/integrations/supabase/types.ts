@@ -765,32 +765,338 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      classes: {
         Row: {
           created_at: string | null
-          email: string | null
-          full_name: string | null
+          end_date: string | null
           id: string
-          role: Database["public"]["Enums"]["user_role_enum"] | null
+          owner_id: string
+          stage: string | null
+          start_date: string | null
+          subject: string | null
+          title: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          id: string
-          role?: Database["public"]["Enums"]["user_role_enum"] | null
+          end_date?: string | null
+          id?: string
+          owner_id: string
+          stage?: string | null
+          start_date?: string | null
+          subject?: string | null
+          title: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
-          email?: string | null
-          full_name?: string | null
+          end_date?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["user_role_enum"] | null
+          owner_id?: string
+          stage?: string | null
+          start_date?: string | null
+          subject?: string | null
+          title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "classes_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curricula: {
+        Row: {
+          academic_year: string | null
+          class_id: string
+          created_at: string | null
+          id: string
+          owner_id: string
+          subject: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          academic_year?: string | null
+          class_id: string
+          created_at?: string | null
+          id?: string
+          owner_id: string
+          subject: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          academic_year?: string | null
+          class_id?: string
+          created_at?: string | null
+          id?: string
+          owner_id?: string
+          subject?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curricula_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curricula_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      curriculum_items: {
+        Row: {
+          created_at: string | null
+          curriculum_id: string
+          id: string
+          lesson_title: string
+          position: number
+          scheduled_on: string | null
+          stage: string | null
+          status: "planned" | "in_progress" | "done"
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          curriculum_id: string
+          id?: string
+          lesson_title: string
+          position: number
+          scheduled_on?: string | null
+          stage?: string | null
+          status?: "planned" | "in_progress" | "done"
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          curriculum_id?: string
+          id?: string
+          lesson_title?: string
+          position?: number
+          scheduled_on?: string | null
+          stage?: string | null
+          status?: "planned" | "in_progress" | "done"
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_items_curriculum_id_fkey"
+            columns: ["curriculum_id"]
+            isOneToOne: false
+            referencedRelation: "curricula"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plans: {
+        Row: {
+          body_md: string | null
+          class_id: string
+          created_at: string | null
+          curriculum_item_id: string
+          exported_docx_url: string | null
+          exported_pdf_url: string | null
+          id: string
+          owner_id: string
+          planned_date: string | null
+          stage: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          body_md?: string | null
+          class_id: string
+          created_at?: string | null
+          curriculum_item_id: string
+          exported_docx_url?: string | null
+          exported_pdf_url?: string | null
+          id?: string
+          owner_id: string
+          planned_date?: string | null
+          stage?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          body_md?: string | null
+          class_id?: string
+          created_at?: string | null
+          curriculum_item_id?: string
+          exported_docx_url?: string | null
+          exported_pdf_url?: string | null
+          id?: string
+          owner_id?: string
+          planned_date?: string | null
+          stage?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plans_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plans_curriculum_item_id_fkey"
+            columns: ["curriculum_item_id"]
+            isOneToOne: true
+            referencedRelation: "curriculum_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plans_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_plan_resources: {
+        Row: {
+          created_at: string | null
+          id: string
+          lesson_plan_id: string
+          position: number
+          resource_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          lesson_plan_id: string
+          position?: number
+          resource_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          lesson_plan_id?: string
+          position?: number
+          resource_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_plan_resources_lesson_plan_id_fkey"
+            columns: ["lesson_plan_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_plan_resources_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resources: {
+        Row: {
+          created_at: string | null
+          file_path: string | null
+          id: string
+          instructions: string | null
+          is_public: boolean | null
+          meta: Json | null
+          owner_id: string | null
+          title: string
+          type: "link" | "pdf" | "ppt" | "docx" | "image" | "video"
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_path?: string | null
+          id?: string
+          instructions?: string | null
+          is_public?: boolean | null
+          meta?: Json | null
+          owner_id?: string | null
+          title: string
+          type: "link" | "pdf" | "ppt" | "docx" | "image" | "video"
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_path?: string | null
+          id?: string
+          instructions?: string | null
+          is_public?: boolean | null
+          meta?: Json | null
+          owner_id?: string | null
+          title?: string
+          type?: "link" | "pdf" | "ppt" | "docx" | "image" | "video"
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          salutation: "Mr" | "Ms" | "Mx" | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          salutation?: "Mr" | "Ms" | "Mx" | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          salutation?: "Mr" | "Ms" | "Mx" | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       research_documents: {
         Row: {
