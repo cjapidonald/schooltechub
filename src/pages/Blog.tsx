@@ -1,6 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Calendar, Clock, User, Tag } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  Clock,
+  User,
+  Tag,
+  Laptop,
+  GraduationCap,
+  Lightbulb,
+  Users,
+  Edit3,
+  Sparkles,
+  ShoppingBag,
+  FileText,
+  FlaskConical,
+  HelpCircle,
+  MessageSquare,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { format } from "date-fns";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -14,13 +32,6 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
@@ -41,6 +52,20 @@ type BlogPostRow = Database["public"]["Tables"]["blogs"]["Row"] & {
 
 type BlogPost = BlogPostRow & {
   author?: AuthorInfo | null;
+};
+
+const categoryIcons: Record<string, LucideIcon> = {
+  eduTech: Laptop,
+  tutorials: GraduationCap,
+  teachingTechniques: Lightbulb,
+  classActivity: Users,
+  teacherReflection: Edit3,
+  tips: Sparkles,
+  shop: ShoppingBag,
+  caseStudy: FileText,
+  research: FlaskConical,
+  researchQuestion: HelpCircle,
+  teacherDebates: MessageSquare,
 };
 
 const BLOG_FILTER_KEYS = [
@@ -703,29 +728,52 @@ const Blog = () => {
                 ) : null}
 
                 <div className="space-y-2">
-                  <Label htmlFor="blog-category-filter" className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  <Label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     {t.blog.filters.category}
                   </Label>
-                  <Select
-                    value={filters.category[0] ?? undefined}
-                    onValueChange={(value) => {
-                      setFilters(prev => ({ ...prev, category: value ? [value] : [] }));
-                    }}
-                  >
-                    <SelectTrigger
-                      id="blog-category-filter"
-                      className="h-11 w-full rounded-full border-border/50 bg-background/80 text-left"
-                    >
-                      <SelectValue placeholder={t.blog.filters.category} />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-64">
-                      {optionEntries.category?.map(([value, label]) => (
-                        <SelectItem key={`category-${value}`} value={value}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-col gap-1">
+                    {optionEntries.category?.map(([value, label]) => {
+                      const Icon = categoryIcons[value] ?? Tag;
+                      const isActive = filters.category.includes(value);
+
+                      return (
+                        <button
+                          key={`category-${value}`}
+                          type="button"
+                          onClick={() =>
+                            setFilters(prev => ({
+                              ...prev,
+                              category: isActive ? [] : [value],
+                            }))
+                          }
+                          className={cn(
+                            "flex w-full items-center gap-3 rounded-full border border-transparent bg-background/80 px-3 py-2 text-left text-sm transition",
+                            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
+                            isActive
+                              ? "border-primary bg-primary/10 text-primary shadow-sm"
+                              : "text-muted-foreground hover:bg-muted/60"
+                          )}
+                          aria-pressed={isActive}
+                        >
+                          <span
+                            className={cn(
+                              "flex h-2.5 w-2.5 items-center justify-center rounded-full border",
+                              isActive ? "border-primary bg-primary" : "border-muted-foreground/40"
+                            )}
+                            aria-hidden="true"
+                          />
+                          <Icon
+                            className={cn(
+                              "h-4 w-4 shrink-0",
+                              isActive ? "text-primary" : "text-muted-foreground"
+                            )}
+                            aria-hidden="true"
+                          />
+                          <span className="flex-1 truncate">{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                   {filters.category.length > 0 ? (
                     <Button
                       variant="link"
