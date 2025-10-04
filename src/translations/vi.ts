@@ -69,6 +69,9 @@ export const vi = {
     common: {
       loading: "Đang tải...",
       signInPrompt: "Đăng nhập để quản lý bảng điều khiển.",
+      exampleTag: "Ví dụ",
+      exampleDescription: "Dữ liệu minh họa để bạn thấy không gian làm việc sẽ trông như thế nào.",
+      exampleActionsDisabled: "Các thao tác bị vô hiệu hóa với mục ví dụ.",
     },
     toasts: {
       classCreated: "Đã tạo lớp học",

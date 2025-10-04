@@ -6,7 +6,7 @@ import type { Class } from "../../../types/supabase-tables";
 import { format } from "date-fns";
 
 interface ClassesTableProps {
-  classes: Class[];
+  classes: Array<Class & { isExample?: boolean }>;
   loading?: boolean;
   onNewClass: () => void;
   onViewClass?: (classId: string) => void;
@@ -65,7 +65,17 @@ export function ClassesTable({ classes, loading, onNewClass, onViewClass, onEdit
               classes.map(item => (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <div className="font-medium">{item.title}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">{item.title}</div>
+                      {item.isExample ? (
+                        <Badge variant="outline" className="text-xs font-normal uppercase tracking-wide">
+                          {t.dashboard.common.exampleTag}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    {item.isExample ? (
+                      <p className="mt-1 text-xs text-muted-foreground">{t.dashboard.common.exampleDescription}</p>
+                    ) : null}
                   </TableCell>
                   <TableCell>
                     {item.stage ? <Badge variant="secondary">{item.stage}</Badge> : "—"}
@@ -79,13 +89,28 @@ export function ClassesTable({ classes, loading, onNewClass, onViewClass, onEdit
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => onViewClass?.(item.id)} aria-label={t.dashboard.classes.actions.view}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={item.isExample}
+                        onClick={() => onViewClass?.(item.id)}
+                        aria-label={t.dashboard.classes.actions.view}
+                      >
                         {t.dashboard.classes.actions.view}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => onEditClass?.(item.id)} aria-label={t.dashboard.classes.actions.edit}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={item.isExample}
+                        onClick={() => onEditClass?.(item.id)}
+                        aria-label={t.dashboard.classes.actions.edit}
+                      >
                         {t.dashboard.classes.actions.edit}
                       </Button>
                     </div>
+                    {item.isExample ? (
+                      <p className="mt-2 text-xs text-muted-foreground">{t.dashboard.common.exampleActionsDisabled}</p>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))

@@ -6,7 +6,7 @@ import type { CurriculumItem } from "../../../types/supabase-tables";
 import { format } from "date-fns";
 
 interface CurriculumEditorProps {
-  items: CurriculumItem[];
+  items: Array<CurriculumItem & { isExample?: boolean }>;
   loading?: boolean;
   onCreateLessonPlan: (curriculumItemId: string) => void;
 }
@@ -54,7 +54,17 @@ export function CurriculumEditor({ items, loading, onCreateLessonPlan }: Curricu
               <TableRow key={item.id}>
                 <TableCell className="font-semibold">{item.position}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{item.lesson_title}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium">{item.lesson_title}</div>
+                    {item.isExample ? (
+                      <Badge variant="outline" className="text-xs font-normal uppercase tracking-wide">
+                        {t.dashboard.common.exampleTag}
+                      </Badge>
+                    ) : null}
+                  </div>
+                  {item.isExample ? (
+                    <p className="mt-1 text-xs text-muted-foreground">{t.dashboard.common.exampleDescription}</p>
+                  ) : null}
                 </TableCell>
                 <TableCell>
                   {item.stage ? <Badge variant="secondary">{item.stage}</Badge> : "—"}
@@ -67,12 +77,15 @@ export function CurriculumEditor({ items, loading, onCreateLessonPlan }: Curricu
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={!item.id}
+                    disabled={!item.id || item.isExample}
                     onClick={() => onCreateLessonPlan(item.id)}
                     aria-label={t.dashboard.curriculumView.actions.createLessonPlan}
                   >
                     {t.dashboard.curriculumView.actions.createLessonPlan}
                   </Button>
+                  {item.isExample ? (
+                    <p className="mt-2 text-xs text-muted-foreground">{t.dashboard.common.exampleActionsDisabled}</p>
+                  ) : null}
                 </TableCell>
               </TableRow>
             ))
