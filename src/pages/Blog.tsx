@@ -671,12 +671,6 @@ const Blog = () => {
               <Badge variant="secondary" className="w-fit rounded-full bg-primary/10 text-primary">
                 {t.blog.hero.title}
               </Badge>
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                {t.blog.title}
-              </h1>
-              <p className="text-lg text-muted-foreground">
-                {t.blog.subtitle}
-              </p>
             </div>
           </div>
         </section>
