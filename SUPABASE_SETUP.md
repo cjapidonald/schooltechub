@@ -35,6 +35,29 @@ The Supabase client is already configured with the following credentials:
    - Search: generated `search_vector` column backed by GIN indexes for fast keyword lookups
    - Access: defaults to `draft`; only `status = 'published'` rows are exposed through public RLS policies
 
+5. **students** - Individual learner records owned by a teacher
+   - Fields: first_name, last_name, preferred_name, email, avatar_url, owner_id
+   - Policies: only the owning teacher (owner_id) can view or modify rows
+
+6. **class_students** - Enrollment join table between classes and students
+   - Enforces unique (class_id, student_id) pairs
+   - Policies: restricted to classes owned by the authenticated teacher
+
+7. **student_behavior_logs** & **student_appraisals** - Narrative notes about behaviour and achievements
+   - Behaviour entries store sentiment (positive, neutral, needs_support)
+   - Appraisals capture highlights used for AI progress reports
+
+8. **student_reports** - Audit trail of AI-generated progress report requests
+   - Tracks status (`pending`, `processing`, `ready`, `failed`) plus generated URLs
+
+9. **curriculum_items** & **curriculum_lessons** - Store scoped curriculum rows and links to lesson plans
+   - Support filters for stage, subject, week, and scheduled date in the dashboard
+
+10. **assessments**, **assessment_submissions**, **assessment_grades** - Assessment tracking stack
+    - Templates capture description, grading scale, and due date
+    - Submissions record student status/attachments
+    - Grades capture teacher feedback with flexible scales (letter, percentage, points, rubric)
+
 #### Row Level Security (RLS)
 - All tables have RLS enabled
 - Users can only view/modify their own data

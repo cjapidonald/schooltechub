@@ -46,7 +46,7 @@ const Navigation = () => {
 
   const navItems = useMemo(() => {
     const items = [
-      { name: t.nav.profile, path: "/profile" },
+      { name: t.nav.dashboard ?? t.nav.profile, path: "/profile" },
       { name: t.nav.home, path: "/" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.curriculum ?? "Curriculum", path: "/curriculum" },
@@ -60,6 +60,7 @@ const Navigation = () => {
     t.nav.about,
     t.nav.blog,
     t.nav.curriculum,
+    t.nav.dashboard,
     t.nav.events,
     t.nav.home,
     t.nav.profile,
@@ -158,7 +159,7 @@ const Navigation = () => {
                     onClick={() => navigate(getLocalizedNavPath("/profile"))}
                   >
                     <IdCard className="mr-2 h-4 w-4" />
-                    {t.nav.profile}
+                    {t.nav.dashboard ?? t.nav.profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}
@@ -234,11 +235,11 @@ const Navigation = () => {
                   <div className="border-t pt-4 space-y-3">
                     <p className="px-2 text-sm text-muted-foreground">{user.email}</p>
                     <Link
-                      to={getLocalizedNavPath("/account")}
+                      to={getLocalizedNavPath("/profile")}
                       onClick={() => setIsOpen(false)}
                     >
                       <Button className="w-full" variant="secondary">
-                        {t.nav.profile}
+                        {t.nav.dashboard ?? t.nav.profile}
                       </Button>
                     </Link>
                     <Link
