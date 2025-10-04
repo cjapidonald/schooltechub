@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Calendar, Clock, User, Tag } from "lucide-react";
 import { format } from "date-fns";
@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { cn } from "@/lib/utils";
 
 interface AuthorInfo {
   name?: string | null;
@@ -32,6 +33,209 @@ type BlogPostRow = Database["public"]["Tables"]["blogs"]["Row"] & {
 type BlogPost = BlogPostRow & {
   author?: AuthorInfo | null;
 };
+
+const BLOG_FILTER_KEYS = [
+  "category",
+  "stage",
+  "subject",
+  "delivery",
+  "payment",
+  "platform",
+] as const;
+
+type BlogFilterKey = (typeof BLOG_FILTER_KEYS)[number];
+
+type BlogFilterState = Record<BlogFilterKey, string[]>;
+
+const FILTER_SOURCE_KEYS: Record<BlogFilterKey, string[]> = {
+  category: ["category", "categories", "filter_type", "filterType", "content_type", "contentType", "type", "types", "page"],
+  stage: ["stage", "stages", "grade", "grades", "grade_level", "grade_levels", "gradeLevel", "gradeLevels"],
+  subject: ["subject", "subjects"],
+  delivery: ["delivery", "deliveries", "delivery_mode", "deliveryMode", "best_for"],
+  payment: ["payment", "payments", "pricing", "price_type", "priceType"],
+  platform: ["platform", "platforms", "device", "devices"],
+};
+
+const sanitizeKey = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const slugifyValue = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const stripValue = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const formatFilterLabel = (value: string) =>
+  value
+    .replace(/[-_]/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, char => char.toUpperCase());
+
+const createEmptyFilters = (): BlogFilterState => ({
+  category: [],
+  stage: [],
+  subject: [],
+  delivery: [],
+  payment: [],
+  platform: [],
+});
+
+const toValueArray = (input: unknown): string[] => {
+  if (!input && input !== 0) {
+    return [];
+  }
+
+  if (Array.isArray(input)) {
+    return input.flatMap(item => toValueArray(item));
+  }
+
+  if (typeof input === "number") {
+    return [String(input)];
+  }
+
+  if (typeof input === "string") {
+    return input
+      .split(/[;,/]/)
+      .map(value => value.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof input === "object") {
+    const record = input as Record<string, unknown>;
+    if ("value" in record) {
+      return toValueArray(record.value);
+    }
+    if ("label" in record) {
+      return toValueArray(record.label);
+    }
+  }
+
+  return [];
+};
+
+const asRecord = (value: unknown): Record<string, unknown> | null => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+};
+
+const collectSources = (post: BlogPost): Record<string, unknown>[] => {
+  const sources: Record<string, unknown>[] = [];
+
+  const pushRecord = (value: unknown) => {
+    const record = asRecord(value);
+    if (record) {
+      sources.push(record);
+    }
+  };
+
+  pushRecord(post);
+
+  if (post.author) {
+    pushRecord(post.author);
+  }
+
+  const contentRecord = asRecord(post.content);
+  if (contentRecord) {
+    pushRecord(contentRecord);
+
+    Object.values(contentRecord).forEach(value => {
+      pushRecord(value);
+    });
+  }
+
+  return sources;
+};
+
+const getMatchingValues = (source: Record<string, unknown>, keys: string[]): unknown[] => {
+  const targetKeys = new Set(keys.map(sanitizeKey));
+  const matches: unknown[] = [];
+
+  for (const [key, value] of Object.entries(source)) {
+    if (targetKeys.has(sanitizeKey(key))) {
+      matches.push(value);
+    }
+  }
+
+  return matches;
+};
+
+const createNormalizer = (options: Record<string, string>) => {
+  const map = new Map<string, string>();
+
+  const register = (candidate: string, key: string) => {
+    if (!candidate) {
+      return;
+    }
+    map.set(candidate, key);
+  };
+
+  Object.entries(options).forEach(([key, label]) => {
+    register(key, key);
+    register(key.toLowerCase(), key);
+    register(stripValue(key), key);
+    register(slugifyValue(key), key);
+    register(label.toLowerCase(), key);
+    register(stripValue(label), key);
+    register(slugifyValue(label), key);
+  });
+
+  return (rawValue: string | null | undefined): { value: string; label: string } | null => {
+    if (rawValue === null || rawValue === undefined) {
+      return null;
+    }
+
+    const trimmed = String(rawValue).trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const direct = map.get(trimmed);
+    const lower = map.get(trimmed.toLowerCase());
+    const stripped = map.get(stripValue(trimmed));
+    const slug = map.get(slugifyValue(trimmed));
+
+    const matchKey = direct ?? lower ?? stripped ?? slug;
+    if (matchKey) {
+      return { value: matchKey, label: options[matchKey] };
+    }
+
+    const fallbackValue = slugifyValue(trimmed) || stripValue(trimmed) || trimmed.toLowerCase();
+    return {
+      value: fallbackValue,
+      label: formatFilterLabel(trimmed),
+    };
+  };
+};
+
+const FilterChip = ({
+  active,
+  label,
+  onToggle,
+}: {
+  active: boolean;
+  label: string;
+  onToggle: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className={cn(
+      "rounded-full border px-3 py-1 text-sm font-medium transition",
+      active
+        ? "border-primary/70 bg-primary/10 text-primary shadow-sm"
+        : "border-border/60 text-muted-foreground hover:border-primary/40 hover:text-primary"
+    )}
+    aria-pressed={active}
+  >
+    {label}
+  </button>
+);
 
 const getAuthorName = (post: BlogPost): string => {
   const { author, author_name } = post;
@@ -116,6 +320,7 @@ const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<BlogFilterState>(() => createEmptyFilters());
 
   useEffect(() => {
     setSearchValue(searchParamValue);
@@ -185,27 +390,189 @@ const Blog = () => {
     }
   };
 
+  const filterOptions = useMemo(() => {
+    return {
+      category: t.blog.filters.categories,
+      stage: t.blog.filters.stages,
+      subject: t.blog.filters.subjects,
+      delivery: t.blog.filters.deliveries,
+      payment: t.blog.filters.payments,
+      platform: t.blog.filters.platforms,
+    } as Record<BlogFilterKey, Record<string, string>>;
+  }, [t]);
+
+  const { postsWithMetadata, optionEntries } = useMemo(() => {
+    const baseSets = BLOG_FILTER_KEYS.reduce(
+      (acc, key) => {
+        acc[key] = new Set(Object.keys(filterOptions[key] ?? {}));
+        return acc;
+      },
+      {} as Record<BlogFilterKey, Set<string>>
+    );
+
+    const normalizers = BLOG_FILTER_KEYS.reduce(
+      (acc, key) => {
+        acc[key] = createNormalizer(filterOptions[key] ?? {});
+        return acc;
+      },
+      {} as Record<BlogFilterKey, (value: string) => { value: string; label: string } | null>
+    );
+
+    const dynamicOptions = BLOG_FILTER_KEYS.reduce(
+      (acc, key) => {
+        acc[key] = new Map<string, string>();
+        return acc;
+      },
+      {} as Record<BlogFilterKey, Map<string, string>>
+    );
+
+    const postsWithMetadata = posts.map(post => {
+      const metadata: BlogFilterState = {
+        category: [],
+        stage: [],
+        subject: [],
+        delivery: [],
+        payment: [],
+        platform: [],
+      };
+
+      const sources = collectSources(post);
+      const postRecord = asRecord(post);
+
+      BLOG_FILTER_KEYS.forEach(key => {
+        const values = new Set<string>();
+        const baseSet = baseSets[key];
+        const normalizer = normalizers[key];
+        const addValue = (raw: unknown, allowDynamic = true) => {
+          toValueArray(raw).forEach(value => {
+            const normalized = normalizer(value);
+            if (!normalized) {
+              return;
+            }
+
+            const isBaseOption = baseSet.has(normalized.value);
+            if (!isBaseOption && !allowDynamic) {
+              return;
+            }
+
+            values.add(normalized.value);
+
+            if (!isBaseOption) {
+              dynamicOptions[key].set(normalized.value, normalized.label);
+            }
+          });
+        };
+
+        if (key === "category") {
+          addValue(post.category);
+          if (postRecord) {
+            addValue(postRecord.filter_type);
+            addValue(postRecord.content_type);
+            addValue(postRecord.type);
+          }
+        }
+
+        sources.forEach(source => {
+          getMatchingValues(source, FILTER_SOURCE_KEYS[key]).forEach(value => {
+            addValue(value);
+          });
+        });
+
+        if (key === "subject") {
+          addValue(post.tags, false);
+          addValue(post.keywords, false);
+        }
+
+        if (key === "stage") {
+          addValue(post.tags, false);
+          addValue(post.keywords, false);
+        }
+
+        if (key === "delivery") {
+          addValue(post.tags, false);
+        }
+
+        if (key === "platform") {
+          addValue(post.tags, false);
+        }
+
+        metadata[key] = Array.from(values);
+      });
+
+      return { post, metadata };
+    });
+
+    const optionEntries = BLOG_FILTER_KEYS.reduce(
+      (acc, key) => {
+        const baseEntries = Object.entries(filterOptions[key] ?? {});
+        const dynamicEntries = Array.from(dynamicOptions[key].entries()).filter(
+          ([value]) => !baseSets[key].has(value)
+        );
+
+        acc[key] = [...baseEntries, ...dynamicEntries];
+        return acc;
+      },
+      {} as Record<BlogFilterKey, Array<[string, string]>>
+    );
+
+    return { postsWithMetadata, optionEntries };
+  }, [posts, filterOptions]);
+
   const filteredPosts = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
 
-    if (!query) {
-      return posts;
-    }
+    return postsWithMetadata
+      .filter(({ post, metadata }) => {
+        if (query) {
+          const haystack = [
+            post.title,
+            post.subtitle,
+            post.excerpt,
+            normalizeText(post.category),
+            normalizeText(post.tags),
+            normalizeText(post.keywords),
+          ]
+            .join(" ")
+            .toLowerCase();
 
-    return posts.filter(post => {
-      const haystack = [
-        post.title,
-        post.subtitle,
-        post.excerpt,
-        normalizeText(post.category),
-        normalizeText(post.tags),
-      ]
-        .join(" ")
-        .toLowerCase();
+          if (!haystack.includes(query)) {
+            return false;
+          }
+        }
 
-      return haystack.includes(query);
+        return BLOG_FILTER_KEYS.every(key => {
+          const selected = filters[key];
+          if (!selected.length) {
+            return true;
+          }
+
+          const available = metadata[key];
+          if (!available.length) {
+            return false;
+          }
+
+          return selected.some(value => available.includes(value));
+        });
+      })
+      .map(item => item.post);
+  }, [filters, postsWithMetadata, searchValue]);
+
+  const toggleFilter = useCallback((key: BlogFilterKey, value: string) => {
+    setFilters(prev => {
+      const current = prev[key];
+      const exists = current.includes(value);
+      const nextValues = exists ? current.filter(item => item !== value) : [...current, value];
+      return { ...prev, [key]: nextValues };
     });
-  }, [posts, searchValue]);
+  }, []);
+
+  const clearFilters = useCallback(() => {
+    setFilters(createEmptyFilters());
+  }, []);
+
+  const hasActiveFilters = useMemo(() => {
+    return BLOG_FILTER_KEYS.some(key => filters[key].length > 0);
+  }, [filters]);
 
   const featuredPosts = filteredPosts.filter(post => {
     if (post.is_featured) {
@@ -267,6 +634,7 @@ const Blog = () => {
       caseStudy: t.blog.filters.categories.caseStudy,
       research: t.blog.filters.categories.research,
       teacherDebates: t.blog.filters.categories.teacherDebates,
+      researchQuestion: t.blog.filters.categories.researchQuestion,
     };
 
     return (
@@ -316,6 +684,69 @@ const Blog = () => {
                   className="h-12 rounded-full border-muted-foreground/20 pl-11"
                   aria-label={t.blog.searchPlaceholder}
                 />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-border/60 bg-background/40">
+          <div className="container py-10">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                    {t.blog.filters.title}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {t.blog.filters.helper ?? t.blog.subtitle}
+                  </p>
+                </div>
+                {hasActiveFilters ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="w-full sm:w-auto"
+                  >
+                    {t.blog.filters.clear}
+                  </Button>
+                ) : null}
+              </div>
+
+              <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
+                {BLOG_FILTER_KEYS.map(key => {
+                  const options = optionEntries[key] ?? [];
+                  if (!options.length) {
+                    return null;
+                  }
+
+                  const sectionLabel = {
+                    category: t.blog.filters.category,
+                    stage: t.blog.filters.stage,
+                    subject: t.blog.filters.subject,
+                    delivery: t.blog.filters.delivery,
+                    payment: t.blog.filters.payment,
+                    platform: t.blog.filters.platform,
+                  }[key];
+
+                  return (
+                    <div key={key} className="space-y-3">
+                      <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        {sectionLabel}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {options.map(([value, label]) => (
+                          <FilterChip
+                            key={`${key}-${value}`}
+                            label={label}
+                            active={filters[key].includes(value)}
+                            onToggle={() => toggleFilter(key, value)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

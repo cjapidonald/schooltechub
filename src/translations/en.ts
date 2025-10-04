@@ -432,6 +432,8 @@ export const en = {
     },
     filters: {
       title: "Filters",
+      helper: "Refine posts by topic, stage, subject, and format.",
+      clear: "Clear filters",
       category: "Category",
       stage: "Stage",
       subject: "Subject",
@@ -448,6 +450,7 @@ export const en = {
         shop: "Shop",
         caseStudy: "Case Study",
         research: "Research",
+        researchQuestion: "Research Questions",
         teacherDebates: "Teacher Debates"
       },
       stages: {
