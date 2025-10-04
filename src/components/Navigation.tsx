@@ -10,6 +10,7 @@ import {
   BookOpen,
   IdCard,
   GraduationCap,
+  LayoutDashboard,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -158,10 +159,16 @@ const Navigation = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
+                    onClick={() => navigate(getLocalizedNavPath("/dashboard"))}
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    {t.dashboard.header.title}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/profile"))}
                   >
                     <IdCard className="mr-2 h-4 w-4" />
-                    {t.nav.profile ?? t.nav.dashboard}
+                    {t.nav.profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}
