@@ -1370,6 +1370,10 @@ export const sq = {
   lessonBuilder: {
     editor: {
       heading: "Plani i mësimit",
+      prefilledNotice: "Paraplotësuar nga kurrikula juaj. Ndryshoni këto detaje te burimi.",
+      classLabel: "Klasa",
+      stageLabel: "Niveli",
+      changeLink: "Ndrysho",
       addResource: "Shto burim",
       exportPdf: "Eksporto PDF",
       exportDocx: "Eksporto DOCX",
@@ -1403,6 +1407,9 @@ export const sq = {
         image: "Imazh",
         video: "Video",
       },
+      tagsLabel: "Etiketa",
+      tagsPlaceholder: "Shkruani një etiketë dhe shtypni Enter",
+      removeTagLabel: "Hiq etiketën {tag}",
       stageLabel: "Niveli",
       stagePlaceholder: "p.sh. Niveli 3",
       subjectLabel: "Lënda",

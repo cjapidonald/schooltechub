@@ -1370,6 +1370,10 @@ export const vi = {
   lessonBuilder: {
     editor: {
       heading: "Kế hoạch bài học",
+      prefilledNotice: "Được điền sẵn từ chương trình giảng dạy của bạn. Hãy chỉnh sửa tại nguồn.",
+      classLabel: "Lớp học",
+      stageLabel: "Cấp học",
+      changeLink: "Thay đổi",
       addResource: "Thêm tài nguyên",
       exportPdf: "Xuất PDF",
       exportDocx: "Xuất DOCX",
@@ -1403,6 +1407,9 @@ export const vi = {
         image: "Hình ảnh",
         video: "Video",
       },
+      tagsLabel: "Thẻ",
+      tagsPlaceholder: "Nhập thẻ và nhấn Enter",
+      removeTagLabel: "Xóa thẻ {tag}",
       stageLabel: "Cấp học",
       stagePlaceholder: "vd. Khối 3",
       subjectLabel: "Môn học",

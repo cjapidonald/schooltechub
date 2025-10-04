@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -26,6 +26,7 @@ type ResourceFilters = {
   stage: string;
   subject: string;
   cost: "both" | "free" | "paid";
+  tags: string[];
 };
 
 const defaultFilters: ResourceFilters = {
@@ -34,18 +35,78 @@ const defaultFilters: ResourceFilters = {
   stage: "",
   subject: "",
   cost: "both",
+  tags: [],
 };
 
 const escapeCell = (value: string) => value.replace(/\|/g, "\\|").replace(/\n/g, " ");
 
-const createMarkdownTable = (title: string, instructions: string, resourceLink: string) => `| Title | Instructions | Resource |\n|---|---|---|\n| ${escapeCell(title)} | ${escapeCell(instructions)} | ${resourceLink} |`;
+const escapeHtmlAttribute = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+const createMarkdownTable = (title: string, instructions: string, resourceLink: string) =>
+  `| Title | Instructions | Resource |\n|---|---|---|\n| ${escapeCell(title)} | ${escapeCell(instructions)} | ${resourceLink} |`;
+
+const createVideoEmbedUrl = (rawUrl: string): string | null => {
+  try {
+    const url = new URL(rawUrl);
+    const host = url.hostname.toLowerCase();
+
+    if (host.includes("youtube.com")) {
+      const videoId = url.searchParams.get("v");
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+      if (url.pathname.startsWith("/embed/")) {
+        return url.toString();
+      }
+      if (url.pathname.startsWith("/shorts/")) {
+        const [, , id] = url.pathname.split("/");
+        if (id) {
+          return `https://www.youtube.com/embed/${id}`;
+        }
+      }
+    }
+
+    if (host === "youtu.be") {
+      const id = url.pathname.replace(/^\//, "");
+      if (id) {
+        return `https://www.youtube.com/embed/${id}`;
+      }
+    }
+
+    if (host.includes("vimeo.com")) {
+      const segments = url.pathname.split("/").filter(Boolean);
+      if (segments.length > 0) {
+        const id = segments[segments.length - 1];
+        return `https://player.vimeo.com/video/${id}`;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Failed to parse video URL", error);
+    return null;
+  }
+};
 
 async function resolveResourceLink(resource: Resource): Promise<string> {
-  if (resource.type === "link" && resource.url) {
+  if (resource.type === "video" && resource.url) {
+    const embedUrl = createVideoEmbedUrl(resource.url);
+    if (embedUrl) {
+      return `<iframe src="${embedUrl}" title="${escapeHtmlAttribute(resource.title)}" allowfullscreen loading="lazy" style="width:100%;aspect-ratio:16/9;border:0;"></iframe>`;
+    }
     return `[${escapeCell(resource.title)}](${resource.url})`;
   }
 
-  if ((resource.type === "video" || resource.type === "image") && resource.url) {
+  if (resource.type === "image" && resource.url) {
+    return `![${escapeCell(resource.title)}](${resource.url})`;
+  }
+
+  if (resource.type === "link" && resource.url) {
     return `[${escapeCell(resource.title)}](${resource.url})`;
   }
 
@@ -59,7 +120,8 @@ async function resolveResourceLink(resource: Resource): Promise<string> {
       return resource.url ? `[${escapeCell(resource.title)}](${resource.url})` : resource.title;
     }
 
-    return `[${escapeCell(resource.title)}](${data.signedUrl})`;
+    const label = resource.type ? resource.type.toUpperCase() : "FILE";
+    return `[${label} – ${escapeCell(resource.title)}](${data.signedUrl})`;
   }
 
   if (resource.url) {
@@ -80,6 +142,8 @@ export default function LessonBuilderWorkspace() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [resourceFilters, setResourceFilters] = useState<ResourceFilters>(defaultFilters);
   const [hasLoadedInitialBody, setHasLoadedInitialBody] = useState(false);
+  const [highlightResources, setHighlightResources] = useState(false);
+  const highlightTimerRef = useRef<number | null>(null);
 
   const handleFiltersChange = useCallback((filters: ResourceFilters) => {
     setResourceFilters(filters);
@@ -193,6 +257,32 @@ export default function LessonBuilderWorkspace() {
     [id, toast, t.lessonBuilder.exports.error, t.lessonBuilder.exports.success],
   );
 
+  const handleAddResourceClick = useCallback(() => {
+    const searchInput = document.getElementById("resource-search");
+    if (searchInput instanceof HTMLInputElement) {
+      searchInput.focus();
+      searchInput.select();
+    }
+
+    if (highlightTimerRef.current) {
+      window.clearTimeout(highlightTimerRef.current);
+    }
+
+    setHighlightResources(true);
+    highlightTimerRef.current = window.setTimeout(() => {
+      setHighlightResources(false);
+      highlightTimerRef.current = null;
+    }, 1200);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current) {
+        window.clearTimeout(highlightTimerRef.current);
+      }
+    };
+  }, []);
+
   const metadata = useMemo(() => {
     if (!planQuery.data) {
       return {
@@ -200,6 +290,7 @@ export default function LessonBuilderWorkspace() {
         className: t.lessonBuilder.editor.unknownClass,
         stage: null,
         date: null,
+        links: {},
       } as const;
     }
 
@@ -212,6 +303,12 @@ export default function LessonBuilderWorkspace() {
       className,
       stage,
       date,
+      links: {
+        lesson: `/builder/lesson-plans/${planQuery.data.id}`,
+        class: planQuery.data.class?.id ? `/account/classes/${planQuery.data.class.id}` : undefined,
+        stage: `/builder/lesson-plans/${planQuery.data.id}`,
+        date: `/builder/lesson-plans/${planQuery.data.id}`,
+      },
     } as const;
   }, [planQuery.data, t.lessonBuilder.editor.unknownClass, t.lessonBuilder.editor.loadingTitle]);
 
@@ -256,7 +353,7 @@ export default function LessonBuilderWorkspace() {
         body={body}
         onBodyChange={setBody}
         onSave={handleManualSave}
-        onAddResource={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        onAddResource={handleAddResourceClick}
         onExport={handleExport}
         resourcePanel={
           <ResourceSearch
@@ -264,6 +361,7 @@ export default function LessonBuilderWorkspace() {
             loading={resourcesQuery.isLoading}
             onFilterChange={handleFiltersChange}
             onInsert={resource => insertResourceMutation.mutate(resource)}
+            highlighted={highlightResources}
           />
         }
         autosaveState={autosaveState}

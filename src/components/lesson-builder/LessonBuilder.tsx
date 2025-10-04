@@ -1,10 +1,11 @@
 import { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export type LessonBuilderExportFormat = "pdf" | "docx";
 
@@ -14,6 +15,12 @@ interface LessonBuilderProps {
     className: string;
     stage?: string | null;
     date?: string | null;
+    links?: {
+      lesson?: string;
+      class?: string;
+      stage?: string;
+      date?: string;
+    };
   };
   body: string;
   onBodyChange: (value: string) => void;
@@ -58,21 +65,53 @@ export function LessonBuilder({
     }
   })();
 
+  const renderChangeLink = (href?: string) => {
+    if (!href) return null;
+    return (
+      <Button variant="link" size="sm" className="h-auto px-0 text-xs" asChild>
+        <Link to={href}>{t.lessonBuilder.editor.changeLink}</Link>
+      </Button>
+    );
+  };
+
   return (
     <PanelGroup direction="horizontal" className="h-full rounded-xl border bg-card">
       <Panel defaultSize={65} minSize={40} className="flex flex-col">
-        <div className="flex flex-col gap-4 border-b px-6 py-5">
-          <div>
+        <div className="flex flex-col gap-5 border-b px-6 py-5">
+          <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {t.lessonBuilder.editor.heading}
             </p>
-            <h1 className="text-2xl font-bold leading-tight">{metadata.title}</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold leading-tight">{metadata.title}</h1>
+              {renderChangeLink(metadata.links?.lesson)}
+            </div>
+            <p className="text-xs text-muted-foreground">{t.lessonBuilder.editor.prefilledNotice}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <Badge variant="secondary">{metadata.className}</Badge>
-            {metadata.stage ? <Badge variant="outline">{metadata.stage}</Badge> : null}
-            <span>{t.lessonBuilder.editor.dateLabel}: {formatLessonDate(metadata.date)}</span>
-          </div>
+          <dl className="grid gap-4 text-sm text-muted-foreground sm:grid-cols-3">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide">{t.lessonBuilder.editor.classLabel}</dt>
+              <dd className="mt-1 flex flex-wrap items-center gap-2 text-base text-foreground">
+                <span>{metadata.className}</span>
+                {renderChangeLink(metadata.links?.class)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide">{t.lessonBuilder.editor.stageLabel}</dt>
+              <dd className={cn("mt-1 flex flex-wrap items-center gap-2", metadata.stage ? "text-base text-foreground" : "text-base text-muted-foreground")}
+              >
+                <span>{metadata.stage ?? "—"}</span>
+                {renderChangeLink(metadata.links?.stage)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide">{t.lessonBuilder.editor.dateLabel}</dt>
+              <dd className="mt-1 flex flex-wrap items-center gap-2 text-base text-foreground">
+                <span>{formatLessonDate(metadata.date)}</span>
+                {renderChangeLink(metadata.links?.date)}
+              </dd>
+            </div>
+          </dl>
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={onAddResource} variant="outline" aria-label={t.lessonBuilder.editor.addResource}>
               {t.lessonBuilder.editor.addResource}

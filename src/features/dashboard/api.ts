@@ -296,6 +296,7 @@ export type ResourceSearchFilters = {
   subject?: string;
   stage?: string;
   cost?: "free" | "paid" | "both";
+  tags?: string[];
 };
 
 export async function searchResources(filters: ResourceSearchFilters): Promise<Resource[]> {
@@ -329,7 +330,25 @@ export async function searchResources(filters: ResourceSearchFilters): Promise<R
     throw error;
   }
 
-  return data ?? [];
+  let resources = data ?? [];
+
+  if (filters.tags && filters.tags.length > 0) {
+    const tagMatchers = filters.tags.map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
+    if (tagMatchers.length > 0) {
+      resources = resources.filter(resource => {
+        const meta = resource.meta;
+        if (!meta || typeof meta !== "object") {
+          return false;
+        }
+        const record = meta as Record<string, unknown>;
+        const rawTags = Array.isArray(record.tags) ? record.tags : [];
+        const normalized = rawTags.map(tag => String(tag).toLowerCase());
+        return tagMatchers.every(tag => normalized.some(value => value.includes(tag)));
+      });
+    }
+  }
+
+  return resources;
 }
 
 export async function attachResourceToLessonPlan(input: {
