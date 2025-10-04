@@ -48,38 +48,39 @@ export const sq = {
     },
   },
   hero: {
-    title: "Fuqizimi i Arsimit përmes Inovacionit",
-    subtitle: "Transformoni Shkollën Tuaj me Zgjidhje Teknologjike të Avancuara",
-    description: "Ne ofrojmë zgjidhje gjithëpërfshirëse të teknologjisë arsimore që revolucionojnë përvojat e të mësuarit dhe thjeshtojnë operacionet shkollore.",
-    getStarted: "Fillo Tani",
-    learnMore: "Mëso Më Shumë"
+    title: "Hapësira juaj gjithëpërfshirëse e punës për mësues",
+    subtitle: "Planifikoni, bashkëpunoni dhe zhvillohuni me SchoolTech Hub",
+    description:
+      "SchoolTech Hub u jep edukatorëve një staf dixhital ku planifikojnë mësime, kurorëzojnë burime, ndajnë kërkime dhe qëndrojnë në hap me trendet më të fundit EdTech.",
+    getStarted: "Filloni planifikimin",
+    learnMore: "Eksploroni hapësirën"
   },
   features: {
-    title: "Pse të Zgjidhni School Tech Hub Solutions?",
-    subtitle: "Zgjidhje të Plota për Arsimin Modern",
+    title: "Gjithçka që u duhet mësuesve në një platformë",
+    subtitle: "Mjete të kuruara për të mësuar, bashkëpunuar dhe udhëhequr me besim",
     feature1: {
-      title: "Menaxhim i Zgjuar i të Mësuarit",
-      description: "Platformë LMS e avancuar me personalizim të fuqizuar nga AI dhe ndjekje të progresit në kohë reale"
+      title: "Planifikim strategjik i mësimit",
+      description: "Shabllone të udhëzuara, sugjerime nga AI dhe përafrim me kurrikulën që i mbajnë çdo orë të qëllimshme"
     },
     feature2: {
-      title: "Zgjidhje për Klasat Virtuale",
-      description: "Mjedise të të mësuarit online me mjete interaktive dhe veçori bashkëpunimi"
+      title: "Bibliotekë burimesh të kuruara",
+      description: "Kërkoni shpejt mjete të provuara në klasë, materiale shkarkimi dhe rekomandime teknologjike"
     },
     feature3: {
-      title: "Paneli i Analizës së të Dhënave",
-      description: "Njohuri gjithëpërfshirëse për performancën e studentëve dhe metrikat institucionale"
+      title: "Qendër zhvillimi profesional",
+      description: "Ndiqni blogje, sinteza kërkimore dhe udhëzues zbatimi pa dalë nga hapësira juaj e punës"
     },
     feature4: {
-      title: "Infrastruktura Cloud",
-      description: "Zgjidhje cloud të sigurta dhe të shkallëzueshme që sigurojnë 99.9% kohë funksionimi dhe mbrojtje të dhënash"
+      title: "Shabllone gati për të dhëna",
+      description: "Qasuni gjurmuesve të progresit, ditarëve reflektues dhe eksporteve për mbledhje apo inspektime"
     },
     feature5: {
-      title: "Aplikacione Mobile për të Mësuar",
-      description: "Aplikacione mobile për të mësuar pa pengesa në çdo pajisje"
+      title: "Hapësira bashkëpunimi",
+      description: "Ndani plane, bëni pyetje dhe bashkë-krijoni njësi me kolegët ose rrjetin tuaj profesional"
     },
     feature6: {
-      title: "Mbështetje Teknike 24/7",
-      description: "Mbështetje rreth orës nga ekipi ynë teknik ekspert"
+      title: "Mbështetje e udhëzuar",
+      description: "Prezantime të personalizuara, orë zyre dhe burime ndihme që mbajnë ritmin"
     }
   },
   about: {
@@ -1155,21 +1156,21 @@ export const sq = {
   },
   home: {
     highlights: {
-      aiPowered: "Me fuqi AI",
-      vrClassrooms: "Klasa VR",
-      realTimeAnalytics: "Analitikë në kohë reale"
+      workspace: "Tabela bashkëpunuese për planifikim mësimi",
+      resourceLibrary: "Bibliotekë e kuruar me mjete dhe burime",
+      community: "Komunitet aktiv mësuesish & pyetje/përgjigje"
     },
     stats: {
-      aiLessons: "Mësime me fuqi AI",
-      vrExperiences: "Përvoja VR",
-      engagementRate: "Norma e angazhimit",
-      supportAvailable: "Mbështetje në dispozicion"
+      lessonPlans: "Plane mësimore të organizuara",
+      resourceDownloads: "Burime të shpërndara me mësuesit",
+      teacherSatisfaction: "Vlerësim i kënaqësisë së mësuesve",
+      supportAvailable: "Orë mbështetjeje çdo javë"
     },
     cta: {
-      title: "Gati të transformoni shkollën tuaj?",
-      description: "Bashkohuni me mijëra edukatorë që tashmë përdorin platformën tonë për të krijuar përvoja më të mira të të mësuarit.",
-      primary: "Fillo Tani",
-      secondary: "Shiko Çmimet",
+      title: "Ndërtoni hapësirën tuaj të punës sot",
+      description: "Qendërzoni planifikimin, burimet dhe zhvillimin profesional për disa minuta.",
+      primary: "Rezervoni një prezantim",
+      secondary: "Shfletoni burimet për mësues",
       social: {
         facebook: "Facebook",
         instagram: "Instagram",
