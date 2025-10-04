@@ -7,6 +7,11 @@ import type {
   Profile,
   Resource,
 } from "../../../types/supabase-tables";
+import {
+  DASHBOARD_EXAMPLE_CLASS,
+  DASHBOARD_EXAMPLE_CURRICULUM,
+  DASHBOARD_EXAMPLE_CURRICULUM_ITEMS,
+} from "./examples";
 
 export type LessonPlanWithRelations = LessonPlan & {
   class?: Class | null;
@@ -173,6 +178,70 @@ export async function fetchCurriculumItems(curriculumId: string): Promise<Curric
   }
 
   return data ?? [];
+}
+
+export async function seedExampleDashboardData(input: {
+  ownerId: string;
+}): Promise<{ class: Class; curriculum: Curriculum; items: CurriculumItem[] }> {
+  const { data: createdClass, error: classError } = await supabase
+    .from("classes")
+    .insert({
+      owner_id: input.ownerId,
+      title: DASHBOARD_EXAMPLE_CLASS.title,
+      stage: DASHBOARD_EXAMPLE_CLASS.stage ?? null,
+      subject: DASHBOARD_EXAMPLE_CLASS.subject ?? null,
+      start_date: DASHBOARD_EXAMPLE_CLASS.start_date ?? null,
+      end_date: DASHBOARD_EXAMPLE_CLASS.end_date ?? null,
+    })
+    .select("id,title,stage,subject,start_date,end_date")
+    .single();
+
+  if (classError) {
+    console.error("Failed to copy example class", classError);
+    throw classError;
+  }
+
+  const { data: createdCurriculum, error: curriculumError } = await supabase
+    .from("curricula")
+    .insert({
+      owner_id: input.ownerId,
+      class_id: createdClass.id,
+      subject: DASHBOARD_EXAMPLE_CURRICULUM.subject,
+      title: DASHBOARD_EXAMPLE_CURRICULUM.title,
+      academic_year: DASHBOARD_EXAMPLE_CURRICULUM.academic_year ?? null,
+    })
+    .select("id,class_id,subject,title,academic_year")
+    .single();
+
+  if (curriculumError) {
+    console.error("Failed to copy example curriculum", curriculumError);
+    throw curriculumError;
+  }
+
+  const itemsPayload = DASHBOARD_EXAMPLE_CURRICULUM_ITEMS.map(item => ({
+    curriculum_id: createdCurriculum.id,
+    position: item.position,
+    lesson_title: item.lesson_title,
+    stage: item.stage ?? null,
+    scheduled_on: item.scheduled_on ?? null,
+    status: item.status,
+  }));
+
+  const { data: createdItems, error: itemsError } = await supabase
+    .from("curriculum_items")
+    .insert(itemsPayload)
+    .select("id,curriculum_id,position,lesson_title,stage,scheduled_on,status");
+
+  if (itemsError) {
+    console.error("Failed to copy example curriculum items", itemsError);
+    throw itemsError;
+  }
+
+  return {
+    class: createdClass,
+    curriculum: createdCurriculum,
+    items: createdItems ?? [],
+  };
 }
 
 export async function createLessonPlanFromItem(input: {

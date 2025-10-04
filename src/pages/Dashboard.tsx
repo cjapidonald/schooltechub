@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useOptionalUser } from "@/hooks/useOptionalUser";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -28,6 +29,7 @@ import {
   fetchCurriculumItems,
   fetchMyClasses,
   fetchMyProfile,
+  seedExampleDashboardData,
 } from "@/features/dashboard/api";
 import {
   DASHBOARD_EXAMPLE_CLASS,
@@ -162,6 +164,21 @@ export default function DashboardPage() {
     },
   });
 
+  const seedExampleDataMutation = useMutation({
+    mutationFn: () => seedExampleDashboardData({ ownerId: user!.id }),
+    onSuccess: result => {
+      toast({ description: t.dashboard.toasts.exampleDataCreated });
+      setActiveCurriculumId(result.curriculum.id);
+      queryClient.setQueryData(["dashboard-curriculum-items", result.curriculum.id], result.items);
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-classes", user?.id] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-curricula", user?.id] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-curriculum-items"], exact: false });
+    },
+    onError: () => {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    },
+  });
+
   const handleQuickAction = (action: DashboardQuickAction) => {
     switch (action) {
       case "ask-question":
@@ -194,6 +211,13 @@ export default function DashboardPage() {
     }
     return [DASHBOARD_EXAMPLE_CURRICULUM];
   }, [curriculaQuery.data]);
+
+  const showingExampleData = useMemo(() => {
+    if (classesQuery.isLoading || curriculaQuery.isLoading) {
+      return false;
+    }
+    return classes.some(item => item.isExample) || curricula.some(item => item.isExample);
+  }, [classes, curricula, classesQuery.isLoading, curriculaQuery.isLoading]);
 
   const fallbackCurriculumId = curricula[0]?.id ?? null;
   const effectiveCurriculumId = activeCurriculumId ?? fallbackCurriculumId;
@@ -239,6 +263,21 @@ export default function DashboardPage() {
   return (
     <main className="container space-y-8 py-10">
       <SEO title="My Dashboard" description="Teacher workspace dashboard" />
+      {showingExampleData ? (
+        <Alert>
+          <AlertTitle>{t.dashboard.common.exampleActionsTitle}</AlertTitle>
+          <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>{t.dashboard.common.exampleActionsDescription}</span>
+            <Button
+              onClick={() => seedExampleDataMutation.mutate()}
+              disabled={seedExampleDataMutation.isPending}
+              aria-label={t.dashboard.common.exampleActionsCta}
+            >
+              {seedExampleDataMutation.isPending ? t.common.loading : t.dashboard.common.exampleActionsCta}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <DashboardHeader
         profile={profileQuery.data ?? null}
         avatarUrl={profileQuery.data?.avatar_url ?? null}
