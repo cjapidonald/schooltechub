@@ -1404,6 +1404,10 @@ export const en = {
   lessonBuilder: {
     editor: {
       heading: "Lesson Plan",
+      prefilledNotice: "Prefilled from your curriculum. Change these details in the source record.",
+      classLabel: "Class",
+      stageLabel: "Stage",
+      changeLink: "Change",
       addResource: "Add Resource",
       exportPdf: "Export PDF",
       exportDocx: "Export DOCX",
@@ -1437,6 +1441,9 @@ export const en = {
         image: "Image",
         video: "Video",
       },
+      tagsLabel: "Tags",
+      tagsPlaceholder: "Type a tag and press Enter",
+      removeTagLabel: "Remove tag {tag}",
       stageLabel: "Stage",
       stagePlaceholder: "e.g. Stage 3",
       subjectLabel: "Subject",
