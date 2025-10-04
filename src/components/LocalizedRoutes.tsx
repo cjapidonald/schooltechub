@@ -19,6 +19,7 @@ import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
 import AccountResourceEdit from '@/pages/AccountResourceEdit';
 import LessonBuilderPage from '@/pages/lesson-builder/LessonBuilderPage';
+import Curriculum from '@/pages/Curriculum';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
@@ -54,6 +55,7 @@ export const LocalizedRoutes = () => {
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
       <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
+      <Route path="/curriculum" element={<RouteWrapper><Curriculum /></RouteWrapper>} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />

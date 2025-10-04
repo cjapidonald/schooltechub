@@ -5,6 +5,7 @@ export const en = {
     about: "About",
     services: "Services",
     blog: "Blog",
+    curriculum: "Curriculum",
     lessonPlans: "Lesson Plans",
     builder: "Lesson Builder",
     worksheets: "Worksheets",

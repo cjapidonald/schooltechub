@@ -5,6 +5,7 @@ export const sq = {
     about: "Rreth Nesh",
     services: "Shërbimet",
     blog: "Blog",
+    curriculum: "Kurrikula",
     lessonPlans: "Planet e mësimit",
     builder: "Ndërtuesi i mësimit",
     worksheets: "Fletë pune",

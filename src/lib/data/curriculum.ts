@@ -190,3 +190,87 @@ export async function linkCurriculumToLesson(
 export function getDemoCurriculumLinks(): CurriculumLessonLink[] {
   return DEMO_LINKS;
 }
+
+export async function listCurriculumLessonLinks(client: Client = supabase): Promise<CurriculumLessonLink[]> {
+  const { data, error } = await client
+    .from("curriculum_lessons")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    if (isTableMissing(error)) {
+      console.warn("curriculum_lessons table missing, returning demo curriculum lesson links", error);
+      return DEMO_LINKS;
+    }
+    throw error;
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data.map(mapLink);
+}
+
+export async function upsertCurriculumLessonLink(
+  input: {
+    id?: string | null;
+    curriculumItemId: string;
+    lessonPlanId: string;
+    viewUrl?: string | null;
+    status?: CurriculumLessonLink["status"];
+  },
+  client: Client = supabase,
+): Promise<CurriculumLessonLink> {
+  const payload = {
+    id: input.id ?? undefined,
+    curriculum_item_id: input.curriculumItemId,
+    lesson_plan_id: input.lessonPlanId,
+    view_url: input.viewUrl ?? null,
+    status: input.status ?? "draft",
+  };
+
+  const query = input.id
+    ? client.from("curriculum_lessons").update(payload).eq("id", input.id).select().maybeSingle()
+    : client
+        .from("curriculum_lessons")
+        .upsert(payload, { onConflict: "curriculum_item_id" })
+        .select()
+        .maybeSingle();
+
+  const { data, error } = await query;
+
+  if (error) {
+    if (isTableMissing(error)) {
+      console.warn("curriculum_lessons table missing, returning demo curriculum lesson link", error);
+      return mapLink({ ...payload, id: input.id ?? randomId(), created_at: new Date().toISOString() });
+    }
+    throw error;
+  }
+
+  return mapLink(data ?? payload);
+}
+
+export async function deleteCurriculumLessonLink(id: string, client: Client = supabase): Promise<void> {
+  const { error } = await client.from("curriculum_lessons").delete().eq("id", id);
+
+  if (error) {
+    if (isTableMissing(error)) {
+      console.warn("curriculum_lessons table missing, skipping delete", error);
+      return;
+    }
+    throw error;
+  }
+}
+
+export async function deleteCurriculumItem(id: string, client: Client = supabase): Promise<void> {
+  const { error } = await client.from("curriculum_items").delete().eq("id", id);
+
+  if (error) {
+    if (isTableMissing(error)) {
+      console.warn("curriculum_items table missing, skipping delete", error);
+      return;
+    }
+    throw error;
+  }
+}
