@@ -1,4 +1,13 @@
-import { useMemo, useRef, useState, type ComponentProps, type ComponentType } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ComponentProps,
+  type ComponentType,
+} from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -54,8 +64,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useMyProfile } from "@/hooks/useMyProfile";
-import { ClassCreateDialog } from "@/components/classes/ClassCreateDialog";
-import { listMyClassesWithPlanCount, type ClassWithPlanCount } from "@/lib/classes";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  createClass,
+  listMyClassesWithPlanCount,
+  updateClass,
+  type ClassWithPlanCount,
+} from "@/lib/classes";
 import {
   getStudentProfile,
   listMyStudents,
@@ -83,6 +98,12 @@ import type {
   StudentSummary,
 } from "@/types/platform";
 import type { LessonPlanMetaDraft } from "@/pages/lesson-builder/types";
+import {
+  PROFILE_IMAGE_BUCKET,
+  createProfileImageSignedUrl,
+  resolveAvatarReference,
+} from "@/lib/avatar";
+import { createFileIdentifier } from "@/lib/files";
 
 const tabs = [
   { value: "classes", label: "My Classes" },
@@ -129,7 +150,7 @@ const formatDate = (value: string | null | undefined) => {
 
 const AccountDashboard = () => {
   const { user, loading } = useRequireAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { fullName } = useMyProfile();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -138,7 +159,6 @@ const AccountDashboard = () => {
     const initial = searchParams.get("tab");
     return tabs.some(tab => tab.value === initial) ? (initial as DashboardTab) : "classes";
   });
-  const [isCreateClassOpen, setIsCreateClassOpen] = useState(false);
   const [lessonPreset, setLessonPreset] = useState<LessonBuilderPreset>(null);
   const [studentDialogOpen, setStudentDialogOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -169,7 +189,87 @@ const AccountDashboard = () => {
     numeric: "",
     feedback: "",
   });
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const uploadRef = useRef<HTMLInputElement | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadAvatar = async () => {
+      if (!user) {
+        if (!isCancelled) {
+          setAvatarUrl(null);
+        }
+        return;
+      }
+
+      const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+      const { reference, url } = resolveAvatarReference(metadata);
+
+      if (url) {
+        if (!isCancelled) {
+          setAvatarUrl(url);
+        }
+        return;
+      }
+
+      if (!reference) {
+        if (!isCancelled) {
+          setAvatarUrl(null);
+        }
+        return;
+      }
+
+      try {
+        const signedUrl = await createProfileImageSignedUrl(reference);
+        if (!isCancelled) {
+          setAvatarUrl(signedUrl);
+        }
+      } catch (error) {
+        console.error("Failed to resolve avatar", error);
+        if (!isCancelled) {
+          setAvatarUrl(null);
+        }
+      }
+    };
+
+    void loadAvatar();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [user]);
+
+  const avatarFallback = useMemo(() => {
+    const nameSource = fullName?.trim() || user?.email || "";
+    return nameSource ? nameSource.charAt(0).toUpperCase() : "T";
+  }, [fullName, user]);
+
+  const greetingName = useMemo(() => {
+    const trimmed = fullName?.trim();
+    if (trimmed) {
+      const parts = trimmed.split(/\s+/);
+      const firstPart = parts[0];
+      if (/^(mr|mrs|ms|miss|dr)\.?$/i.test(firstPart)) {
+        const nextPart = parts[1];
+        return [firstPart, nextPart].filter(Boolean).join(" ") || firstPart;
+      }
+      return `Mr ${firstPart}`;
+    }
+
+    const emailName = user?.email?.split("@")[0];
+    return emailName ? `Mr ${emailName}` : "Teacher";
+  }, [fullName, user]);
+
+  const accountDisplayName = useMemo(() => {
+    const trimmed = fullName?.trim();
+    if (trimmed && trimmed.length > 0) {
+      return trimmed;
+    }
+    return user?.email ?? "";
+  }, [fullName, user]);
 
   const classesQuery = useQuery({
     queryKey: ["dashboard-classes"],
@@ -209,6 +309,68 @@ const AccountDashboard = () => {
         : Promise.resolve([]),
     enabled: gradingDialogOpen && Boolean(gradingContext.assessment?.id),
   });
+
+  const handleAvatarButtonClick = () => {
+    avatarInputRef.current?.click();
+  };
+
+  const handleAvatarFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) {
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      const extension = file.name.split(".").pop();
+      const safeExtension = extension ? extension.toLowerCase() : "png";
+      const filePath = `${user.id}/${createFileIdentifier()}.${safeExtension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(PROFILE_IMAGE_BUCKET)
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(PROFILE_IMAGE_BUCKET).getPublicUrl(filePath);
+
+      const signedUrl = await createProfileImageSignedUrl(filePath);
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          avatar_url: publicUrl,
+          avatar_storage_path: filePath,
+        },
+      });
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setAvatarUrl(signedUrl);
+      toast({ title: t.account.toast.avatarUpdated });
+    } catch (error) {
+      console.error("Failed to upload avatar", error);
+      toast({
+        variant: "destructive",
+        title: t.account.toast.avatarError,
+        description: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = "";
+      }
+    }
+  };
 
   const assessmentSubmissionsQuery = useQuery<AssessmentSubmission[]>({
     queryKey: ["dashboard-assessment-submissions", gradingContext.assessment?.id],
@@ -449,12 +611,49 @@ const AccountDashboard = () => {
       />
       <div className="container space-y-8 py-10">
         <Card className="border border-primary/30 bg-background/80 shadow-[0_0_35px_hsl(var(--glow-primary)/0.15)]">
-          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <CardTitle className="text-2xl font-semibold text-foreground">
-                Welcome back{fullName ? `, {fullName.split(" ")[0]}` : ""}
-              </CardTitle>
-              <CardDescription>Everything you need to run your classroom in one place.</CardDescription>
+          <CardHeader className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
+                  {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
+                  <AvatarFallback>{avatarFallback}</AvatarFallback>
+                </Avatar>
+                <div className="space-y-1">
+                  <CardTitle className="text-2xl font-semibold text-foreground">
+                    {`Welcome back ${greetingName}`}
+                  </CardTitle>
+                  <CardDescription>
+                    Everything you need to run your classroom in one place.
+                  </CardDescription>
+                  {accountDisplayName ? (
+                    <p className="text-sm text-muted-foreground">Signed in as {accountDisplayName}</p>
+                  ) : null}
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAvatarButtonClick}
+                  disabled={isUploadingAvatar}
+                >
+                  {isUploadingAvatar ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Uploading
+                    </>
+                  ) : (
+                    "Update photo"
+                  )}
+                </Button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarFileChange}
+                />
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" asChild>
@@ -492,13 +691,7 @@ const AccountDashboard = () => {
               classes={classes}
               isLoading={classesQuery.isLoading}
               error={classesQuery.error instanceof Error ? classesQuery.error : null}
-              onCreate={() => setIsCreateClassOpen(true)}
               onPlanLesson={handleOpenLessonBuilder}
-            />
-            <ClassCreateDialog
-              open={isCreateClassOpen}
-              onOpenChange={setIsCreateClassOpen}
-              onCreated={() => queryClient.invalidateQueries({ queryKey: ["dashboard-classes"] })}
             />
           </TabsContent>
 
@@ -588,6 +781,29 @@ const AccountDashboard = () => {
             />
           </TabsContent>
         </Tabs>
+
+        <Card className="border border-dashed border-primary/40 bg-background/80">
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle>{t.account.research.cardTitle}</CardTitle>
+              <CardDescription>{t.account.research.cardDescription}</CardDescription>
+            </div>
+            <Badge variant="outline" className="self-start">
+              {t.account.research.badge}
+            </Badge>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>{t.account.research.cardBody}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button size="sm" variant="outline" disabled>
+                {t.account.research.toggleLabel}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                {t.account.research.toggleDescription}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <StudentDialog
@@ -664,23 +880,234 @@ interface ClassesPanelProps {
   classes: ClassWithPlanCount[];
   isLoading: boolean;
   error: Error | null;
-  onCreate: () => void;
   onPlanLesson: (item?: CurriculumItem | null, classId?: string | null) => void;
 }
 
-const ClassesPanel = ({ classes, isLoading, error, onCreate, onPlanLesson }: ClassesPanelProps) => {
+type EditableClassState = {
+  id: string;
+  title: string;
+  summary: string;
+  subject: string;
+  stage: string;
+};
+
+const createInitialClassForm = () => ({
+  title: "",
+  summary: "",
+  subject: "",
+  stage: "",
+});
+
+const ClassesPanel = ({ classes, isLoading, error, onPlanLesson }: ClassesPanelProps) => {
+  const { toast } = useToast();
+  const { t } = useLanguage();
+  const queryClient = useQueryClient();
+
+  const [createForm, setCreateForm] = useState(() => createInitialClassForm());
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [editState, setEditState] = useState<EditableClassState | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const createClassMutation = useMutation({
+    mutationFn: async (values: ReturnType<typeof createInitialClassForm>) => {
+      const trimmedTitle = values.title.trim();
+      const trimmedSummary = values.summary.trim();
+      const trimmedSubject = values.subject.trim();
+      const trimmedStage = values.stage.trim();
+
+      return createClass({
+        title: trimmedTitle,
+        summary: trimmedSummary.length > 0 ? trimmedSummary : null,
+        subject: trimmedSubject.length > 0 ? trimmedSubject : null,
+        stage: trimmedStage.length > 0 ? trimmedStage : null,
+      });
+    },
+    onSuccess: created => {
+      toast({
+        title: t.account.toast.classCreated,
+        description: t.account.toast.classCreatedDescription.replace("{title}", created.title),
+      });
+      setCreateForm(createInitialClassForm());
+      setCreateError(null);
+      queryClient.invalidateQueries({ queryKey: ["dashboard-classes"] });
+    },
+    onError: error => {
+      toast({
+        title: "Unable to create class",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateClassMutation = useMutation({
+    mutationFn: async (values: EditableClassState) => {
+      const trimmedTitle = values.title.trim();
+      const trimmedSummary = values.summary.trim();
+      const trimmedSubject = values.subject.trim();
+      const trimmedStage = values.stage.trim();
+
+      return updateClass(values.id, {
+        title: trimmedTitle,
+        summary: trimmedSummary.length > 0 ? trimmedSummary : null,
+        subject: trimmedSubject.length > 0 ? trimmedSubject : null,
+        stage: trimmedStage.length > 0 ? trimmedStage : null,
+      });
+    },
+    onSuccess: updated => {
+      toast({
+        title: "Class updated",
+        description: `“${updated.title}” has been saved.`,
+      });
+      setEditState(null);
+      setEditError(null);
+      queryClient.invalidateQueries({ queryKey: ["dashboard-classes"] });
+    },
+    onError: error => {
+      toast({
+        title: "Unable to update class",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateChange = (field: keyof ReturnType<typeof createInitialClassForm>) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setCreateForm(previous => ({ ...previous, [field]: event.target.value }));
+      if (createError) {
+        setCreateError(null);
+      }
+    };
+
+  const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const trimmedTitle = createForm.title.trim();
+    if (!trimmedTitle) {
+      setCreateError("Class name is required.");
+      return;
+    }
+
+    setCreateError(null);
+    createClassMutation.mutate(createForm);
+  };
+
+  const handleStartEditing = (classItem: ClassWithPlanCount) => {
+    setEditState({
+      id: classItem.id,
+      title: classItem.title ?? "",
+      summary: classItem.summary ?? "",
+      subject: classItem.subject ?? "",
+      stage: classItem.stage ?? "",
+    });
+    setEditError(null);
+  };
+
+  const handleEditChange = (field: keyof EditableClassState) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setEditState(previous => {
+        if (!previous) {
+          return previous;
+        }
+        return { ...previous, [field]: event.target.value };
+      });
+      if (editError) {
+        setEditError(null);
+      }
+    };
+
+  const handleEditSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editState) {
+      return;
+    }
+
+    const trimmedTitle = editState.title.trim();
+    if (!trimmedTitle) {
+      setEditError("Class name is required.");
+      return;
+    }
+
+    setEditError(null);
+    updateClassMutation.mutate(editState);
+  };
+
+  const handleCancelEdit = () => {
+    setEditState(null);
+    setEditError(null);
+  };
+
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <CardTitle>My classes</CardTitle>
-          <CardDescription>Organise rosters, meeting details, and linked lesson plans.</CardDescription>
-        </div>
-        <Button variant="outline" onClick={onCreate}>
-          <Plus className="mr-2 h-4 w-4" /> New class
-        </Button>
+      <CardHeader>
+        <CardTitle>My classes</CardTitle>
+        <CardDescription>Build and refine your class roster without leaving the dashboard.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        <form
+          onSubmit={handleCreateSubmit}
+          className="space-y-4 rounded-lg border border-dashed border-primary/40 bg-muted/20 p-4"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="new-class-title">Class name</Label>
+            <Input
+              id="new-class-title"
+              value={createForm.title}
+              onChange={handleCreateChange("title")}
+              placeholder="e.g. Year 5 STEM Club"
+              disabled={createClassMutation.isPending}
+              required
+            />
+            {createError ? <p className="text-sm text-destructive">{createError}</p> : null}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="new-class-summary">Summary</Label>
+            <Textarea
+              id="new-class-summary"
+              value={createForm.summary}
+              onChange={handleCreateChange("summary")}
+              placeholder="What will this class cover?"
+              disabled={createClassMutation.isPending}
+              rows={3}
+            />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="new-class-subject">Subject</Label>
+              <Input
+                id="new-class-subject"
+                value={createForm.subject}
+                onChange={handleCreateChange("subject")}
+                placeholder="Math, Science, ..."
+                disabled={createClassMutation.isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-class-stage">Stage</Label>
+              <Input
+                id="new-class-stage"
+                value={createForm.stage}
+                onChange={handleCreateChange("stage")}
+                placeholder="Grade level or age group"
+                disabled={createClassMutation.isPending}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={createClassMutation.isPending}>
+              {createClassMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" /> Add class
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+
         {isLoading ? (
           <div className="flex justify-center py-10">
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -695,32 +1122,109 @@ const ClassesPanel = ({ classes, isLoading, error, onCreate, onPlanLesson }: Cla
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {classes.map(classItem => (
-              <div key={classItem.id} className="rounded-xl border bg-background/80 p-4 shadow-sm">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">{classItem.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {classItem.summary ?? "Keep attendance, assignments, and resources in sync."}
-                    </p>
+            {classes.map(classItem => {
+              const isEditing = editState?.id === classItem.id;
+
+              return (
+                <div key={classItem.id} className="rounded-xl border bg-background/80 p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">{classItem.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {classItem.summary ?? "Keep attendance, assignments, and resources in sync."}
+                      </p>
+                    </div>
+                    <Badge variant="outline">{classItem.planCount} plans</Badge>
                   </div>
-                  <Badge variant="outline">{classItem.planCount} plans</Badge>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    {classItem.stage ? <Badge variant="outline">{classItem.stage}</Badge> : null}
+                    {classItem.subject ? <Badge variant="outline">{classItem.subject}</Badge> : null}
+                  </div>
+                  {isEditing ? (
+                    <form onSubmit={handleEditSubmit} className="mt-4 space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`edit-title-${classItem.id}`}>Class name</Label>
+                        <Input
+                          id={`edit-title-${classItem.id}`}
+                          value={editState?.title ?? ""}
+                          onChange={handleEditChange("title")}
+                          disabled={updateClassMutation.isPending}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`edit-summary-${classItem.id}`}>Summary</Label>
+                        <Textarea
+                          id={`edit-summary-${classItem.id}`}
+                          value={editState?.summary ?? ""}
+                          onChange={handleEditChange("summary")}
+                          disabled={updateClassMutation.isPending}
+                          rows={3}
+                        />
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`edit-subject-${classItem.id}`}>Subject</Label>
+                          <Input
+                            id={`edit-subject-${classItem.id}`}
+                            value={editState?.subject ?? ""}
+                            onChange={handleEditChange("subject")}
+                            disabled={updateClassMutation.isPending}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`edit-stage-${classItem.id}`}>Stage</Label>
+                          <Input
+                            id={`edit-stage-${classItem.id}`}
+                            value={editState?.stage ?? ""}
+                            onChange={handleEditChange("stage")}
+                            disabled={updateClassMutation.isPending}
+                          />
+                        </div>
+                      </div>
+                      {editError ? <p className="text-sm text-destructive">{editError}</p> : null}
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="submit" size="sm" disabled={updateClassMutation.isPending}>
+                          {updateClassMutation.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
+                            </>
+                          ) : (
+                            "Save changes"
+                          )}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleCancelEdit}
+                          disabled={updateClassMutation.isPending}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Button size="sm" onClick={() => onPlanLesson(null, classItem.id)}>
+                        <BookOpen className="mr-2 h-4 w-4" /> Plan a lesson
+                      </Button>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link to={`/account/classes/${classItem.id}`}>Open dashboard</Link>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleStartEditing(classItem)}
+                        disabled={updateClassMutation.isPending}
+                      >
+                        Edit details
+                      </Button>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  {classItem.stage ? <Badge variant="outline">{classItem.stage}</Badge> : null}
-                  {classItem.subject ? <Badge variant="outline">{classItem.subject}</Badge> : null}
-                  {classItem.startDate ? <Badge variant="outline">{formatDate(classItem.startDate)}</Badge> : null}
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={() => onPlanLesson(null, classItem.id)}>
-                    <BookOpen className="mr-2 h-4 w-4" /> Plan a lesson
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to={`/account/classes/${classItem.id}`}>Open dashboard</Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>

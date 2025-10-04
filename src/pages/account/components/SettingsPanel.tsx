@@ -31,21 +31,13 @@ import {
   resolveAvatarReference,
   isHttpUrl,
 } from "@/lib/avatar";
+import { createFileIdentifier } from "@/lib/files";
 
 type ThemePreference = "system" | "light" | "dark";
 type LanguageOption = "en";
 
 type SettingsPanelProps = {
   user: User;
-};
-
-const createFileIdentifier = () => {
-  const cryptoRef = typeof globalThis !== "undefined" ? globalThis.crypto : undefined;
-  if (cryptoRef && "randomUUID" in cryptoRef) {
-    return cryptoRef.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
 const isLanguageOption = (value: unknown): value is LanguageOption => value === "en";
