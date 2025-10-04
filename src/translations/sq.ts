@@ -1,6 +1,6 @@
 export const sq = {
   nav: {
-    dashboard: "Pulti im",
+    dashboard: "Profili im",
     home: "Ballina",
     about: "Rreth Nesh",
     services: "Shërbimet",
@@ -17,7 +17,7 @@ export const sq = {
     signIn: "Hyr",
     signUp: "Regjistrohu",
     signOut: "Dil",
-    profile: "Pulti Im"
+    profile: "Profili im"
   },
   profilePage: {
     title: "Profili im",

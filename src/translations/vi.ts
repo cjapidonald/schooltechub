@@ -1,6 +1,6 @@
 export const vi = {
   nav: {
-    dashboard: "Bảng điều khiển của tôi",
+    dashboard: "Hồ sơ của tôi",
     home: "Trang chủ",
     about: "Về chúng tôi",
     services: "Dịch vụ",
@@ -17,7 +17,7 @@ export const vi = {
     signIn: "Đăng nhập",
     signUp: "Đăng ký",
     signOut: "Đăng xuất",
-    profile: "Bảng điều khiển của tôi"
+    profile: "Hồ sơ của tôi"
   },
   profilePage: {
     title: "Hồ sơ của tôi",

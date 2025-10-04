@@ -1,6 +1,6 @@
 export const en = {
   nav: {
-    dashboard: "My Dashboard",
+    dashboard: "My profile",
     home: "Home",
     about: "About",
     services: "Services",
@@ -17,7 +17,7 @@ export const en = {
     signIn: "Sign In",
     signUp: "Sign Up",
     signOut: "Sign Out",
-    profile: "My Dashboard"
+    profile: "My profile"
   },
   profilePage: {
     title: "My Profile",
