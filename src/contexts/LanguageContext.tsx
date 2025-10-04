@@ -33,13 +33,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const getLanguageFromPath = () => 'en';
 
-  const [language, setLanguageState] = useState<Language>(() => getLanguageFromPath());
+  const [language, setLanguageState] = useState<Language>('en');
 
   useEffect(() => {
-    setLanguageState((current) => {
-      const urlLang = getLanguageFromPath();
-      return current === urlLang ? current : urlLang;
-    });
+    setLanguageState('en');
   }, [location.pathname]);
 
   const setLanguage = (_newLang: Language) => {

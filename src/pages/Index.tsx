@@ -159,12 +159,11 @@ const Index = () => {
         canonicalUrl="https://schooltechhub.com"
       />
       <StructuredData
-        type="WebApplication"
+        type="Organization"
         data={{
-          name: "SchoolTech Hub Teacher Workspace",
+          name: "SchoolTech Hub",
           description:
             "A centralized workspace for teachers to plan lessons, manage classes, track progress, and publish resources.",
-          applicationCategory: "Education",
         }}
       />
       <MouseGlowEffect />

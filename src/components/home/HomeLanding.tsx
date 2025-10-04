@@ -16,6 +16,7 @@ import {
   Instagram,
   Linkedin,
   Mail,
+  Book,
 } from "lucide-react";
 
 import MouseGlowEffect from "@/components/MouseGlowEffect";
@@ -261,7 +262,7 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
                 color: "accent",
               },
               {
-                icon: BookOpen,
+                icon: Book,
                 title: t.features.feature6.title,
                 description: t.features.feature6.description,
                 color: "secondary",

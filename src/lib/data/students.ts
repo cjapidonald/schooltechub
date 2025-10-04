@@ -41,10 +41,10 @@ function mapBehaviorEntry(record: Record<string, unknown>): StudentBehaviorEntry
   return {
     id: String(record.id ?? randomId()),
     studentId: String(record.student_id ?? record.studentId ?? ""),
-    classId: record.class_id ?? record.classId ?? null,
+    classId: String(record.class_id ?? record.classId ?? ""),
     note: typeof record.note === "string" ? record.note : "",
-    recordedAt: record.recorded_at ?? record.recordedAt ?? new Date().toISOString(),
-    recordedBy: record.recorded_by ?? record.recordedBy ?? null,
+    recordedAt: String(record.recorded_at ?? record.recordedAt ?? new Date().toISOString()),
+    recordedBy: String(record.recorded_by ?? record.recordedBy ?? ""),
     sentiment:
       record.sentiment === "positive" || record.sentiment === "needs_support"
         ? record.sentiment
@@ -56,10 +56,10 @@ function mapAppraisalEntry(record: Record<string, unknown>): StudentAppraisalEnt
   return {
     id: String(record.id ?? randomId()),
     studentId: String(record.student_id ?? record.studentId ?? ""),
-    classId: record.class_id ?? record.classId ?? null,
+    classId: String(record.class_id ?? record.classId ?? ""),
     highlight: typeof record.highlight === "string" ? record.highlight : "",
-    recordedAt: record.recorded_at ?? record.recordedAt ?? new Date().toISOString(),
-    recordedBy: record.recorded_by ?? record.recordedBy ?? null,
+    recordedAt: String(record.recorded_at ?? record.recordedAt ?? new Date().toISOString()),
+    recordedBy: String(record.recorded_by ?? record.recordedBy ?? ""),
   } satisfies StudentAppraisalEntry;
 }
 
@@ -68,12 +68,12 @@ function mapAssessmentGrade(record: Record<string, unknown>): AssessmentGrade {
     id: String(record.id ?? randomId()),
     assessmentId: String(record.assessment_id ?? record.assessmentId ?? ""),
     studentId: String(record.student_id ?? record.studentId ?? ""),
-    gradeValue: record.grade_value ?? record.gradeValue ?? null,
-    gradeNumeric: typeof record.grade_numeric === "number" ? record.grade_numeric : record.gradeNumeric ?? null,
+    gradeValue: String(record.grade_value ?? record.gradeValue ?? ""),
+    gradeNumeric: typeof record.grade_numeric === "number" ? record.grade_numeric : Number(record.gradeNumeric ?? 0),
     scale: mapGradeScale(record.scale),
-    gradedAt: record.graded_at ?? record.gradedAt ?? null,
-    feedback: record.feedback ?? null,
-    recordedBy: record.recorded_by ?? record.recordedBy ?? null,
+    gradedAt: String(record.graded_at ?? record.gradedAt ?? ""),
+    feedback: String(record.feedback ?? ""),
+    recordedBy: String(record.recorded_by ?? record.recordedBy ?? ""),
   } satisfies AssessmentGrade;
 }
 
@@ -86,8 +86,8 @@ function mapAssignment(record: Record<string, unknown>): StudentAssignmentSummar
       record.status === "submitted" || record.status === "graded" || record.status === "missing"
         ? record.status
         : "assigned",
-    dueDate: record.due_date ?? record.dueDate ?? null,
-    grade: record.grade ?? record.grade_value ?? null,
+    dueDate: String(record.due_date ?? record.dueDate ?? ""),
+    grade: String(record.grade ?? record.grade_value ?? ""),
     gradeScale: record.grade === null && record.grade_value === null ? null : scale,
   } satisfies StudentAssignmentSummary;
 }
@@ -97,7 +97,7 @@ function mapProgressEntry(record: Record<string, unknown>): StudentProgressSnaps
     metric: typeof record.metric === "string" ? record.metric : "Progress",
     value: typeof record.value === "number" ? record.value : Number(record.value ?? 0),
     trend: record.trend === "up" || record.trend === "down" ? record.trend : "steady",
-    capturedAt: record.captured_at ?? record.capturedAt ?? new Date().toISOString(),
+    capturedAt: String(record.captured_at ?? record.capturedAt ?? new Date().toISOString()),
   } satisfies StudentProgressSnapshot;
 }
 
@@ -156,8 +156,8 @@ function mapStudentSummary(record: Record<string, unknown>): StudentSummary {
     email: typeof record.email === "string" ? record.email : null,
     avatarUrl: typeof record.avatar_url === "string" ? record.avatar_url : null,
     classIds,
-    createdAt: record.created_at ?? record.createdAt ?? null,
-    updatedAt: record.updated_at ?? record.updatedAt ?? null,
+    createdAt: String(record.created_at ?? record.createdAt ?? ""),
+    updatedAt: String(record.updated_at ?? record.updatedAt ?? ""),
     classes: classes as StudentSummary["classes"],
     latestBehaviorNote,
     latestAppraisalNote,
@@ -495,14 +495,14 @@ export async function getStudentProfile(
     ? {
         id: String(reportRecord.id ?? randomId()),
         studentId: summary.id,
-        requestedBy: reportRecord.requested_by ?? reportRecord.requestedBy ?? "",
+        requestedBy: String(reportRecord.requested_by ?? ""),
         status:
           reportRecord.status === "processing" || reportRecord.status === "ready" || reportRecord.status === "failed"
             ? reportRecord.status
             : "pending",
-        generatedUrl: reportRecord.generated_url ?? reportRecord.generatedUrl ?? null,
-        requestedAt: reportRecord.requested_at ?? reportRecord.requestedAt ?? new Date().toISOString(),
-        completedAt: reportRecord.completed_at ?? reportRecord.completedAt ?? null,
+        generatedUrl: String(reportRecord.generated_url ?? ""),
+        requestedAt: String(reportRecord.requested_at ?? new Date().toISOString()),
+        completedAt: String(reportRecord.completed_at ?? ""),
       }
     : null;
 

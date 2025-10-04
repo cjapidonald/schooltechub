@@ -4,7 +4,6 @@ import Index from '@/pages/Index';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
-import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import Resources from '@/pages/resources';
 import Events from '@/pages/Events';
@@ -52,7 +51,6 @@ export const LocalizedRoutes = () => {
       <Route path="/home" element={<RouteWrapper><Home /></RouteWrapper>} />
       <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
-      <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
       <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
