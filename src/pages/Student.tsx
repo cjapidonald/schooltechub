@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CalendarDays, CheckCircle2, Clock, LogIn, Notebook, Sparkles, Trophy } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, Clock, LogIn, Notebook, Sparkles, TrendingUp, Trophy } from "lucide-react";
+
+import { StudentSkillChart } from "@/components/students/StudentSkillChart";
+import type { StudentSkillProgress } from "@/features/students/types";
 
 const assignments = [
   {
@@ -128,7 +131,87 @@ const timeline = [
   },
 ];
 
+const skillProgress: StudentSkillProgress[] = [
+  {
+    skillId: "analysis",
+    skillName: "Scientific Analysis",
+    scores: [
+      { id: "analysis-2024-01", month: "2024-01", score: 62 },
+      { id: "analysis-2024-02", month: "2024-02", score: 72 },
+      { id: "analysis-2024-03", month: "2024-03", score: 81 },
+      { id: "analysis-2024-04", month: "2024-04", score: 86 },
+    ],
+  },
+  {
+    skillId: "communication",
+    skillName: "Reflective Writing",
+    scores: [
+      { id: "communication-2024-01", month: "2024-01", score: 58 },
+      { id: "communication-2024-02", month: "2024-02", score: 66 },
+      { id: "communication-2024-03", month: "2024-03", score: 74 },
+      { id: "communication-2024-04", month: "2024-04", score: 82 },
+    ],
+  },
+  {
+    skillId: "collaboration",
+    skillName: "Team Collaboration",
+    scores: [
+      { id: "collaboration-2024-01", month: "2024-01", score: 71 },
+      { id: "collaboration-2024-02", month: "2024-02", score: 77 },
+      { id: "collaboration-2024-03", month: "2024-03", score: 83 },
+      { id: "collaboration-2024-04", month: "2024-04", score: 89 },
+    ],
+  },
+];
+
+const teacherSkillNotes = [
+  {
+    skillId: "analysis",
+    teacher: "Ms. Rivera",
+    focus: "You moved from listing facts to connecting evidence to your hypothesis in the last two labs.",
+    nextStep: "Document two more data citations in your upcoming field report to reach mastery.",
+  },
+  {
+    skillId: "communication",
+    teacher: "Mr. Patel",
+    focus: "Paragraph transitions are smoother and your voice sounds more confident each week.",
+    nextStep: "Schedule a 1:1 writing conference to outline the next long-form reflection.",
+  },
+  {
+    skillId: "collaboration",
+    teacher: "Coach Lin",
+    focus: "Robotics stand-ups show you leading sprint planning without reminders.",
+    nextStep: "Share your daily checklist template with your squad before the showcase.",
+  },
+];
+
 export default function StudentPage() {
+  const averageImprovement =
+    skillProgress.length > 0
+      ? Math.round(
+          skillProgress.reduce((total, skill) => {
+            const startingScore = skill.scores[0]?.score ?? 0;
+            const latestScore = skill.scores[skill.scores.length - 1]?.score ?? startingScore;
+            return total + (latestScore - startingScore);
+          }, 0) / skillProgress.length,
+        )
+      : 0;
+
+  const latestMonthLabel = (() => {
+    const latestMonth = skillProgress[0]?.scores[skillProgress[0].scores.length - 1]?.month;
+    if (!latestMonth) {
+      return null;
+    }
+
+    const [year, month] = latestMonth.split("-");
+    const formatted = new Date(Number(year), Number(month) - 1, 1).toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
+
+    return formatted;
+  })();
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
       <SEO
@@ -325,6 +408,107 @@ export default function StudentPage() {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        <section className="grid gap-8 lg:grid-cols-[1.6fr,1fr]">
+          <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+            <CardHeader className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm uppercase tracking-wide text-white/60">
+                  <BarChart3 className="h-4 w-4" />
+                  Teacher skill tracker
+                </div>
+                <CardTitle className="text-2xl font-semibold">Your skill growth</CardTitle>
+                <CardDescription className="text-white/65">
+                  These charts mirror what teachers see on their skills page, so you can celebrate the same progress they are coaching.
+                </CardDescription>
+              </div>
+              <div className="flex flex-col items-start gap-1 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-left text-sm text-white/70">
+                <div className="flex items-center gap-2 text-white">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="font-semibold">+{averageImprovement} pts</span>
+                </div>
+                <span className="text-xs uppercase tracking-wide text-white/50">Avg improvement across focus skills</span>
+                {latestMonthLabel ? (
+                  <span className="text-xs text-white/40">Updated with {latestMonthLabel} check-ins</span>
+                ) : null}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {skillProgress.map(skill => {
+                  const teacherNote = teacherSkillNotes.find(note => note.skillId === skill.skillId);
+                  const startingScore = skill.scores[0]?.score ?? 0;
+                  const latestScore = skill.scores[skill.scores.length - 1]?.score ?? startingScore;
+                  const delta = latestScore - startingScore;
+
+                  return (
+                    <div
+                      key={skill.skillId}
+                      className="rounded-3xl border border-white/10 bg-white/[0.08] p-5 shadow-[0_15px_55px_-35px_rgba(15,23,42,1)] backdrop-blur-xl"
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-lg font-semibold text-white">{skill.skillName}</p>
+                            <p className="text-xs uppercase tracking-wide text-white/50">Growth since January</p>
+                          </div>
+                          {teacherNote ? (
+                            <Badge className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] uppercase tracking-wide text-white/70">
+                              {teacherNote.teacher}
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <div className="text-sm text-emerald-200">+{delta} pts</div>
+                      </div>
+                      <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950/40 p-3">
+                        <StudentSkillChart skill={skill} emptyLabel="Skill check-in data will appear here" />
+                      </div>
+                      {teacherNote ? (
+                        <div className="mt-4 space-y-2 text-sm text-white/70">
+                          <p>{teacherNote.focus}</p>
+                          <p className="text-xs uppercase tracking-wide text-white/50">Next step: {teacherNote.nextStep}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
+            <CardHeader className="space-y-2">
+              <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
+                <TrendingUp className="h-6 w-6" />
+                Teacher nudges
+              </CardTitle>
+              <CardDescription className="text-white/65">
+                Live highlights from the teacher skills workspace help you make confident moves before the next check-in.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {teacherSkillNotes.map(note => {
+                const skillName = skillProgress.find(skill => skill.skillId === note.skillId)?.skillName ?? "Skill focus";
+
+                return (
+                  <div key={note.skillId} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-base font-semibold text-white">{skillName}</p>
+                        <p className="text-xs uppercase tracking-wide text-white/50">Guided by {note.teacher}</p>
+                      </div>
+                      <Badge className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] uppercase tracking-wide text-white/70">
+                        Linked skill page
+                      </Badge>
+                    </div>
+                    <p className="mt-3 text-sm text-white/70">{note.focus}</p>
+                    <p className="mt-2 text-xs font-medium uppercase tracking-wide text-emerald-200">Next step · {note.nextStep}</p>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
         </section>
 
         <section className="grid gap-8 lg:grid-cols-[1.4fr,1fr]">
