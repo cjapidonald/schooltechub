@@ -37,6 +37,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { SAMPLE_BLOG_POSTS, type SampleBlogPost } from "@/data/sampleBlogPosts";
+import { cn } from "@/lib/utils";
 
 interface AuthorInfo {
   name?: string | null;
@@ -698,6 +699,9 @@ const Blog = () => {
     },
   ];
 
+  const highlightCardClassName =
+    "flex h-full flex-col rounded-2xl border border-white/15 bg-white/10 p-4 shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl";
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
       <SEO
@@ -719,23 +723,38 @@ const Blog = () => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
           <div className="absolute inset-y-0 right-[-20%] hidden w-[50%] rounded-full bg-gradient-to-br from-cyan-400/30 via-transparent to-transparent blur-3xl md:block" />
 
-          <div className="relative z-10 grid gap-10 md:grid-cols-[1.6fr,1fr] md:items-start">
+          <div className="relative z-10 space-y-10">
             <div className="space-y-6">
               <div className="space-y-4">
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{t.blog.title}</h1>
                 <p className="text-lg text-white/70 md:max-w-2xl">{t.blog.subtitle}</p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {heroHighlights.map(item => (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl"
-                  >
+                  <div key={item.id} className={cn(highlightCardClassName, "items-center justify-center text-center")}>
                     <p className="text-sm uppercase tracking-wide text-white/60">{item.label}</p>
                     <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
                     <p className="mt-1 text-xs text-white/60">{item.detail}</p>
                   </div>
                 ))}
+                <Card className={cn(highlightCardClassName, "justify-start gap-4 border-white/20 bg-white/10 text-left text-white")}> 
+                  <CardContent className="flex flex-col gap-3 p-0">
+                    <label htmlFor="blog-search" className="text-sm font-medium uppercase tracking-wide text-white/60">
+                      {t.blog.searchPlaceholder}
+                    </label>
+                    <div className="relative">
+                      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+                      <Input
+                        id="blog-search"
+                        value={searchValue}
+                        onChange={(event) => handleSearchChange(event.target.value)}
+                        placeholder={t.blog.searchPlaceholder}
+                        className="h-12 rounded-2xl border-white/20 bg-white/10 pl-11 text-base text-white placeholder:text-white/50 focus-visible:ring-white/40"
+                        aria-label={t.blog.searchPlaceholder}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
               {categoryTabs.length > 0 ? (
                 <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
@@ -775,24 +794,6 @@ const Blog = () => {
               ) : null}
             </div>
 
-            <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl md:-mt-6 md:self-start lg:-mt-8">
-              <CardContent className="space-y-4">
-                <label htmlFor="blog-search" className="sr-only">
-                  {t.blog.searchPlaceholder}
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-                  <Input
-                    id="blog-search"
-                    value={searchValue}
-                    onChange={(event) => handleSearchChange(event.target.value)}
-                    placeholder={t.blog.searchPlaceholder}
-                    className="h-12 rounded-2xl border-white/20 bg-white/10 pl-11 text-base text-white placeholder:text-white/50 focus-visible:ring-white/40"
-                    aria-label={t.blog.searchPlaceholder}
-                  />
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </section>
 
@@ -864,7 +865,7 @@ const Blog = () => {
                           </>
                         }
                         defaultOpen={false}
-                        contentClassName="flex flex-wrap gap-2"
+                        contentClassName="grid w-full gap-2 sm:grid-cols-2 lg:grid-cols-3"
                       >
                         {options.map(([value, label]) => {
                           const isActive = filters[key].includes(value);
@@ -874,12 +875,12 @@ const Blog = () => {
                               type="button"
                               size="sm"
                               variant={isActive ? "default" : "outline"}
-                              className={`rounded-full border-white/20 bg-white/10 px-4 py-1 text-xs font-medium text-white/80 transition hover:text-white ${
+                              className={`w-full rounded-full border-white/20 bg-white/10 px-3 py-2 text-[0.7rem] font-medium leading-tight text-white/80 transition hover:text-white ${
                                 isActive ? "border-transparent bg-white/90 text-slate-900 hover:bg-white" : "hover:bg-white/20"
                               }`}
                               onClick={() => handleFilterToggle(key, value)}
                             >
-                              {label}
+                              <span className="block whitespace-normal break-words text-center">{label}</span>
                             </Button>
                           );
                         })}
