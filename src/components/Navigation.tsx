@@ -110,8 +110,8 @@ const Navigation = () => {
                   to={localizedPath}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "rounded-full px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap",
-                    "border border-transparent hover:border-primary/40 hover:bg-primary/5 hover:text-primary",
+                    "rounded-full px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap",
+                    "border border-transparent hover:border-white/40 hover:bg-white/20 hover:text-foreground hover:backdrop-blur-sm",
                     isActive
                       ? "border-primary bg-primary/10 text-primary"
                       : "text-muted-foreground"
