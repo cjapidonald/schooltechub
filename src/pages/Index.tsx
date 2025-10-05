@@ -365,7 +365,7 @@ const Index = () => {
                   <span className={convexOverlayClass} aria-hidden />
                   <span className="bolt-fastener absolute left-8 top-6 z-20 md:left-12 md:top-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 top-6 z-20 md:right-12 md:top-8" aria-hidden />
-                  <div className="relative z-10">
+                  <div className="relative z-10 flex flex-col items-center text-center">
                     <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
                     <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
                       Power every lesson with organised workflows and luminous insights
@@ -387,7 +387,7 @@ const Index = () => {
                     <span className={convexOverlayClass} aria-hidden />
                     <span className="bolt-fastener absolute left-6 top-5 z-20 md:left-8 md:top-7" aria-hidden />
                     <span className="bolt-fastener absolute right-6 top-5 z-20 md:right-8 md:top-7" aria-hidden />
-                    <div className="relative z-10">
+                    <div className="relative z-10 flex flex-col items-center text-center">
                       <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
                       <h3 className="mt-4 text-2xl font-semibold text-white">Class and student insights synchronised in real time</h3>
                       <p className="mt-3 text-white/70">
