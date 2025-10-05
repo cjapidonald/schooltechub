@@ -7,7 +7,6 @@ import {
   LogOut,
   BookOpen,
   IdCard,
-  GraduationCap,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -145,12 +144,6 @@ const Navigation = () => {
                     <IdCard className="mr-2 h-4 w-4" />
                     {t.nav.my_profile}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate(getLocalizedNavPath("/teacher?tab=classes"))}
-                  >
-                    <GraduationCap className="mr-2 h-4 w-4" />
-                    {t.account.tabs.classes}
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -213,14 +206,6 @@ const Navigation = () => {
                     >
                       <Button className="w-full" variant="secondary">
                         {t.nav.my_profile ?? t.nav.dashboard}
-                      </Button>
-                    </Link>
-                    <Link
-                      to={getLocalizedNavPath("/teacher?tab=classes")}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <Button className="w-full" variant="outline">
-                        {t.account.tabs.classes}
                       </Button>
                     </Link>
                     <Button
