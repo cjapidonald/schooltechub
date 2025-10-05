@@ -2,9 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   Search,
-  Calendar,
-  Clock,
-  User,
   Tag,
   Laptop,
   GraduationCap,
@@ -26,8 +23,6 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { format } from "date-fns";
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { SEO } from "@/components/SEO";
@@ -35,7 +30,7 @@ import { StructuredData } from "@/components/StructuredData";
 import { FilterSection } from "@/components/filters/FilterSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -284,43 +279,6 @@ const getAuthorName = (post: BlogPost): string => {
   return "SchoolTech Hub";
 };
 
-const getReadTimeLabel = (post: BlogPost): string | null => {
-  const { read_time, time_required } = post;
-
-  if (typeof read_time === "number" && read_time > 0) {
-    return `${read_time} min read`;
-  }
-
-  if (typeof read_time === "string" && read_time.trim().length > 0) {
-    const parsed = parseInt(read_time, 10);
-    if (!Number.isNaN(parsed) && parsed > 0) {
-      return `${parsed} min read`;
-    }
-  }
-
-  if (typeof time_required === "string") {
-    const normalized = time_required.trim();
-    if (normalized.length > 0) {
-      return normalized.toLowerCase().includes("read") ? normalized : `${normalized} read`;
-    }
-  }
-
-  return null;
-};
-
-const formatPublishedDate = (value?: string | null): string | null => {
-  if (!value) {
-    return null;
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-
-  return format(date, "PPP");
-};
-
 const normalizeText = (input: string | string[] | null | undefined) => {
   if (!input) {
     return "";
@@ -331,55 +289,6 @@ const normalizeText = (input: string | string[] | null | undefined) => {
   }
 
   return input.toLowerCase();
-};
-
-const getContentField = (post: BlogPost, field: string): string | null => {
-  const { content } = post;
-  if (!content || typeof content !== "object" || Array.isArray(content)) {
-    return null;
-  }
-
-  const value = (content as Record<string, unknown>)[field];
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : null;
-  }
-
-  return null;
-};
-
-const getPublisherLabel = (post: BlogPost): string | null => {
-  const explicitPublisher = getContentField(post, "publisher");
-  if (explicitPublisher) {
-    return explicitPublisher;
-  }
-
-  const author = post.author;
-  if (author && typeof author === "object") {
-    const record = author as Record<string, unknown>;
-    const organization = record.organization ?? record.organisation;
-    if (typeof organization === "string" && organization.trim().length > 0) {
-      return organization.trim();
-    }
-  }
-
-  return null;
-};
-
-const getImageCaption = (post: BlogPost): string | null => {
-  return (
-    getContentField(post, "heroImageCaption") ??
-    getContentField(post, "heroCaption") ??
-    getContentField(post, "imageCaption")
-  );
-};
-
-const getReadingHighlight = (post: BlogPost): string | null => {
-  return (
-    getContentField(post, "readingHighlight") ??
-    getContentField(post, "readingPreview") ??
-    getContentField(post, "readingGuide")
-  );
 };
 
 const FEATURED_TAGS = new Set(["featured", "spotlight"]);
@@ -1027,10 +936,6 @@ const Blog = () => {
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-2/3" />
                       </CardHeader>
-                      <CardFooter className="flex items-center justify-between">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-9 w-28" />
-                      </CardFooter>
                     </Card>
                   ))}
                 </div>
@@ -1054,12 +959,13 @@ const Blog = () => {
                         </span>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        {featuredPosts.map(post => {
-                          const imageCaption = getImageCaption(post);
-                          const publisher = getPublisherLabel(post);
-                          const readingHighlight = getReadingHighlight(post);
-                          return (
-                            <Card key={post.id} className="group overflow-hidden border-primary/30 bg-background/80 shadow-[0_10px_40px_rgba(33,150,243,0.08)]">
+                        {featuredPosts.map(post => (
+                          <Link
+                            key={post.id}
+                            to={getLocalizedPath(`/blog/${post.slug}`, language)}
+                            className="group block"
+                          >
+                            <Card className="overflow-hidden border-primary/30 bg-background/80 transition-transform hover:-translate-y-1 hover:border-primary/60">
                               {post.featured_image ? (
                                 <figure className="relative h-56 overflow-hidden">
                                   <img
@@ -1068,77 +974,19 @@ const Blog = () => {
                                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                     loading="lazy"
                                   />
-                                  {imageCaption ? (
-                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-2 text-xs text-white/80">
-                                      {imageCaption}
-                                    </figcaption>
-                                  ) : null}
                                 </figure>
                               ) : null}
                               <CardHeader className="space-y-3">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {post.category ? (
-                                    <Badge variant="outline" className="rounded-full border-primary/60 text-primary">
-                                      {getCategoryLabel(post.category)}
-                                    </Badge>
+                                <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-primary">
+                                  {post.title}
+                                </h2>
+                                {post.subtitle ? (
+                                  <p className="text-base text-muted-foreground">{post.subtitle}</p>
                                 ) : null}
-                                {Array.isArray(post.tags)
-                                  ? post.tags.slice(0, 2).map(tag => (
-                                      <Badge key={tag} variant="secondary" className="rounded-full bg-primary/10 text-primary">
-                                        <Tag className="mr-1 h-3.5 w-3.5" />
-                                        {tag}
-                                      </Badge>
-                                    ))
-                                  : null}
-                              </div>
-                              <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-primary">
-                                {post.title}
-                              </h2>
-                              {post.subtitle ? (
-                                <p className="text-base text-muted-foreground">{post.subtitle}</p>
-                              ) : null}
-                              <p className="text-sm text-muted-foreground/90">
-                                {post.excerpt}
-                              </p>
-                              {readingHighlight ? (
-                                <p className="rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary/90">
-                                  {readingHighlight}
-                                </p>
-                              ) : null}
-                              {publisher ? (
-                                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
-                                  Publisher: {publisher}
-                                </p>
-                              ) : null}
-                            </CardHeader>
-                            <CardFooter className="flex flex-col gap-4 border-t border-border/40 bg-background/60 p-6 sm:flex-row sm:items-center sm:justify-between">
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1.5">
-                                  <User className="h-4 w-4 text-primary" />
-                                  {t.blog.postedBy} {getAuthorName(post)}
-                                </span>
-                                {formatPublishedDate(post.published_at ?? post.created_at) ? (
-                                  <span className="flex items-center gap-1.5">
-                                    <Calendar className="h-4 w-4 text-primary" />
-                                    {formatPublishedDate(post.published_at ?? post.created_at)}
-                                  </span>
-                                ) : null}
-                                {getReadTimeLabel(post) ? (
-                                  <span className="flex items-center gap-1.5">
-                                    <Clock className="h-4 w-4 text-primary" />
-                                    {getReadTimeLabel(post)}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <Button asChild size="lg" className="rounded-full">
-                                <Link to={getLocalizedPath(`/blog/${post.slug}`, language)}>
-                                  {t.blog.readMore}
-                                </Link>
-                              </Button>
-                            </CardFooter>
-                          </Card>
-                        );
-                      })}
+                              </CardHeader>
+                            </Card>
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   ) : null}
@@ -1152,12 +1000,13 @@ const Blog = () => {
                         </span>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {regularPosts.map(post => {
-                          const imageCaption = getImageCaption(post);
-                          const publisher = getPublisherLabel(post);
-                          const readingHighlight = getReadingHighlight(post);
-                          return (
-                            <Card key={post.id} className="group flex h-full flex-col overflow-hidden border-border/40 bg-background/70">
+                        {regularPosts.map(post => (
+                          <Link
+                            key={post.id}
+                            to={getLocalizedPath(`/blog/${post.slug}`, language)}
+                            className="group block h-full"
+                          >
+                            <Card className="flex h-full flex-col overflow-hidden border-border/40 bg-background/70 transition-transform hover:-translate-y-1 hover:border-primary/50">
                               {post.featured_image ? (
                                 <figure className="relative h-44 overflow-hidden">
                                   <img
@@ -1166,69 +1015,19 @@ const Blog = () => {
                                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                     loading="lazy"
                                   />
-                                  {imageCaption ? (
-                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-3 py-1.5 text-[0.7rem] text-white/80">
-                                      {imageCaption}
-                                    </figcaption>
-                                  ) : null}
                                 </figure>
                               ) : null}
-                              <CardHeader className="space-y-3">
-                                <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-                                  {post.category ? (
-                                    <Badge variant="outline" className="rounded-full border-muted-foreground/40 text-muted-foreground">
-                                      {getCategoryLabel(post.category)}
-                                    </Badge>
+                              <CardHeader className="space-y-2">
+                                <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-primary">
+                                  {post.title}
+                                </h3>
+                                {post.subtitle ? (
+                                  <p className="text-sm text-muted-foreground">{post.subtitle}</p>
                                 ) : null}
-                                {getReadTimeLabel(post) ? (
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="h-3.5 w-3.5" />
-                                    {getReadTimeLabel(post)}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-primary">
-                                {post.title}
-                              </h3>
-                              {post.subtitle ? (
-                                <p className="text-sm text-muted-foreground">{post.subtitle}</p>
-                              ) : null}
-                              <p className="text-sm text-muted-foreground/90 line-clamp-3">
-                                {post.excerpt}
-                              </p>
-                              {readingHighlight ? (
-                                <p className="rounded-md bg-primary/5 px-3 py-2 text-xs text-primary/80">
-                                  {readingHighlight}
-                                </p>
-                              ) : null}
-                              {publisher ? (
-                                <p className="text-[0.65rem] font-medium uppercase tracking-widest text-muted-foreground/80">
-                                  Publisher: {publisher}
-                                </p>
-                              ) : null}
-                            </CardHeader>
-                            <CardFooter className="mt-auto flex items-center justify-between border-t border-border/40 bg-background/50 p-6">
-                              <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1.5">
-                                  <User className="h-3.5 w-3.5" />
-                                  {getAuthorName(post)}
-                                </span>
-                                {formatPublishedDate(post.published_at ?? post.created_at) ? (
-                                  <span className="flex items-center gap-1.5">
-                                    <Calendar className="h-3.5 w-3.5" />
-                                    {formatPublishedDate(post.published_at ?? post.created_at)}
-                                  </span>
-                                ) : null}
-                              </div>
-                              <Button asChild variant="secondary" size="sm" className="rounded-full">
-                                <Link to={getLocalizedPath(`/blog/${post.slug}`, language)}>
-                                  {t.blog.readMore}
-                                </Link>
-                              </Button>
-                            </CardFooter>
-                          </Card>
-                        );
-                      })}
+                              </CardHeader>
+                            </Card>
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   ) : null}
