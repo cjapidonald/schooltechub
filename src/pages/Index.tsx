@@ -391,48 +391,32 @@ const Index = () => {
                     <Card
                       className={cn(
                         neonCardClass,
-                        "rounded-[1.75rem] overflow-hidden bg-gradient-to-b from-secondary/20 via-background/70 to-background"
+                        "rounded-[1.75rem] bg-gradient-to-b from-secondary/20 via-background/70 to-background p-0 aspect-[4/5]"
                       )}
                     >
-                      <div className="relative overflow-hidden rounded-[1.25rem]">
-                        <img
-                          src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80"
-                          alt="Smart classroom with interactive displays"
-                          loading="lazy"
-                          className="h-32 w-full rounded-[1.25rem] object-cover"
-                        />
-                        <div className="pointer-events-none absolute inset-0 rounded-[1.25rem] bg-gradient-to-tr from-background/10 via-transparent to-transparent" />
-                      </div>
-                      <div className="mt-4">
-                        <div className="text-sm font-semibold text-secondary">Lesson Builder Platform</div>
-                        <p className="mt-2 text-sm text-white/75">
-                          Align objectives, differentiation, and formative checks in minutes with responsible AI support.
-                        </p>
-                      </div>
+                      <img
+                        src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80"
+                        alt="Smart classroom with interactive displays"
+                        loading="lazy"
+                        className="block h-full w-full object-cover"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-background/10 via-transparent to-transparent" />
                     </Card>
                   </Reveal>
                   <Reveal delay={180}>
                     <Card
                       className={cn(
                         neonCardClass,
-                        "rounded-[1.75rem] overflow-hidden bg-gradient-to-b from-accent/20 via-background/70 to-background"
+                        "rounded-[1.75rem] bg-gradient-to-b from-accent/20 via-background/70 to-background p-0 aspect-[4/5]"
                       )}
                     >
-                      <div className="relative overflow-hidden rounded-[1.25rem]">
-                        <img
-                          src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80"
-                          alt="Teacher working on a laptop in a classroom"
-                          loading="lazy"
-                          className="h-32 w-full rounded-[1.25rem] object-cover"
-                        />
-                        <div className="pointer-events-none absolute inset-0 rounded-[1.25rem] bg-gradient-to-tr from-background/10 via-transparent to-transparent" />
-                      </div>
-                      <div className="mt-4">
-                        <div className="text-sm font-semibold text-accent">Data-Driven Reports</div>
-                        <p className="mt-2 text-sm text-white/75">
-                          Turn evidence into narrative-rich reports and share instantly with leadership and families.
-                        </p>
-                      </div>
+                      <img
+                        src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80"
+                        alt="Teacher working attentively on a laptop"
+                        loading="lazy"
+                        className="block h-full w-full object-cover"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-background/10 via-transparent to-transparent" />
                     </Card>
                   </Reveal>
                 </div>
