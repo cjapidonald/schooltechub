@@ -1,363 +1,334 @@
-import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import {
+  Award,
   BarChart3,
   BookOpen,
-  CalendarCheck,
-  CalendarPlus,
-  GraduationCap,
-  Layers3,
-  MessageCircle,
-  NotebookPen,
-  PencilLine,
-  PlusCircle,
+  BrainCircuit,
+  CalendarRange,
+  ClipboardList,
+  Laptop,
+  LayoutDashboard,
+  MessageSquare,
   Sparkles,
+  TrendingUp,
+  Users,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import MouseGlowEffect from "@/components/MouseGlowEffect";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { cn } from "@/lib/utils";
 
-const quickActions = [
+type Feature = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+type Testimonial = {
+  quote: string;
+  name: string;
+  role: string;
+};
+
+const workflowTools: Feature[] = [
   {
-    title: "Create a lesson plan",
-    description: "Draft standards-aligned lessons and let the workspace manage materials for you.",
-    icon: PencilLine,
-    action: "Open lesson planner",
-    link: (language: string) => getLocalizedPath("/account?tab=lessonPlans", language),
+    title: "AI Lesson Planner",
+    description:
+      "Draft engaging lessons in minutes with standards alignment, smart suggestions, and reusable templates.",
+    icon: CalendarRange,
   },
   {
-    title: "Schedule it on the calendar",
-    description: "Add a date and the plan appears instantly on your teaching calendar.",
-    icon: CalendarPlus,
-    action: "Schedule lesson",
-    link: (language: string) => getLocalizedPath("/account?tab=lessonPlans", language),
+    title: "Progress Tracker",
+    description:
+      "See class and individual growth at a glance with dashboards that surface data-driven insights automatically.",
+    icon: LayoutDashboard,
   },
   {
-    title: "Monitor student progress",
-    description: "See class performance at a glance and dive into individual learning journeys.",
+    title: "Student Dashboards",
+    description:
+      "Give every learner clarity with personalised AI summaries, goals, and next steps that keep families in the loop.",
     icon: BarChart3,
-    action: "View analytics",
-    link: (language: string) => getLocalizedPath("/account?tab=activity", language),
   },
   {
-    title: "Respond to class needs",
-    description: "Post updates, share resources, and answer questions in one workspace.",
-    icon: MessageCircle,
-    action: "Open community board",
-    link: (language: string) => getLocalizedPath("/account?tab=classes", language),
-  },
-];
-
-const workspaceModules = [
-  {
-    title: "Lesson Planning & Builder",
+    title: "AI Report Builder",
     description:
-      "Design lesson plans with AI assistance, reuse templates, and launch the full lesson builder without leaving the dashboard.",
-    icon: NotebookPen,
-    linkLabel: "Launch builder",
-    link: (language: string) => getLocalizedPath("/account?tab=lessonPlans&view=builder", language),
+      "Transform evidence into narrative-rich reports and share them instantly with leadership teams and guardians.",
+    icon: ClipboardList,
   },
+];
+
+const schoolSolutions: Feature[] = [
   {
-    title: "Calendar",
+    title: "Technology in the Classroom",
     description:
-      "Every lesson with a date automatically lands on your teaching calendar. Drag-and-drop to adjust pacing instantly.",
-    icon: CalendarCheck,
-    linkLabel: "Open calendar",
-    link: (language: string) => getLocalizedPath("/account?tab=lessonPlans&view=calendar", language),
+      "Embed devices, apps, and blended learning strategies with coaching that supports every teacher.",
+    icon: Laptop,
   },
   {
-    title: "Student Progress",
+    title: "Responsible AI Adoption",
     description:
-      "Track mastery, attendance, and participation across classes with easy-to-read analytics dashboards.",
-    icon: BarChart3,
-    linkLabel: "Review progress",
-    link: (language: string) => getLocalizedPath("/account?tab=activity", language),
+      "Launch AI initiatives with governance, ready-made resources, and professional development pathways.",
+    icon: BrainCircuit,
   },
   {
-    title: "Class Hub",
-    description: "Create classes, group students, assign tasks, and keep conversations organized in threads.",
-    icon: GraduationCap,
-    linkLabel: "Manage classes",
-    link: (language: string) => getLocalizedPath("/account?tab=classes", language),
+    title: "Collaborative Staff Culture",
+    description:
+      "Unite departments with shared workspaces, lesson libraries, and community boards for rapid feedback.",
+    icon: Users,
   },
   {
-    title: "Resource Library & Blogs",
-    description: "Store handouts, attach media, and publish blog posts that can be shared with your learning community.",
-    icon: Layers3,
-    linkLabel: "Open library",
-    link: (language: string) => getLocalizedPath("/account/resources", language),
-  },
-  {
-    title: "Teacher Queries",
-    description: "Post questions to other teachers, capture reflections, and turn solutions into reusable notes.",
-    icon: MessageCircle,
-    linkLabel: "Visit queries",
-    link: (language: string) => getLocalizedPath("/account?tab=activity&view=queries", language),
+    title: "Data-Informed Leadership",
+    description:
+      "Equip leaders with real-time analytics, progress indicators, and planning tools for strategic decisions.",
+    icon: Sparkles,
   },
 ];
 
-const calendarItems = [
+const stats = [
+  { number: "12k+", label: "AI-accelerated lessons created on SchoolTech Hub" },
+  { number: "94%", label: "Teachers reporting smoother workflow management" },
+  { number: "60%", label: "Average reduction in time spent writing reports" },
+  { number: "35+", label: "Districts modernising teaching with our platform" },
+];
+
+const testimonials: Testimonial[] = [
   {
-    title: "Grade 5 Science – Weather Patterns",
-    date: "Mon, Apr 22",
-    time: "09:30 AM",
-    detail: "Auto-added from lesson plan",
+    quote:
+      "SchoolTech Hub keeps our planning aligned and reflective. AI prompts help every lesson land for diverse learners.",
+    name: "Emma Rodriguez",
+    role: "Digital Learning Coach, Horizon Primary",
   },
   {
-    title: "Class Reflection – Inquiry Circles",
-    date: "Tue, Apr 23",
-    time: "12:00 PM",
-    detail: "Notes space ready for quick journaling",
+    quote:
+      "The dashboards give our team a living picture of student growth, so we can intervene and celebrate faster.",
+    name: "James Patel",
+    role: "Year 6 Teacher, Northside Academy",
   },
   {
-    title: "Parent Update Blog",
-    date: "Wed, Apr 24",
-    time: "05:00 PM",
-    detail: "Draft post pulled from resource library",
+    quote:
+      "Our leadership team finally has the analytics we need to coach staff and scale innovation responsibly.",
+    name: "Dr. Amina Clarke",
+    role: "Assistant Principal, Futures STEM School",
   },
 ];
 
-const blogHighlights = [
-  {
-    title: "How to remix last week's plan in seconds",
-    summary: "Use saved templates and the builder to adapt content for diverse groups.",
-    link: (language: string) => getLocalizedPath("/blog", language),
+const structuredData = {
+  description:
+    "SchoolTech Hub is the all-in-one teacher workspace for lesson planning, student dashboards, AI report building, and technology professional development.",
+  sameAs: [
+    "https://www.facebook.com/schooltechhub",
+    "https://www.instagram.com/schooltechhub/",
+    "https://www.linkedin.com/company/schooltechhub/",
+  ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Teacher workflow platform",
+    itemListElement: workflowTools.map((tool) => ({
+      "@type": "Offer",
+      itemOffered: {
+        "@type": "Service",
+        name: tool.title,
+        description: tool.description,
+      },
+    })),
   },
-  {
-    title: "Turning formative checks into progress insights",
-    summary: "Capture quick student responses and convert them into dashboard metrics.",
-    link: (language: string) => getLocalizedPath("/blog", language),
-  },
-  {
-    title: "Teacher query spotlight",
-    summary: "See top-voted solutions from this week’s community board.",
-    link: (language: string) => getLocalizedPath("/blog", language),
-  },
-];
+};
 
-const communityPrompts = [
-  "What strategies are you using for project-based pacing this month?",
-  "Share a reflection from today’s class that you want feedback on.",
-  "Looking for enrichment tasks for advanced readers—drop your ideas!",
-];
+const accentCardClass =
+  "border border-primary/35 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] transition-colors duration-300 hover:border-primary/70";
 
 const Index = () => {
   const { language } = useLanguage();
 
-  return (
-    <div className="relative min-h-screen bg-background">
-      <SEO
-        title="Teacher Workspace Dashboard"
-        description="Plan lessons, manage classes, and track student progress from one workspace designed for educators."
-        keywords="teacher dashboard, lesson planner, education calendar, student progress tracking, teacher blogs, class management"
-        canonicalUrl="https://schooltechhub.com"
-      />
-      <StructuredData
-        type="Organization"
-        data={{
-          name: "SchoolTech Hub",
-          description:
-            "A centralized workspace for teachers to plan lessons, manage classes, track progress, and publish resources.",
-        }}
-      />
-      <MouseGlowEffect />
+  const highlightPills = [
+    "Organise lessons, calendars, and reflections in one place",
+    "Share best practice and professional learning with your team",
+    "Harness AI and data to personalise every student journey",
+  ];
 
-      <section className="border-b bg-gradient-to-br from-background via-background to-primary/10">
-        <div className="container grid gap-10 py-20 lg:grid-cols-[minmax(0,1fr)_380px]">
-          <div className="space-y-6">
-            <Badge className="w-fit bg-primary/15 text-primary">Your teaching headquarters</Badge>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Work, plan, and reflect in the SchoolTech Hub dashboard
+  return (
+    <div className="relative min-h-screen bg-background text-foreground">
+      <SEO
+        title="All-in-One Teacher Technology Platform | SchoolTech Hub"
+        description="Empower teachers with an AI-ready workspace to plan lessons, track student progress, build reports, and embed technology across the school."
+        keywords="teacher workflow platform, AI lesson planner, student progress dashboards, report builder for teachers, technology in the classroom, professional development in educational technology"
+        canonicalUrl="https://schooltechhub.com/"
+      />
+      <StructuredData type="Organization" data={structuredData} />
+
+      <section className="relative overflow-hidden py-24">
+        <MouseGlowEffect />
+        <div className="container relative mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="secondary" className="mb-6 bg-primary/15 text-primary">
+              The all-in-one technology workspace for teachers
+            </Badge>
+            <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
+              Power every lesson with organised workflows and smart insights
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Build lessons, organize classes, publish blogs, and respond to student needs without jumping between apps.
-              Everything you plan appears on the calendar, so you always know what’s next.
+            <p className="mt-6 text-lg text-white/80 md:text-xl">
+              SchoolTech Hub helps teachers organise their workflow, collaborate with colleagues, and use technology to elevate every classroom experience. Plan lessons, track progress, and publish AI-driven reports without leaving your digital staffroom.
             </p>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="gap-2">
-                <Link to={getLocalizedPath("/auth", language)}>
-                  <Sparkles className="h-4 w-4" />
-                  Sign in to your dashboard
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to={getLocalizedPath("/about", language)}>
-                  Learn how the workspace supports teachers
-                </Link>
-              </Button>
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link to={getLocalizedPath("/services", language)}>
+                <Button size="lg">Explore platform features</Button>
+              </Link>
+              <Link to={getLocalizedPath("/resources", language)}>
+                <Button size="lg" variant="outline">
+                  <BookOpen className="mr-2 h-5 w-5" />
+                  Browse teaching resources
+                </Button>
+              </Link>
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {quickActions.slice(0, 3).map((action) => (
-                <Card key={action.title} className="border-dashed border-primary/40 bg-primary/5">
-                  <CardHeader className="space-y-1 pb-2">
-                    <div className="flex items-center gap-2 text-primary">
-                      <action.icon className="h-4 w-4" />
-                      <span className="text-xs font-semibold uppercase tracking-wide">Workflow</span>
-                    </div>
-                    <CardTitle className="text-base">{action.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>{action.description}</p>
-                    <Button asChild size="sm" variant="secondary" className="gap-2">
-                      <Link to={action.link(language)}>
-                        <PlusCircle className="h-4 w-4" />
-                        {action.action}
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-sm text-white/70">
+              {highlightPills.map((highlight) => (
+                <span
+                  key={highlight}
+                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"
+                >
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  {highlight}
+                </span>
               ))}
             </div>
           </div>
-
-          <Card className="self-start border-primary/40 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <CalendarCheck className="h-5 w-5 text-primary" />
-                This week at a glance
-              </CardTitle>
-              <CardDescription>
-                Lesson plans with dates are scheduled automatically—edit once and every view stays in sync.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {calendarItems.map((item) => (
-                <Fragment key={item.title}>
-                  <div className="flex items-start justify-between gap-4 rounded-lg border border-dashed border-primary/30 bg-muted/40 p-4">
-                    <div>
-                      <p className="font-semibold text-foreground">{item.title}</p>
-                      <p className="text-sm text-muted-foreground">{item.detail}</p>
-                    </div>
-                    <div className="text-right text-sm">
-                      <p className="font-medium text-primary">{item.date}</p>
-                      <p className="text-muted-foreground">{item.time}</p>
-                    </div>
-                  </div>
-                </Fragment>
-              ))}
-              <Button asChild variant="outline" className="w-full">
-                <Link to={getLocalizedPath("/account?tab=lessonPlans&view=calendar", language)}>
-                  Manage calendar
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
-      <section className="border-b py-16">
-        <div className="container space-y-10">
-          <div className="space-y-3 text-center">
-            <Badge className="bg-secondary/20 text-secondary">Workspace modules</Badge>
-            <h2 className="text-3xl font-semibold">Everything teachers need in one place</h2>
-            <p className="max-w-3xl mx-auto text-muted-foreground">
-              Launch the lesson builder, review student performance, publish blogs, or respond to queries—each module is one click away inside the dashboard.
+      <section className="bg-muted/20 py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <h2 className="text-3xl font-bold md:text-4xl">Plan, track, and celebrate learning in one hub</h2>
+            <p className="mt-4 text-lg text-white/70">
+              Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
             </p>
           </div>
-
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {workspaceModules.map((module) => (
-              <Card key={module.title} className="flex h-full flex-col border-border/60">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-lg">
-                    <module.icon className="h-5 w-5 text-primary" />
-                    {module.title}
-                  </CardTitle>
-                  <CardDescription>{module.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  <Button asChild variant="secondary" className="w-full">
-                    <Link to={module.link(language)}>{module.linkLabel}</Link>
-                  </Button>
-                </CardContent>
+          <div className="grid gap-6 md:grid-cols-2">
+            {workflowTools.map(({ title, description, icon: Icon }) => (
+              <Card key={title} className={cn("h-full p-6", accentCardClass)}>
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <Icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold">{title}</h3>
+                </div>
+                <p className="text-white/80 leading-relaxed">{description}</p>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-b py-16">
-        <div className="container grid gap-8 lg:grid-cols-2">
-          <Card className="h-full border-primary/40 bg-primary/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <BookOpen className="h-5 w-5 text-primary" />
-                Knowledge center
-              </CardTitle>
-              <CardDescription>
-                Keep teachers inspired with curated blog posts, saved strategies, and update announcements.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              {blogHighlights.map((item) => (
-                <div key={item.title} className="rounded-lg border border-dashed border-primary/30 bg-background/70 p-4">
-                  <h3 className="font-semibold text-foreground">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.summary}</p>
-                  <Button asChild variant="link" className="px-0">
-                    <Link to={item.link(language)}>Read more</Link>
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="h-full border-border/60">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MessageCircle className="h-5 w-5 text-primary" />
-                Query board
-              </CardTitle>
-              <CardDescription>
-                Capture questions, reflections, and peer feedback so the whole team can collaborate asynchronously.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {communityPrompts.map((prompt) => (
-                <div key={prompt} className="rounded-lg border border-dashed border-border/70 bg-muted/40 p-4 text-sm text-muted-foreground">
-                  {prompt}
-                </div>
-              ))}
-              <Button asChild className="w-full">
-                <Link to={getLocalizedPath("/account?tab=activity&view=queries", language)}>
-                  Post a new query
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center justify-between gap-10 md:flex-row">
+            <div className="max-w-xl">
+              <Badge variant="secondary" className="bg-secondary/20 text-secondary-foreground">
+                School-wide technology solutions
+              </Badge>
+              <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+                Professional development and classroom technology aligned
+              </h2>
+              <p className="mt-4 text-lg text-white/70">
+                From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
+              </p>
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <Link to={getLocalizedPath("/contact", language)}>
+                  <Button size="lg">Talk with our team</Button>
                 </Link>
-              </Button>
-            </CardContent>
-          </Card>
+                <Link to={getLocalizedPath("/events", language)}>
+                  <Button size="lg" variant="outline">
+                    <MessageSquare className="mr-2 h-5 w-5" />
+                    Join a training session
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
+              {schoolSolutions.map(({ title, description, icon: Icon }) => (
+                <Card key={title} className={cn("h-full p-6", accentCardClass)}>
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/15">
+                      <Icon className="h-6 w-6 text-secondary-foreground" />
+                    </div>
+                    <h3 className="text-xl font-semibold">{title}</h3>
+                  </div>
+                  <p className="text-white/80 leading-relaxed">{description}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="container">
-          <Card className="border-primary/40 bg-gradient-to-r from-primary/10 via-primary/5 to-background">
-            <CardHeader className="text-center space-y-3">
-              <Badge className="mx-auto bg-primary text-primary-foreground">Ready when you are</Badge>
-              <CardTitle className="text-3xl font-semibold">
-                Your dashboard is the teacher’s home base
-              </CardTitle>
-              <CardDescription className="max-w-2xl mx-auto text-base">
-                Create a plan, set the date, and we’ll place it on the calendar. Track student growth, share blogs, and answer queries without leaving the workspace.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Button asChild size="lg" className="gap-2">
-                <Link to={getLocalizedPath("/auth", language)}>
-                  <Sparkles className="h-4 w-4" />
-                  Enter the dashboard
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to={getLocalizedPath("/contact", language)}>
-                  Talk with our team
-                </Link>
-              </Button>
-            </CardContent>
+      <section className="bg-gradient-to-r from-primary/10 via-background to-secondary/10 py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-8 text-center md:grid-cols-4">
+            {stats.map((stat) => (
+              <Card key={stat.label} className={cn("p-8", accentCardClass)}>
+                <p className="text-4xl font-bold text-primary">{stat.number}</p>
+                <p className="mt-3 text-sm uppercase tracking-wide text-white/60">{stat.label}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <h2 className="text-3xl font-bold md:text-4xl">Teachers trust SchoolTech Hub for digital transformation</h2>
+            <p className="mt-4 text-lg text-white/70">
+              Hear how schools are building confident, future-ready classrooms with our AI-powered platform.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {testimonials.map(({ quote, name, role }) => (
+              <Card key={name} className={cn("p-6", accentCardClass)}>
+                <p className="mb-4 text-white/90 italic">“{quote}”</p>
+                <div>
+                  <p className="font-semibold">{name}</p>
+                  <p className="text-sm text-white/70">{role}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-muted/20 py-20">
+        <div className="container mx-auto px-4">
+          <Card
+            className={cn(
+              "mx-auto max-w-4xl bg-gradient-to-r from-primary/10 via-background to-secondary/10 p-10 text-center",
+              accentCardClass,
+            )}
+          >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
+              <Award className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="mt-6 text-3xl font-bold md:text-4xl">Ready to simplify your teaching workflow?</h2>
+            <p className="mt-4 text-lg text-white/70">
+              Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Link to={getLocalizedPath("/auth", language)}>
+                <Button size="lg">Get started free</Button>
+              </Link>
+              <Link to={getLocalizedPath("/services", language)}>
+                <Button size="lg" variant="outline">
+                  <TrendingUp className="mr-2 h-5 w-5" />
+                  View implementation roadmap
+                </Button>
+              </Link>
+            </div>
           </Card>
         </div>
       </section>
