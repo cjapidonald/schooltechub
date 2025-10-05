@@ -381,18 +381,6 @@ const Index = () => {
                 Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
               </p>
             </Reveal>
-            <div className="space-y-3">
-              <Reveal delay={240}>
-                <h3 className="text-2xl font-semibold text-white">
-                  Professional development and classroom technology aligned
-                </h3>
-              </Reveal>
-              <Reveal delay={300}>
-                <p className="text-base text-white/75">
-                  From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
-                </p>
-              </Reveal>
-            </div>
           </div>
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureShowcase.map(({ title, description, icon: Icon }, index) => {
@@ -427,6 +415,18 @@ const Index = () => {
                 </Reveal>
               );
             })}
+          </div>
+          <div className="mt-10 space-y-3 text-center">
+            <Reveal delay={120}>
+              <h3 className="text-2xl font-semibold text-white">
+                Professional development and classroom technology aligned
+              </h3>
+            </Reveal>
+            <Reveal delay={180}>
+              <p className="text-base text-white/75">
+                From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
+              </p>
+            </Reveal>
           </div>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Reveal>
