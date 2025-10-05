@@ -587,12 +587,22 @@ export default function DashboardPage() {
         onQuickAction={handleQuickAction}
       />
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="curriculum">{t.dashboard.tabs.curriculum}</TabsTrigger>
-          <TabsTrigger value="classes">{t.dashboard.tabs.classes}</TabsTrigger>
-          <TabsTrigger value="lessonBuilder">{t.dashboard.tabs.lessonBuilder}</TabsTrigger>
-          <TabsTrigger value="students">{t.dashboard.tabs.students}</TabsTrigger>
-          <TabsTrigger value="skills">{t.dashboard.tabs.skills}</TabsTrigger>
+        <TabsList className="grid w-full gap-2 sm:grid-cols-5">
+          <TabsTrigger value="curriculum" className="w-full">
+            {t.dashboard.tabs.curriculum}
+          </TabsTrigger>
+          <TabsTrigger value="classes" className="w-full">
+            {t.dashboard.tabs.classes}
+          </TabsTrigger>
+          <TabsTrigger value="lessonBuilder" className="w-full">
+            {t.dashboard.tabs.lessonBuilder}
+          </TabsTrigger>
+          <TabsTrigger value="students" className="w-full">
+            {t.dashboard.tabs.students}
+          </TabsTrigger>
+          <TabsTrigger value="skills" className="w-full">
+            {t.dashboard.tabs.skills}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="curriculum" className="space-y-6">
           <CurriculaList
