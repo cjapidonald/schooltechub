@@ -671,7 +671,7 @@ export default function DashboardPage() {
         />
         <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_25px_90px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl md:p-10">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="mx-auto grid w-full gap-2 rounded-[1.75rem] border border-white/20 bg-white/10 p-2 text-white/70 shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl sm:w-auto sm:auto-cols-max sm:grid-flow-col">
+            <TabsList className="mx-auto grid w-full gap-2 text-white/70 sm:w-auto sm:auto-cols-max sm:grid-flow-col">
               <TabsTrigger
                 value="curriculum"
                 className={GLASS_TAB_TRIGGER_CLASS}
