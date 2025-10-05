@@ -167,8 +167,8 @@ All colors MUST be HSL.
       radial-gradient(circle at 75% 78%, hsla(222 47% 18% / 0.55), transparent 68%),
       linear-gradient(150deg, hsla(0 0% 100% / 0.12), hsla(222 47% 14% / 0.92));
     box-shadow:
-      inset 9px 9px 22px hsla(222 67% 6% / 0.65),
-      inset -9px -9px 22px hsla(0 0% 100% / 0.06);
+      inset 6px 6px 18px hsla(222 67% 6% / 0.6),
+      inset -6px -6px 18px hsla(0 0% 100% / 0.05);
     opacity: 0.92;
     pointer-events: none;
     z-index: 0;
@@ -182,7 +182,7 @@ All colors MUST be HSL.
   .convex-panel-sheen::after {
     content: "";
     position: absolute;
-    inset: clamp(0.65rem, 2.1vw, 1.2rem);
+    inset: clamp(0.45rem, 1.6vw, 0.95rem);
     border-radius: inherit;
     border: 1px solid hsla(0 0% 100% / 0.05);
     background: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(222 47% 12% / 0));
@@ -196,13 +196,13 @@ All colors MUST be HSL.
       radial-gradient(circle at 80% 75%, hsla(222 47% 22% / 0.45), transparent 70%),
       linear-gradient(150deg, hsla(0 0% 100% / 0.08), hsla(222 47% 16% / 0.88));
     box-shadow:
-      inset 10px 10px 26px hsla(222 67% 6% / 0.6),
-      inset -10px -10px 26px hsla(0 0% 100% / 0.08);
+      inset 7px 7px 20px hsla(222 67% 6% / 0.55),
+      inset -7px -7px 20px hsla(0 0% 100% / 0.07);
     opacity: 0.88;
   }
 
   .convex-panel-sheen--compact::after {
-    inset: clamp(0.38rem, 1.35vw, 0.75rem);
+    inset: clamp(0.28rem, 1.05vw, 0.6rem);
     border: 1px solid hsla(0 0% 100% / 0.08);
     opacity: 0.8;
   }
