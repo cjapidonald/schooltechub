@@ -64,6 +64,7 @@ import {
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import CurriculumPage from "@/pages/Curriculum";
 import { LessonDocEditor } from "./LessonDocEditor";
+import CurriculumOverview from "./components/CurriculumOverview";
 import type {
   AssessmentGrade,
   AssessmentSubmission,
@@ -132,6 +133,7 @@ const AccountDashboard = () => {
     return tabs.some(tab => tab.value === initial) ? (initial as DashboardTab) : "classes";
   });
   const [lessonPreset, setLessonPreset] = useState<LessonBuilderPreset>(null);
+  const [curriculumPlannerOpen, setCurriculumPlannerOpen] = useState(false);
   const [studentDialogOpen, setStudentDialogOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [behaviorNote, setBehaviorNote] = useState("");
@@ -538,7 +540,12 @@ const AccountDashboard = () => {
           </TabsContent>
 
           <TabsContent value="curriculum" className="space-y-6">
-            <CurriculumPage />
+            <CurriculumOverview onOpenPlanner={() => setCurriculumPlannerOpen(true)} />
+            <Dialog open={curriculumPlannerOpen} onOpenChange={setCurriculumPlannerOpen}>
+              <DialogContent className="max-h-[90vh] w-full max-w-6xl overflow-y-auto p-0">
+                <CurriculumPage />
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="builder" className="space-y-6">
