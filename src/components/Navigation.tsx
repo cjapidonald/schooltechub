@@ -159,8 +159,12 @@ const Navigation = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2"
+                  >
                     <User className="h-5 w-5" />
+                    <span className="text-sm font-medium">My account</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
