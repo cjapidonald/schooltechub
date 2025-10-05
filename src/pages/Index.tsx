@@ -172,7 +172,7 @@ const Index = () => {
       />
       <StructuredData type="Organization" data={structuredData} />
 
-      <section className="relative overflow-hidden py-28">
+      <section className="relative overflow-hidden pt-20 pb-28 md:pt-24">
         <MouseGlowEffect />
         <SparklesBackground />
         <div className="absolute inset-0">
