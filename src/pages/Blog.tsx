@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
+import { FilterSection } from "@/components/filters/FilterSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -974,29 +975,33 @@ const Blog = () => {
 
                       const Icon = filterSectionIcons[key];
                       return (
-                        <div key={key} className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm font-semibold">
-                            <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
-                            <span>{t.blog.filters[key]}</span>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {options.map(([value, label]) => {
-                              const isActive = filters[key].includes(value);
-                              return (
-                                <Button
-                                  key={value}
-                                  type="button"
-                                  size="sm"
-                                  variant={isActive ? "default" : "outline"}
-                                  className="rounded-full"
-                                  onClick={() => handleFilterToggle(key, value)}
-                                >
-                                  {label}
-                                </Button>
-                              );
-                            })}
-                          </div>
-                        </div>
+                        <FilterSection
+                          key={key}
+                          title={
+                            <>
+                              <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                              <span>{t.blog.filters[key]}</span>
+                            </>
+                          }
+                          defaultOpen={false}
+                          contentClassName="flex flex-wrap gap-2"
+                        >
+                          {options.map(([value, label]) => {
+                            const isActive = filters[key].includes(value);
+                            return (
+                              <Button
+                                key={value}
+                                type="button"
+                                size="sm"
+                                variant={isActive ? "default" : "outline"}
+                                className="rounded-full"
+                                onClick={() => handleFilterToggle(key, value)}
+                              >
+                                {label}
+                              </Button>
+                            );
+                          })}
+                        </FilterSection>
                       );
                     })}
                 </CardContent>

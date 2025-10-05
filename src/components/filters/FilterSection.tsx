@@ -5,10 +5,12 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { cn } from "@/lib/utils";
 
 interface FilterSectionProps {
-  title: string;
+  title: ReactNode;
   children: ReactNode;
   defaultOpen?: boolean;
   className?: string;
+  triggerClassName?: string;
+  titleWrapperClassName?: string;
   contentClassName?: string;
 }
 
@@ -17,6 +19,8 @@ export function FilterSection({
   children,
   defaultOpen = true,
   className,
+  triggerClassName,
+  titleWrapperClassName,
   contentClassName,
 }: FilterSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -30,10 +34,13 @@ export function FilterSection({
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-2 text-left text-sm font-semibold"
+          className={cn(
+            "flex w-full items-center justify-between gap-2 text-left text-sm font-semibold",
+            triggerClassName,
+          )}
           aria-expanded={isOpen}
         >
-          <span>{title}</span>
+          <span className={cn("flex items-center gap-2", titleWrapperClassName)}>{title}</span>
           <ChevronDown
             className={cn(
               "h-4 w-4 shrink-0 transition-transform duration-200",
