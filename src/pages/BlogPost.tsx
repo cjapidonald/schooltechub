@@ -18,6 +18,17 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { SAMPLE_BLOG_POSTS } from "@/data/sampleBlogPosts";
 
+type RichContentTextChild = {
+  text: string;
+  bold?: boolean;
+};
+
+type RichContentBlock = {
+  type: "paragraph" | "heading";
+  level?: number;
+  children?: RichContentTextChild[];
+};
+
 const extractTags = (tags: string[] | string | null | undefined) => {
   if (Array.isArray(tags)) {
     return tags;
@@ -54,6 +65,75 @@ const getReadTimeLabel = (
   }
 
   return null;
+};
+
+const convertMarkdownToRichContent = (markdown: string): RichContentBlock[] => {
+  if (!markdown) {
+    return [];
+  }
+
+  const blocks: RichContentBlock[] = [];
+  const normalized = markdown.replace(/\r\n/g, "\n");
+  const lines = normalized.split("\n");
+  let paragraphLines: string[] = [];
+
+  const flushParagraph = () => {
+    if (paragraphLines.length === 0) {
+      return;
+    }
+
+    const text = paragraphLines.join(" ").replace(/\s+/g, " ").trim();
+    if (text) {
+      blocks.push({
+        type: "paragraph",
+        children: [{ text }],
+      });
+    }
+    paragraphLines = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      flushParagraph();
+      continue;
+    }
+
+    const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      flushParagraph();
+      const [, hashes, headingText] = headingMatch;
+      const level = Math.min(Math.max(hashes.length, 2), 4);
+      const text = headingText.trim();
+      if (text) {
+        blocks.push({
+          type: "heading",
+          level,
+          children: [{ text }],
+        });
+      }
+      continue;
+    }
+
+    if (/^[-*+]\s+/.test(trimmed)) {
+      flushParagraph();
+      const bulletText = trimmed.replace(/^[-*+]\s+/, "").trim();
+      if (bulletText) {
+        blocks.push({
+          type: "paragraph",
+          children: [{ text: `• ${bulletText}` }],
+        });
+      }
+      continue;
+    }
+
+    paragraphLines.push(trimmed);
+  }
+
+  flushParagraph();
+
+  return blocks;
 };
 
 type SavedPostRow = Database["public"]["Tables"]["saved_posts"]["Row"];
@@ -122,6 +202,22 @@ export default function BlogPost() {
 
   const post = (fetchedPost ?? samplePost) as (BlogPostRow & { content?: unknown }) | null;
   const isLoadingPost = isLoading && !samplePost;
+  const resolvedContent = useMemo(() => {
+    if (!post) {
+      return null;
+    }
+
+    if ((post as any).content) {
+      return (post as any).content;
+    }
+
+    const markdown = (post as any).content_md as string | null | undefined;
+    if (typeof markdown === "string" && markdown.trim().length > 0) {
+      return convertMarkdownToRichContent(markdown);
+    }
+
+    return null;
+  }, [post]);
 
   const savedPostQuery = useQuery({
     queryKey: ["saved-post", user?.id, fetchedPost?.id],
@@ -582,32 +678,32 @@ export default function BlogPost() {
               )}
             </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button
-              variant={isPostSaved ? "secondary" : "outline"}
-              onClick={handleToggleSave}
-              disabled={!canInteractWithPost || savedPostQuery.isLoading || toggleSaveMutation.isPending}
-              aria-pressed={isPostSaved}
-              className="gap-2"
-            >
-              {isPostSaved ? (
-                <BookmarkCheck className="h-4 w-4" />
-              ) : (
-                <Bookmark className="h-4 w-4" />
-              )}
-              {isPostSaved ? t.blogPost.saved : t.blogPost.save}
-            </Button>
-            <ShareButton
-              url={canonicalUrl}
-              title={post.title}
-              buttonLabel={t.blogPost.share}
-            />
-          </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                variant={isPostSaved ? "secondary" : "outline"}
+                onClick={handleToggleSave}
+                disabled={!canInteractWithPost || savedPostQuery.isLoading || toggleSaveMutation.isPending}
+                aria-pressed={isPostSaved}
+                className="gap-2"
+              >
+                {isPostSaved ? (
+                  <BookmarkCheck className="h-4 w-4" />
+                ) : (
+                  <Bookmark className="h-4 w-4" />
+                )}
+                {isPostSaved ? t.blogPost.saved : t.blogPost.save}
+              </Button>
+              <ShareButton
+                url={canonicalUrl}
+                title={post.title}
+                buttonLabel={t.blogPost.share}
+              />
+            </div>
           </header>
 
           {/* Article Content */}
           <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
-            {post.content && <RichContent content={post.content as any} />}
+            {resolvedContent && <RichContent content={resolvedContent as any} />}
           </div>
 
           {/* Comments Section */}

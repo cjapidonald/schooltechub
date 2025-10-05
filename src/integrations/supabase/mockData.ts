@@ -579,7 +579,29 @@ export const mockTables: MockTables = {
       title: "Building Joyful Classrooms",
       subtitle: "Strategies to spark curiosity every day",
       excerpt: "Practical strategies for creating engaged learning environments.",
-      content_md: "# Building Joyful Classrooms\nCreate community with collaborative norms and rituals.",
+      content_md: `# Building Joyful Classrooms
+
+Creating a joyful classroom means tending to the conditions that let students feel safe, seen, and ready to take risks. When the tone is right, curiosity follows and learners lean into the work with genuine energy.
+
+## Start with Shared Rituals
+
+Begin the week with a community circle that invites every voice. Quick check-in prompts like "What made you smile this weekend?" keep the moment light while reinforcing that everyone belongs. Rotate student facilitators so the routine becomes something learners co-own instead of a teacher-led script.
+
+- Use a visual schedule and music cue to signal transitions.
+- Encourage students to design greetings or affirmations that reflect your class culture.
+
+## Design Learning that Sparks Wonder
+
+Blend movement, discussion, and creation throughout each lesson arc. A three-part flow—ignite, explore, reflect—helps every activity feel purposeful. During the explore phase, offer choice boards or station menus so students can pick the modality that fits how they learn best.
+
+## Celebrate Growth Out Loud
+
+Create space every day to recognize small wins. Invite students to shout out a peer for persistence, creativity, or collaboration. Capture those moments on a "Joy Wall" with sticky notes or digital badges so the celebrations live beyond the day they happen.
+
+## Sustain Joy for the Long Term
+
+Joyful classrooms are intentional, not accidental. Protect planning time to notice which routines are working and where energy dips. Gather quick feedback from learners each Friday and make one adjustment for the following week. The steady rhythm of reflection keeps joy sustainable for both students and teachers.
+`,
       cover_image: "/images/blog/joyful-classroom.jpg",
       tags: ["pedagogy", "culture"],
       author_id: "author-1",
@@ -603,7 +625,26 @@ export const mockTables: MockTables = {
       title: "Leveraging Student Voice in Planning",
       subtitle: "Co-create lessons with learners",
       excerpt: "Invite learners into the planning process with surveys and reflections.",
-      content_md: "# Student Voice\nAmplify learners through choice boards and feedback loops.",
+      content_md: `# Leveraging Student Voice in Planning
+
+When students shape what and how they learn, engagement becomes authentic. Centering student voice in planning builds ownership, surfaces hidden interests, and helps instruction stay responsive.
+
+## Listen Before You Plan
+
+Start each unit with a short interest survey and a "wonder wall" brainstorm. Ask questions that reveal curiosities, preferred collaboration styles, and pacing needs. Pair the responses with formative data to identify themes—those insights become the anchor for your lesson sequence.
+
+## Co-Design the Learning Path
+
+Share the big learning goals with students and invite them to suggest how they might demonstrate mastery. Some may gravitate toward multimedia projects while others prefer written reflections or live demonstrations. Capture the ideas in a planning doc and commit to incorporating at least two student-generated options.
+
+## Keep Feedback Loops Open
+
+Schedule quick midpoint conferences or use a weekly exit ticket that asks, "What should we keep, stop, or start next week?" Close the loop by naming which suggestions you acted on and why. Visible responsiveness builds trust and encourages even quieter students to speak up.
+
+## Reflect Together
+
+End the unit with a collective retrospective. Invite students to share what helped them learn, what stretched them, and what they want to explore next. Their reflections become the launchpad for your next planning cycle, ensuring student voice remains a constant, not a one-time survey.
+`,
       cover_image: "/images/blog/student-voice.jpg",
       tags: ["student voice", "planning"],
       author_id: "author-1",
