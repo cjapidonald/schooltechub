@@ -18,7 +18,8 @@ export const en = {
     signUp: "Sign Up",
     signOut: "Sign Out",
     profile: "My Profile",
-    my_profile: "My Profile"
+    my_profile: "My Profile",
+    workspace: "Workspace",
   },
   profilePage: {
     title: "My Profile",
