@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { StudentSkillChart } from "@/components/students/StudentSkillChart";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
-import { DASHBOARD_EXAMPLE_STUDENTS } from "@/features/students/examples";
-import { CalendarDays, CheckCircle2, Clock, LogIn, Notebook, Sparkles, Trophy } from "lucide-react";
+import { DASHBOARD_EXAMPLE_SKILLS, DASHBOARD_EXAMPLE_STUDENTS } from "@/features/students/examples";
+import { CalendarDays, CheckCircle2, Clock, LogIn, Notebook, Sparkles, TrendingUp, Trophy } from "lucide-react";
 
 const getInitials = (name: string): string => {
   const letters = name
@@ -20,6 +21,39 @@ const getInitials = (name: string): string => {
 };
 
 const exampleStudent = DASHBOARD_EXAMPLE_STUDENTS[0];
+
+const exampleStudentSkills = exampleStudent?.skills ?? [];
+const teacherSkillCatalog = new Map(DASHBOARD_EXAMPLE_SKILLS.map(skill => [skill.id, skill]));
+const skillInsights = exampleStudentSkills.map(skill => {
+  const firstScore = skill.scores[0]?.score ?? 0;
+  const latestScore = skill.scores[skill.scores.length - 1]?.score ?? firstScore;
+  const change = latestScore - firstScore;
+  const teacherDescription = teacherSkillCatalog.get(skill.skillId)?.description;
+
+  return {
+    record: skill,
+    startScore: firstScore,
+    latestScore,
+    change,
+    changeLabel: `${change >= 0 ? "+" : ""}${change} pts`,
+    teacherDescription,
+  };
+});
+
+const overallStartAverage =
+  skillInsights.length > 0
+    ? skillInsights.reduce((sum, entry) => sum + entry.startScore, 0) / skillInsights.length
+    : 0;
+const overallLatestAverage =
+  skillInsights.length > 0
+    ? skillInsights.reduce((sum, entry) => sum + entry.latestScore, 0) / skillInsights.length
+    : 0;
+const overallChange = overallLatestAverage - overallStartAverage;
+const overallChangeLabel = `${overallChange >= 0 ? "+" : ""}${Math.round(overallChange)} pts`;
+const overallLatestAverageDisplay = Math.round(overallLatestAverage);
+const observationCheckIns = exampleStudentSkills.reduce((max, skill) => Math.max(max, skill.scores.length), 0);
+const observationLabel = observationCheckIns > 0 ? `${observationCheckIns} check-ins` : "recent updates";
+const emptySkillChartLabel = "Skill trend data will appear once your teacher shares updates.";
 
 const fallbackStudentName = "Jordan Martinez";
 const exampleStudentFullName = exampleStudent?.fullName ?? fallbackStudentName;
@@ -274,6 +308,92 @@ export default function StudentPage() {
             </Card>
           </div>
         </section>
+
+        {skillInsights.length > 0 && (
+          <section className="grid gap-8">
+            <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+              <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
+                    <TrendingUp className="h-6 w-6" />
+                    Guided skill growth
+                  </CardTitle>
+                  <CardDescription className="text-white/65">
+                    Live updates from your teacher&apos;s skills workspace show exactly how your mastery is building each week.
+                  </CardDescription>
+                </div>
+                <Badge className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/70">
+                  Teacher skill goals
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                <div className="grid gap-6 lg:grid-cols-[1.6fr,1fr]">
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,1)]">
+                    <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-white/50">Average mastery</p>
+                        <p className="mt-2 text-4xl font-semibold text-white">{overallLatestAverageDisplay}%</p>
+                        <p className="mt-3 text-sm text-white/70">{overallChangeLabel} since {observationLabel}.</p>
+                      </div>
+                      <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-white/70">
+                        <Sparkles className="h-4 w-4" />
+                        Teacher check-ins sync automatically
+                      </div>
+                    </div>
+                    <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                      {skillInsights.map(insight => (
+                        <div key={insight.record.skillId} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                          <p className="text-xs uppercase tracking-wide text-white/50">{insight.record.skillName}</p>
+                          <p className="mt-2 text-2xl font-semibold text-white">{insight.latestScore}%</p>
+                          <p className="text-xs text-white/60">Started at {insight.startScore}%</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,1)]">
+                    <p className="text-sm text-white/70">
+                      Every time your teacher logs evidence on the skills page, your dashboard refreshes with the newest score, narrative context, and focus tips. Use these signals to plan study sessions and celebrate growth.
+                    </p>
+                    <div className="mt-5 space-y-4">
+                      <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                        <p className="text-xs uppercase tracking-wide text-white/50">Teacher reflection</p>
+                        <p className="mt-2 text-sm text-white/70">{exampleStudentAcademicComment}</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                        <p className="text-xs uppercase tracking-wide text-white/50">How to use it</p>
+                        <p className="mt-2 text-sm text-white/70">Review the charts after each workshop or assignment to decide which skill to practice next.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                  {skillInsights.map(insight => (
+                    <div
+                      key={`${insight.record.skillId}-chart`}
+                      className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_-40px_rgba(15,23,42,1)] backdrop-blur"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-white">{insight.record.skillName}</h3>
+                          <p className="text-xs uppercase tracking-wide text-white/50">{exampleStudentPreferredName}&apos;s progress</p>
+                        </div>
+                        <Badge className="w-fit rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white/70">
+                          {insight.changeLabel}
+                        </Badge>
+                      </div>
+                      <div className="mt-4">
+                        <StudentSkillChart skill={insight.record} emptyLabel={emptySkillChartLabel} />
+                      </div>
+                      {insight.teacherDescription && (
+                        <p className="mt-4 text-sm text-white/70">{insight.teacherDescription}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
         <section className="grid gap-8 lg:grid-cols-[1.9fr,1fr]">
           <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
