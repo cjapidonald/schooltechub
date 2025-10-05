@@ -81,7 +81,7 @@ const Navigation = () => {
       <div className="container flex h-16 items-center gap-4">
         <Link to={getLocalizedNavPath("/")} className="flex items-center gap-2 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg border border-primary bg-white flex items-center justify-center">
+            <div className="h-10 w-10 rounded-lg border border-white bg-muted flex items-center justify-center">
               <BookOpen className="h-6 w-6 text-primary" />
             </div>
             <span className="text-xl font-bold">SchoolTech</span>
