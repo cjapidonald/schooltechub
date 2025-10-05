@@ -22,7 +22,7 @@ type TranslationDictionary = typeof en;
 const createStaticRoutes = (dictionary: TranslationDictionary): RouteLink[] => [
   {
     title: dictionary.nav.my_profile ?? dictionary.nav.profile ?? dictionary.nav.dashboard,
-    url: "/account"
+    url: "/my-profile"
   },
   { title: dictionary.nav.home, url: "/home" },
   { title: dictionary.nav.about, url: "/about" },
