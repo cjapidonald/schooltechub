@@ -308,7 +308,7 @@ const Index = () => {
             <img
               src={futuristicHeroImage}
               alt="Futuristic classroom with holographic interfaces"
-              className="h-full w-full object-cover object-center opacity-45"
+              className="h-full w-full object-cover object-center opacity-80"
               loading="lazy"
             />
           </div>
@@ -334,8 +334,8 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsla(var(--glow-primary)/0.22),transparent_60%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/85 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsla(var(--glow-primary)/0.14),transparent_62%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background/90" />
         </div>
         <div className="container relative z-10 mx-auto px-4">
           <div className="relative grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
@@ -348,17 +348,17 @@ const Index = () => {
                     loading="lazy"
                     className="h-full w-full object-cover opacity-70"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/75 to-background/85" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-background/40 via-background/65 to-background/80" />
                 </div>
               ))}
-              <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/85 to-background" />
+              <div className="absolute inset-0 bg-gradient-to-br from-background/45 via-background/70 to-background/85" />
             </div>
             <div>
               <Reveal>
                 <Card
                   className={cn(
                     neonCardClass,
-                    "relative isolate rounded-[2rem] bg-gradient-to-br from-primary/30 via-background/85 to-background/95 p-8 shadow-[0_28px_60px_-20px_rgba(54,20,130,0.65)] transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.7)] md:p-10",
+                    "relative isolate rounded-[2rem] bg-gradient-to-br from-primary/30 via-background/70 to-background/85 p-8 backdrop-blur-xl shadow-[0_28px_60px_-20px_rgba(54,20,130,0.65)] transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.7)] md:p-10",
                     "before:absolute before:inset-[1.5px] before:rounded-[1.92rem] before:bg-[linear-gradient(150deg,rgba(255,255,255,0.22),rgba(15,15,35,0.65))] before:opacity-80 before:content-[''] before:z-0",
                   )}
                 >
@@ -384,7 +384,7 @@ const Index = () => {
                 <Card
                   className={cn(
                     neonCardClass,
-                    "relative w-full max-w-2xl rounded-[2.25rem] bg-gradient-to-br from-primary/18 via-background/65 to-background/95 p-8 md:p-10"
+                    "relative w-full max-w-2xl rounded-[2.25rem] bg-gradient-to-br from-primary/18 via-background/55 to-background/85 p-8 backdrop-blur-xl md:p-10"
                   )}
                 >
                   <span className={convexOverlayClass} aria-hidden />
