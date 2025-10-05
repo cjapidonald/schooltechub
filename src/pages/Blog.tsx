@@ -719,7 +719,7 @@ const Blog = () => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
           <div className="absolute inset-y-0 right-[-20%] hidden w-[50%] rounded-full bg-gradient-to-br from-cyan-400/30 via-transparent to-transparent blur-3xl md:block" />
 
-          <div className="relative z-10 grid gap-10 md:grid-cols-[1.6fr,1fr] md:items-center">
+          <div className="relative z-10 grid gap-10 md:grid-cols-[1.6fr,1fr] md:items-start">
             <div className="space-y-6">
               <div className="space-y-4">
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{t.blog.title}</h1>
@@ -738,12 +738,12 @@ const Blog = () => {
                 ))}
               </div>
               {categoryTabs.length > 0 ? (
-                <div className="flex flex-wrap gap-3">
+                <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                   <Button
                     type="button"
                     size="sm"
                     variant={activeCategory === "all" ? "default" : "outline"}
-                    className={`rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white ${
+                    className={`w-full rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white ${
                       activeCategory === "all"
                         ? "border-transparent bg-white/90 text-slate-900 hover:bg-white"
                         : "hover:bg-white/20"
@@ -761,7 +761,7 @@ const Blog = () => {
                         type="button"
                         size="sm"
                         variant={isActive ? "default" : "outline"}
-                        className={`gap-2 rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white ${
+                        className={`w-full gap-2 rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white ${
                           isActive ? "border-transparent bg-white/90 text-slate-900 hover:bg-white" : "hover:bg-white/20"
                         }`}
                         onClick={() => handleCategoryButtonClick(value)}
@@ -775,7 +775,7 @@ const Blog = () => {
               ) : null}
             </div>
 
-            <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl">
+            <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl md:self-start">
               <CardHeader className="space-y-2">
                 <h2 className="text-2xl font-semibold">Search the library</h2>
                 <p className="text-sm text-white/70">Find strategies, reflections, and toolkits tailored to your classroom.</p>
