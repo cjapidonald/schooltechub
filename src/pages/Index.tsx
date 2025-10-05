@@ -301,22 +301,16 @@ const Index = () => {
                 <Card
                   className={cn(
                     neonCardClass,
-                    "relative isolate rounded-[2rem] bg-gradient-to-br from-primary/30 via-background/85 to-background/95 p-8 shadow-[0_28px_60px_-20px_rgba(54,20,130,0.65)] transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.7)] md:p-10",
-                    "before:absolute before:inset-[1.5px] before:rounded-[1.92rem] before:bg-[linear-gradient(150deg,rgba(255,255,255,0.22),rgba(15,15,35,0.65))] before:opacity-80 before:content-[''] before:z-0",
-                    "after:absolute after:inset-0 after:rounded-[2rem] after:border after:border-white/12 after:shadow-[inset_0_2px_3px_rgba(255,255,255,0.45),inset_0_-6px_12px_rgba(12,11,30,0.85)] after:content-[''] after:pointer-events-none after:z-20",
+                    "rounded-[1.75rem] bg-gradient-to-br from-primary/15 via-background/60 to-background"
                   )}
                 >
-                  <div className="relative z-10">
-                    <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
-                    <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
-                      Power every lesson with organised workflows and luminous insights
-                    </h2>
-                    <p className="mt-6 max-w-xl text-base text-white/80 md:text-lg">
-                      SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
-                    </p>
-                  </div>
-                  <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
-                  <div className="pointer-events-none absolute -right-16 -top-12 h-48 w-48 rounded-full bg-secondary/20 blur-3xl" />
+                  <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
+                  <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
+                    Power every lesson with organised workflows and luminous insights
+                  </h2>
+                  <p className="mt-6 max-w-xl text-base text-white/80 md:text-lg">
+                    SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
+                  </p>
                 </Card>
               </Reveal>
             </div>
