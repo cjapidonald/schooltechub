@@ -663,8 +663,8 @@ export const en = {
     }
   },
   blog: {
-    title: "Latest Insights & Updates",
-    subtitle: "Stay informed about the latest trends in educational technology",
+    title: "",
+    subtitle: "",
     searchPlaceholder: "Search posts...",
     readMore: "Read More",
     minRead: "min read",
