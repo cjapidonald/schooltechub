@@ -70,6 +70,11 @@ const categoryIcons: Record<string, LucideIcon> = {
   teacherDebates: MessageSquare,
 };
 
+const EXCLUDED_CATEGORY_LABELS = new Set([
+  "teacher debates",
+  "teaching practice",
+]);
+
 const BLOG_FILTER_KEYS = [
   "category",
   "stage",
@@ -503,7 +508,10 @@ const Blog = () => {
     return { postsWithMetadata, optionEntries };
   }, [posts, filterOptions]);
 
-  const categoryTabs = optionEntries.category ?? [];
+  const categoryTabs = (optionEntries.category ?? []).filter(([, label]) => {
+    const normalizedLabel = label.trim().toLowerCase();
+    return !EXCLUDED_CATEGORY_LABELS.has(normalizedLabel);
+  });
   const activeCategory = filters.category[0] ?? "all";
 
   const filteredPosts = useMemo(() => {
@@ -679,24 +687,7 @@ const Blog = () => {
       {structuredData ? <StructuredData data={structuredData} /> : null}
 
       <div className="flex-1">
-        <section className="border-b border-border/50 bg-background/60 backdrop-blur">
-          <div className="container py-8">
-            <div className="mx-auto max-w-2xl">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={searchValue}
-                  onChange={(event) => handleSearchChange(event.target.value)}
-                  placeholder={t.blog.searchPlaceholder}
-                  className="h-12 rounded-full border-muted-foreground/20 pl-11"
-                  aria-label={t.blog.searchPlaceholder}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="container space-y-8 py-12">
+        <section className="container space-y-8 py-10">
           <div className="space-y-3">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{t.blog.title}</h1>
             <p className="text-muted-foreground">{t.blog.subtitle}</p>
@@ -734,91 +725,112 @@ const Blog = () => {
           ) : null}
 
           <div className="flex flex-col gap-8 lg:flex-row">
-            <aside className="order-2 lg:order-1 lg:w-56 xl:w-64 lg:flex-shrink-0">
-              <Card className="border-border/40 bg-background/80 shadow-lg shadow-primary/10">
-                <CardHeader className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                    <Filter className="h-4 w-4" aria-hidden="true" />
-                    {t.blog.filters.title}
-                  </div>
-                  <p className="text-sm text-muted-foreground/80">{t.blog.filters.helper}</p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {isAnyFilterActive ? (
-                      <>
-                        {selectedFilters.map(item => (
-                          <Badge key={`${item.key}-${item.value}`} variant="secondary" className="flex items-center gap-1 rounded-full">
-                            <span>{item.label}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeFilterValue(item.key, item.value)}
-                              className="rounded-full p-0.5 text-muted-foreground hover:text-foreground"
-                              aria-label={`Remove ${item.label}`}
-                            >
-                              <X className="h-3 w-3" aria-hidden="true" />
-                            </button>
-                          </Badge>
-                        ))}
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="rounded-full px-3 py-1 text-xs"
-                          onClick={clearAllFilters}
-                        >
-                          {t.blog.filters.clear}
-                        </Button>
-                      </>
-                    ) : (
-                      <Badge variant="outline" className="rounded-full border-dashed border-border/60 text-xs text-muted-foreground">
-                        No filters applied
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {(["stage", "subject", "delivery", "payment", "platform"] as Array<Exclude<BlogFilterKey, "category">>)
-                    .map(key => {
-                      const options = optionEntries[key] ?? [];
-                      if (!options.length) {
-                        return null;
-                      }
+            <aside className="order-1 lg:w-56 xl:w-64 lg:flex-shrink-0">
+              <div className="space-y-6">
+                <Card className="border-border/40 bg-background/80 shadow-lg shadow-primary/10">
+                  <CardContent className="pt-6">
+                    <label htmlFor="blog-search" className="sr-only">
+                      {t.blog.searchPlaceholder}
+                    </label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id="blog-search"
+                        value={searchValue}
+                        onChange={(event) => handleSearchChange(event.target.value)}
+                        placeholder={t.blog.searchPlaceholder}
+                        className="h-12 rounded-full border-muted-foreground/20 pl-11"
+                        aria-label={t.blog.searchPlaceholder}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
-                      const Icon = filterSectionIcons[key];
-                      return (
-                        <FilterSection
-                          key={key}
-                          title={
-                            <>
-                              <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
-                              <span>{t.blog.filters[key]}</span>
-                            </>
-                          }
-                          defaultOpen={false}
-                          contentClassName="flex flex-wrap gap-2"
-                        >
-                          {options.map(([value, label]) => {
-                            const isActive = filters[key].includes(value);
-                            return (
-                              <Button
-                                key={value}
+                <Card className="border-border/40 bg-background/80 shadow-lg shadow-primary/10">
+                  <CardHeader className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                      <Filter className="h-4 w-4" aria-hidden="true" />
+                      {t.blog.filters.title}
+                    </div>
+                    <p className="text-sm text-muted-foreground/80">{t.blog.filters.helper}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {isAnyFilterActive ? (
+                        <>
+                          {selectedFilters.map(item => (
+                            <Badge key={`${item.key}-${item.value}`} variant="secondary" className="flex items-center gap-1 rounded-full">
+                              <span>{item.label}</span>
+                              <button
                                 type="button"
-                                size="sm"
-                                variant={isActive ? "default" : "outline"}
-                                className="rounded-full"
-                                onClick={() => handleFilterToggle(key, value)}
+                                onClick={() => removeFilterValue(item.key, item.value)}
+                                className="rounded-full p-0.5 text-muted-foreground hover:text-foreground"
+                                aria-label={`Remove ${item.label}`}
                               >
-                                {label}
-                              </Button>
-                            );
-                          })}
-                        </FilterSection>
-                      );
-                    })}
-                </CardContent>
-              </Card>
+                                <X className="h-3 w-3" aria-hidden="true" />
+                              </button>
+                            </Badge>
+                          ))}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="rounded-full px-3 py-1 text-xs"
+                            onClick={clearAllFilters}
+                          >
+                            {t.blog.filters.clear}
+                          </Button>
+                        </>
+                      ) : (
+                        <Badge variant="outline" className="rounded-full border-dashed border-border/60 text-xs text-muted-foreground">
+                          No filters applied
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {(["stage", "subject", "delivery", "payment", "platform"] as Array<Exclude<BlogFilterKey, "category">>)
+                      .map(key => {
+                        const options = optionEntries[key] ?? [];
+                        if (!options.length) {
+                          return null;
+                        }
+
+                        const Icon = filterSectionIcons[key];
+                        return (
+                          <FilterSection
+                            key={key}
+                            title={
+                              <>
+                                <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                                <span>{t.blog.filters[key]}</span>
+                              </>
+                            }
+                            defaultOpen={false}
+                            contentClassName="flex flex-wrap gap-2"
+                          >
+                            {options.map(([value, label]) => {
+                              const isActive = filters[key].includes(value);
+                              return (
+                                <Button
+                                  key={value}
+                                  type="button"
+                                  size="sm"
+                                  variant={isActive ? "default" : "outline"}
+                                  className="rounded-full"
+                                  onClick={() => handleFilterToggle(key, value)}
+                                >
+                                  {label}
+                                </Button>
+                              );
+                            })}
+                          </FilterSection>
+                        );
+                      })}
+                  </CardContent>
+                </Card>
+              </div>
             </aside>
 
-            <div className="order-1 flex-1 space-y-8 lg:order-2">
+            <div className="order-2 flex-1 space-y-8">
               {error ? (
                 <Alert variant="destructive">
                   <AlertTitle>Something went wrong</AlertTitle>
