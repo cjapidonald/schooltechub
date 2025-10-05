@@ -32,11 +32,14 @@ import {
   isHttpUrl,
 } from "@/lib/avatar";
 import { createFileIdentifier } from "@/lib/files";
+import { cn } from "@/lib/utils";
 import type { Salutation } from "@/types/supabase-tables";
 
 type ThemePreference = "system" | "light" | "dark";
 type SettingsPanelProps = {
   user: User;
+  className?: string;
+  variant?: "default" | "glass";
 };
 
 const isThemePreference = (value: unknown): value is ThemePreference =>
@@ -67,7 +70,7 @@ const getMetadataSalutation = (metadata: Record<string, unknown> | undefined): S
   return isSalutationValue(rawValue) ? (rawValue as Salutation) : "none";
 };
 
-export const SettingsPanel = ({ user }: SettingsPanelProps) => {
+export const SettingsPanel = ({ user, className, variant = "default" }: SettingsPanelProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -133,6 +136,35 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const [isSavingPreferences, setIsSavingPreferences] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const isGlass = variant === "glass";
+  const cardClassName = isGlass
+    ? "border border-white/15 bg-white/10 text-white shadow-[0_20px_70px_-30px_rgba(15,23,42,0.85)] backdrop-blur-2xl"
+    : undefined;
+  const inputClassName = isGlass
+    ? "border-white/20 bg-white/10 text-white placeholder:text-white/60 focus-visible:ring-white/50"
+    : undefined;
+  const helperTextClassName = isGlass ? "text-white/60" : "text-muted-foreground";
+  const subtleTextClassName = isGlass ? "text-white/70" : "text-muted-foreground";
+  const labelClassName = isGlass ? "text-white" : undefined;
+  const containerClassName = cn("space-y-6", className, isGlass && "text-white");
+  const primaryButtonClassName = isGlass
+    ? "border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+    : undefined;
+  const outlineButtonClassName = isGlass
+    ? "border-white/30 bg-white/10 text-white hover:bg-white/20"
+    : undefined;
+  const ghostButtonClassName = isGlass ? "text-white hover:bg-white/10" : undefined;
+  const avatarContainerClassName = isGlass
+    ? "border-white/20 bg-white/10"
+    : "border-border/70 bg-muted/40";
+  const selectTriggerClassName = isGlass
+    ? "border-white/20 bg-white/10 text-white focus:ring-white/50"
+    : undefined;
+  const selectContentClassName = isGlass
+    ? "border border-white/20 bg-slate-900/90 text-white backdrop-blur-xl"
+    : undefined;
+  const selectItemClassName = isGlass ? "focus:bg-white/20 focus:text-white" : undefined;
 
   useEffect(() => {
     const metadata = user.user_metadata as Record<string, unknown> | undefined;
@@ -612,11 +644,13 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className={containerClassName}>
+      <Card className={cn(cardClassName)}>
         <CardHeader>
           <CardTitle>{t.account.image.title}</CardTitle>
-          <CardDescription>{t.account.image.description}</CardDescription>
+          <CardDescription className={cn(subtleTextClassName)}>
+            {t.account.image.description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -626,13 +660,9 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                 <AvatarFallback>{avatarFallback}</AvatarFallback>
               </Avatar>
               <div className="space-y-1">
-                {user.email ? (
-                  <p className="text-sm font-medium">{user.email}</p>
-                ) : null}
+                {user.email ? <p className="text-sm font-medium">{user.email}</p> : null}
                 {currentAvatarUrl ? (
-                  <p className="text-xs text-muted-foreground">
-                    {t.account.image.description}
-                  </p>
+                  <p className={cn("text-xs", subtleTextClassName)}>{t.account.image.description}</p>
                 ) : null}
               </div>
             </div>
@@ -649,6 +679,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploadingAvatar}
+                className={cn(outlineButtonClassName)}
               >
                 {t.account.image.changeButton}
               </Button>
@@ -656,6 +687,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                 type="button"
                 onClick={handleAvatarUpload}
                 disabled={!avatarFile || isUploadingAvatar}
+                className={cn(primaryButtonClassName)}
               >
                 {isUploadingAvatar ? (
                   <>
@@ -671,27 +703,34 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={cn(cardClassName)}>
         <form onSubmit={handlePersonalInfoSubmit} className="space-y-0">
           <CardHeader>
             <CardTitle>{t.account.personal.title}</CardTitle>
-            <CardDescription>{t.account.personal.description}</CardDescription>
+            <CardDescription className={cn(subtleTextClassName)}>
+              {t.account.personal.description}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor="salutation">{t.account.personal.salutationLabel}</Label>
-                <Select
-                  value={salutation}
-                  onValueChange={value => setSalutation(value as SalutationOption)}
-                >
-                  <SelectTrigger id="salutation" disabled={isSavingPersonalInfo}>
+                <Label htmlFor="salutation" className={cn(labelClassName)}>
+                  {t.account.personal.salutationLabel}
+                </Label>
+                <Select value={salutation} onValueChange={value => setSalutation(value as SalutationOption)}>
+                  <SelectTrigger
+                    id="salutation"
+                    disabled={isSavingPersonalInfo}
+                    className={cn(selectTriggerClassName)}
+                  >
                     <SelectValue placeholder={t.account.personal.salutationPlaceholder} />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t.account.personal.salutationNone}</SelectItem>
+                  <SelectContent className={cn(selectContentClassName)}>
+                    <SelectItem value="none" className={cn(selectItemClassName)}>
+                      {t.account.personal.salutationNone}
+                    </SelectItem>
                     {SALUTATION_OPTIONS.map(option => (
-                      <SelectItem key={option} value={option}>
+                      <SelectItem key={option} value={option} className={cn(selectItemClassName)}>
                         {t.account.personal.salutationOptions[option]}
                       </SelectItem>
                     ))}
@@ -699,55 +738,69 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">{t.account.personal.emailLabel}</Label>
-                <Input id="email" value={user.email ?? ""} disabled />
+                <Label htmlFor="email" className={cn(labelClassName)}>
+                  {t.account.personal.emailLabel}
+                </Label>
+                <Input id="email" value={user.email ?? ""} disabled className={cn(inputClassName)} />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor="first-name">{t.account.personal.firstNameLabel}</Label>
+                <Label htmlFor="first-name" className={cn(labelClassName)}>
+                  {t.account.personal.firstNameLabel}
+                </Label>
                 <Input
                   id="first-name"
                   value={firstName}
                   onChange={event => setFirstName(event.target.value)}
                   placeholder={t.account.personal.firstNamePlaceholder}
                   disabled={isSavingPersonalInfo}
+                  className={cn(inputClassName)}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="last-name">{t.account.personal.lastNameLabel}</Label>
+                <Label htmlFor="last-name" className={cn(labelClassName)}>
+                  {t.account.personal.lastNameLabel}
+                </Label>
                 <Input
                   id="last-name"
                   value={lastName}
                   onChange={event => setLastName(event.target.value)}
                   placeholder={t.account.personal.lastNamePlaceholder}
                   disabled={isSavingPersonalInfo}
+                  className={cn(inputClassName)}
                 />
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="subject">{t.account.personal.subjectLabel}</Label>
+              <Label htmlFor="subject" className={cn(labelClassName)}>
+                {t.account.personal.subjectLabel}
+              </Label>
               <Input
                 id="subject"
                 value={subject}
                 onChange={event => setSubject(event.target.value)}
                 placeholder={t.account.personal.subjectPlaceholder}
                 disabled={isSavingPersonalInfo}
+                className={cn(inputClassName)}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="phone">{t.account.personal.phoneLabel}</Label>
+              <Label htmlFor="phone" className={cn(labelClassName)}>
+                {t.account.personal.phoneLabel}
+              </Label>
               <Input
                 id="phone"
                 value={phoneNumber}
                 onChange={event => setPhoneNumber(event.target.value)}
                 placeholder={t.account.personal.phonePlaceholder}
                 disabled={isSavingPersonalInfo}
+                className={cn(inputClassName)}
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isSavingPersonalInfo}>
+            <Button type="submit" disabled={isSavingPersonalInfo} className={cn(primaryButtonClassName)}>
               {isSavingPersonalInfo ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -761,26 +814,36 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
         </form>
       </Card>
 
-      <Card>
+      <Card className={cn(cardClassName)}>
         <form onSubmit={handleSchoolInfoSubmit} className="space-y-0">
           <CardHeader>
             <CardTitle>{t.account.school.title}</CardTitle>
-            <CardDescription>{t.account.school.description}</CardDescription>
+            <CardDescription className={cn(subtleTextClassName)}>
+              {t.account.school.description}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="school-name">{t.account.school.nameLabel}</Label>
+              <Label htmlFor="school-name" className={cn(labelClassName)}>
+                {t.account.school.nameLabel}
+              </Label>
               <Input
                 id="school-name"
                 value={schoolName}
                 onChange={event => setSchoolName(event.target.value)}
                 placeholder={t.account.school.namePlaceholder}
+                className={cn(inputClassName)}
               />
             </div>
             <div className="space-y-2">
-              <Label>{t.account.school.logoLabel}</Label>
+              <Label className={cn(labelClassName)}>{t.account.school.logoLabel}</Label>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border border-border/70 bg-muted/40">
+                <div
+                  className={cn(
+                    "flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border",
+                    avatarContainerClassName,
+                  )}
+                >
                   {displayedSchoolLogo ? (
                     <img
                       src={displayedSchoolLogo}
@@ -788,7 +851,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                       className="h-full w-full object-contain"
                     />
                   ) : (
-                    <span className="px-2 text-center text-xs text-muted-foreground">
+                    <span className={cn("px-2 text-center text-xs", helperTextClassName)}>
                       {t.account.school.logoPlaceholder}
                     </span>
                   )}
@@ -806,6 +869,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                     variant="outline"
                     onClick={() => schoolLogoInputRef.current?.click()}
                     disabled={isSavingSchoolInfo}
+                    className={cn(outlineButtonClassName)}
                   >
                     {t.account.school.uploadButton}
                   </Button>
@@ -815,17 +879,18 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                       variant="ghost"
                       onClick={handleSchoolLogoToggle}
                       disabled={isSavingSchoolInfo}
+                      className={cn(ghostButtonClassName)}
                     >
                       {isLogoRemoved ? t.account.school.restoreButton : t.account.school.removeButton}
                     </Button>
                   ) : null}
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">{t.account.school.logoHelp}</p>
+              <p className={cn("text-xs", helperTextClassName)}>{t.account.school.logoHelp}</p>
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isSavingSchoolInfo}>
+            <Button type="submit" disabled={isSavingSchoolInfo} className={cn(primaryButtonClassName)}>
               {isSavingSchoolInfo ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -839,15 +904,19 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
         </form>
       </Card>
 
-      <Card>
+      <Card className={cn(cardClassName)}>
         <form onSubmit={handlePasswordSubmit} className="space-y-0">
           <CardHeader>
             <CardTitle>{t.account.security.title}</CardTitle>
-            <CardDescription>{t.account.security.description}</CardDescription>
+            <CardDescription className={cn(subtleTextClassName)}>
+              {t.account.security.description}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="new-password">{t.account.security.newPasswordLabel}</Label>
+              <Label htmlFor="new-password" className={cn(labelClassName)}>
+                {t.account.security.newPasswordLabel}
+              </Label>
               <Input
                 id="new-password"
                 type="password"
@@ -857,10 +926,13 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                   setPasswordForm(previous => ({ ...previous, newPassword: event.target.value }))
                 }
                 placeholder="••••••••"
+                className={cn(inputClassName)}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="confirm-password">{t.account.security.confirmPasswordLabel}</Label>
+              <Label htmlFor="confirm-password" className={cn(labelClassName)}>
+                {t.account.security.confirmPasswordLabel}
+              </Label>
               <Input
                 id="confirm-password"
                 type="password"
@@ -870,11 +942,12 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
                   setPasswordForm(previous => ({ ...previous, confirmPassword: event.target.value }))
                 }
                 placeholder="••••••••"
+                className={cn(inputClassName)}
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isUpdatingPassword}>
+            <Button type="submit" disabled={isUpdatingPassword} className={cn(primaryButtonClassName)}>
               {isUpdatingPassword ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -888,44 +961,62 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
         </form>
       </Card>
 
-      <Card>
+      <Card className={cn(cardClassName)}>
         <form onSubmit={handlePreferencesSubmit} className="space-y-0">
           <CardHeader>
             <CardTitle>{t.account.settings.title}</CardTitle>
-            <CardDescription>{t.account.settings.description}</CardDescription>
+            <CardDescription className={cn(subtleTextClassName)}>
+              {t.account.settings.description}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="timezone">{t.account.settings.timezone}</Label>
+              <Label htmlFor="timezone" className={cn(labelClassName)}>
+                {t.account.settings.timezone}
+              </Label>
               <Input
                 id="timezone"
                 value={timezone}
                 onChange={event => setTimezone(event.target.value)}
                 placeholder={t.account.settings.timezonePlaceholder}
+                className={cn(inputClassName)}
               />
             </div>
             <div className="grid gap-2">
-              <Label>{t.account.settings.language}</Label>
-              <div className="rounded-md border border-input bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+              <Label className={cn(labelClassName)}>{t.account.settings.language}</Label>
+              <div
+                className={cn(
+                  "rounded-md border px-3 py-2 text-sm",
+                  isGlass
+                    ? "border-white/20 bg-white/5 text-white/80"
+                    : "border-input bg-muted/50 text-muted-foreground",
+                )}
+              >
                 {t.account.settings.languageValue}
               </div>
             </div>
             <div className="grid gap-2">
-              <Label>{t.account.settings.theme}</Label>
+              <Label className={cn(labelClassName)}>{t.account.settings.theme}</Label>
               <Select value={themePreference} onValueChange={value => setThemePreference(value as ThemePreference)}>
-                <SelectTrigger>
+                <SelectTrigger className={cn(selectTriggerClassName)}>
                   <SelectValue placeholder={t.account.settings.themePlaceholder} />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="system">{t.account.settings.themeOptions.system}</SelectItem>
-                  <SelectItem value="light">{t.account.settings.themeOptions.light}</SelectItem>
-                  <SelectItem value="dark">{t.account.settings.themeOptions.dark}</SelectItem>
+                <SelectContent className={cn(selectContentClassName)}>
+                  <SelectItem value="system" className={cn(selectItemClassName)}>
+                    {t.account.settings.themeOptions.system}
+                  </SelectItem>
+                  <SelectItem value="light" className={cn(selectItemClassName)}>
+                    {t.account.settings.themeOptions.light}
+                  </SelectItem>
+                  <SelectItem value="dark" className={cn(selectItemClassName)}>
+                    {t.account.settings.themeOptions.dark}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isSavingPreferences}>
+            <Button type="submit" disabled={isSavingPreferences} className={cn(primaryButtonClassName)}>
               {isSavingPreferences ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
