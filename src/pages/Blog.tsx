@@ -775,7 +775,7 @@ const Blog = () => {
               ) : null}
             </div>
 
-            <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl md:self-start">
+            <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl md:-mt-6 md:self-start lg:-mt-8">
               <CardHeader className="space-y-2">
                 <h2 className="text-2xl font-semibold">Search the library</h2>
                 <p className="text-sm text-white/70">Find strategies, reflections, and toolkits tailored to your classroom.</p>
