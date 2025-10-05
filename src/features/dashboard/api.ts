@@ -3,6 +3,7 @@ import type {
   Class,
   Curriculum,
   CurriculumItem,
+  CurriculumItemStatus,
   LessonPlan,
   Profile,
   Resource,
@@ -12,6 +13,7 @@ import {
   DASHBOARD_EXAMPLE_CURRICULUM,
   DASHBOARD_EXAMPLE_CURRICULUM_ITEMS,
   type DashboardCurriculumItem,
+  type DashboardCurriculumSummary,
 } from "./examples";
 
 export type LessonPlanWithRelations = LessonPlan & {
@@ -117,6 +119,78 @@ export async function fetchCurricula(
       ? curriculum.curriculum_items[0]?.count ?? 0
       : 0,
   }));
+}
+
+const mapCurriculumSummary = (
+  curriculum:
+    | (Curriculum & {
+        class: Class | null;
+        items_count: number;
+        created_at?: string;
+      })
+    | null,
+): DashboardCurriculumSummary | null => {
+  if (!curriculum) {
+    return null;
+  }
+
+  return {
+    id: curriculum.id,
+    title: curriculum.title,
+    subject: curriculum.subject,
+    academic_year: curriculum.academic_year ?? undefined,
+    class_id: curriculum.class_id,
+    created_at: curriculum.created_at ?? undefined,
+    class: curriculum.class,
+    items_count: curriculum.items_count,
+  } satisfies DashboardCurriculumSummary;
+};
+
+export async function fetchCurriculumDetail(
+  curriculumId: string,
+): Promise<DashboardCurriculumSummary | null> {
+  const { data, error } = await supabase
+    .from("curricula")
+    .select(
+      "id,title,subject,academic_year,class_id,created_at,classes(id,title,stage,subject,start_date,end_date),curriculum_items(count)",
+    )
+    .eq("id", curriculumId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to load curriculum detail", error);
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  const summary: Curriculum & {
+    class: Class | null;
+    items_count: number;
+    created_at?: string;
+  } = {
+    id: data.id,
+    title: data.title,
+    subject: data.subject,
+    academic_year: data.academic_year ?? undefined,
+    class_id: data.class_id,
+    class: data.classes
+      ? {
+          id: data.classes.id,
+          title: data.classes.title,
+          stage: data.classes.stage ?? undefined,
+          subject: data.classes.subject ?? undefined,
+          start_date: data.classes.start_date ?? undefined,
+          end_date: data.classes.end_date ?? undefined,
+        }
+      : null,
+    items_count: Array.isArray(data.curriculum_items) ? data.curriculum_items[0]?.count ?? 0 : 0,
+    created_at: data.created_at ?? undefined,
+  };
+
+  return mapCurriculumSummary(summary);
 }
 
 export async function createCurriculum(input: {
@@ -253,6 +327,89 @@ export async function fetchCurriculumItems(curriculumId: string): Promise<Dashbo
       presentation_links: [],
     } satisfies DashboardCurriculumItem;
   });
+}
+
+export async function appendCurriculumLessons(input: {
+  curriculumId: string;
+  startIndex: number;
+  lessonTitles: string[];
+  defaultStage?: string | null;
+  defaultDate?: string | null;
+}): Promise<DashboardCurriculumItem[]> {
+  if (input.lessonTitles.length === 0) {
+    return [];
+  }
+
+  const baseIndex = Number.isFinite(input.startIndex) ? input.startIndex : 0;
+  const payload = input.lessonTitles.map((title, index) => ({
+    curriculum_id: input.curriculumId,
+    position: baseIndex + index + 1,
+    seq_index: baseIndex + index + 1,
+    lesson_title: title,
+    stage: input.defaultStage ?? null,
+    scheduled_on: input.defaultDate ?? null,
+    status: "planned" as CurriculumItemStatus,
+  }));
+
+  const { data, error } = await supabase
+    .from("curriculum_items")
+    .insert(payload)
+    .select("id,curriculum_id,position,seq_index,lesson_title,stage,scheduled_on,status");
+
+  if (error) {
+    console.error("Failed to append curriculum lessons", error);
+    throw error;
+  }
+
+  return (data ?? []).map(item => ({
+    ...item,
+    lesson_plan_id: null,
+    resource_shortcut_ids: [],
+    presentation_links: [],
+  }));
+}
+
+export async function updateCurriculumItemDetails(input: {
+  itemId: string;
+  lessonTitle: string;
+  stage?: string | null;
+  scheduledOn?: string | null;
+  status: CurriculumItemStatus;
+}): Promise<DashboardCurriculumItem> {
+  const payload = {
+    lesson_title: input.lessonTitle,
+    stage: input.stage ?? null,
+    scheduled_on: input.scheduledOn ?? null,
+    status: input.status,
+  };
+
+  const { data, error } = await supabase
+    .from("curriculum_items")
+    .update(payload)
+    .eq("id", input.itemId)
+    .select("id,curriculum_id,position,seq_index,lesson_title,stage,scheduled_on,status")
+    .single();
+
+  if (error) {
+    console.error("Failed to update curriculum item", error);
+    throw error;
+  }
+
+  return {
+    ...data,
+    lesson_plan_id: null,
+    resource_shortcut_ids: [],
+    presentation_links: [],
+  } satisfies DashboardCurriculumItem;
+}
+
+export async function deleteCurriculumItemById(itemId: string): Promise<void> {
+  const { error } = await supabase.from("curriculum_items").delete().eq("id", itemId);
+
+  if (error) {
+    console.error("Failed to delete curriculum item", error);
+    throw error;
+  }
 }
 
 export async function reorderCurriculumItems(input: { curriculumId: string; itemIds: string[] }): Promise<void> {
