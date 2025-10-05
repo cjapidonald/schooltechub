@@ -103,13 +103,13 @@ const schoolSolutions: Feature[] = [
 const featureShowcase = [...workflowTools, ...schoolSolutions];
 
 const compactCardBaseClass =
-  "group relative overflow-hidden rounded-[1.5rem] border border-white/10 p-5 transition-transform duration-300 hover:-translate-y-1 hover:border-primary/60";
+  "group relative overflow-hidden rounded-[1.5rem] border border-white/15 bg-[hsla(222,47%,14%,0.68)] p-5 shadow-[0_22px_48px_-28px_rgba(10,18,55,0.65)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_30px_72px_-30px_rgba(35,78,182,0.6)] backdrop-blur-xl";
 
 const compactCardGradients = [
-  "bg-gradient-to-br from-primary/20 via-background/75 to-background/95",
-  "bg-gradient-to-br from-secondary/25 via-background/75 to-background/95",
-  "bg-gradient-to-br from-accent/25 via-background/75 to-background/95",
-  "bg-gradient-to-br from-primary/25 via-background/80 to-background/95",
+  "bg-[linear-gradient(145deg,hsla(var(--glow-primary)/0.22),hsla(222,47%,12%,0.55))]",
+  "bg-[linear-gradient(145deg,hsla(var(--glow-secondary)/0.22),hsla(222,47%,12%,0.55))]",
+  "bg-[linear-gradient(145deg,hsla(var(--glow-accent)/0.22),hsla(222,47%,12%,0.55))]",
+  "bg-[linear-gradient(145deg,hsla(var(--glow-primary)/0.18),hsla(222,47%,12%,0.55))]",
 ];
 
 type Stat = {
@@ -213,10 +213,10 @@ const classroomTechnologyBackgrounds = {
 };
 
 const iconColorClasses = [
-  "bg-green-500 text-white",
-  "bg-white text-slate-900",
-  "bg-blue-500 text-white",
-  "bg-orange-500 text-white",
+  "border border-white/30 bg-[hsla(var(--glow-accent)/0.28)] text-white shadow-[0_0_18px_hsla(var(--glow-accent)/0.4)] backdrop-blur-sm",
+  "border border-white/30 bg-[hsla(var(--glow-secondary)/0.28)] text-white shadow-[0_0_18px_hsla(var(--glow-secondary)/0.38)] backdrop-blur-sm",
+  "border border-white/30 bg-[hsla(var(--glow-primary)/0.28)] text-white shadow-[0_0_18px_hsla(var(--glow-primary)/0.38)] backdrop-blur-sm",
+  "border border-white/30 bg-[hsla(var(--glow-primary)/0.24)] text-white shadow-[0_0_18px_hsla(var(--glow-primary)/0.32)] backdrop-blur-sm",
 ];
 
 type DecorativeBackgroundImage = {
@@ -481,7 +481,11 @@ const Index = () => {
               return (
                 <Reveal key={title} delay={index * 120}>
                   <Card className={cn("h-full", compactCardBaseClass, gradientClass)}>
-                    <div className="flex flex-col gap-4 text-left">
+                    <span
+                      className={cn(convexOverlayClass, "convex-panel-sheen--compact")}
+                      aria-hidden
+                    />
+                    <div className="relative z-10 flex flex-col gap-4 text-left">
                       <div
                         className={cn(
                           "flex h-10 w-10 items-center justify-center rounded-xl",
@@ -499,7 +503,7 @@ const Index = () => {
                         >
                           {title}
                         </h3>
-                        <p className="mt-2 text-sm text-white/75">{description}</p>
+                        <p className="mt-2 text-sm text-white/80">{description}</p>
                       </div>
                     </div>
                   </Card>
