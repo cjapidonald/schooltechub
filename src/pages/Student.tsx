@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { SEO } from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -199,6 +201,8 @@ const timeline = [
 ];
 
 export default function StudentPage() {
+  const [hasEntered, setHasEntered] = useState(false);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
       <SEO
@@ -286,9 +290,24 @@ export default function StudentPage() {
                     />
                   </div>
                 </div>
-                <Button className="h-12 w-full rounded-2xl bg-white/90 text-base font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white" size="lg">
-                  <LogIn className="mr-2 h-5 w-5" />
-                  Enter learning space
+                <Button
+                  type="button"
+                  className="h-12 w-full rounded-2xl bg-white/90 text-base font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white disabled:cursor-default disabled:bg-white/70"
+                  size="lg"
+                  onClick={() => setHasEntered(true)}
+                  disabled={hasEntered}
+                >
+                  {hasEntered ? (
+                    <>
+                      <CheckCircle2 className="mr-2 h-5 w-5" />
+                      Journey unlocked
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="mr-2 h-5 w-5" />
+                      Enter my journey
+                    </>
+                  )}
                 </Button>
                 <div className="space-y-3 rounded-2xl border border-white/15 bg-white/5 p-4">
                   <p className="text-xs uppercase tracking-wide text-white/50">Profile snapshot</p>
@@ -309,7 +328,45 @@ export default function StudentPage() {
           </div>
         </section>
 
-        {skillInsights.length > 0 && (
+        {!hasEntered && (
+          <section className="grid gap-8">
+            <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+              <CardHeader className="space-y-2 text-center md:text-left">
+                <CardTitle className="text-2xl font-semibold">Preview your journey</CardTitle>
+                <CardDescription className="text-white/65">
+                  Enter your journey to unlock live progress, assignments, and focus tips tailored just for you.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="grid gap-4 text-sm text-white/70 md:grid-cols-3">
+                  <li className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <TrendingUp className="h-5 w-5 shrink-0 text-white/80" />
+                    <div>
+                      <p className="font-medium text-white">Guided skill growth</p>
+                      <p>Watch your mastery scores rise with every teacher check-in.</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <Notebook className="h-5 w-5 shrink-0 text-white/80" />
+                    <div>
+                      <p className="font-medium text-white">Homework hub</p>
+                      <p>Track progress on assignments without leaving your dashboard.</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <Trophy className="h-5 w-5 shrink-0 text-white/80" />
+                    <div>
+                      <p className="font-medium text-white">Focus highlights</p>
+                      <p>Get micro-updates from teachers to plan your next win.</p>
+                    </div>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {hasEntered && skillInsights.length > 0 && (
           <section className="grid gap-8">
             <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
               <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
@@ -395,76 +452,133 @@ export default function StudentPage() {
           </section>
         )}
 
-        <section className="grid gap-8 lg:grid-cols-[1.9fr,1fr]">
-          <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
-            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-              <div>
-                <CardTitle className="text-2xl font-semibold">This week's homework</CardTitle>
-                <CardDescription className="text-white/60">
-                  Track teacher assignments, due dates, and your progress in real time.
-                </CardDescription>
-              </div>
-              <Badge className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/70">
-                <Notebook className="h-3.5 w-3.5" />
-                Live updates
-              </Badge>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {assignments.map((assignment) => (
-                <div
-                  key={assignment.id}
-                  className="group rounded-3xl border border-white/10 bg-white/[0.08] p-6 shadow-[0_15px_55px_-35px_rgba(15,23,42,1)] transition-all duration-300 hover:border-white/20 hover:bg-white/15"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-y-1">
-                      <h3 className="text-xl font-semibold text-white">{assignment.title}</h3>
-                      <p className="text-sm text-white/65">{assignment.description}</p>
-                    </div>
-                    <Badge className={`w-fit rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${assignment.accent}`}>
-                      {assignment.status}
-                    </Badge>
-                  </div>
-                  <div className="mt-5 grid gap-4 md:grid-cols-[1fr,auto] md:items-center">
-                    <div className="space-y-3">
-                      <Progress value={assignment.progress} className="h-2 rounded-full bg-white/10" />
-                      <p className="text-xs font-medium uppercase tracking-wide text-white/50">{assignment.progress}% complete</p>
-                    </div>
-                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/70">
-                      <Clock className="h-4 w-4" />
-                      {assignment.due}
-                    </div>
-                  </div>
+        {hasEntered && (
+          <section className="grid gap-8 lg:grid-cols-[1.9fr,1fr]">
+            <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+              <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <CardTitle className="text-2xl font-semibold">This week's homework</CardTitle>
+                  <CardDescription className="text-white/60">
+                    Track teacher assignments, due dates, and your progress in real time.
+                  </CardDescription>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-8">
-            <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
-              <CardHeader className="space-y-1">
-                <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
-                  <CalendarDays className="h-6 w-6" />
-                  Upcoming sessions
-                </CardTitle>
-                <CardDescription className="text-white/65">
-                  Arrive a few minutes early to get the most from each experience.
-                </CardDescription>
+                <Badge className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/70">
+                  <Notebook className="h-3.5 w-3.5" />
+                  Live updates
+                </Badge>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {upcomingSessions.map((session) => (
-                  <div key={session.id} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-lg font-medium text-white">{session.title}</p>
-                        <p className="text-sm text-white/60">{session.facilitator}</p>
+              <CardContent className="space-y-6">
+                {assignments.map((assignment) => (
+                  <div
+                    key={assignment.id}
+                    className="group rounded-3xl border border-white/10 bg-white/[0.08] p-6 shadow-[0_15px_55px_-35px_rgba(15,23,42,1)] transition-all duration-300 hover:border-white/20 hover:bg-white/15"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="space-y-1">
+                        <h3 className="text-xl font-semibold text-white">{assignment.title}</h3>
+                        <p className="text-sm text-white/65">{assignment.description}</p>
                       </div>
-                      <Badge className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/70">
-                        {session.location}
+                      <Badge className={`w-fit rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${assignment.accent}`}>
+                        {assignment.status}
                       </Badge>
                     </div>
-                    <div className="mt-3 flex items-center gap-2 text-sm text-white/65">
-                      <Clock className="h-4 w-4" />
-                      {session.time}
+                    <div className="mt-5 grid gap-4 md:grid-cols-[1fr,auto] md:items-center">
+                      <div className="space-y-3">
+                        <Progress value={assignment.progress} className="h-2 rounded-full bg-white/10" />
+                        <p className="text-xs font-medium uppercase tracking-wide text-white/50">{assignment.progress}% complete</p>
+                      </div>
+                      <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/70">
+                        <Clock className="h-4 w-4" />
+                        {assignment.due}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-8">
+              <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
+                <CardHeader className="space-y-1">
+                  <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
+                    <CalendarDays className="h-6 w-6" />
+                    Upcoming sessions
+                  </CardTitle>
+                  <CardDescription className="text-white/65">
+                    Arrive a few minutes early to get the most from each experience.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {upcomingSessions.map((session) => (
+                    <div key={session.id} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-lg font-medium text-white">{session.title}</p>
+                          <p className="text-sm text-white/60">{session.facilitator}</p>
+                        </div>
+                        <Badge className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/70">
+                          {session.location}
+                        </Badge>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2 text-sm text-white/65">
+                        <Clock className="h-4 w-4" />
+                        {session.time}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
+                <CardHeader className="space-y-1">
+                  <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
+                    <Trophy className="h-6 w-6" />
+                    Focus highlights
+                  </CardTitle>
+                  <CardDescription className="text-white/65">
+                    Micro-updates from your teacher to guide what comes next.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {focusAreas.map((focus) => (
+                    <div key={focus.id} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
+                      <p className="text-lg font-semibold text-white">{focus.title}</p>
+                      <p className="mt-2 text-sm text-white/70">{focus.description}</p>
+                      <p className={`mt-3 text-xs font-medium uppercase tracking-wide ${focus.tone}`}>{focus.change}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        )}
+
+        {hasEntered && (
+          <section className="grid gap-8 lg:grid-cols-[1.4fr,1fr]">
+            <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
+              <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <CardTitle className="text-2xl font-semibold">Activity timeline</CardTitle>
+                  <CardDescription className="text-white/60">
+                    Every update from your teachers and clubs appears here instantly.
+                  </CardDescription>
+                </div>
+                <Badge className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/70">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Synced
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {timeline.map((item, index) => (
+                  <div key={item.id} className="relative pl-6">
+                    {index !== timeline.length - 1 && (
+                      <span className="absolute left-2 top-6 h-[calc(100%-1.5rem)] w-px bg-gradient-to-b from-white/40 to-transparent" />
+                    )}
+                    <span className="absolute left-0 top-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-white/40 bg-white/20" />
+                    <div className="space-y-1">
+                      <p className="text-lg font-medium text-white">{item.title}</p>
+                      <p className="text-sm text-white/65">{item.description}</p>
+                      <p className="text-xs uppercase tracking-wide text-white/40">{item.time}</p>
                     </div>
                   </div>
                 ))}
@@ -472,82 +586,29 @@ export default function StudentPage() {
             </Card>
 
             <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
-              <CardHeader className="space-y-1">
-                <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
-                  <Trophy className="h-6 w-6" />
-                  Focus highlights
-                </CardTitle>
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold">Quick start tips</CardTitle>
                 <CardDescription className="text-white/65">
-                  Micro-updates from your teacher to guide what comes next.
+                  Borrowed from Apple-inspired design systems to keep your dashboard calm yet energetic.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {focusAreas.map((focus) => (
-                  <div key={focus.id} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                    <p className="text-lg font-semibold text-white">{focus.title}</p>
-                    <p className="mt-2 text-sm text-white/70">{focus.description}</p>
-                    <p className={`mt-3 text-xs font-medium uppercase tracking-wide ${focus.tone}`}>{focus.change}</p>
-                  </div>
-                ))}
+              <CardContent className="space-y-4 text-sm text-white/70">
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                  <p className="font-medium text-white">Sync devices</p>
+                  <p className="mt-1 text-white/65">Use the SchoolTech app on your iPad to capture photos directly into assignments.</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                  <p className="font-medium text-white">Stay notified</p>
+                  <p className="mt-1 text-white/65">Enable push notifications for gentle nudges before homework is due.</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
+                  <p className="font-medium text-white">Share wins</p>
+                  <p className="mt-1 text-white/65">Celebrate progress with classmates by posting highlights to your learning journal.</p>
+                </div>
               </CardContent>
             </Card>
-          </div>
-        </section>
-
-        <section className="grid gap-8 lg:grid-cols-[1.4fr,1fr]">
-          <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
-            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-              <div>
-                <CardTitle className="text-2xl font-semibold">Activity timeline</CardTitle>
-                <CardDescription className="text-white/60">
-                  Every update from your teachers and clubs appears here instantly.
-                </CardDescription>
-              </div>
-              <Badge className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-white/70">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                Synced
-              </Badge>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {timeline.map((item, index) => (
-                <div key={item.id} className="relative pl-6">
-                  {index !== timeline.length - 1 && (
-                    <span className="absolute left-2 top-6 h-[calc(100%-1.5rem)] w-px bg-gradient-to-b from-white/40 to-transparent" />
-                  )}
-                  <span className="absolute left-0 top-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-white/40 bg-white/20" />
-                  <div className="space-y-1">
-                    <p className="text-lg font-medium text-white">{item.title}</p>
-                    <p className="text-sm text-white/65">{item.description}</p>
-                    <p className="text-xs uppercase tracking-wide text-white/40">{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold">Quick start tips</CardTitle>
-              <CardDescription className="text-white/65">
-                Borrowed from Apple-inspired design systems to keep your dashboard calm yet energetic.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm text-white/70">
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                <p className="font-medium text-white">Sync devices</p>
-                <p className="mt-1 text-white/65">Use the SchoolTech app on your iPad to capture photos directly into assignments.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                <p className="font-medium text-white">Stay notified</p>
-                <p className="mt-1 text-white/65">Enable push notifications for gentle nudges before homework is due.</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                <p className="font-medium text-white">Share wins</p>
-                <p className="mt-1 text-white/65">Celebrate progress with classmates by posting highlights to your learning journal.</p>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+          </section>
+        )}
       </div>
     </div>
   );
