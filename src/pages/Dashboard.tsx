@@ -385,15 +385,6 @@ export default function DashboardPage() {
       case "post-blog":
         navigate("/blog/new");
         return;
-      case "new-lesson-plan":
-        setLessonBuilderContext(null);
-        return;
-      case "new-curriculum":
-        setCurriculumDialogOpen(true);
-        return;
-      case "new-class":
-        setClassDialogOpen(true);
-        return;
       default:
         return;
     }
@@ -593,7 +584,6 @@ export default function DashboardPage() {
         nameParts={derivedNameParts}
         displayName={normalizeName(displayName) ?? normalizeName(fullName)}
         avatarUrl={avatarUrl}
-        hasCurriculumContext={hasCurriculumContext}
         onQuickAction={handleQuickAction}
       />
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">

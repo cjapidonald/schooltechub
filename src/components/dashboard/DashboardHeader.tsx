@@ -1,19 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export type DashboardQuickAction =
   | "ask-question"
-  | "post-blog"
-  | "new-lesson-plan"
-  | "new-curriculum"
-  | "new-class";
+  | "post-blog";
 
 export interface DashboardHeaderNameParts {
   honorific?: string | null;
@@ -25,7 +16,6 @@ interface DashboardHeaderProps {
   nameParts: DashboardHeaderNameParts;
   displayName?: string | null;
   avatarUrl?: string | null;
-  hasCurriculumContext: boolean;
   onQuickAction: (action: DashboardQuickAction) => void;
 }
 
@@ -33,7 +23,6 @@ export function DashboardHeader({
   nameParts,
   displayName,
   avatarUrl,
-  hasCurriculumContext,
   onQuickAction,
 }: DashboardHeaderProps) {
   const { t } = useLanguage();
@@ -72,60 +61,24 @@ export function DashboardHeader({
             </p>
           </div>
         </div>
-        <TooltipProvider>
-          <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-5">
-            <Button
-              onClick={() => onQuickAction("ask-question")}
-              variant="outline"
-              className="w-full justify-center"
-              aria-label={t.dashboard.quickActions.askQuestion}
-            >
-              {t.dashboard.quickActions.askQuestion}
-            </Button>
-            <Button
-              onClick={() => onQuickAction("post-blog")}
-              variant="outline"
-              className="w-full justify-center"
-              aria-label={t.dashboard.quickActions.postBlog}
-            >
-              {t.dashboard.quickActions.postBlog}
-            </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="w-full">
-                  <Button
-                    onClick={() => onQuickAction("new-lesson-plan")}
-                    className="w-full justify-center"
-                    aria-label={t.dashboard.quickActions.newLessonPlan}
-                    disabled={!hasCurriculumContext}
-                  >
-                    {t.dashboard.quickActions.newLessonPlan}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {!hasCurriculumContext ? (
-                <TooltipContent side="bottom">
-                  {t.dashboard.quickActions.newLessonPlanTooltip}
-                </TooltipContent>
-              ) : null}
-            </Tooltip>
-            <Button
-              onClick={() => onQuickAction("new-curriculum")}
-              className="w-full justify-center"
-              aria-label={t.dashboard.quickActions.newCurriculum}
-            >
-              {t.dashboard.quickActions.newCurriculum}
-            </Button>
-            <Button
-              onClick={() => onQuickAction("new-class")}
-              className="w-full justify-center"
-              variant="secondary"
-              aria-label={t.dashboard.quickActions.newClass}
-            >
-              {t.dashboard.quickActions.newClass}
-            </Button>
-          </div>
-        </TooltipProvider>
+        <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-2">
+          <Button
+            onClick={() => onQuickAction("ask-question")}
+            variant="outline"
+            className="w-full justify-center"
+            aria-label={t.dashboard.quickActions.askQuestion}
+          >
+            {t.dashboard.quickActions.askQuestion}
+          </Button>
+          <Button
+            onClick={() => onQuickAction("post-blog")}
+            variant="outline"
+            className="w-full justify-center"
+            aria-label={t.dashboard.quickActions.postBlog}
+          >
+            {t.dashboard.quickActions.postBlog}
+          </Button>
+        </div>
       </div>
     </header>
   );
