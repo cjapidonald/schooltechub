@@ -156,12 +156,6 @@ const neonIconSecondaryClass =
 const Index = () => {
   const { language } = useLanguage();
 
-  const highlightPills = [
-    "Organise lessons, calendars, and reflections in one place",
-    "Share best practice and professional learning with your team",
-    "Harness AI and data to personalise every student journey",
-  ];
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <SEO
@@ -197,30 +191,6 @@ const Index = () => {
               <p className="mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
                 SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
               </p>
-              <div className="mt-10 flex flex-col items-center justify-start gap-4 sm:flex-row">
-                <Link to={getLocalizedPath("/services", language)}>
-                  <Button size="lg" className="neon-pulse">
-                    Explore platform features
-                  </Button>
-                </Link>
-                <Link to={getLocalizedPath("/resources", language)}>
-                  <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                    <BookOpen className="mr-2 h-5 w-5" />
-                    Browse teaching resources
-                  </Button>
-                </Link>
-              </div>
-              <div className="mt-12 flex flex-wrap items-center gap-4 text-sm text-white/75">
-                {highlightPills.map((highlight) => (
-                  <span
-                    key={highlight}
-                    className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 shadow-[0_0_25px_hsl(var(--glow-primary)/0.15)] backdrop-blur"
-                  >
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    {highlight}
-                  </span>
-                ))}
-              </div>
             </div>
             <div className="relative hidden md:flex">
               <div className="pointer-events-none absolute -inset-12 rounded-full bg-primary/10 blur-3xl" />
