@@ -318,7 +318,7 @@ const Index = () => {
                   <div className="relative z-10 flex flex-col items-center gap-10 text-center">
                     <div className="flex flex-col items-center text-center">
                       <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
-                      <h2 className="mt-5 text-4xl font-semibold text-white/60 md:text-5xl">
+                      <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
                         Power every lesson with organised workflows and luminous insights
                       </h2>
                       <p className="mt-6 max-w-xl text-base text-white/60 md:text-lg">
