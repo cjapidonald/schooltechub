@@ -112,7 +112,7 @@ const Sitemap = () => {
         description={t.sitemap.description}
         keywords="sitemap, navigation, school tech hub pages"
       />
-      <main className="flex-1">
+      <div className="flex-1">
         <div className="container py-12">
           <h1 className="text-4xl font-bold mb-2">{t.sitemap.title}</h1>
           <p className="text-muted-foreground mb-8">
@@ -196,7 +196,7 @@ const Sitemap = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
 
     </div>
   );

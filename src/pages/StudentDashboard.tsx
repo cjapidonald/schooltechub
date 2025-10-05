@@ -119,12 +119,12 @@ export default function StudentDashboardPage() {
 
   if (!user) {
     return (
-      <main className="container space-y-8 py-10">
+      <div className="container space-y-8 py-10">
         <SEO title="Student Dashboard" description="Student progress" />
         <div className="rounded-xl border bg-muted/10 p-10 text-center text-muted-foreground">
           {t.dashboard.common.signInPrompt}
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -176,7 +176,7 @@ export default function StudentDashboardPage() {
   };
 
   return (
-    <main className="container space-y-8 py-10">
+    <div className="container space-y-8 py-10">
       <SEO title={`${student.fullName} • ${t.studentDashboard.title}`} description="Student progress overview" />
       <Button
         variant="ghost"
@@ -291,6 +291,6 @@ export default function StudentDashboardPage() {
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

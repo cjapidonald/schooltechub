@@ -314,39 +314,39 @@ export default function LessonBuilderWorkspace() {
 
   if (!user) {
     return (
-      <main className="container py-10">
+      <div className="container py-10">
         <SEO title="Lesson Builder" description="Lesson Builder" />
         <div className="rounded-lg border bg-muted/20 p-10 text-center text-muted-foreground">
           {t.dashboard.common.signInPrompt}
         </div>
-      </main>
+      </div>
     );
   }
 
   if (planQuery.isError) {
     return (
-      <main className="container py-10">
+      <div className="container py-10">
         <SEO title="Lesson Builder" description="Lesson Builder" />
         <div className="rounded-lg border bg-destructive/10 p-10 text-center text-destructive">
           {t.lessonBuilder.editor.loadError}
         </div>
-      </main>
+      </div>
     );
   }
 
   if (!planQuery.data) {
     return (
-      <main className="container py-10">
+      <div className="container py-10">
         <SEO title="Lesson Builder" description="Lesson Builder" />
         <div className="rounded-lg border bg-muted/20 p-10 text-center text-muted-foreground">
           {t.lessonBuilder.editor.loading}
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="container h-[calc(100vh-8rem)] py-6">
+    <div className="container h-[calc(100vh-8rem)] py-6">
       <SEO title={t.lessonBuilder.editor.pageTitle.replace("{title}", planQuery.data.title)} description={t.lessonBuilder.editor.pageDescription} />
       <LessonBuilder
         metadata={metadata}
@@ -367,6 +367,6 @@ export default function LessonBuilderWorkspace() {
         autosaveState={autosaveState}
         lastSavedAt={lastSavedAt}
       />
-    </main>
+    </div>
   );
 }

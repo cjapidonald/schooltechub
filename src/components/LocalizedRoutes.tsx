@@ -35,7 +35,9 @@ import StudentDashboardPage from '@/pages/StudentDashboard';
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>
     <Navigation />
-    {children}
+    <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
+      {children}
+    </main>
     <Footer />
   </>
 );

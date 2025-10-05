@@ -82,6 +82,12 @@ const Navigation = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
       <div className="container flex h-16 items-center gap-4">
         <Link to={getLocalizedNavPath("/")} className="flex items-center gap-2 flex-shrink-0">
           <div className="flex items-center gap-2">

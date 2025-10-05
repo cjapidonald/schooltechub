@@ -556,7 +556,7 @@ const ResourcesPage = () => {
         canonicalUrl={`https://schooltechhub.com${getLocalizedPath("/resources", language)}`}
         lang={language}
       />
-      <main className="container py-12">
+      <div className="container py-12">
         <div className="flex flex-col gap-12 lg:grid lg:grid-cols-[280px_1fr]">
           <aside className="flex flex-col gap-6">
             <div className="space-y-3">
@@ -803,7 +803,7 @@ const ResourcesPage = () => {
             </div>
           </section>
         </div>
-      </main>
+      </div>
 
       <UploadResourceDialog
         open={uploadDialogOpen}

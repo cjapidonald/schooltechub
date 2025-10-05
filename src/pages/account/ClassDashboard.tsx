@@ -78,7 +78,7 @@ export function ClassDashboard() {
         description={t.account.classes.dashboard.seoDescription}
         canonicalUrl="https://schooltechhub.com/account/classes"
       />
-      <main className="container mx-auto space-y-8 px-4">
+      <div className="container mx-auto space-y-8 px-4">
         <div className="flex items-center justify-between gap-4">
           <Button variant="ghost" asChild>
             <Link to={getLocalizedPath("/account", language)} className="inline-flex items-center gap-2">
@@ -220,7 +220,7 @@ export function ClassDashboard() {
             </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
