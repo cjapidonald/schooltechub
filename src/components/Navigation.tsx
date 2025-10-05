@@ -1,10 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Menu,
-  Search,
   User,
   LogOut,
   BookOpen,
@@ -26,7 +24,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -65,16 +62,8 @@ const Navigation = () => {
     t.nav.student,
     t.nav.services,
   ]);
-  
-  const getLocalizedNavPath = (path: string) => getLocalizedPath(path, "en");
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(getLocalizedNavPath(`/blog?search=${encodeURIComponent(searchQuery)}`));
-      setSearchQuery("");
-    }
-  };
+  const getLocalizedNavPath = (path: string) => getLocalizedPath(path, "en");
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -100,25 +89,6 @@ const Navigation = () => {
         </Link>
 
         <div className="flex flex-1 items-center justify-end gap-3">
-          {/* Desktop search */}
-          <form
-            onSubmit={handleSearch}
-            className="relative hidden flex-1 items-center md:flex md:max-w-xs lg:max-w-sm xl:max-w-md"
-          >
-            <label htmlFor="desktop-search" className="sr-only">
-              {t.common.search}
-            </label>
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-            <Input
-              id="desktop-search"
-              type="text"
-              placeholder={t.common.search}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full rounded-full pl-9 pr-3"
-            />
-          </form>
-
           {/* Desktop navigation links */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navItems.map(item => {
@@ -207,22 +177,6 @@ const Navigation = () => {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[380px]">
               <div className="mt-8 flex flex-col space-y-4">
-                {/* Mobile Search */}
-                <form onSubmit={handleSearch} className="relative">
-                  <label htmlFor="mobile-search" className="sr-only">
-                    {t.common.search}
-                  </label>
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-                  <Input
-                    id="mobile-search"
-                    type="text"
-                    placeholder={t.common.search}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-10 w-full rounded-full pl-9 pr-3"
-                  />
-                </form>
-
                 {navItems.map(item => {
                   const localizedPath = getLocalizedNavPath(item.path);
                   const [targetPath, queryString] = localizedPath.split("?");
