@@ -6,7 +6,43 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
+import { DASHBOARD_EXAMPLE_STUDENTS } from "@/features/students/examples";
 import { CalendarDays, CheckCircle2, Clock, LogIn, Notebook, Sparkles, Trophy } from "lucide-react";
+
+const getInitials = (name: string): string => {
+  const letters = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(part => part[0]?.toUpperCase() ?? "")
+    .join("");
+  return letters.slice(0, 2) || "ST";
+};
+
+const exampleStudent = DASHBOARD_EXAMPLE_STUDENTS[0];
+
+const fallbackStudentName = "Jordan Martinez";
+const exampleStudentFullName = exampleStudent?.fullName ?? fallbackStudentName;
+const exampleStudentPreferredName =
+  exampleStudent?.preferredName ?? exampleStudentFullName.split(/\s+/)[0] ?? exampleStudentFullName;
+const exampleStudentGuardian = exampleStudent?.guardianName ?? "Family Advocate";
+const exampleStudentGuardianContact = exampleStudent?.guardianContact ?? "family@example.com";
+const exampleStudentInitials = getInitials(exampleStudentFullName);
+const exampleStudentClassTitle = DASHBOARD_EXAMPLE_CLASS.title;
+const exampleStudentStage = DASHBOARD_EXAMPLE_CLASS.stage;
+const exampleStudentBehaviorComment =
+  exampleStudent?.behaviorComment ??
+  "Consistently supportive of classmates and contributes thoughtful ideas during class discussions.";
+const exampleStudentAcademicComment =
+  exampleStudent?.academicComment ??
+  "Showing strong progress in reading comprehension with increasing confidence in writing tasks.";
+
+const profileHighlights = [
+  { label: "Class group", value: `${exampleStudentClassTitle} • ${exampleStudentStage}` },
+  { label: "Preferred name", value: exampleStudentPreferredName },
+  { label: "Primary guardian", value: exampleStudentGuardian },
+  { label: "Family contact", value: exampleStudentGuardianContact },
+];
 
 const assignments = [
   {
@@ -73,7 +109,7 @@ const focusAreas = [
   {
     id: "writing",
     title: "Writing Flow",
-    description: "Two drafts awaiting teacher feedback. Keep the creativity flowing!",
+    description: exampleStudentAcademicComment,
     change: "2 reflections pending",
     tone: "text-sky-100",
   },
@@ -100,24 +136,24 @@ const achievements = [
     detail: "Assignments turned in on time",
   },
   {
-    id: "projects",
-    label: "Projects",
-    value: "3",
-    detail: "Portfolio showcases awaiting review",
+    id: "class",
+    label: "Class",
+    value: exampleStudentStage,
+    detail: exampleStudentClassTitle,
   },
 ];
 
 const timeline = [
   {
     id: "feedback",
-    title: "Feedback posted for Solar Notes",
-    description: "“Great capture of the lunar eclipse!” — Ms. Rivera",
+    title: "New reflection from Ms. Rivera",
+    description: `“${exampleStudentBehaviorComment}”`,
     time: "20 minutes ago",
   },
   {
     id: "message",
-    title: "New message from Robotics team",
-    description: "Remember to bring your prototype chassis to practice.",
+    title: "Family contact updated",
+    description: `${exampleStudentGuardian} (${exampleStudentGuardianContact}) confirmed the robotics showcase RSVP.`,
     time: "1 hour ago",
   },
   {
@@ -155,7 +191,7 @@ export default function StudentPage() {
               </div>
               <div>
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                  Welcome back, Jordan. Your personal learning space is ready.
+                  Welcome back, {exampleStudentPreferredName}. Your personal learning space is ready.
                 </h1>
                 <p className="mt-4 text-lg text-white/70 md:max-w-xl">
                   Jump into the assignments your teacher prepared, review curated feedback, and celebrate your streaks—all from one immersive hub.
@@ -185,11 +221,11 @@ export default function StudentPage() {
               <CardContent className="space-y-6">
                 <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/5 p-4">
                   <Avatar className="h-12 w-12 border border-white/30">
-                    <AvatarFallback className="bg-white/10 text-lg text-white">JM</AvatarFallback>
+                    <AvatarFallback className="bg-white/10 text-lg text-white">{exampleStudentInitials}</AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="text-sm text-white/70">Current profile</p>
-                    <p className="text-lg font-medium text-white">Jordan Martinez</p>
+                    <p className="text-lg font-medium text-white">{exampleStudentFullName}</p>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -220,6 +256,17 @@ export default function StudentPage() {
                   <LogIn className="mr-2 h-5 w-5" />
                   Enter learning space
                 </Button>
+                <div className="space-y-3 rounded-2xl border border-white/15 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-wide text-white/50">Profile snapshot</p>
+                  <dl className="grid gap-3">
+                    {profileHighlights.map((item) => (
+                      <div key={item.label} className="space-y-1 text-sm">
+                        <dt className="text-xs uppercase tracking-wide text-white/50">{item.label}</dt>
+                        <dd className="text-white/80">{item.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
                 <p className="text-center text-xs text-white/60">
                   Need help? Ask your teacher to resend the code or reset your password.
                 </p>
