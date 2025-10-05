@@ -29,7 +29,9 @@ import { useCountUp } from "@/hooks/useCountUp";
 import { useInView } from "@/hooks/useInView";
 import { cn } from "@/lib/utils";
 
-import heroImage from "@/assets/futuristic-classroom-hero.jpg";
+import aiCollaborationImage from "@/assets/ai-collaboration.jpg";
+import futuristicHeroImage from "@/assets/futuristic-classroom-hero.jpg";
+import holographicTeachingImage from "@/assets/holographic-teaching.jpg";
 
 type Feature = {
   title: string;
@@ -247,13 +249,37 @@ const Index = () => {
       <section className="relative overflow-hidden pt-20 pb-28 md:pt-24">
         <MouseGlowEffect />
         <SparklesBackground />
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Futuristic classroom with holographic interfaces"
-            className="h-full w-full object-cover object-center opacity-45"
-            loading="lazy"
-          />
+        <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+          <div className="absolute inset-0">
+            <img
+              src={futuristicHeroImage}
+              alt="Futuristic classroom with holographic interfaces"
+              className="h-full w-full object-cover object-center opacity-45"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="hero-floating-cluster">
+            <div className="hero-floating-card hero-floating-card--primary hidden lg:block">
+              <img
+                src={aiCollaborationImage}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+              <div className="hero-floating-card__glow" />
+            </div>
+            <div className="hero-floating-card hero-floating-card--secondary hidden xl:block">
+              <img
+                src={holographicTeachingImage}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+              <div className="hero-floating-card__glow" />
+            </div>
+          </div>
+
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsla(var(--glow-primary)/0.22),transparent_60%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/85 to-background" />
         </div>
