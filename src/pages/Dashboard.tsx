@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useOptionalUser } from "@/hooks/useOptionalUser";
@@ -41,6 +42,7 @@ import {
 } from "@/features/dashboard/examples";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
+import { BarChart3, ClipboardList, LogIn, Sparkles, Users } from "lucide-react";
 
 const normalizeName = (value: string | null | undefined) => {
   if (!value) {
@@ -68,6 +70,13 @@ const deriveNamePartsFromFullName = (fullName: string | null | undefined) => {
 
   return { firstName: segments[0], lastName: segments[segments.length - 1] };
 };
+
+const TEACHER_PORTAL_FEATURES = [
+  { id: "planner", icon: ClipboardList, label: "Plan technology-rich lessons" },
+  { id: "students", icon: Users, label: "Monitor student progress snapshots" },
+  { id: "insights", icon: Sparkles, label: "Surface AI-powered coaching prompts" },
+  { id: "reports", icon: BarChart3, label: "Assemble reports in seconds" },
+] as const;
 
 const classSchema = z.object({
   title: z.string().min(2),
@@ -141,6 +150,26 @@ export default function DashboardPage() {
   const [isCurriculumDialogOpen, setCurriculumDialogOpen] = useState(false);
   const [activeCurriculumId, setActiveCurriculumId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
+  const journeyContentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (user && !hasEnteredPrototype) {
+      setHasEnteredPrototype(true);
+    }
+  }, [user, hasEnteredPrototype]);
+
+  useEffect(() => {
+    if (!hasEnteredPrototype || user) {
+      return;
+    }
+
+    journeyContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hasEnteredPrototype, user]);
+
+  const handleEnterPrototype = useCallback(() => {
+    setHasEnteredPrototype(true);
+  }, []);
 
   const updateSearchParams = useCallback(
     (mutator: (params: URLSearchParams) => void, options: { replace?: boolean } = {}) => {
@@ -509,7 +538,11 @@ export default function DashboardPage() {
     };
   }, [displayName, firstName, fullName, honorific, lastName]);
 
-  if (!user) {
+  const teacherPreviewName =
+    normalizeName(displayName) ?? normalizeName(fullName) ?? "Morgan Patel";
+  const teacherPreviewClassLabel = `${DASHBOARD_EXAMPLE_CLASS.title} • ${DASHBOARD_EXAMPLE_CLASS.stage}`;
+
+  if (!hasEnteredPrototype) {
     return (
       <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
         <SEO title="Teacher" description="Teacher workspace dashboard" />
@@ -519,12 +552,74 @@ export default function DashboardPage() {
           <div className="absolute top-1/3 left-[-10rem] h-[18rem] w-[18rem] rounded-full bg-emerald-500/20 blur-3xl" />
         </div>
         <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-24 md:px-8">
-          <section className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-10 text-center shadow-[0_25px_80px_-20px_rgba(15,23,42,0.75)] backdrop-blur-2xl">
-            <div className="space-y-4">
-              <h1 className="text-3xl font-semibold md:text-4xl">{t.dashboard.header.title}</h1>
-              <p className="text-white/70">{t.dashboard.common.signInPrompt}</p>
-            </div>
-          </section>
+          <Card className="border-white/15 bg-white/10 text-white shadow-[0_25px_80px_-20px_rgba(15,23,42,0.75)] backdrop-blur-2xl">
+            <CardHeader className="space-y-4 text-center">
+              <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
+                <Sparkles className="h-4 w-4" />
+                Teacher journey portal
+              </div>
+              <CardTitle className="text-3xl font-semibold text-white md:text-4xl">
+                Log in to your workspace
+              </CardTitle>
+              <CardDescription className="text-white/70">
+                Preview lesson planning, student analytics, and reporting workflows instantly—no credentials required for this prototype.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-8">
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-left">
+                <p className="text-sm text-white/70">Previewing workspace for</p>
+                <p className="text-lg font-medium text-white">{teacherPreviewName}</p>
+                <p className="text-xs uppercase tracking-wide text-white/50">{teacherPreviewClassLabel}</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="teacher-email" className="text-xs uppercase tracking-wide text-white/60">
+                    School email
+                  </Label>
+                  <Input
+                    id="teacher-email"
+                    type="email"
+                    placeholder="you@schooltechhub.com"
+                    className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="teacher-code" className="text-xs uppercase tracking-wide text-white/60">
+                    Workspace code
+                  </Label>
+                  <Input
+                    id="teacher-code"
+                    type="text"
+                    placeholder="Prototype access"
+                    className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                  />
+                </div>
+              </div>
+              <div className="space-y-3 text-sm text-white/70">
+                <p className="font-medium text-white">What you&apos;ll explore</p>
+                <ul className="grid gap-2 text-left sm:grid-cols-2">
+                  {TEACHER_PORTAL_FEATURES.map(({ id, icon: Icon, label }) => (
+                    <li key={id} className="flex items-start gap-2">
+                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <Button
+                type="button"
+                className="h-12 w-full rounded-2xl bg-white/90 text-base font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white"
+                size="lg"
+                onClick={handleEnterPrototype}
+              >
+                <LogIn className="mr-2 h-5 w-5" />
+                Log in to my workspace
+              </Button>
+              <p className="text-center text-xs text-white/60">
+                Prototype note: Selecting “Log in” instantly reveals the teacher dashboard experience.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -538,7 +633,7 @@ export default function DashboardPage() {
         <div className="absolute top-1/4 right-[-12rem] h-[28rem] w-[28rem] rounded-full bg-indigo-500/25 blur-3xl" />
         <div className="absolute bottom-[-12rem] left-[-8rem] h-[24rem] w-[24rem] rounded-full bg-emerald-500/20 blur-3xl" />
       </div>
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-24 md:px-8">
+      <div ref={journeyContentRef} className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-24 md:px-8">
         {showingExampleData ? (
           <Alert className="border-white/20 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
             <AlertTitle className="text-lg font-semibold text-white">
