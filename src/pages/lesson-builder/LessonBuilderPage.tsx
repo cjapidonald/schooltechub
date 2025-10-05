@@ -90,7 +90,7 @@ const createLessonDocTemplate = (meta: LessonPlanMetaDraft, fallbackTeacher: str
           <th style="text-align:left;padding:0.5rem;border:1px solid #d8dee6;background:#f1f5f9;font-weight:600;">${escapeHtml(
             row.label,
           )}</th>
-          <td style="padding:0.5rem;border:1px solid #d8dee6;">${value}</td>
+          <td style="padding:0.5rem;border:1px solid #d8dee6;background:#f1f5f9;">${value}</td>
         </tr>
       `;
     })
