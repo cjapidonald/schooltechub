@@ -253,6 +253,60 @@ export const en = {
         untitled: "this lesson",
       },
     },
+    curriculumDetail: {
+      pageTitle: "Curriculum workspace",
+      pageDescription: "Manage lesson details, scheduling, and sequencing for this curriculum.",
+      back: "Back to curriculum overview",
+      header: {
+        badge: "Curriculum",
+        classLabel: "Class",
+        unknownClass: "No class assigned",
+        subjectLabel: "Subject",
+        academicYearLabel: "Academic year",
+        createdLabel: "Created",
+        lessonsLabel: "Lessons",
+      },
+      actionsPanel: {
+        title: "Lesson planning board",
+        description: "Add lessons, adjust pacing, and keep your curriculum up to date.",
+      },
+      actions: {
+        addLessons: "Add lessons",
+        saveLesson: "Save lesson",
+        removeLesson: "Remove lesson",
+      },
+      addDialog: {
+        title: "Add lessons to this curriculum",
+        description: "Paste lesson titles line-by-line and we'll add them in order.",
+        textareaPlaceholder: "Lesson title 1\nLesson title 2\nLesson title 3",
+        stageLabel: "Default stage (optional)",
+        dateLabel: "Default date (optional)",
+        helper: "We'll apply the default stage and date to every new lesson.",
+        submit: "Add to curriculum",
+        error: "Add at least one lesson before saving.",
+      },
+      empty: {
+        title: "No lessons yet",
+        description: "Add lessons to begin shaping this curriculum.",
+      },
+      labels: {
+        stage: "Stage",
+        date: "Date",
+        lessonList: "Lesson titles",
+        unscheduled: "Not scheduled",
+        identifier: "Lesson ID: {id}",
+      },
+      lessonTitle: "Lesson {index}",
+      toasts: {
+        updated: "Curriculum lesson updated",
+        deleted: "Lesson removed from curriculum",
+        added: "Lessons added to curriculum",
+        notFound: "We couldn't find that curriculum.",
+      },
+      validation: {
+        titleRequired: "Add a lesson title before saving.",
+      },
+    },
     dialogs: {
       newClass: {
         title: "New Class",
