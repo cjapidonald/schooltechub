@@ -17,6 +17,13 @@ import {
   FlaskConical,
   HelpCircle,
   MessageSquare,
+  Filter,
+  BookOpen,
+  Layers,
+  MonitorSmartphone,
+  CreditCard,
+  Globe,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -31,7 +38,6 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
@@ -78,6 +84,14 @@ const BLOG_FILTER_KEYS = [
 type BlogFilterKey = (typeof BLOG_FILTER_KEYS)[number];
 
 type BlogFilterState = Record<BlogFilterKey, string[]>;
+
+const filterSectionIcons: Record<Exclude<BlogFilterKey, "category">, LucideIcon> = {
+  stage: Layers,
+  subject: BookOpen,
+  delivery: MonitorSmartphone,
+  payment: CreditCard,
+  platform: Globe,
+};
 
 const FILTER_SOURCE_KEYS: Record<BlogFilterKey, string[]> = {
   category: ["category", "categories", "filter_type", "filterType", "content_type", "contentType", "type", "types", "page"],
@@ -318,7 +332,159 @@ const normalizeText = (input: string | string[] | null | undefined) => {
   return input.toLowerCase();
 };
 
+const getContentField = (post: BlogPost, field: string): string | null => {
+  const { content } = post;
+  if (!content || typeof content !== "object" || Array.isArray(content)) {
+    return null;
+  }
+
+  const value = (content as Record<string, unknown>)[field];
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
+  return null;
+};
+
+const getPublisherLabel = (post: BlogPost): string | null => {
+  const explicitPublisher = getContentField(post, "publisher");
+  if (explicitPublisher) {
+    return explicitPublisher;
+  }
+
+  const author = post.author;
+  if (author && typeof author === "object") {
+    const record = author as Record<string, unknown>;
+    const organization = record.organization ?? record.organisation;
+    if (typeof organization === "string" && organization.trim().length > 0) {
+      return organization.trim();
+    }
+  }
+
+  return null;
+};
+
+const getImageCaption = (post: BlogPost): string | null => {
+  return (
+    getContentField(post, "heroImageCaption") ??
+    getContentField(post, "heroCaption") ??
+    getContentField(post, "imageCaption")
+  );
+};
+
+const getReadingHighlight = (post: BlogPost): string | null => {
+  return (
+    getContentField(post, "readingHighlight") ??
+    getContentField(post, "readingPreview") ??
+    getContentField(post, "readingGuide")
+  );
+};
+
 const FEATURED_TAGS = new Set(["featured", "spotlight"]);
+
+const SAMPLE_BLOG_POSTS: BlogPost[] = [
+  {
+    id: "sample-ai-coteacher",
+    title: "How an AI Co-Teacher Personalizes Every Classroom",
+    subtitle: "Inside a pilot program where teachers collaborate with AI for differentiated instruction.",
+    slug: "ai-co-teacher-personalizes-classrooms",
+    excerpt:
+      "Discover how Ms. Saunders uses an AI planning assistant to map out weekly lessons, surface intervention groups, and keep families in the loop.",
+    category: "eduTech",
+    tags: ["AI", "Differentiation", "Planning"],
+    keywords: ["secondary", "science", "ai"],
+    featured_image:
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=1200&q=80",
+    content: {
+      publisher: "SchoolTechHub Editorial",
+      heroImageCaption: "Ms. Saunders guiding students during a project-based science workshop.",
+      readingHighlight: "See the weekly planning template that keeps AI feedback aligned with state standards.",
+      stages: ["secondary"],
+      subjects: ["science"],
+      deliveryMode: ["inClass"],
+      pricing: ["free"],
+      platforms: ["webapp", "smartboard"],
+    },
+    author: { name: "Amelia Saunders", job_title: "Instructional Technologist" },
+    author_name: "Amelia Saunders",
+    author_image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80",
+    created_at: "2024-02-12T09:30:00Z",
+    published_at: "2024-02-12T09:30:00Z",
+    updated_at: "2024-02-12T09:30:00Z",
+    is_published: true,
+    read_time: 8,
+    view_count: 1430,
+    language: null,
+  },
+  {
+    id: "sample-vr-field-trip",
+    title: "Designing Virtual Reality Field Trips for Primary Classrooms",
+    subtitle: "Step-by-step guidance for building immersive explorations that fit a 40-minute block.",
+    slug: "virtual-reality-field-trips-primary",
+    excerpt:
+      "Learn how educators scaffold VR experiences with inquiry journals, safety checkpoints, and reflection prompts for young learners.",
+    category: "teachingTechniques",
+    tags: ["VR", "Primary", "Inquiry"],
+    keywords: ["primary", "steam", "virtual reality"],
+    featured_image:
+      "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80",
+    content: {
+      publisher: "Future of Learning Lab",
+      heroImageCaption: "Students explore coral reefs through a classroom VR station.",
+      readingHighlight: "Includes a printable VR reflection journal and parent communication template.",
+      stages: ["primary"],
+      subjects: ["steam", "science"],
+      delivery: ["inClass", "live"],
+      pricing: ["educationDiscount"],
+      platforms: ["mobileApp", "smartboard"],
+    },
+    author: { name: "Ritika Menon", job_title: "Primary Innovation Coach" },
+    author_name: "Ritika Menon",
+    author_image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+    created_at: "2024-01-22T14:10:00Z",
+    published_at: "2024-01-22T14:10:00Z",
+    updated_at: "2024-01-22T14:10:00Z",
+    is_published: true,
+    read_time: 6,
+    is_featured: true,
+    view_count: 980,
+    language: null,
+  },
+  {
+    id: "sample-family-portal",
+    title: "Building a Family Portal for Project-Based Learning",
+    subtitle: "A case study on sharing artefacts, progress, and feedback in real time.",
+    slug: "family-portal-project-based-learning",
+    excerpt:
+      "Follow a middle school team that launched a secure family portal to document PBL milestones, celebrate wins, and streamline conferencing.",
+    category: "caseStudy",
+    tags: ["Community", "PBL", "Communication"],
+    keywords: ["secondary", "english", "project based"],
+    featured_image:
+      "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
+    content: {
+      publisher: "SchoolTechHub Research",
+      heroImageCaption: "Families reviewing student showcases during an exhibition night.",
+      readingHighlight: "Templates for progress snapshots, privacy agreements, and student-led conference scripts.",
+      stages: ["secondary"],
+      subjects: ["english", "history"],
+      delivery: ["online", "homework"],
+      pricing: ["paid"],
+      platforms: ["webapp", "mobileApp"],
+    },
+    author: { name: "Jordan Ellis", job_title: "Community Partnerships Lead" },
+    author_name: "Jordan Ellis",
+    author_image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
+    created_at: "2023-12-05T17:45:00Z",
+    published_at: "2023-12-05T17:45:00Z",
+    updated_at: "2023-12-05T17:45:00Z",
+    is_published: true,
+    read_time: 9,
+    view_count: 2110,
+    language: null,
+  },
+];
 
 const Blog = () => {
   const { language, t } = useLanguage();
@@ -362,7 +528,7 @@ const Blog = () => {
           return !postLanguage || postLanguage === language;
         }) as BlogPost[];
 
-        setPosts(filteredByLanguage);
+        setPosts([...filteredByLanguage, ...SAMPLE_BLOG_POSTS]);
       } catch (err) {
         console.error("Failed to load blog posts", err);
         if (isMounted) {
@@ -568,15 +734,23 @@ const Blog = () => {
       .map(item => item.post);
   }, [filters, postsWithMetadata, searchValue]);
 
-  const handleCategoryTabChange = useCallback(
-    (value: string) => {
-      setFilters(prev => ({
+  const handleCategoryButtonClick = useCallback((value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      category: value === "all" ? [] : [value],
+    }));
+  }, []);
+
+  const handleFilterToggle = useCallback((key: BlogFilterKey, value: string) => {
+    setFilters(prev => {
+      const current = prev[key];
+      const exists = current.includes(value);
+      return {
         ...prev,
-        category: value === "all" ? [] : [value],
-      }));
-    },
-    []
-  );
+        [key]: exists ? current.filter(item => item !== value) : [...current, value],
+      };
+    });
+  }, []);
 
   const featuredPosts = filteredPosts.filter(post => {
     if (post.is_featured) {
@@ -591,6 +765,40 @@ const Blog = () => {
   });
 
   const regularPosts = filteredPosts.filter(post => !featuredPosts.includes(post));
+
+  const clearAllFilters = useCallback(() => {
+    setFilters(createEmptyFilters());
+  }, []);
+
+  const removeFilterValue = useCallback((key: BlogFilterKey, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: prev[key].filter(item => item !== value),
+    }));
+  }, []);
+
+  const getFilterLabel = useCallback(
+    (key: BlogFilterKey, value: string) => {
+      const entries = optionEntries[key] ?? [];
+      const match = entries.find(([entryValue]) => entryValue === value);
+      if (match) {
+        return match[1];
+      }
+
+      return formatFilterLabel(value);
+    },
+    [optionEntries]
+  );
+
+  const selectedFilters = useMemo(
+    () =>
+      BLOG_FILTER_KEYS.flatMap(key =>
+        filters[key].map(value => ({ key, value, label: getFilterLabel(key, value) }))
+      ),
+    [filters, getFilterLabel]
+  );
+
+  const isAnyFilterActive = selectedFilters.length > 0;
 
   const structuredData = useMemo(() => {
     if (filteredPosts.length === 0) {
@@ -684,35 +892,128 @@ const Blog = () => {
           </div>
 
           {categoryTabs.length > 0 ? (
-            <Tabs value={activeCategory} onValueChange={handleCategoryTabChange} className="w-full">
-              <TabsList className="flex w-full flex-wrap gap-2 overflow-x-auto border border-border/40 bg-background/80 py-1">
-                <TabsTrigger value="all" className="rounded-full px-4 py-2">
-                  {t.blog.filters.all ?? "All"}
-                </TabsTrigger>
-                {categoryTabs.map(([value, label]) => {
-                  const Icon = categoryIcons[value] ?? Tag;
-                  return (
-                    <TabsTrigger key={value} value={value} className="gap-2 rounded-full px-4 py-2">
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                      <span className="whitespace-nowrap">{label}</span>
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
-            </Tabs>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                size="sm"
+                variant={activeCategory === "all" ? "default" : "outline"}
+                className="rounded-full"
+                onClick={() => handleCategoryButtonClick("all")}
+              >
+                {t.blog.filters.all ?? "All"}
+              </Button>
+              {categoryTabs.map(([value, label]) => {
+                const Icon = categoryIcons[value] ?? Tag;
+                const isActive = activeCategory === value;
+                return (
+                  <Button
+                    key={value}
+                    type="button"
+                    size="sm"
+                    variant={isActive ? "default" : "outline"}
+                    className="gap-2 rounded-full"
+                    onClick={() => handleCategoryButtonClick(value)}
+                  >
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                    <span className="whitespace-nowrap">{label}</span>
+                  </Button>
+                );
+              })}
+            </div>
           ) : null}
 
-          <div className="space-y-8">
-            {error ? (
-              <Alert variant="destructive">
-                <AlertTitle>Something went wrong</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            ) : null}
+          <div className="flex flex-col gap-10 lg:flex-row">
+            <aside className="order-2 lg:order-1 lg:w-72 lg:flex-shrink-0">
+              <Card className="border-border/40 bg-background/80">
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-muted-foreground">
+                    <Filter className="h-4 w-4" aria-hidden="true" />
+                    {t.blog.filters.title}
+                  </div>
+                  <p className="text-sm text-muted-foreground/80">{t.blog.filters.helper}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {isAnyFilterActive ? (
+                      <>
+                        {selectedFilters.map(item => (
+                          <Badge key={`${item.key}-${item.value}`} variant="secondary" className="flex items-center gap-1 rounded-full">
+                            <span>{item.label}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeFilterValue(item.key, item.value)}
+                              className="rounded-full p-0.5 text-muted-foreground hover:text-foreground"
+                              aria-label={`Remove ${item.label}`}
+                            >
+                              <X className="h-3 w-3" aria-hidden="true" />
+                            </button>
+                          </Badge>
+                        ))}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="rounded-full px-3 py-1 text-xs"
+                          onClick={clearAllFilters}
+                        >
+                          {t.blog.filters.clear}
+                        </Button>
+                      </>
+                    ) : (
+                      <Badge variant="outline" className="rounded-full border-dashed border-border/60 text-xs text-muted-foreground">
+                        No filters applied
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {(["stage", "subject", "delivery", "payment", "platform"] as Array<Exclude<BlogFilterKey, "category">>)
+                    .map(key => {
+                      const options = optionEntries[key] ?? [];
+                      if (!options.length) {
+                        return null;
+                      }
 
-            {loading ? (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, index) => (
+                      const Icon = filterSectionIcons[key];
+                      return (
+                        <div key={key} className="space-y-3">
+                          <div className="flex items-center gap-2 text-sm font-semibold">
+                            <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                            <span>{t.blog.filters[key]}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {options.map(([value, label]) => {
+                              const isActive = filters[key].includes(value);
+                              return (
+                                <Button
+                                  key={value}
+                                  type="button"
+                                  size="sm"
+                                  variant={isActive ? "default" : "outline"}
+                                  className="rounded-full"
+                                  onClick={() => handleFilterToggle(key, value)}
+                                >
+                                  {label}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </CardContent>
+              </Card>
+            </aside>
+
+            <div className="order-1 flex-1 space-y-8 lg:order-2">
+              {error ? (
+                <Alert variant="destructive">
+                  <AlertTitle>Something went wrong</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              ) : null}
+
+              {loading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
                     <Card key={index} className="overflow-hidden border-border/40">
                       <Skeleton className="h-48 w-full" />
                       <CardHeader className="space-y-3">
@@ -748,24 +1049,33 @@ const Blog = () => {
                         </span>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
-                        {featuredPosts.map(post => (
-                          <Card key={post.id} className="group overflow-hidden border-primary/30 bg-background/80 shadow-[0_10px_40px_rgba(33,150,243,0.08)]">
-                            {post.featured_image ? (
-                              <div className="relative h-56 overflow-hidden">
-                                <img
-                                  src={post.featured_image}
-                                  alt={post.title}
-                                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                  loading="lazy"
-                                />
-                              </div>
-                            ) : null}
-                            <CardHeader className="space-y-3">
-                              <div className="flex flex-wrap items-center gap-2">
-                                {post.category ? (
-                                  <Badge variant="outline" className="rounded-full border-primary/60 text-primary">
-                                    {getCategoryLabel(post.category)}
-                                  </Badge>
+                        {featuredPosts.map(post => {
+                          const imageCaption = getImageCaption(post);
+                          const publisher = getPublisherLabel(post);
+                          const readingHighlight = getReadingHighlight(post);
+                          return (
+                            <Card key={post.id} className="group overflow-hidden border-primary/30 bg-background/80 shadow-[0_10px_40px_rgba(33,150,243,0.08)]">
+                              {post.featured_image ? (
+                                <figure className="relative h-56 overflow-hidden">
+                                  <img
+                                    src={post.featured_image}
+                                    alt={post.title}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                  />
+                                  {imageCaption ? (
+                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-2 text-xs text-white/80">
+                                      {imageCaption}
+                                    </figcaption>
+                                  ) : null}
+                                </figure>
+                              ) : null}
+                              <CardHeader className="space-y-3">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {post.category ? (
+                                    <Badge variant="outline" className="rounded-full border-primary/60 text-primary">
+                                      {getCategoryLabel(post.category)}
+                                    </Badge>
                                 ) : null}
                                 {Array.isArray(post.tags)
                                   ? post.tags.slice(0, 2).map(tag => (
@@ -785,6 +1095,16 @@ const Blog = () => {
                               <p className="text-sm text-muted-foreground/90">
                                 {post.excerpt}
                               </p>
+                              {readingHighlight ? (
+                                <p className="rounded-lg bg-primary/10 px-3 py-2 text-sm text-primary/90">
+                                  {readingHighlight}
+                                </p>
+                              ) : null}
+                              {publisher ? (
+                                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
+                                  Publisher: {publisher}
+                                </p>
+                              ) : null}
                             </CardHeader>
                             <CardFooter className="flex flex-col gap-4 border-t border-border/40 bg-background/60 p-6 sm:flex-row sm:items-center sm:justify-between">
                               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
@@ -812,7 +1132,8 @@ const Blog = () => {
                               </Button>
                             </CardFooter>
                           </Card>
-                        ))}
+                        );
+                      })}
                       </div>
                     </div>
                   ) : null}
@@ -826,24 +1147,33 @@ const Blog = () => {
                         </span>
                       </div>
                       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {regularPosts.map(post => (
-                          <Card key={post.id} className="group flex h-full flex-col overflow-hidden border-border/40 bg-background/70">
-                            {post.featured_image ? (
-                              <div className="relative h-44 overflow-hidden">
-                                <img
-                                  src={post.featured_image}
-                                  alt={post.title}
-                                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                  loading="lazy"
-                                />
-                              </div>
-                            ) : null}
-                            <CardHeader className="space-y-3">
-                              <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-                                {post.category ? (
-                                  <Badge variant="outline" className="rounded-full border-muted-foreground/40 text-muted-foreground">
-                                    {getCategoryLabel(post.category)}
-                                  </Badge>
+                        {regularPosts.map(post => {
+                          const imageCaption = getImageCaption(post);
+                          const publisher = getPublisherLabel(post);
+                          const readingHighlight = getReadingHighlight(post);
+                          return (
+                            <Card key={post.id} className="group flex h-full flex-col overflow-hidden border-border/40 bg-background/70">
+                              {post.featured_image ? (
+                                <figure className="relative h-44 overflow-hidden">
+                                  <img
+                                    src={post.featured_image}
+                                    alt={post.title}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                  />
+                                  {imageCaption ? (
+                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-3 py-1.5 text-[0.7rem] text-white/80">
+                                      {imageCaption}
+                                    </figcaption>
+                                  ) : null}
+                                </figure>
+                              ) : null}
+                              <CardHeader className="space-y-3">
+                                <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+                                  {post.category ? (
+                                    <Badge variant="outline" className="rounded-full border-muted-foreground/40 text-muted-foreground">
+                                      {getCategoryLabel(post.category)}
+                                    </Badge>
                                 ) : null}
                                 {getReadTimeLabel(post) ? (
                                   <span className="flex items-center gap-1">
@@ -861,6 +1191,16 @@ const Blog = () => {
                               <p className="text-sm text-muted-foreground/90 line-clamp-3">
                                 {post.excerpt}
                               </p>
+                              {readingHighlight ? (
+                                <p className="rounded-md bg-primary/5 px-3 py-2 text-xs text-primary/80">
+                                  {readingHighlight}
+                                </p>
+                              ) : null}
+                              {publisher ? (
+                                <p className="text-[0.65rem] font-medium uppercase tracking-widest text-muted-foreground/80">
+                                  Publisher: {publisher}
+                                </p>
+                              ) : null}
                             </CardHeader>
                             <CardFooter className="mt-auto flex items-center justify-between border-t border-border/40 bg-background/50 p-6">
                               <div className="flex flex-col gap-1 text-xs text-muted-foreground">
@@ -882,12 +1222,14 @@ const Blog = () => {
                               </Button>
                             </CardFooter>
                           </Card>
-                        ))}
+                        );
+                      })}
                       </div>
                     </div>
                   ) : null}
                   </div>
                 )}
+            </div>
           </div>
         </section>
       </div>
