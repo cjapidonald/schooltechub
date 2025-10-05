@@ -44,6 +44,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 const gradeScales: Array<{ value: GradeScale; label: string }> = [
   { value: "letter", label: "Letter" },
@@ -66,7 +67,7 @@ const formatDate = (value: string | null | undefined) => {
   return format(parsed, "PPP");
 };
 
-export const AssessmentsSection = () => {
+export const AssessmentsSection = ({ className }: { className?: string }) => {
   const { user } = useOptionalUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -199,6 +200,7 @@ export const AssessmentsSection = () => {
           setGradingDialogOpen(true);
         }}
         canManage={canManage}
+        className={className}
       />
       <GradingDialog
         open={gradingDialogOpen}
@@ -231,6 +233,7 @@ interface AssessmentsPanelProps {
   isCreating: boolean;
   onOpenGrades: (assessment: AssessmentTemplate) => void;
   canManage: boolean;
+  className?: string;
 }
 
 const AssessmentsPanel = ({
@@ -242,6 +245,7 @@ const AssessmentsPanel = ({
   isCreating,
   onOpenGrades,
   canManage,
+  className,
 }: AssessmentsPanelProps) => {
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -307,28 +311,50 @@ const AssessmentsPanel = ({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-3">
+    <Card
+      className={cn(
+        "rounded-[2rem] border border-white/15 bg-white/10 text-white shadow-[0_35px_120px_-50px_rgba(15,23,42,0.95)] backdrop-blur-2xl",
+        className,
+      )}
+    >
+      <CardHeader className="flex flex-col gap-4">
         {selectedClass ? (
           <>
-            <Button variant="ghost" size="sm" className="w-fit pl-0" onClick={() => setSelectedClassId(null)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-fit rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-white/80 transition hover:bg-white/20"
+              onClick={() => setSelectedClassId(null)}
+            >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to classes
             </Button>
             <div>
-              <CardTitle>{selectedClass.title}</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-2xl font-semibold text-white">
+                {selectedClass.title}
+              </CardTitle>
+              <CardDescription className="text-white/70">
                 Review assessments, track submissions, and record grades for this class.
               </CardDescription>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              {selectedClass.stage ? <Badge variant="outline">{selectedClass.stage}</Badge> : null}
-              {selectedClass.subject ? <Badge variant="outline">{selectedClass.subject}</Badge> : null}
+            <div className="flex flex-wrap gap-2 text-xs text-white/70">
+              {selectedClass.stage ? (
+                <Badge variant="outline" className="border-white/40 bg-white/10 text-white/80">
+                  {selectedClass.stage}
+                </Badge>
+              ) : null}
+              {selectedClass.subject ? (
+                <Badge variant="outline" className="border-white/40 bg-white/10 text-white/80">
+                  {selectedClass.subject}
+                </Badge>
+              ) : null}
             </div>
           </>
         ) : (
           <>
-            <CardTitle>Assessment tracking</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-semibold text-white">
+              Assessment tracking
+            </CardTitle>
+            <CardDescription className="text-white/70">
               Choose a class to review assessments, track submissions, and add new ones.
             </CardDescription>
           </>
@@ -339,33 +365,33 @@ const AssessmentsPanel = ({
           <div className="space-y-6">
             {isLoading ? (
               <div className="flex justify-center py-10">
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin text-white/80" />
               </div>
             ) : error ? (
-              <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+              <div className="rounded-2xl border border-red-500/60 bg-red-500/10 p-4 text-sm text-red-100">
                 {error.message}
               </div>
             ) : classAssessments.length === 0 ? (
-              <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+              <div className="rounded-2xl border border-dashed border-white/30 bg-white/5 p-8 text-center text-sm text-white/70">
                 No assessments for this class yet. Use the form below to create one.
               </div>
             ) : (
-              <div className="overflow-hidden rounded-lg border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
+              <div className="overflow-hidden rounded-2xl border border-white/20 bg-white/5 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+                <Table className="text-white/80">
+                  <TableHeader className="bg-white/5 text-white/70 [&_tr]:border-white/10 [&_th]:text-white/70 [&_th]:font-semibold">
+                    <TableRow className="border-white/10">
                       <TableHead>Assessment</TableHead>
                       <TableHead>Due</TableHead>
                       <TableHead>Scale</TableHead>
                       <TableHead className="w-[140px]" />
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
+                  <TableBody className="[&_tr]:border-white/10">
                     {classAssessments.map(assessment => (
-                      <TableRow key={assessment.id}>
-                        <TableCell className="font-medium text-foreground">{assessment.title}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{formatDate(assessment.dueDate)}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{assessment.gradingScale}</TableCell>
+                      <TableRow key={assessment.id} className="border-white/10 transition hover:bg-white/15">
+                        <TableCell className="font-semibold text-white">{assessment.title}</TableCell>
+                        <TableCell className="text-sm text-white/70">{formatDate(assessment.dueDate)}</TableCell>
+                        <TableCell className="text-sm text-white/70">{assessment.gradingScale}</TableCell>
                         <TableCell className="text-right">
                           <Button
                             size="sm"
@@ -380,6 +406,7 @@ const AssessmentsPanel = ({
                               onOpenGrades(assessment);
                             }}
                             disabled={readOnly}
+                            className="rounded-lg border border-white/40 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-white disabled:border-white/20 disabled:text-slate-700"
                           >
                             Record grades
                           </Button>
@@ -391,35 +418,43 @@ const AssessmentsPanel = ({
               </div>
             )}
 
-            <section className="rounded-lg border bg-muted/20 p-4">
-              <h3 className="text-sm font-semibold text-foreground">Add new assessment</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
+            <section className="rounded-2xl border border-white/15 bg-white/10 p-6 text-white shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+              <h3 className="text-lg font-semibold text-white">Add new assessment</h3>
+              <p className="mt-2 text-sm text-white/70">
                 Share expectations, due dates, and grading scales with your class.
               </p>
               <div className="mt-4 space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="assessment-title">Title</Label>
+                  <Label htmlFor="assessment-title" className="text-sm font-medium text-white/80">
+                    Title
+                  </Label>
                   <Input
                     id="assessment-title"
                     value={form.title}
                     onChange={event => setForm(current => ({ ...current, title: event.target.value }))}
                     placeholder="Forces and motion quiz"
                     disabled={readOnly}
+                    className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40 disabled:border-white/10 disabled:text-white/40"
                   />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="assessment-due">Due date</Label>
+                    <Label htmlFor="assessment-due" className="text-sm font-medium text-white/80">
+                      Due date
+                    </Label>
                     <Input
                       id="assessment-due"
                       type="date"
                       value={form.dueDate}
                       onChange={event => setForm(current => ({ ...current, dueDate: event.target.value }))}
                       disabled={readOnly}
+                      className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40 disabled:border-white/10 disabled:text-white/40"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="assessment-scale">Grading scale</Label>
+                    <Label htmlFor="assessment-scale" className="text-sm font-medium text-white/80">
+                      Grading scale
+                    </Label>
                     <Select
                       value={form.scale}
                       onValueChange={value =>
@@ -427,10 +462,13 @@ const AssessmentsPanel = ({
                       }
                       disabled={readOnly}
                     >
-                      <SelectTrigger id="assessment-scale">
+                      <SelectTrigger
+                        id="assessment-scale"
+                        className="rounded-xl border border-white/30 bg-white/10 text-white focus:ring-white/40 disabled:border-white/10 disabled:text-white/40"
+                      >
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="border-white/20 bg-slate-900/90 text-white backdrop-blur-xl">
                         {gradeScales.map(option => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
@@ -441,17 +479,24 @@ const AssessmentsPanel = ({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="assessment-description">Instructions</Label>
+                  <Label htmlFor="assessment-description" className="text-sm font-medium text-white/80">
+                    Instructions
+                  </Label>
                   <Textarea
                     id="assessment-description"
                     value={form.description}
                     onChange={event => setForm(current => ({ ...current, description: event.target.value }))}
                     placeholder="Outline objectives, required materials, and success criteria"
                     disabled={readOnly}
+                    className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40 disabled:border-white/10 disabled:text-white/40"
                   />
                 </div>
                 <div className="flex justify-end">
-                  <Button onClick={handleSubmit} disabled={!form.title.trim() || isCreating || readOnly}>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!form.title.trim() || isCreating || readOnly}
+                    className="rounded-xl border border-white/40 bg-white/90 px-5 py-2 text-sm font-semibold text-slate-900 shadow-[0_15px_45px_-25px_rgba(255,255,255,0.9)] transition hover:bg-white disabled:border-white/20 disabled:text-slate-700"
+                  >
                     {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Add assessment
                   </Button>
@@ -462,17 +507,17 @@ const AssessmentsPanel = ({
         ) : (
           <div className="space-y-4">
             {readOnly ? (
-              <div className="rounded-lg border border-dashed border-primary/40 bg-primary/5 p-4 text-sm text-muted-foreground">
+              <div className="rounded-2xl border border-dashed border-white/30 bg-white/5 p-4 text-sm text-white/70">
                 Browse example assessment tracking. Sign in to create assignments, record submissions, and grade students.
               </div>
             ) : null}
             {error ? (
-              <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+              <div className="rounded-2xl border border-red-500/60 bg-red-500/10 p-4 text-sm text-red-100">
                 {error.message}
               </div>
             ) : null}
             {classes.length === 0 ? (
-              <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+              <div className="rounded-2xl border border-dashed border-white/30 bg-white/5 p-8 text-center text-sm text-white/70">
                 Create a class to start tracking assessments.
               </div>
             ) : (
@@ -482,22 +527,30 @@ const AssessmentsPanel = ({
                     key={classItem.id}
                     type="button"
                     onClick={() => setSelectedClassId(classItem.id)}
-                    className="flex w-full flex-col items-start gap-3 rounded-xl border bg-background/80 p-4 text-left shadow-sm transition hover:border-primary/60 hover:shadow"
+                    className="flex w-full flex-col items-start gap-3 rounded-2xl border border-white/20 bg-white/10 p-5 text-left text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.85)] transition hover:border-white/40 hover:bg-white/15"
                   >
                     <div className="flex w-full items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-lg font-semibold text-foreground">{classItem.title}</h3>
-                        <p className="text-sm text-muted-foreground">
+                        <h3 className="text-lg font-semibold text-white">{classItem.title}</h3>
+                        <p className="text-sm text-white/70">
                           {classItem.summary ?? "Track assignments, submissions, and feedback in one place."}
                         </p>
                       </div>
-                      <Badge variant="outline">
+                      <Badge variant="outline" className="border-white/40 bg-white/10 text-white/80">
                         {assessmentCounts.get(classItem.id) ?? 0} assessments
                       </Badge>
                     </div>
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      {classItem.stage ? <Badge variant="outline">{classItem.stage}</Badge> : null}
-                      {classItem.subject ? <Badge variant="outline">{classItem.subject}</Badge> : null}
+                    <div className="flex flex-wrap gap-2 text-xs text-white/70">
+                      {classItem.stage ? (
+                        <Badge variant="outline" className="border-white/40 bg-white/10 text-white/80">
+                          {classItem.stage}
+                        </Badge>
+                      ) : null}
+                      {classItem.subject ? (
+                        <Badge variant="outline" className="border-white/40 bg-white/10 text-white/80">
+                          {classItem.subject}
+                        </Badge>
+                      ) : null}
                     </div>
                   </button>
                 ))}
@@ -505,7 +558,7 @@ const AssessmentsPanel = ({
             )}
             {isLoading ? (
               <div className="flex justify-center py-6">
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin text-white/80" />
               </div>
             ) : null}
           </div>
@@ -549,39 +602,48 @@ const GradingDialog = ({
 }: GradingDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl border border-white/20 bg-white/10 text-white shadow-[0_35px_120px_-50px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
         <DialogHeader>
-          <DialogTitle>Grade submissions</DialogTitle>
-          <DialogDescription>Record progress and share personalised feedback.</DialogDescription>
+          <DialogTitle className="text-2xl font-semibold text-white">Grade submissions</DialogTitle>
+          <DialogDescription className="text-white/70">
+            Record progress and share personalised feedback.
+          </DialogDescription>
         </DialogHeader>
         {context.assessment ? (
           <div className="space-y-6">
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm font-medium text-foreground">{context.assessment.title}</p>
-              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.85)]">
+              <p className="text-sm font-semibold text-white">{context.assessment.title}</p>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-white/70">
                 {context.assessment.dueDate ? (
-                  <Badge variant="outline">Due {formatDate(context.assessment.dueDate)}</Badge>
+                  <Badge variant="outline" className="border-white/40 bg-white/10 text-white/80">
+                    Due {formatDate(context.assessment.dueDate)}
+                  </Badge>
                 ) : null}
-                <Badge variant="outline">Scale: {context.assessment.gradingScale}</Badge>
+                <Badge variant="outline" className="border-white/40 bg-white/10 text-white/80">
+                  Scale: {context.assessment.gradingScale}
+                </Badge>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="grade-student">Student ID</Label>
+                <Label htmlFor="grade-student" className="text-sm font-medium text-white/80">
+                  Student ID
+                </Label>
                 <Input
                   id="grade-student"
                   value={context.studentId}
                   onChange={event => onChange({ ...context, studentId: event.target.value })}
                   placeholder="Enter student identifier"
+                  className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Scale</Label>
+                <Label className="text-sm font-medium text-white/80">Scale</Label>
                 <Select value={context.scale} onValueChange={value => onChange({ ...context, scale: value as GradeScale })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-xl border border-white/30 bg-white/10 text-white focus:ring-white/40">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-white/20 bg-slate-900/90 text-white backdrop-blur-xl">
                     {gradeScales.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -593,12 +655,17 @@ const GradingDialog = ({
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="grade-value">Grade</Label>
+                <Label htmlFor="grade-value" className="text-sm font-medium text-white/80">
+                  Grade
+                </Label>
                 <Select value={context.grade} onValueChange={value => onChange({ ...context, grade: value })}>
-                  <SelectTrigger id="grade-value">
+                  <SelectTrigger
+                    id="grade-value"
+                    className="rounded-xl border border-white/30 bg-white/10 text-white focus:ring-white/40"
+                  >
                     <SelectValue placeholder="Select or type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border-white/20 bg-slate-900/90 text-white backdrop-blur-xl">
                     {presets[context.scale].map(option => (
                       <SelectItem key={option} value={option}>
                         {option}
@@ -607,35 +674,41 @@ const GradingDialog = ({
                   </SelectContent>
                 </Select>
                 <Input
-                  className="mt-2"
+                  className="mt-2 rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
                   placeholder="Custom grade"
                   value={context.grade}
                   onChange={event => onChange({ ...context, grade: event.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="grade-numeric">Numeric value</Label>
+                <Label htmlFor="grade-numeric" className="text-sm font-medium text-white/80">
+                  Numeric value
+                </Label>
                 <Input
                   id="grade-numeric"
                   type="number"
                   value={context.numeric}
                   onChange={event => onChange({ ...context, numeric: event.target.value })}
                   placeholder="Optional"
+                  className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="grade-feedback">Feedback</Label>
+              <Label htmlFor="grade-feedback" className="text-sm font-medium text-white/80">
+                Feedback
+              </Label>
               <Textarea
                 id="grade-feedback"
                 value={context.feedback}
                 onChange={event => onChange({ ...context, feedback: event.target.value })}
                 placeholder="Celebrate wins and outline next steps"
+                className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
               />
             </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm font-medium text-foreground">Recent submissions</p>
-              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-white">
+              <p className="text-sm font-medium text-white">Recent submissions</p>
+              <ul className="mt-2 space-y-1 text-xs text-white/70">
                 {submissions.length ? (
                   submissions.map(item => (
                     <li key={item.id}>
@@ -648,9 +721,9 @@ const GradingDialog = ({
                 )}
               </ul>
             </div>
-            <div className="rounded-lg border bg-muted/20 p-4">
-              <p className="text-sm font-medium text-foreground">Recent grades</p>
-              <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-white">
+              <p className="text-sm font-medium text-white">Recent grades</p>
+              <ul className="mt-2 space-y-1 text-xs text-white/70">
                 {grades.length ? (
                   grades.map(grade => (
                     <li key={grade.id}>
@@ -665,10 +738,18 @@ const GradingDialog = ({
           </div>
         ) : null}
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="border-white/40 text-white hover:bg-white/15"
+          >
             Close
           </Button>
-          <Button onClick={onSubmit} disabled={!context.assessment || !context.studentId || isSubmitting}>
+          <Button
+            onClick={onSubmit}
+            disabled={!context.assessment || !context.studentId || isSubmitting}
+            className="border border-white/40 bg-white/90 text-slate-900 hover:bg-white disabled:border-white/20 disabled:text-slate-700"
+          >
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Save grade
           </Button>
