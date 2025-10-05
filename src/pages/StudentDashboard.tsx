@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,13 @@ import { useToast } from "@/hooks/use-toast";
 import { StudentSkillChart } from "@/components/students/StudentSkillChart";
 import { fetchMyClasses } from "@/features/dashboard/api";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
-import { useStudentsStore } from "@/stores/students";
+import {
+  fetchStudents,
+  getStudentsQueryKey,
+  shouldUseStudentExamples,
+  updateStudentComments,
+  upsertStudentSkillScore,
+} from "@/features/students/api";
 import type { Class } from "../../types/supabase-tables";
 
 export default function StudentDashboardPage() {
@@ -24,11 +30,7 @@ export default function StudentDashboardPage() {
   const { t } = useLanguage();
   const { user } = useOptionalUser();
   const { toast } = useToast();
-
-  const students = useStudentsStore(state => state.students);
-  const updateBehaviorComment = useStudentsStore(state => state.updateBehaviorComment);
-  const updateAcademicComment = useStudentsStore(state => state.updateAcademicComment);
-  const recordSkillScore = useStudentsStore(state => state.recordSkillScore);
+  const queryClient = useQueryClient();
 
   const [behaviorDraft, setBehaviorDraft] = useState("");
   const [academicDraft, setAcademicDraft] = useState("");
@@ -39,7 +41,33 @@ export default function StudentDashboardPage() {
     enabled: Boolean(user?.id),
   });
 
+  const classes = useMemo(() => {
+    if (classesQuery.data && classesQuery.data.length > 0) {
+      return classesQuery.data;
+    }
+    return [DASHBOARD_EXAMPLE_CLASS];
+  }, [classesQuery.data]);
+
+  const classIds = useMemo(() => classes.map(item => item.id), [classes]);
+  const studentsQueryKey = useMemo(
+    () => getStudentsQueryKey(user?.id, classIds),
+    [classIds, user?.id],
+  );
+
+  const studentsQuery = useQuery({
+    queryKey: studentsQueryKey,
+    queryFn: () => fetchStudents({ ownerId: user?.id, classIds }),
+    enabled: classIds.length > 0 && (Boolean(user?.id) || shouldUseStudentExamples(user?.id)),
+  });
+
+  const students = studentsQuery.data ?? [];
   const student = useMemo(() => students.find(item => item.id === id) ?? null, [id, students]);
+
+  useEffect(() => {
+    if (studentsQuery.error) {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    }
+  }, [studentsQuery.error, t.dashboard.toasts.error, toast]);
 
   useEffect(() => {
     setBehaviorDraft(student?.behaviorComment ?? "");
@@ -47,11 +75,47 @@ export default function StudentDashboardPage() {
   }, [student?.behaviorComment, student?.academicComment, student?.id]);
 
   useEffect(() => {
-    if (!student && id) {
+    if (!studentsQuery.isLoading && !student && id) {
       toast({ description: t.studentDashboard.toasts.notFound, variant: "destructive" });
       navigate("/dashboard?tab=students", { replace: true });
     }
-  }, [id, navigate, student, t.studentDashboard.toasts.notFound, toast]);
+  }, [id, navigate, student, studentsQuery.isLoading, t.studentDashboard.toasts.notFound, toast]);
+
+  const behaviorCommentMutation = useMutation({
+    mutationFn: (input: { studentId: string; comment: string }) =>
+      updateStudentComments({ ownerId: user?.id, studentId: input.studentId, behaviorComment: input.comment }),
+    onSuccess: () => {
+      toast({ description: t.studentDashboard.toasts.commentsSaved });
+      void queryClient.invalidateQueries({ queryKey: studentsQueryKey });
+    },
+    onError: () => {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    },
+  });
+
+  const academicCommentMutation = useMutation({
+    mutationFn: (input: { studentId: string; comment: string }) =>
+      updateStudentComments({ ownerId: user?.id, studentId: input.studentId, academicComment: input.comment }),
+    onSuccess: () => {
+      toast({ description: t.studentDashboard.toasts.commentsSaved });
+      void queryClient.invalidateQueries({ queryKey: studentsQueryKey });
+    },
+    onError: () => {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    },
+  });
+
+  const recordSkillScoreMutation = useMutation({
+    mutationFn: (input: { studentId: string; skillId: string; month: string; score: number }) =>
+      upsertStudentSkillScore({ ownerId: user?.id, ...input }),
+    onSuccess: () => {
+      toast({ description: t.studentDashboard.toasts.scoreSaved });
+      void queryClient.invalidateQueries({ queryKey: studentsQueryKey });
+    },
+    onError: () => {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    },
+  });
 
   if (!user) {
     return (
@@ -68,21 +132,28 @@ export default function StudentDashboardPage() {
     return null;
   }
 
-  const classes = classesQuery.data && classesQuery.data.length > 0 ? classesQuery.data : [DASHBOARD_EXAMPLE_CLASS];
   const studentClass = classes.find(item => item.id === student.classId) ?? null;
 
   const handleBehaviorBlur = () => {
-    updateBehaviorComment(student.id, behaviorDraft.trim());
-    toast({ description: t.studentDashboard.toasts.commentsSaved });
+    if (!student) {
+      return;
+    }
+    behaviorCommentMutation.mutate({ studentId: student.id, comment: behaviorDraft.trim() });
   };
 
   const handleAcademicBlur = () => {
-    updateAcademicComment(student.id, academicDraft.trim());
-    toast({ description: t.studentDashboard.toasts.commentsSaved });
+    if (!student) {
+      return;
+    }
+    academicCommentMutation.mutate({ studentId: student.id, comment: academicDraft.trim() });
   };
 
   const handleScoreSubmit = (skillId: string, event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!student) {
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const month = String(formData.get("month"));
     const scoreValue = formData.get("score");
@@ -100,8 +171,7 @@ export default function StudentDashboardPage() {
       return;
     }
 
-    recordSkillScore({ studentId: student.id, skillId, month, score });
-    toast({ description: t.studentDashboard.toasts.scoreSaved });
+    recordSkillScoreMutation.mutate({ studentId: student.id, skillId, month, score });
     event.currentTarget.reset();
   };
 
@@ -211,7 +281,7 @@ export default function StudentDashboardPage() {
                         required
                       />
                     </div>
-                    <Button type="submit" className="justify-self-start">
+                    <Button type="submit" className="justify-self-start" disabled={recordSkillScoreMutation.isPending}>
                       {t.studentDashboard.skills.fields.submit}
                     </Button>
                   </form>
