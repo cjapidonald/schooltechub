@@ -376,7 +376,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative overflow-hidden py-24">
+      <section className="relative -mt-16 overflow-hidden pt-16 pb-24 md:-mt-20 md:pt-20">
         <div className="absolute inset-0 -z-20">
           <img
             src={classroomTechnologyBackgrounds.featureShowcase}
