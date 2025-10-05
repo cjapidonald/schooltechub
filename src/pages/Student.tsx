@@ -236,98 +236,53 @@ export default function StudentPage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
           <div className="absolute inset-y-0 right-[-20%] hidden w-[50%] rounded-full bg-gradient-to-br from-cyan-400/30 via-transparent to-transparent blur-3xl md:block" />
 
-          <div className="relative z-10 grid gap-10 md:grid-cols-[1.6fr,1fr] md:items-center">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
-                <Sparkles className="h-4 w-4" />
-                Effortless learning for every student
+          {hasEntered ? (
+            <div className="relative z-10 grid gap-10 md:grid-cols-[1.6fr,1fr] md:items-center">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
+                  <Sparkles className="h-4 w-4" />
+                  Effortless learning for every student
+                </div>
+                <div>
+                  <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
+                    Welcome back, {exampleStudentPreferredName}. Your personal learning space is ready.
+                  </h1>
+                  <p className="mt-4 text-lg text-white/70 md:max-w-xl">
+                    Jump into the assignments your teacher prepared, review curated feedback, and celebrate your streaks—all from
+                    one immersive hub.
+                  </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  {achievements.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl"
+                    >
+                      <p className="text-sm uppercase tracking-wide text-white/60">{item.label}</p>
+                      <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
+                      <p className="mt-1 text-xs text-white/60">{item.detail}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div>
-                <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                  Welcome back, {exampleStudentPreferredName}. Your personal learning space is ready.
-                </h1>
-                <p className="mt-4 text-lg text-white/70 md:max-w-xl">
-                  Jump into the assignments your teacher prepared, review curated feedback, and celebrate your streaks—all from one immersive hub.
-                </p>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-3">
-                {achievements.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-2xl border border-white/15 bg-white/10 p-4 text-center shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl"
-                  >
-                    <p className="text-sm uppercase tracking-wide text-white/60">{item.label}</p>
-                    <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
-                    <p className="mt-1 text-xs text-white/60">{item.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl">
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-semibold">Sign in to your desk</CardTitle>
-                <CardDescription className="text-white/65">
-                  Enter the access code your teacher shared to continue where you left off.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/5 p-4">
-                  <Avatar className="h-12 w-12 border border-white/30">
-                    <AvatarFallback className="bg-white/10 text-lg text-white">{exampleStudentInitials}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm text-white/70">Current profile</p>
-                    <p className="text-lg font-medium text-white">{exampleStudentFullName}</p>
+              <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl">
+                <CardHeader className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-14 w-14 border border-white/30">
+                      <AvatarFallback className="bg-white/10 text-lg text-white">{exampleStudentInitials}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-white/50">Profile snapshot</p>
+                      <CardTitle className="text-2xl font-semibold text-white">{exampleStudentFullName}</CardTitle>
+                      <CardDescription className="text-white/65">
+                        {exampleStudentPreferredName}&apos;s details at a glance.
+                      </CardDescription>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="student-email" className="text-xs uppercase tracking-wide text-white/60">
-                      School email
-                    </Label>
-                    <Input
-                      id="student-email"
-                      type="email"
-                      placeholder="you@studenthub.com"
-                      className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="student-code" className="text-xs uppercase tracking-wide text-white/60">
-                      Access code
-                    </Label>
-                    <Input
-                      id="student-code"
-                      type="text"
-                      placeholder="6-digit code"
-                      className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
-                    />
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  className="h-12 w-full rounded-2xl bg-white/90 text-base font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white disabled:cursor-default disabled:bg-white/70"
-                  size="lg"
-                  onClick={handleEnterJourney}
-                  disabled={hasEntered}
-                  aria-pressed={hasEntered}
-                >
-                  {hasEntered ? (
-                    <>
-                      <CheckCircle2 className="mr-2 h-5 w-5" />
-                      Journey unlocked
-                    </>
-                  ) : (
-                    <>
-                      <LogIn className="mr-2 h-5 w-5" />
-                      Enter my journey
-                    </>
-                  )}
-                </Button>
-                <div className="space-y-3 rounded-2xl border border-white/15 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-wide text-white/50">Profile snapshot</p>
-                  <dl className="grid gap-3">
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <dl className="grid gap-4">
                     {profileHighlights.map((item) => (
                       <div key={item.label} className="space-y-1 text-sm">
                         <dt className="text-xs uppercase tracking-wide text-white/50">{item.label}</dt>
@@ -335,53 +290,109 @@ export default function StudentPage() {
                       </div>
                     ))}
                   </dl>
-                </div>
-                <p className="text-center text-xs text-white/60">
-                  Need help? Ask your teacher to resend the code or reset your password.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+                  <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/70">
+                    <p className="font-medium text-white">Teacher reflection</p>
+                    <p className="mt-1">{exampleStudentAcademicComment}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="relative z-10 mx-auto max-w-xl">
+              <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl">
+                <CardHeader className="space-y-4 text-center">
+                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
+                    <Sparkles className="h-4 w-4" />
+                    Student journey portal
+                  </div>
+                  <CardTitle className="text-3xl font-semibold text-white">Log in to your journey</CardTitle>
+                  <CardDescription className="text-white/70">
+                    Access assignments, celebrate streaks, and follow teacher guidance the moment you sign in.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/5 p-4">
+                    <Avatar className="h-12 w-12 border border-white/30">
+                      <AvatarFallback className="bg-white/10 text-lg text-white">{exampleStudentInitials}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm text-white/70">Previewing as</p>
+                      <p className="text-lg font-medium text-white">{exampleStudentFullName}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="student-email" className="text-xs uppercase tracking-wide text-white/60">
+                        School email
+                      </Label>
+                      <Input
+                        id="student-email"
+                        type="email"
+                        placeholder="you@studenthub.com"
+                        className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="student-code" className="text-xs uppercase tracking-wide text-white/60">
+                        Access code
+                      </Label>
+                      <Input
+                        id="student-code"
+                        type="text"
+                        placeholder="6-digit code"
+                        className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-sm text-white/70">
+                    <p className="font-medium text-white">What you&apos;ll unlock</p>
+                    <ul className="grid gap-2 text-left sm:grid-cols-2">
+                      <li className="flex items-start gap-2">
+                        <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
+                        Guided skill growth updates
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Notebook className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
+                        Real-time homework tracking
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
+                        Focus highlights from teachers
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
+                        Upcoming sessions overview
+                      </li>
+                    </ul>
+                  </div>
+                  <Button
+                    type="button"
+                    className="h-12 w-full rounded-2xl bg-white/90 text-base font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white disabled:cursor-default disabled:bg-white/70"
+                    size="lg"
+                    onClick={handleEnterJourney}
+                    disabled={hasEntered}
+                    aria-pressed={hasEntered}
+                  >
+                    {hasEntered ? (
+                      <>
+                        <CheckCircle2 className="mr-2 h-5 w-5" />
+                        Journey unlocked
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="mr-2 h-5 w-5" />
+                        Log in to my journey
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-center text-xs text-white/60">
+                    Need help? Ask your teacher to resend the code or reset your password.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </section>
-
-        {!hasEntered && (
-          <section className="grid gap-8">
-            <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
-              <CardHeader className="space-y-2 text-center md:text-left">
-                <CardTitle className="text-2xl font-semibold">Preview your journey</CardTitle>
-                <CardDescription className="text-white/65">
-                  Enter your journey to unlock live progress, assignments, and focus tips tailored just for you.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid gap-4 text-sm text-white/70 md:grid-cols-3">
-                  <li className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <TrendingUp className="h-5 w-5 shrink-0 text-white/80" />
-                    <div>
-                      <p className="font-medium text-white">Guided skill growth</p>
-                      <p>Watch your mastery scores rise with every teacher check-in.</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <Notebook className="h-5 w-5 shrink-0 text-white/80" />
-                    <div>
-                      <p className="font-medium text-white">Homework hub</p>
-                      <p>Track progress on assignments without leaving your dashboard.</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <Trophy className="h-5 w-5 shrink-0 text-white/80" />
-                    <div>
-                      <p className="font-medium text-white">Focus highlights</p>
-                      <p>Get micro-updates from teachers to plan your next win.</p>
-                    </div>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </section>
-        )}
-
         {hasEntered && skillInsights.length > 0 && (
           <section ref={journeyContentRef} className="grid gap-8">
             <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
