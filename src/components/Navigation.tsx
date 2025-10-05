@@ -47,7 +47,7 @@ const Navigation = () => {
 
   const navItems = useMemo(() => {
     const items = [
-      { name: t.dashboard.header.title, path: "/dashboard" },
+      { name: t.nav.dashboard, path: "/dashboard" },
       { name: t.nav.home, path: "/" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.events, path: "/events" },
@@ -57,7 +57,7 @@ const Navigation = () => {
 
     return items;
   }, [
-    t.dashboard.header.title,
+    t.nav.dashboard,
     t.nav.about,
     t.nav.blog,
     t.nav.events,
@@ -164,13 +164,13 @@ const Navigation = () => {
                     onClick={() => navigate(getLocalizedNavPath("/dashboard"))}
                   >
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    {t.dashboard.header.title}
+                    {t.nav.dashboard}
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => navigate(getLocalizedNavPath("/profile"))}
+                    onClick={() => navigate(getLocalizedNavPath("/account"))}
                   >
                     <IdCard className="mr-2 h-4 w-4" />
-                    {t.nav.profile}
+                    {t.nav.my_profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}
@@ -253,11 +253,11 @@ const Navigation = () => {
                   <div className="border-t pt-4 space-y-3">
                     <p className="px-2 text-sm text-muted-foreground">{user.email}</p>
                     <Link
-                      to={getLocalizedNavPath("/profile")}
+                      to={getLocalizedNavPath("/account")}
                       onClick={() => setIsOpen(false)}
                     >
                       <Button className="w-full" variant="secondary">
-                        {t.nav.profile ?? t.nav.dashboard}
+                        {t.nav.my_profile ?? t.nav.dashboard}
                       </Button>
                     </Link>
                     <Link
