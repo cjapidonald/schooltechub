@@ -112,7 +112,7 @@ const Home = () => {
                 <Link to={getLocalizedPath("/services", language)}>
                   <Button size="lg">{t.about.cta.primary}</Button>
                 </Link>
-                <Link to={getLocalizedPath("/tools", language)}>
+                <Link to={getLocalizedPath("/resources", language)}>
                   <Button size="lg" variant="outline">
                     <BookOpen className="mr-2 h-5 w-5" />
                     {t.about.cta.secondary}
