@@ -6,6 +6,13 @@ import type { SkillDefinition, StudentRecord, StudentSkillProgress, StudentSkill
 
 const EXAMPLE_FLAG = (import.meta.env.VITE_ENABLE_STUDENT_EXAMPLES ?? "true").toString().toLowerCase();
 
+const cloneDeep = <T>(value: T): T => {
+  if (typeof structuredClone === "function") {
+    return structuredClone(value);
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
+};
+
 const exampleState = {
   students: cloneDeep(DASHBOARD_EXAMPLE_STUDENTS),
   skills: cloneDeep(DASHBOARD_EXAMPLE_SKILLS),
@@ -57,13 +64,6 @@ type SupabaseStudentSkillScoreRow = {
 const getCurrentMonth = () => {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-};
-
-const cloneDeep = <T>(value: T): T => {
-  if (typeof structuredClone === "function") {
-    return structuredClone(value);
-  }
-  return JSON.parse(JSON.stringify(value)) as T;
 };
 
 const toMonthDisplay = (value: string | null | undefined): string => {
