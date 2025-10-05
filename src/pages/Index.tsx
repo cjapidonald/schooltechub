@@ -338,7 +338,7 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background/90" />
         </div>
         <div className="container relative z-10 mx-auto px-4">
-          <div className="relative grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
+          <div className="relative mx-auto max-w-5xl">
             <div className="pointer-events-none absolute inset-0 -z-10">
               {heroBackgroundDecorations.map(({ src, className }) => (
                 <div key={src} className={cn("absolute bg-white/5", className)}>
@@ -365,64 +365,33 @@ const Index = () => {
                   <span className={convexOverlayClass} aria-hidden />
                   <span className="bolt-fastener absolute left-8 top-6 z-20 md:left-12 md:top-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 top-6 z-20 md:right-12 md:top-8" aria-hidden />
-                  <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
-                    <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
-                      Power every lesson with organised workflows and luminous insights
-                    </h2>
-                    <p className="mt-6 max-w-xl text-base text-white/80 md:text-lg">
-                      SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
-                    </p>
-                  </div>
-                  <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
-                </Card>
-              </Reveal>
-            </div>
-            <div className="relative hidden md:flex">
-              <div className="pointer-events-none absolute -inset-12 rounded-full bg-primary/10 blur-3xl" />
-              <Reveal>
-                <Card
-                  className={cn(
-                    neonCardClass,
-                    "relative w-full max-w-2xl rounded-[2.25rem] bg-gradient-to-br from-primary/18 via-background/55 to-background/85 p-8 backdrop-blur-xl md:p-10"
-                  )}
-                >
-                  <span className={convexOverlayClass} aria-hidden />
-                  <span className="bolt-fastener absolute left-7 top-6 z-20 md:left-9 md:top-8" aria-hidden />
-                  <span className="bolt-fastener absolute right-7 top-6 z-20 md:right-9 md:top-8" aria-hidden />
-                  <div className="relative z-10 flex flex-col gap-8">
-                    <div className="text-center">
-                      <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
-                      <h3 className="mt-4 text-2xl font-semibold text-white md:text-3xl">
-                        Class and student insights synchronised in real time
-                      </h3>
-                      <p className="mt-4 text-white/70">
-                        Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
+                  <div className="relative z-10 flex flex-col items-center gap-10 text-center">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
+                      <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
+                        Power every lesson with organised workflows and luminous insights
+                      </h2>
+                      <p className="mt-6 max-w-xl text-base text-white/80 md:text-lg">
+                        SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
                       </p>
                     </div>
-                    <div className="relative grid gap-6 sm:grid-cols-2">
-                      <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
-                        <div className="pointer-events-none absolute -top-3 left-6 h-5 w-12 rounded-full bg-white/40 blur-xl" />
-                        <div className="pointer-events-none absolute -bottom-4 right-6 h-6 w-14 rounded-full bg-primary/35 blur-xl" />
-                        <div className="flex h-40 items-center justify-center rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-primary/25 via-background/80 to-background/95 text-sm font-semibold uppercase tracking-[0.35em] text-white/70 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
-                          Pulse metrics
-                        </div>
-                        <span className="pointer-events-none absolute left-5 top-4 inline-flex rotate-[-6deg] rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/80">
-                          Pulse
-                        </span>
-                      </div>
-                      <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
-                        <div className="pointer-events-none absolute -top-4 right-7 h-5 w-10 rounded-full bg-secondary/35 blur-xl" />
-                        <div className="pointer-events-none absolute -bottom-3 left-8 h-7 w-16 rounded-full bg-white/40 blur-2xl" />
-                        <div className="flex h-40 items-center justify-center rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-secondary/25 via-background/80 to-background/95 text-sm font-semibold uppercase tracking-[0.35em] text-white/70 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
-                          Collaboration flow
-                        </div>
-                        <span className="pointer-events-none absolute right-4 bottom-5 inline-flex rotate-[8deg] rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
-                          Collab
-                        </span>
+                    <div className="relative w-full rounded-[1.75rem] border border-white/10 bg-white/5 p-6 text-left backdrop-blur-xl md:p-8">
+                      <span
+                        className="pointer-events-none absolute -inset-px rounded-[1.7rem] border border-white/10 opacity-60"
+                        aria-hidden
+                      />
+                      <div className="relative z-10 space-y-4 text-left">
+                        <div className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
+                        <h3 className="text-2xl font-semibold text-white md:text-3xl">
+                          Class and student insights synchronised in real time
+                        </h3>
+                        <p className="text-white/75">
+                          Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
+                        </p>
                       </div>
                     </div>
                   </div>
+                  <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
                 </Card>
               </Reveal>
             </div>
