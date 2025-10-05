@@ -199,6 +199,17 @@ const neonCardGradients = [
   "bg-gradient-to-br from-accent/25 via-background/75 to-background/95",
 ];
 
+const classroomTechnologyBackgrounds = {
+  featureShowcase:
+    "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=2100&q=80",
+  stats:
+    "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2100&q=80",
+  testimonials:
+    "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=2100&q=80",
+  cta:
+    "https://images.unsplash.com/photo-1530229525026-1b0e9753a0c1?auto=format&fit=crop&w=2100&q=80",
+};
+
 const iconColorClasses = [
   "bg-green-500 text-white",
   "bg-white text-slate-900",
@@ -348,7 +359,15 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative py-24">
+      <section className="relative overflow-hidden py-24">
+        <div className="absolute inset-0 -z-20">
+          <img
+            src={classroomTechnologyBackgrounds.featureShowcase}
+            alt="Collaborative classroom using interactive technology"
+            className="h-full w-full object-cover object-center opacity-25"
+            loading="lazy"
+          />
+        </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl space-y-6 text-center">
@@ -429,7 +448,15 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative py-24">
+      <section className="relative overflow-hidden py-24">
+        <div className="absolute inset-0 -z-20">
+          <img
+            src={classroomTechnologyBackgrounds.stats}
+            alt="Teacher reviewing analytics on a classroom display"
+            className="h-full w-full object-cover object-center opacity-25"
+            loading="lazy"
+          />
+        </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
           <div ref={statsRef} className="grid gap-8 text-center md:grid-cols-4">
@@ -440,7 +467,16 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="py-24">
+      <section className="relative overflow-hidden py-24">
+        <div className="absolute inset-0 -z-20">
+          <img
+            src={classroomTechnologyBackgrounds.testimonials}
+            alt="Students collaborating with digital tablets"
+            className="h-full w-full object-cover object-center opacity-25"
+            loading="lazy"
+          />
+        </div>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/95 via-background/80 to-background" />
         <div className="container mx-auto px-4">
           <div className="mx-auto mb-16 max-w-2xl text-center">
             <Reveal>
@@ -484,7 +520,15 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative py-24">
+      <section className="relative overflow-hidden py-24">
+        <div className="absolute inset-0 -z-20">
+          <img
+            src={classroomTechnologyBackgrounds.cta}
+            alt="Educators collaborating with immersive classroom tools"
+            className="h-full w-full object-cover object-center opacity-25"
+            loading="lazy"
+          />
+        </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-background to-secondary/20" />
         <div className="container mx-auto px-4">
           <Reveal>
