@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/SEO";
 import { format, differenceInMilliseconds } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { cn } from "@/lib/utils";
 
 const Events = () => {
@@ -336,9 +335,9 @@ const Events = () => {
 
                         <div className="space-y-2">
                           <h3 className="text-2xl font-semibold text-white">
-                            <Link to={getLocalizedPath(`/events/${event.slug}`, language)} className="hover:text-white/80">
+                            <span className="block transition-colors hover:text-white/80">
                               {event.title}
-                            </Link>
+                            </span>
                           </h3>
                           {event.subtitle && <p className="text-sm text-white/70">{event.subtitle}</p>}
                           <p className="text-sm text-white/70">{event.excerpt || "Click for more details..."}</p>
@@ -374,7 +373,9 @@ const Events = () => {
                         <div className="flex flex-wrap gap-3">
                           {!isPast && event.registration_url && (
                             <Button asChild className="rounded-2xl bg-white/90 text-slate-900 shadow-[0_15px_45px_-25px_rgba(226,232,240,0.9)] hover:bg-white">
-                              <Link to={event.registration_url}>Register Now</Link>
+                              <a href={event.registration_url} target="_blank" rel="noopener noreferrer">
+                                Register Now
+                              </a>
                             </Button>
                           )}
                           {isPast && event.recording_url && (
@@ -384,13 +385,6 @@ const Events = () => {
                               </a>
                             </Button>
                           )}
-                          <Button
-                            variant="outline"
-                            asChild
-                            className="rounded-2xl border-white/30 text-white hover:bg-white/10 hover:text-white"
-                          >
-                            <Link to={getLocalizedPath(`/events/${event.slug}`, language)}>View Details</Link>
-                          </Button>
                         </div>
                       </CardContent>
                     </Card>

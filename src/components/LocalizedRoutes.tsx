@@ -1,26 +1,14 @@
 import React from 'react';
-import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
 import Blog from '@/pages/Blog';
-import BlogPost from '@/pages/BlogPost';
-import BlogBuilderPage from '@/pages/BlogBuilderPage';
-import Resources from '@/pages/resources';
 import Events from '@/pages/Events';
-import EventDetail from '@/pages/EventDetail';
 import Contact from '@/pages/Contact';
 import FAQ from '@/pages/FAQ';
-import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
-import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
-import Profile from '@/pages/Profile';
-import ClassDashboard from '@/pages/account/ClassDashboard';
-import AccountResources from '@/pages/AccountResources';
-import AccountResourceNew from '@/pages/AccountResourceNew';
-import AccountResourceEdit from '@/pages/AccountResourceEdit';
 import LessonBuilderPage from '@/pages/lesson-builder/LessonBuilderPage';
-import LessonBuilderWorkspace from '@/pages/lesson-builder/LessonBuilderWorkspace';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
@@ -30,8 +18,6 @@ import AdminPage from '@/pages/admin/AdminPage';
 import AdminLoginPrototype from '@/pages/admin/AdminLoginPrototype';
 import DashboardPage from '@/pages/Dashboard';
 import StudentPage from '@/pages/Student';
-import StudentDashboardPage from '@/pages/StudentDashboard';
-import TeacherCurriculumDetailPage from '@/pages/TeacherCurriculumDetail';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>
@@ -43,47 +29,6 @@ const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   </>
 );
 
-const LegacyBuilderRedirect: React.FC = () => {
-  const params = useParams<{ id?: string }>();
-  const destination = params.id
-    ? `/builder/lesson-plans/${params.id}`
-    : `/builder/lesson-plans`;
-
-  return <Navigate to={destination} replace />;
-};
-
-const LegacyAccountRedirect: React.FC = () => {
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const tab = searchParams.get('tab');
-  const tabMap: Record<string, string> = {
-    classes: 'classes',
-    students: 'students',
-    curriculum: 'curriculum',
-    builder: 'lessonBuilder',
-    assessments: 'assessments',
-  };
-
-  const mappedTab = tab ? tabMap[tab] : undefined;
-  const destination = mappedTab ? `/teacher?tab=${mappedTab}` : '/teacher';
-
-  return <Navigate to={destination} replace />;
-};
-
-const LegacyClassDashboardRedirect: React.FC = () => {
-  const params = useParams<{ id?: string }>();
-  const destination = params.id ? `/teacher/classes/${params.id}` : `/teacher?tab=classes`;
-  return <Navigate to={destination} replace />;
-};
-
-const LegacyStudentDashboardRedirect: React.FC = () => {
-  const params = useParams<{ id?: string }>();
-  const destination = params.id
-    ? `/teacher/students/${params.id}`
-    : `/teacher?tab=students`;
-  return <Navigate to={destination} replace />;
-};
-
 export const LocalizedRoutes = () => {
   return (
     <Routes>
@@ -93,35 +38,35 @@ export const LocalizedRoutes = () => {
       <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
-      <Route path="/blog/new" element={<RouteWrapper><BlogBuilderPage /></RouteWrapper>} />
-      <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-      <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
-      <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
+      <Route path="/blog/new" element={<Navigate to="/blog" replace />} />
+      <Route path="/blog/:slug" element={<Navigate to="/blog" replace />} />
+      <Route path="/builder/lesson-plans" element={<Navigate to="/teacher?tab=curriculum" replace />} />
+      <Route path="/builder/lesson-plans/:id" element={<Navigate to="/teacher?tab=curriculum" replace />} />
       <Route path="/curriculum" element={<Navigate to="/teacher?tab=curriculum" replace />} />
-      <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
-      <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
+      <Route path="/lesson-plans/builder" element={<Navigate to="/teacher?tab=lessonBuilder" replace />} />
+      <Route path="/lesson-plans/builder/:id" element={<Navigate to="/teacher?tab=lessonBuilder" replace />} />
       <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
-      <Route path="/lesson-builder/:id" element={<RouteWrapper><LessonBuilderWorkspace /></RouteWrapper>} />
-      <Route path="/resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
+      <Route path="/lesson-builder/:id" element={<Navigate to="/lesson-builder" replace />} />
+      <Route path="/resources" element={<Navigate to="/lesson-builder" replace />} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
-      <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
+      <Route path="/events/:slug" element={<Navigate to="/events" replace />} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
-      <Route path="/account" element={<LegacyAccountRedirect />} />
+      <Route path="/account" element={<Navigate to="/teacher" replace />} />
       <Route path="/teacher" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
-      <Route path="/teacher/curriculum/:id" element={<RouteWrapper><TeacherCurriculumDetailPage /></RouteWrapper>} />
-      <Route path="/teacher/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
+      <Route path="/teacher/curriculum/:id" element={<Navigate to="/teacher?tab=curriculum" replace />} />
+      <Route path="/teacher/classes/:id" element={<Navigate to="/teacher?tab=classes" replace />} />
       <Route path="/dashboard" element={<Navigate to="/teacher" replace />} />
       <Route path="/student" element={<RouteWrapper><StudentPage /></RouteWrapper>} />
-      <Route path="/teacher/students/:id" element={<RouteWrapper><StudentDashboardPage /></RouteWrapper>} />
-      <Route path="/dashboard/students/:id" element={<LegacyStudentDashboardRedirect />} />
-      <Route path="/my-profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
-      <Route path="/profile" element={<Navigate to="/my-profile" replace />} />
-      <Route path="/account/classes/:id" element={<LegacyClassDashboardRedirect />} />
-      <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
-      <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
-      <Route path="/account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
+      <Route path="/teacher/students/:id" element={<Navigate to="/teacher?tab=students" replace />} />
+      <Route path="/dashboard/students/:id" element={<Navigate to="/teacher?tab=students" replace />} />
+      <Route path="/my-profile" element={<Navigate to="/teacher" replace />} />
+      <Route path="/profile" element={<Navigate to="/teacher" replace />} />
+      <Route path="/account/classes/:id" element={<Navigate to="/teacher?tab=classes" replace />} />
+      <Route path="/account/resources" element={<Navigate to="/lesson-builder" replace />} />
+      <Route path="/account/resources/new" element={<Navigate to="/lesson-builder" replace />} />
+      <Route path="/account/resources/:id" element={<Navigate to="/lesson-builder" replace />} />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
       <Route path="/admin/login" element={<AdminLoginPrototype />} />
       <Route path="/admin" element={<AdminLayout />}>

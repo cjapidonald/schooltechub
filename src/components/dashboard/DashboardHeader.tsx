@@ -2,9 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-export type DashboardQuickAction =
-  | "ask-question"
-  | "post-blog";
+export type DashboardQuickAction = "ask-question";
 
 export interface DashboardHeaderNameParts {
   honorific?: string | null;
@@ -65,7 +63,7 @@ export function DashboardHeader({
             </p>
           </div>
         </div>
-        <div className="grid w-full gap-3 sm:grid-cols-2 lg:w-auto">
+        <div className="grid w-full gap-3 sm:max-w-xs lg:w-auto">
           <Button
             onClick={() => onQuickAction("ask-question")}
             variant="outline"
@@ -73,14 +71,6 @@ export function DashboardHeader({
             aria-label={t.dashboard.quickActions.askQuestion}
           >
             {t.dashboard.quickActions.askQuestion}
-          </Button>
-          <Button
-            onClick={() => onQuickAction("post-blog")}
-            variant="outline"
-            className="h-12 w-full justify-center rounded-2xl border-white/40 bg-white/10 text-sm font-semibold text-white/90 transition hover:border-white/60 hover:bg-white/20"
-            aria-label={t.dashboard.quickActions.postBlog}
-          >
-            {t.dashboard.quickActions.postBlog}
           </Button>
         </div>
       </div>

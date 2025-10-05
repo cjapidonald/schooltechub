@@ -1924,7 +1924,7 @@ export const en = {
       seo: {
         title: "My Resources | SchoolTech Hub",
         description: "Review, update, and share your classroom resources from a single dashboard.",
-        canonical: "https://schooltechhub.com/account/resources"
+        canonical: "https://schooltechhub.com/lesson-builder"
       },
       listTitle: "Your resources",
       listDescription: "Update details, refresh links, or share another resource with peers.",
@@ -1973,7 +1973,7 @@ export const en = {
         seo: {
           title: "Submit Resource | SchoolTech Hub",
           description: "Add a new classroom resource for teachers to discover.",
-          canonical: "https://schooltechhub.com/account/resources/new"
+          canonical: "https://schooltechhub.com/lesson-builder"
         }
       },
       edit: {
@@ -1982,7 +1982,7 @@ export const en = {
         seo: {
           title: "Edit {title} | SchoolTech Hub",
           description: "Update the metadata and notes for this teaching resource.",
-          canonical: "https://schooltechhub.com/account/resources"
+          canonical: "https://schooltechhub.com/lesson-builder"
         }
       }
     },
@@ -2155,7 +2155,7 @@ export const en = {
     seo: {
       title: "Build a blog post",
       description: "Draft your story, attach helpful links, and send it to our editorial team for review.",
-      canonical: "https://schooltechub.com/blog/new",
+      canonical: "https://schooltechub.com/blog",
     },
     heading: "Build a blog post",
     subheading: "Share classroom wins, reflections, and big ideas. Submissions are reviewed before publishing.",

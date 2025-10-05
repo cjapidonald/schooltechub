@@ -304,10 +304,10 @@ export default function LessonBuilderWorkspace() {
       stage,
       date,
       links: {
-        lesson: `/builder/lesson-plans/${planQuery.data.id}`,
-        class: planQuery.data.class?.id ? `/teacher/classes/${planQuery.data.class.id}` : undefined,
-        stage: `/builder/lesson-plans/${planQuery.data.id}`,
-        date: `/builder/lesson-plans/${planQuery.data.id}`,
+        lesson: `/lesson-builder`,
+        class: planQuery.data.class?.id ? `/teacher?tab=classes` : undefined,
+        stage: `/lesson-builder`,
+        date: `/lesson-builder`,
       },
     } as const;
   }, [planQuery.data, t.lessonBuilder.editor.unknownClass, t.lessonBuilder.editor.loadingTitle]);

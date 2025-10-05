@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   Search,
   Tag,
@@ -311,6 +311,7 @@ const Blog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BlogFilterState>(() => createEmptyFilters());
+  const blogCanonicalPath = useMemo(() => getLocalizedPath("/blog", language), [language]);
 
   useEffect(() => {
     setSearchValue(searchParamValue);
@@ -630,7 +631,7 @@ const Blog = () => {
       item: {
         "@type": "BlogPosting",
         headline: post.title,
-        url: `https://schooltechub.com${getLocalizedPath(`/blog/${post.slug}`, language)}`,
+        url: `https://schooltechub.com${blogCanonicalPath}#${post.slug}`,
         datePublished: post.published_at ?? post.created_at ?? undefined,
         dateModified: post.updated_at ?? undefined,
         description: post.excerpt ?? undefined,
@@ -647,7 +648,7 @@ const Blog = () => {
       "@type": "ItemList",
       itemListElement: items,
     };
-  }, [filteredPosts, language]);
+  }, [filteredPosts, blogCanonicalPath]);
 
   const getCategoryLabel = (value?: string | null) => {
     if (!value) {
@@ -703,7 +704,7 @@ const Blog = () => {
       <SEO
         title={t.blog.seo.title}
         description={t.blog.seo.description}
-        canonicalUrl={`https://schooltechub.com${getLocalizedPath("/blog", language)}`}
+        canonicalUrl={`https://schooltechub.com${blogCanonicalPath}`}
       />
 
       {structuredData ? <StructuredData data={structuredData} /> : null}
@@ -934,12 +935,8 @@ const Blog = () => {
                     </div>
                     <div className="grid gap-5 md:grid-cols-2">
                       {featuredPosts.map(post => (
-                        <Link
-                          key={post.id}
-                          to={getLocalizedPath(`/blog/${post.slug}`, language)}
-                          className="group block"
-                        >
-                          <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
+                        <article key={post.id} className="group block">
+                          <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform group-hover:-translate-y-1 group-hover:border-white/40">
                             {post.featured_image ? (
                               <figure className="relative h-48 overflow-hidden">
                                 <img
@@ -959,7 +956,7 @@ const Blog = () => {
                               ) : null}
                             </CardHeader>
                           </Card>
-                        </Link>
+                        </article>
                       ))}
                     </div>
                   </div>
@@ -975,12 +972,8 @@ const Blog = () => {
                     </div>
                     <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                       {regularPosts.map(post => (
-                        <Link
-                          key={post.id}
-                          to={getLocalizedPath(`/blog/${post.slug}`, language)}
-                          className="group block h-full"
-                        >
-                          <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
+                        <article key={post.id} className="group block h-full">
+                          <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform group-hover:-translate-y-1 group-hover:border-white/30">
                             {post.featured_image ? (
                               <figure className="relative h-40 overflow-hidden">
                                 <img
@@ -1000,7 +993,7 @@ const Blog = () => {
                               ) : null}
                             </CardHeader>
                           </Card>
-                        </Link>
+                        </article>
                       ))}
                     </div>
                   </div>
