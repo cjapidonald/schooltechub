@@ -1,25 +1,56 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useLanguage } from "@/contexts/LanguageContext";
-import type { Profile } from "../../../types/supabase-tables";
 
-export type DashboardQuickAction = "ask-question" | "post-blog" | "new-curriculum" | "new-class";
+export type DashboardQuickAction =
+  | "ask-question"
+  | "post-blog"
+  | "new-lesson-plan"
+  | "new-curriculum"
+  | "new-class";
+
+export interface DashboardHeaderNameParts {
+  honorific?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+}
 
 interface DashboardHeaderProps {
-  profile: Profile | null;
+  nameParts: DashboardHeaderNameParts;
+  displayName?: string | null;
   avatarUrl?: string | null;
+  hasCurriculumContext: boolean;
   onQuickAction: (action: DashboardQuickAction) => void;
 }
 
-export function DashboardHeader({ profile, avatarUrl, onQuickAction }: DashboardHeaderProps) {
+export function DashboardHeader({
+  nameParts,
+  displayName,
+  avatarUrl,
+  hasCurriculumContext,
+  onQuickAction,
+}: DashboardHeaderProps) {
   const { t } = useLanguage();
 
-  const lastName = profile?.last_name?.trim();
-  const greetingName = profile?.salutation && lastName
-    ? `${profile.salutation} ${lastName}`
-    : profile?.display_name || t.dashboard.fallbackDisplayName;
+  const honorific = nameParts.honorific?.trim() ?? null;
+  const firstName = nameParts.firstName?.trim() ?? null;
+  const lastName = nameParts.lastName?.trim() ?? null;
 
-  const fallbackInitial = greetingName?.charAt(0)?.toUpperCase() || "T";
+  const greetingName = honorific && lastName
+    ? `${honorific} ${lastName}`
+    : firstName
+      ? `Mr ${firstName}`
+      : t.dashboard.fallbackDisplayName;
+
+  const fallbackInitial = (lastName ?? firstName ?? displayName ?? t.dashboard.fallbackDisplayName)
+    ?.charAt(0)
+    ?.toUpperCase() || "T";
 
   return (
     <header className="rounded-xl border bg-card px-6 py-5 shadow-sm">
@@ -41,20 +72,60 @@ export function DashboardHeader({ profile, avatarUrl, onQuickAction }: Dashboard
             </p>
           </div>
         </div>
-        <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-4">
-          <Button onClick={() => onQuickAction("ask-question")} variant="outline" className="justify-center" aria-label={t.dashboard.quickActions.askQuestion}>
-            {t.dashboard.quickActions.askQuestion}
-          </Button>
-          <Button onClick={() => onQuickAction("post-blog")} variant="outline" className="justify-center" aria-label={t.dashboard.quickActions.postBlog}>
-            {t.dashboard.quickActions.postBlog}
-          </Button>
-          <Button onClick={() => onQuickAction("new-curriculum")} className="justify-center" aria-label={t.dashboard.quickActions.newCurriculum}>
-            {t.dashboard.quickActions.newCurriculum}
-          </Button>
-          <Button onClick={() => onQuickAction("new-class")} className="justify-center" variant="secondary" aria-label={t.dashboard.quickActions.newClass}>
-            {t.dashboard.quickActions.newClass}
-          </Button>
-        </div>
+        <TooltipProvider>
+          <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-5">
+            <Button
+              onClick={() => onQuickAction("ask-question")}
+              variant="outline"
+              className="w-full justify-center"
+              aria-label={t.dashboard.quickActions.askQuestion}
+            >
+              {t.dashboard.quickActions.askQuestion}
+            </Button>
+            <Button
+              onClick={() => onQuickAction("post-blog")}
+              variant="outline"
+              className="w-full justify-center"
+              aria-label={t.dashboard.quickActions.postBlog}
+            >
+              {t.dashboard.quickActions.postBlog}
+            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="w-full">
+                  <Button
+                    onClick={() => onQuickAction("new-lesson-plan")}
+                    className="w-full justify-center"
+                    aria-label={t.dashboard.quickActions.newLessonPlan}
+                    disabled={!hasCurriculumContext}
+                  >
+                    {t.dashboard.quickActions.newLessonPlan}
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!hasCurriculumContext ? (
+                <TooltipContent side="bottom">
+                  {t.dashboard.quickActions.newLessonPlanTooltip}
+                </TooltipContent>
+              ) : null}
+            </Tooltip>
+            <Button
+              onClick={() => onQuickAction("new-curriculum")}
+              className="w-full justify-center"
+              aria-label={t.dashboard.quickActions.newCurriculum}
+            >
+              {t.dashboard.quickActions.newCurriculum}
+            </Button>
+            <Button
+              onClick={() => onQuickAction("new-class")}
+              className="w-full justify-center"
+              variant="secondary"
+              aria-label={t.dashboard.quickActions.newClass}
+            >
+              {t.dashboard.quickActions.newClass}
+            </Button>
+          </div>
+        </TooltipProvider>
       </div>
     </header>
   );

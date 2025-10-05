@@ -1,24 +1,39 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import type { Salutation } from "@/types/supabase-tables";
 
 interface MyProfileData {
   fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  displayName: string | null;
+  honorific: Salutation | null;
   schoolName: string | null;
   schoolLogoUrl: string | null;
+  avatarUrl: string | null;
 }
 
 const INITIAL_PROFILE: MyProfileData = {
   fullName: null,
+  firstName: null,
+  lastName: null,
+  displayName: null,
+  honorific: null,
   schoolName: null,
   schoolLogoUrl: null,
+  avatarUrl: null,
 };
 
 type ProfileRow = {
   full_name: string | null;
   school_name: string | null;
   school_logo_url: string | null;
+  salutation: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
 };
 
 function normalizeString(value: unknown): string | null {
@@ -28,6 +43,19 @@ function normalizeString(value: unknown): string | null {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function normalizeHonorific(value: unknown): Salutation | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (trimmed === "Mr" || trimmed === "Ms" || trimmed === "Mx") {
+    return trimmed;
+  }
+
+  return null;
 }
 
 function extractMetadataValue(metadata: Record<string, unknown>, key: string): string | null {
@@ -76,10 +104,17 @@ export function useMyProfile() {
       let fullName = extractMetadataValue(metadata, "full_name");
       let schoolName = extractMetadataValue(metadata, "school_name");
       let schoolLogoUrl = extractMetadataValue(metadata, "school_logo_url");
+      let honorific = normalizeHonorific(metadata.salutation);
+      let firstName = extractMetadataValue(metadata, "first_name");
+      let lastName = extractMetadataValue(metadata, "last_name");
+      let displayName = extractMetadataValue(metadata, "display_name");
+      let avatarUrl = extractMetadataValue(metadata, "avatar_url");
 
       const { data: profileRow, error: profileError } = await supabase
         .from("profiles")
-        .select("full_name, school_name, school_logo_url")
+        .select(
+          "full_name, school_name, school_logo_url, salutation, first_name, last_name, display_name, avatar_url",
+        )
         .eq("id", user.id)
         .maybeSingle() as { data: ProfileRow | null; error: any };
 
@@ -95,17 +130,32 @@ export function useMyProfile() {
         const profileFullName = normalizeString(profileRow.full_name);
         const profileSchoolName = normalizeString(profileRow.school_name);
         const profileSchoolLogoUrl = normalizeString(profileRow.school_logo_url);
+        const profileHonorific = normalizeHonorific(profileRow.salutation);
+        const profileFirstName = normalizeString(profileRow.first_name);
+        const profileLastName = normalizeString(profileRow.last_name);
+        const profileDisplayName = normalizeString(profileRow.display_name);
+        const profileAvatarUrl = normalizeString(profileRow.avatar_url);
 
         fullName = profileFullName ?? fullName;
         schoolName = profileSchoolName ?? schoolName;
         schoolLogoUrl = profileSchoolLogoUrl ?? schoolLogoUrl;
+        honorific = profileHonorific ?? honorific;
+        firstName = profileFirstName ?? firstName;
+        lastName = profileLastName ?? lastName;
+        displayName = profileDisplayName ?? displayName;
+        avatarUrl = profileAvatarUrl ?? avatarUrl;
       }
 
       if (isMountedRef.current) {
         setProfile({
           fullName: fullName ?? null,
+          firstName: firstName ?? null,
+          lastName: lastName ?? null,
+          displayName: displayName ?? null,
+          honorific: honorific ?? null,
           schoolName: schoolName ?? null,
           schoolLogoUrl: schoolLogoUrl ?? null,
+          avatarUrl: avatarUrl ?? null,
         });
       }
     } catch (cause) {
@@ -139,8 +189,13 @@ export function useMyProfile() {
 
   return {
     fullName: profile.fullName,
+    firstName: profile.firstName,
+    lastName: profile.lastName,
+    displayName: profile.displayName,
+    honorific: profile.honorific,
     schoolName: profile.schoolName,
     schoolLogoUrl: profile.schoolLogoUrl,
+    avatarUrl: profile.avatarUrl,
     isLoading,
     error,
     refresh: loadProfile,

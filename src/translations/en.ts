@@ -57,8 +57,10 @@ export const en = {
       subtitle: "Review your classes, build curricula, and start new lesson plans.",
     },
     quickActions: {
-      askQuestion: "Ask a Question",
-      postBlog: "Post a Blog",
+      askQuestion: "Ask the Community",
+      postBlog: "Write a Blog Post",
+      newLessonPlan: "New Lesson Plan",
+      newLessonPlanTooltip: "Create a curriculum first to unlock lesson planning.",
       newCurriculum: "New Curriculum",
       newClass: "New Class",
     },
