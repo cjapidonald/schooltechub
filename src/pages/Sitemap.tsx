@@ -43,24 +43,7 @@ const createDetailedSections = (dictionary: TranslationDictionary): DetailedSect
         { title: nav.about, url: "/about", description: sitemap.details.about },
         { title: nav.services, url: "/services", description: sitemap.details.services },
         { title: nav.blog, url: "/blog", description: sitemap.details.blog },
-        {
-          title: sitemap.linkTitles.blogPost,
-          url: "/blog/:slug",
-          description: sitemap.details.blogPost,
-          badges: ["dynamic"],
-        },
-        {
-          title: sitemap.linkTitles.resources,
-          url: "/resources",
-          description: sitemap.details.resources,
-        },
         { title: nav.events, url: "/events", description: sitemap.details.events },
-        {
-          title: sitemap.linkTitles.eventsDetail,
-          url: "/events/:slug",
-          description: sitemap.details.eventDetail,
-          badges: ["dynamic"],
-        },
         { title: nav.contact, url: "/contact", description: sitemap.details.contact },
         { title: nav.faq, url: "/faq", description: sitemap.details.faq },
         {
@@ -71,44 +54,14 @@ const createDetailedSections = (dictionary: TranslationDictionary): DetailedSect
       ],
     },
     {
-      title: sitemap.sections.contentAndPublishing,
-      description: sitemap.descriptions.contentAndPublishing,
-      links: [
-        {
-          title: sitemap.linkTitles.blogBuilder,
-          url: "/blog/new",
-          description: sitemap.details.blogBuilder,
-          badges: ["requiresAuth"],
-        },
-      ],
-    },
-    {
       title: sitemap.sections.lessonPlanning,
       description: sitemap.descriptions.lessonPlanning,
       links: [
-        {
-          title: sitemap.linkTitles.builderLessonPlans,
-          url: "/builder/lesson-plans",
-          description: sitemap.details.builderLessonPlans,
-          badges: ["requiresAuth"],
-        },
-        {
-          title: sitemap.linkTitles.builderLessonPlanDetail,
-          url: "/builder/lesson-plans/:id",
-          description: sitemap.details.builderLessonPlanDetail,
-          badges: ["requiresAuth", "dynamic"],
-        },
         {
           title: sitemap.linkTitles.lessonBuilder,
           url: "/lesson-builder",
           description: sitemap.details.lessonBuilder,
           badges: ["requiresAuth"],
-        },
-        {
-          title: sitemap.linkTitles.lessonBuilderDetail,
-          url: "/lesson-builder/:id",
-          description: sitemap.details.lessonBuilderDetail,
-          badges: ["requiresAuth", "dynamic"],
         },
       ],
     },
@@ -126,12 +79,6 @@ const createDetailedSections = (dictionary: TranslationDictionary): DetailedSect
           title: sitemap.linkTitles.teacherCurriculumDetail,
           url: "/teacher/curriculum/:id",
           description: sitemap.details.teacherCurriculumDetail,
-          badges: ["requiresAuth", "dynamic"],
-        },
-        {
-          title: sitemap.linkTitles.teacherClassDashboard,
-          url: "/teacher/classes/:id",
-          description: sitemap.details.teacherClassDashboard,
           badges: ["requiresAuth", "dynamic"],
         },
         {
@@ -314,39 +261,21 @@ const Sitemap = () => {
     }
   });
 
-  const { data: events = [] } = useQuery({
-    queryKey: ["sitemap-events"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("events")
-        .select("slug, title, updated_at, start_datetime")
-        .eq("is_published", true)
-        .order("start_datetime", { ascending: false });
-
-      if (error) throw error;
-      return data ?? [];
-    }
-  });
-
   const detailedSections = createDetailedSections(t);
   const badgeLabels = t.sitemap.badges;
 
   const dynamicSections: { title: string; links: DynamicLink[] }[] = [
     {
       title: t.sitemap.sections.blogPosts,
-      links: blogPosts.map((post) => ({
-        title: post.title || post.slug,
-        url: getLocalizedPath(`/blog/${post.slug}`, 'en'),
-        updatedAt: formatUpdatedAt(post.updated_at ?? post.published_at ?? undefined)
-      }))
-    },
-    {
-      title: t.sitemap.sections.events,
-      links: events.map((event) => ({
-        title: event.title || event.slug,
-        url: getLocalizedPath(`/events/${event.slug}`, 'en'),
-        updatedAt: formatUpdatedAt(event.updated_at ?? event.start_datetime ?? undefined)
-      }))
+      links: blogPosts.map((post) => {
+        const anchor = post.slug ? `#post-${post.slug}` : "";
+
+        return {
+          title: post.title || post.slug,
+          url: `${getLocalizedPath('/blog', 'en')}${anchor}`,
+          updatedAt: formatUpdatedAt(post.updated_at ?? post.published_at ?? undefined)
+        };
+      })
     }
   ].map((section) => ({
     ...section,

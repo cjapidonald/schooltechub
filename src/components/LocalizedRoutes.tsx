@@ -4,23 +4,15 @@ import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
 import Blog from '@/pages/Blog';
-import BlogPost from '@/pages/BlogPost';
-import BlogBuilderPage from '@/pages/BlogBuilderPage';
-import Resources from '@/pages/resources';
 import Events from '@/pages/Events';
-import EventDetail from '@/pages/EventDetail';
 import Contact from '@/pages/Contact';
 import FAQ from '@/pages/FAQ';
-import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
-import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
-import ClassDashboard from '@/pages/account/ClassDashboard';
 import AccountResources from '@/pages/AccountResources';
 import AccountResourceNew from '@/pages/AccountResourceNew';
 import AccountResourceEdit from '@/pages/AccountResourceEdit';
 import LessonBuilderPage from '@/pages/lesson-builder/LessonBuilderPage';
-import LessonBuilderWorkspace from '@/pages/lesson-builder/LessonBuilderWorkspace';
 import NotFound from '@/pages/NotFound';
 import Sitemap from '@/pages/Sitemap';
 import Navigation from '@/components/Navigation';
@@ -46,8 +38,8 @@ const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 const LegacyBuilderRedirect: React.FC = () => {
   const params = useParams<{ id?: string }>();
   const destination = params.id
-    ? `/builder/lesson-plans/${params.id}`
-    : `/builder/lesson-plans`;
+    ? `/lesson-builder?id=${encodeURIComponent(params.id)}`
+    : `/lesson-builder`;
 
   return <Navigate to={destination} replace />;
 };
@@ -72,7 +64,9 @@ const LegacyAccountRedirect: React.FC = () => {
 
 const LegacyClassDashboardRedirect: React.FC = () => {
   const params = useParams<{ id?: string }>();
-  const destination = params.id ? `/teacher/classes/${params.id}` : `/teacher?tab=classes`;
+  const destination = params.id
+    ? `/teacher?tab=classes&classId=${encodeURIComponent(params.id)}`
+    : `/teacher?tab=classes`;
   return <Navigate to={destination} replace />;
 };
 
@@ -93,25 +87,25 @@ export const LocalizedRoutes = () => {
       <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
-      <Route path="/blog/new" element={<RouteWrapper><BlogBuilderPage /></RouteWrapper>} />
-      <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
-      <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
-      <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
+      <Route path="/blog/new" element={<Navigate to="/" replace />} />
+      <Route path="/blog/:slug" element={<Navigate to="/blog" replace />} />
+      <Route path="/builder/lesson-plans" element={<Navigate to="/lesson-builder" replace />} />
+      <Route path="/builder/lesson-plans/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/curriculum" element={<Navigate to="/teacher?tab=curriculum" replace />} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
-      <Route path="/lesson-builder/:id" element={<RouteWrapper><LessonBuilderWorkspace /></RouteWrapper>} />
-      <Route path="/resources" element={<RouteWrapper><Resources /></RouteWrapper>} />
+      <Route path="/lesson-builder/:id" element={<LegacyBuilderRedirect />} />
+      <Route path="/resources" element={<Navigate to="/" replace />} />
       <Route path="/events" element={<RouteWrapper><Events /></RouteWrapper>} />
-      <Route path="/events/:slug" element={<RouteWrapper><EventDetail /></RouteWrapper>} />
+      <Route path="/events/:slug" element={<Navigate to="/events" replace />} />
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<LegacyAccountRedirect />} />
       <Route path="/teacher" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
       <Route path="/teacher/curriculum/:id" element={<RouteWrapper><TeacherCurriculumDetailPage /></RouteWrapper>} />
-      <Route path="/teacher/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
+      <Route path="/teacher/classes/:id" element={<LegacyClassDashboardRedirect />} />
       <Route path="/dashboard" element={<Navigate to="/teacher" replace />} />
       <Route path="/student" element={<RouteWrapper><StudentPage /></RouteWrapper>} />
       <Route path="/teacher/students/:id" element={<RouteWrapper><StudentDashboardPage /></RouteWrapper>} />

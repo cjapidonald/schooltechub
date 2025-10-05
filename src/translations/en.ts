@@ -99,6 +99,7 @@ export const en = {
       resourceAttached: "Resource attached to the lesson plan.",
       resourceAttachError: "We couldn't attach that resource. Please try again.",
       error: "Something went wrong. Please try again.",
+      blogUnavailable: "Blog submissions are currently unavailable.",
     },
     classes: {
       title: "My Classes",
