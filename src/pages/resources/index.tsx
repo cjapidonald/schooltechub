@@ -46,39 +46,14 @@ import {
   subscribeToLessonDraftContext,
 } from "@/lib/lesson-draft-bridge";
 import { cn } from "@/lib/utils";
+import {
+  RESOURCE_SORT_OPTIONS,
+  RESOURCE_STAGE_OPTIONS,
+  RESOURCE_SUBJECT_OPTIONS,
+  RESOURCE_TYPE_OPTIONS,
+  type ResourceSortOptionValue,
+} from "@/lib/resource-filters";
 import type { Resource } from "@/types/resources";
-
-const TYPE_OPTIONS = [
-  "Worksheet",
-  "Video",
-  "Interactive",
-  "Presentation",
-  "Assessment",
-  "Article",
-  "Audio",
-  "Game",
-  "Template",
-  "Other",
-];
-
-const SUBJECT_OPTIONS = [
-  "Math",
-  "Science",
-  "English",
-  "Social Studies",
-  "STEM",
-  "ICT",
-  "Arts",
-  "Languages",
-];
-
-const STAGE_OPTIONS = [
-  "Early Childhood",
-  "Primary",
-  "Lower Secondary",
-  "Upper Secondary",
-  "Higher Education",
-];
 
 type FilterState = {
   searchValue: string;
@@ -96,17 +71,11 @@ const DEFAULT_FILTER_STATE: FilterState = {
   tags: [],
 };
 
-const SORT_OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "most-tagged", label: "Most tags" },
-  { value: "title", label: "Title A–Z" },
-] as const;
-
-type SortOption = (typeof SORT_OPTIONS)[number]["value"];
+type SortOption = ResourceSortOptionValue;
 
 type MultiSelectFilterProps = {
   label: string;
-  options: string[];
+  options: readonly string[];
   selected: string[];
   onChange: (next: string[]) => void;
 };
@@ -628,19 +597,19 @@ const ResourcesPage = () => {
               <div className="flex flex-wrap gap-2">
                 <MultiSelectFilter
                   label="Type"
-                  options={TYPE_OPTIONS}
+                  options={RESOURCE_TYPE_OPTIONS}
                   selected={filters.types}
                   onChange={types => setFilters(current => ({ ...current, types }))}
                 />
                 <MultiSelectFilter
                   label="Subject"
-                  options={SUBJECT_OPTIONS}
+                  options={RESOURCE_SUBJECT_OPTIONS}
                   selected={filters.subjects}
                   onChange={subjects => setFilters(current => ({ ...current, subjects }))}
                 />
                 <MultiSelectFilter
                   label="Stage"
-                  options={STAGE_OPTIONS}
+                  options={RESOURCE_STAGE_OPTIONS}
                   selected={filters.stages}
                   onChange={stages => setFilters(current => ({ ...current, stages }))}
                 />
@@ -685,7 +654,7 @@ const ResourcesPage = () => {
                     <SelectValue placeholder="Sort resources" />
                   </SelectTrigger>
                   <SelectContent>
-                    {SORT_OPTIONS.map(option => (
+                    {RESOURCE_SORT_OPTIONS.map(option => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -878,3 +847,10 @@ const ResourcesPage = () => {
 };
 
 export default ResourcesPage;
+
+export {
+  RESOURCE_SORT_OPTIONS,
+  RESOURCE_STAGE_OPTIONS,
+  RESOURCE_SUBJECT_OPTIONS,
+  RESOURCE_TYPE_OPTIONS,
+} from "@/lib/resource-filters";
