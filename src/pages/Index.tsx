@@ -226,7 +226,7 @@ type DecorativeBackgroundImage = {
 
 const heroBackgroundDecorations: DecorativeBackgroundImage[] = [
   {
-    src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+    src: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
     className:
       "-top-16 right-[-6%] hidden h-52 w-72 rotate-3 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_32px_80px_-28px_rgba(59,20,120,0.65)] lg:block",
   },
@@ -236,7 +236,7 @@ const heroBackgroundDecorations: DecorativeBackgroundImage[] = [
       "bottom-[-18%] left-[-10%] hidden h-64 w-80 -rotate-6 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_24px_70px_-32px_rgba(12,102,194,0.55)] md:block",
   },
   {
-    src: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    src: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80",
     className:
       "top-[22%] left-[52%] hidden h-56 w-56 rotate-12 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_28px_80px_-32px_rgba(255,141,41,0.45)] xl:block",
   },
