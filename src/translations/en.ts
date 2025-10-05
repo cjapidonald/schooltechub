@@ -91,6 +91,10 @@ export const en = {
       lessonPlanCreated: "Lesson plan created",
       exportUnavailable: "CSV export will be available soon.",
       exampleDataCreated: "Example data added to your workspace.",
+      lessonPlanMissing: "Create the lesson plan before opening it.",
+      resourceShortcutMissing: "No quick resources are available yet for this lesson.",
+      resourceAttached: "Resource attached to the lesson plan.",
+      resourceAttachError: "We couldn't attach that resource. Please try again.",
       error: "Something went wrong. Please try again.",
     },
     classes: {
@@ -229,6 +233,9 @@ export const en = {
       },
       actions: {
         createLessonPlan: "Create Lesson Plan",
+        openLessonPlan: "Open Lesson Plan",
+        quickAttachResource: "Quick Attach Resource",
+        reorder: "Drag to reorder",
       },
     },
     dialogs: {
