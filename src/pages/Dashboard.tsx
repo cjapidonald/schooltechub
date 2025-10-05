@@ -30,7 +30,6 @@ import {
   fetchCurricula,
   fetchCurriculumItems,
   fetchMyClasses,
-  fetchMyProfile,
   seedExampleDashboardData,
 } from "@/features/dashboard/api";
 import {
@@ -40,7 +39,35 @@ import {
   DASHBOARD_EXAMPLE_CURRICULUM_ITEMS,
   type DashboardCurriculumSummary,
 } from "@/features/dashboard/examples";
-import type { Class, CurriculumItem, Profile } from "../../types/supabase-tables";
+import { useMyProfile } from "@/hooks/useMyProfile";
+import type { Class, CurriculumItem } from "../../types/supabase-tables";
+
+const normalizeName = (value: string | null | undefined) => {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+const deriveNamePartsFromFullName = (fullName: string | null | undefined) => {
+  const normalized = normalizeName(fullName);
+  if (!normalized) {
+    return { firstName: null, lastName: null };
+  }
+
+  const segments = normalized.split(/\s+/).filter(Boolean);
+  if (segments.length === 0) {
+    return { firstName: null, lastName: null };
+  }
+
+  if (segments.length === 1) {
+    return { firstName: segments[0], lastName: null };
+  }
+
+  return { firstName: segments[0], lastName: segments[segments.length - 1] };
+};
 
 const classSchema = z.object({
   title: z.string().min(2),
@@ -73,6 +100,14 @@ export default function DashboardPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useOptionalUser();
+  const {
+    fullName,
+    firstName,
+    lastName,
+    displayName,
+    honorific,
+    avatarUrl,
+  } = useMyProfile();
 
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
   const [isCurriculumDialogOpen, setCurriculumDialogOpen] = useState(false);
@@ -85,12 +120,6 @@ export default function DashboardPage() {
   const curriculumForm = useForm<CurriculumFormValues>({
     resolver: zodResolver(curriculumSchema),
     defaultValues: { title: "", class_id: "", subject: "", academic_year: "", lesson_titles: "" },
-  });
-
-  const profileQuery = useQuery<Profile | null>({
-    queryKey: ["dashboard-profile", user?.id],
-    queryFn: () => fetchMyProfile(user!.id),
-    enabled: Boolean(user?.id),
   });
 
   const classesQuery = useQuery<Class[]>({
@@ -184,10 +213,13 @@ export default function DashboardPage() {
   const handleQuickAction = (action: DashboardQuickAction) => {
     switch (action) {
       case "ask-question":
-        navigate("/blog/new");
+        navigate("/forum/new");
         return;
       case "post-blog":
         navigate("/blog/new");
+        return;
+      case "new-lesson-plan":
+        navigate("/lesson-builder");
         return;
       case "new-curriculum":
         setCurriculumDialogOpen(true);
@@ -221,6 +253,13 @@ export default function DashboardPage() {
     return classes.some(item => item.isExample) || curricula.some(item => item.isExample);
   }, [classes, curricula, classesQuery.isLoading, curriculaQuery.isLoading]);
 
+  const hasCurriculumContext = useMemo(() => {
+    if (!curriculaQuery.data || curriculaQuery.data.length === 0) {
+      return false;
+    }
+    return curriculaQuery.data.some(item => !item.isExample);
+  }, [curriculaQuery.data]);
+
   const fallbackCurriculumId = curricula[0]?.id ?? null;
   const effectiveCurriculumId = activeCurriculumId ?? fallbackCurriculumId;
 
@@ -250,6 +289,15 @@ export default function DashboardPage() {
   }, [effectiveCurriculumId, curriculumItemsQuery.data]);
 
   const curriculumItemsLoading = shouldFetchCurriculumItems ? curriculumItemsQuery.isLoading : false;
+
+  const derivedNameParts = useMemo(() => {
+    const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
+    return {
+      honorific: normalizeName(honorific ?? undefined),
+      firstName: normalizeName(firstName ?? fallback.firstName ?? undefined),
+      lastName: normalizeName(lastName ?? fallback.lastName ?? undefined),
+    };
+  }, [displayName, firstName, fullName, honorific, lastName]);
 
   if (!user) {
     return (
@@ -281,8 +329,10 @@ export default function DashboardPage() {
         </Alert>
       ) : null}
       <DashboardHeader
-        profile={profileQuery.data ?? null}
-        avatarUrl={profileQuery.data?.avatar_url ?? null}
+        nameParts={derivedNameParts}
+        displayName={normalizeName(displayName) ?? normalizeName(fullName)}
+        avatarUrl={avatarUrl}
+        hasCurriculumContext={hasCurriculumContext}
         onQuickAction={handleQuickAction}
       />
       <Tabs defaultValue="curriculum" className="space-y-6">
