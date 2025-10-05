@@ -325,11 +325,6 @@ const Index = () => {
               </p>
             </Reveal>
             <div className="space-y-3">
-              <Reveal delay={180}>
-                <Badge variant="secondary" className="mx-auto bg-secondary/20 text-secondary-foreground">
-                  School-wide technology solutions
-                </Badge>
-              </Reveal>
               <Reveal delay={240}>
                 <h3 className="text-2xl font-semibold text-white">
                   Professional development and classroom technology aligned
