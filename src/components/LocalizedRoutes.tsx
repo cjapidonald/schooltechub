@@ -27,6 +27,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminPage from '@/pages/admin/AdminPage';
+import AdminLoginPrototype from '@/pages/admin/AdminLoginPrototype';
 import DashboardPage from '@/pages/Dashboard';
 import StudentPage from '@/pages/Student';
 import StudentDashboardPage from '@/pages/StudentDashboard';
@@ -122,6 +123,7 @@ export const LocalizedRoutes = () => {
       <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
       <Route path="/account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />
       <Route path="/sitemap" element={<RouteWrapper><Sitemap /></RouteWrapper>} />
+      <Route path="/admin/login" element={<AdminLoginPrototype />} />
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminPage />} />
         <Route path=":segment" element={<AdminPage />} />

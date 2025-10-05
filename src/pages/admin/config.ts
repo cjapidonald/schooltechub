@@ -21,54 +21,25 @@ export const adminNavigation: AdminNavGroup[] = [
   {
     items: [
       {
-        title: "Dashboard",
+        title: "Command Center",
         path: "/admin",
         slug: "",
-        description: "Monitor platform health, stats, and the latest approvals in one place.",
+        description: "Monitor live activity, platform health, and upcoming launches.",
         variant: "dashboard",
       },
     ],
   },
   {
-    label: "Moderation",
+    label: "Content Studio",
     items: [
       {
-        title: "Resources",
-        path: "/admin/moderation/resources",
-        slug: "moderation/resources",
-        description: "Review resource submissions awaiting approval.",
-      },
-      {
-        title: "Blogposts",
-        path: "/admin/moderation/blogposts",
-        slug: "moderation/blogposts",
-        description: "Approve or reject drafted blogposts before they go live.",
-      },
-      {
-        title: "Research Applications",
-        path: "/admin/moderation/research-applications",
-        slug: "moderation/research-applications",
-        description: "Triage research study requests and coordinate reviewer feedback.",
-      },
-      {
-        title: "Comments (stub)",
-        path: "/admin/moderation/comments",
-        slug: "moderation/comments",
-        description: "Centralise comment moderation with a forthcoming workflow.",
-      },
-    ],
-  },
-  {
-    label: "Content",
-    items: [
-      {
-        title: "Posts",
+        title: "Editorial Planner",
         path: "/admin/content/posts",
         slug: "content/posts",
-        description: "Plan and manage editorial posts across the site.",
+        description: "Plan storytelling for the refreshed SchoolTech Hub site.",
       },
       {
-        title: "Resources",
+        title: "Learning Library",
         path: "/admin/content/resources",
         slug: "content/resources",
         description: "Curate approved resources and update catalogue metadata.",
@@ -76,77 +47,36 @@ export const adminNavigation: AdminNavGroup[] = [
     ],
   },
   {
-    label: "Users",
+    label: "Community Pulse",
     items: [
       {
-        title: "Directory",
+        title: "Story Reviews",
+        path: "/admin/moderation/blogposts",
+        slug: "moderation/blogposts",
+        description: "Review community submissions and sign off new stories.",
+      },
+    ],
+  },
+  {
+    label: "People Ops",
+    items: [
+      {
+        title: "Team Directory",
         path: "/admin/users/directory",
         slug: "users/directory",
         description: "Audit accounts, access levels, and sign-in activity.",
       },
       {
-        title: "Invitations",
+        title: "Invites",
         path: "/admin/users/invitations",
         slug: "users/invitations",
         description: "Track outstanding invitations and reminders for collaborators.",
       },
       {
-        title: "Roles (Admins)",
+        title: "Admin Roles",
         path: "/admin/users/roles",
         slug: "users/roles",
         description: "Grant or revoke administrative roles across the organisation.",
-      },
-    ],
-  },
-  {
-    label: "Research",
-    items: [
-      {
-        title: "Projects",
-        path: "/admin/research/projects",
-        slug: "research/projects",
-        description: "Coordinate active research projects and milestones.",
-      },
-      {
-        title: "Documents",
-        path: "/admin/research/documents",
-        slug: "research/documents",
-        description: "Organise research documentation, consent forms, and templates.",
-      },
-      {
-        title: "Participants",
-        path: "/admin/research/participants",
-        slug: "research/participants",
-        description: "Manage participant rosters, consent, and communication.",
-      },
-      {
-        title: "Submissions",
-        path: "/admin/research/submissions",
-        slug: "research/submissions",
-        description: "Review submitted findings, datasets, and supporting evidence.",
-      },
-    ],
-  },
-  {
-    label: "System",
-    items: [
-      {
-        title: "Notifications",
-        path: "/admin/system/notifications",
-        slug: "system/notifications",
-        description: "Broadcast updates and manage delivery schedules.",
-      },
-      {
-        title: "Audit Log",
-        path: "/admin/system/audit-log",
-        slug: "system/audit-log",
-        description: "Inspect sensitive changes recorded across the platform.",
-      },
-      {
-        title: "Settings",
-        path: "/admin/system/settings",
-        slug: "system/settings",
-        description: "Adjust platform-wide configuration and integration keys.",
       },
     ],
   },
