@@ -4,6 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 type AdminGuardState = "checking" | "allowed" | "forbidden" | "error";
 
+const PROTOTYPE_SESSION_KEY = "adminPrototypeSession";
+
+export function hasPrototypeAdminSession(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.localStorage.getItem(PROTOTYPE_SESSION_KEY) === "granted";
+}
+
 async function fetchAdminStatus(): Promise<Response> {
   const { data, error } = await supabase.auth.getSession();
 
@@ -25,6 +35,11 @@ export function useAdminGuard(pathname: string): AdminGuardState {
     let cancelled = false;
 
     async function verifyAdmin() {
+      if (hasPrototypeAdminSession()) {
+        setState("allowed");
+        return;
+      }
+
       setState("checking");
 
       try {
@@ -55,4 +70,20 @@ export function useAdminGuard(pathname: string): AdminGuardState {
   }, [pathname]);
 
   return state;
+}
+
+export function grantPrototypeAdminSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(PROTOTYPE_SESSION_KEY, "granted");
+}
+
+export function clearPrototypeAdminSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(PROTOTYPE_SESSION_KEY);
 }
