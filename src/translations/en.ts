@@ -1173,7 +1173,108 @@ export const en = {
     checkEmail: "Please check your email to confirm your account",
     successSignUp: "Account created successfully!",
     errorSignIn: "Invalid email or password",
-    errorSignUp: "Failed to create account"
+    errorSignUp: "Failed to create account",
+    roleShowcase: {
+      badge: "Tailored access",
+      title: "One login, three connected experiences",
+      subtitle:
+        "Whether you're teaching, learning, or supporting at home, SchoolTechHub gives every role the insights they need while keeping families threaded together.",
+      roles: {
+        student: {
+          title: "Student Dashboard",
+          description: "Stay organised with a personal view of assignments, scores, and nightly homework.",
+          highlights: [
+            "See every assignment with due dates, status, and teacher notes.",
+            "Review quiz and project scores as soon as they're posted.",
+            "Know exactly which homework tasks are due tonight.",
+          ],
+          preview: {
+            title: "This week's snapshot",
+            items: [
+              { label: "Assignments", value: "Solar System Lab — due Fri • Status: In progress" },
+              { label: "Score Snapshot", value: "Algebra Quiz — 92% (+5% growth)" },
+              { label: "Tonight's Homework", value: "Read Chapter 3 & upload reflection" },
+            ],
+          },
+        },
+        parent: {
+          title: "Parent Portal",
+          description: "Follow each child's results and conversations with their teachers in one place.",
+          highlights: [
+            "Review every child's latest results, attendance, and growth trends.",
+            "Track homework completion and teacher feedback in real time.",
+            "Send quick messages when you need more classroom context.",
+          ],
+          preview: {
+            title: "Family overview",
+            items: [
+              { label: "Child Overview", value: "Ava (Grade 6) • Attendance 98% • Growth +7%" },
+              { label: "Latest Results", value: "Science Project — 95% (Teacher: Mr. Patel)" },
+              { label: "Homework Status", value: "Math Practice Set — Submitted" },
+            ],
+          },
+        },
+        teacher: {
+          title: "Teacher Workspace",
+          description: "Plan curriculum-connected lessons, assign homework, and monitor mastery in minutes.",
+          highlights: [
+            "Start with curriculum-aligned class plans and adapt instantly.",
+            "Link skills, resources, and assessments for every roster.",
+            "Assign homework and monitor completion from one screen.",
+          ],
+          preview: {
+            title: "Today's focus",
+            items: [
+              { label: "Classes", value: "Grade 6 Science • Grade 6 Math" },
+              { label: "Skill Tracker", value: "Scientific Inquiry — 78% mastery" },
+              { label: "Homework Queue", value: "Digital Lab Journal • Due Tomorrow" },
+            ],
+          },
+        },
+      },
+      teacherFlow: {
+        title: "From class setup to homework in four threaded steps",
+        description:
+          "Teachers orchestrate the learning journey while students and parents receive the updates instantly—no extra tools required.",
+        stepLabel: "Step",
+        steps: [
+          {
+            title: "Class overview",
+            description: "Start with rosters, pacing guides, and attendance insights in one dashboard.",
+          },
+          {
+            title: "Curriculum to skills",
+            description: "Map standards to daily objectives and monitor mastery for every learner.",
+          },
+          {
+            title: "Lesson builder",
+            description: "Drag in activities, resources, and AI suggestions to craft engaging lessons fast.",
+          },
+          {
+            title: "Homework & feedback",
+            description: "Assign differentiated practice, review submissions, and share feedback instantly.",
+          },
+        ],
+      },
+      connection: {
+        title: "Threaded together for every login",
+        subtitle: "Updates flow automatically so students, parents, and teachers always start conversations with the same information.",
+        items: [
+          {
+            title: "Real-time sync",
+            description: "Homework assigned by teachers appears in the student dashboard and the parent portal within seconds.",
+          },
+          {
+            title: "Shared progress language",
+            description: "Scores, skills, and comments use the same labels everywhere, making school-home dialogue effortless.",
+          },
+          {
+            title: "Supportive nudges",
+            description: "Parents receive gentle reminders when assignments are missing so they can help students stay on track.",
+          },
+        ],
+      },
+    },
   },
   events: {
     title: "Upcoming Events & Webinars",
