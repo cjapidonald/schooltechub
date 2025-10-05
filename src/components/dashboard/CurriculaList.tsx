@@ -60,12 +60,12 @@ export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurri
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {curricula.map(item => (
             <Card key={item.id} className="flex flex-col justify-between">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-3">
-                  <CardTitle className="text-xl font-semibold leading-tight">
+              <CardHeader className="space-y-2 p-4 pb-2">
+                <div className="flex items-start justify-between gap-2">
+                  <CardTitle className="text-lg font-semibold leading-tight">
                     {item.title}
                   </CardTitle>
                   {item.isExample ? (
@@ -74,7 +74,7 @@ export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurri
                     </Badge>
                   ) : null}
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   {item.class ? (
                     <Badge variant="secondary">{item.class.title}</Badge>
                   ) : null}
@@ -82,29 +82,30 @@ export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurri
                   {item.class?.stage ? <span>· {item.class.stage}</span> : null}
                 </div>
                 {item.isExample ? (
-                  <p className="mt-2 text-sm text-muted-foreground">{t.dashboard.common.exampleDescription}</p>
+                  <p className="text-xs text-muted-foreground">{t.dashboard.common.exampleDescription}</p>
                 ) : null}
               </CardHeader>
-              <CardContent className="flex flex-col gap-3">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <CardContent className="flex flex-col gap-2 p-4 pt-1">
+                <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                   <span>{t.dashboard.curriculum.labels.academicYear}</span>
                   <span>{formatYear(item.academic_year)}</span>
                 </div>
                 <Separator />
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                   <span>{t.dashboard.curriculum.labels.itemsCount}</span>
                   <span>{item.items_count}</span>
                 </div>
                 {item.created_at ? (
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                     <span>{t.dashboard.curriculum.labels.createdOn}</span>
                     <span>{formatCreatedAt(item.created_at)}</span>
                   </div>
                 ) : null}
               </CardContent>
-              <CardFooter className="flex items-center justify-between gap-2">
+              <CardFooter className="flex items-center justify-between gap-2 p-4 pt-1">
                 <Button
                   variant="ghost"
+                  size="sm"
                   onClick={() => onOpenCurriculum(item.id)}
                   aria-label={t.dashboard.curriculum.actions.open}
                 >
@@ -112,6 +113,7 @@ export function CurriculaList({ curricula, loading, onNewCurriculum, onOpenCurri
                 </Button>
                 <Button
                   variant="outline"
+                  size="sm"
                   disabled={item.isExample}
                   onClick={() => onExportCurriculum(item.id)}
                   aria-label={t.dashboard.curriculum.actions.exportCsv}
