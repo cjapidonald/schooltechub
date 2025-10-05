@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { format } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -23,10 +24,10 @@ import { CurriculaList } from "@/components/dashboard/CurriculaList";
 import { CurriculumEditor } from "@/components/dashboard/CurriculumEditor";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { SkillsSection } from "@/components/dashboard/SkillsSection";
+import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import {
   createClass,
   createCurriculum,
-  createLessonPlanFromItem,
   fetchCurricula,
   fetchCurriculumItems,
   fetchMyClasses,
@@ -94,6 +95,34 @@ const splitLessonTitles = (input: string) =>
     .map(line => line.trim())
     .filter(Boolean);
 
+type LessonBuilderRouteContext = {
+  title: string;
+  classId: string | null;
+  classTitle: string | null;
+  stage: string | null;
+  date: string | null;
+  sequence: number | null;
+  curriculumId: string | null;
+};
+
+const formatLessonContextDate = (value: string | null) => {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return format(new Date(value), "PPP");
+  } catch {
+    return value;
+  }
+};
+
+const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "skills"] as const;
+type DashboardTab = (typeof DASHBOARD_TABS)[number];
+
+const isDashboardTab = (value: string | null): value is DashboardTab =>
+  Boolean(value && (DASHBOARD_TABS as readonly string[]).includes(value));
+
 export default function DashboardPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -112,6 +141,152 @@ export default function DashboardPage() {
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
   const [isCurriculumDialogOpen, setCurriculumDialogOpen] = useState(false);
   const [activeCurriculumId, setActiveCurriculumId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const updateSearchParams = useCallback(
+    (mutator: (params: URLSearchParams) => void, options: { replace?: boolean } = {}) => {
+      setSearchParams(
+        prev => {
+          const next = new URLSearchParams(prev);
+          mutator(next);
+          return next;
+        },
+        { replace: options.replace ?? true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const setLessonBuilderContext = useCallback(
+    (context: LessonBuilderRouteContext | null) => {
+      updateSearchParams(params => {
+        params.set("tab", "lessonBuilder");
+        const keys = [
+          "lessonTitle",
+          "lessonClassId",
+          "lessonClassTitle",
+          "lessonStage",
+          "lessonDate",
+          "lessonSeq",
+          "lessonCurriculumId",
+        ];
+        keys.forEach(key => params.delete(key));
+
+        if (!context) {
+          return;
+        }
+
+        params.set("lessonTitle", context.title);
+        if (context.classId) {
+          params.set("lessonClassId", context.classId);
+        }
+        if (context.classTitle) {
+          params.set("lessonClassTitle", context.classTitle);
+        }
+        if (context.stage) {
+          params.set("lessonStage", context.stage);
+        }
+        if (context.date) {
+          params.set("lessonDate", context.date);
+        }
+        if (context.sequence !== null && context.sequence !== undefined) {
+          params.set("lessonSeq", String(context.sequence));
+        }
+        if (context.curriculumId) {
+          params.set("lessonCurriculumId", context.curriculumId);
+        }
+      });
+    },
+    [updateSearchParams],
+  );
+
+  const requestedTab = searchParams.get("tab");
+  const activeTab: DashboardTab = isDashboardTab(requestedTab) ? requestedTab : "curriculum";
+
+  const lessonBuilderContext = useMemo<LessonBuilderRouteContext | null>(() => {
+    const getParam = (key: string) => {
+      const value = searchParams.get(key);
+      return value && value.trim().length > 0 ? value : null;
+    };
+
+    const title = getParam("lessonTitle");
+    if (!title) {
+      return null;
+    }
+
+    const sequenceRaw = getParam("lessonSeq");
+    const sequenceNumber = sequenceRaw ? Number.parseInt(sequenceRaw, 10) : Number.NaN;
+
+    return {
+      title,
+      classId: getParam("lessonClassId"),
+      classTitle: getParam("lessonClassTitle"),
+      stage: getParam("lessonStage"),
+      date: getParam("lessonDate"),
+      sequence: Number.isFinite(sequenceNumber) ? sequenceNumber : null,
+      curriculumId: getParam("lessonCurriculumId"),
+    };
+  }, [searchParams]);
+
+  const lessonBuilderSummaryItems = useMemo(
+    () =>
+      lessonBuilderContext
+        ? [
+            {
+              key: "lesson",
+              label: t.dashboard.lessonBuilder.labels.lesson,
+              value: lessonBuilderContext.title,
+            },
+            {
+              key: "class",
+              label: t.dashboard.lessonBuilder.labels.class,
+              value: lessonBuilderContext.classTitle,
+            },
+            {
+              key: "stage",
+              label: t.dashboard.lessonBuilder.labels.stage,
+              value: lessonBuilderContext.stage,
+            },
+            {
+              key: "date",
+              label: t.dashboard.lessonBuilder.labels.date,
+              value: formatLessonContextDate(lessonBuilderContext.date),
+            },
+            {
+              key: "sequence",
+              label: t.dashboard.lessonBuilder.labels.sequence,
+              value:
+                lessonBuilderContext.sequence !== null
+                  ? `#${lessonBuilderContext.sequence}`
+                  : null,
+            },
+          ]
+        : [],
+    [lessonBuilderContext, t],
+  );
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const next: DashboardTab = isDashboardTab(value) ? value : "curriculum";
+      updateSearchParams(params => {
+        params.set("tab", next);
+      });
+    },
+    [updateSearchParams],
+  );
+
+  useEffect(() => {
+    if (!lessonBuilderContext?.curriculumId) {
+      return;
+    }
+
+    setActiveCurriculumId(current => {
+      if (current === lessonBuilderContext.curriculumId) {
+        return current;
+      }
+      return lessonBuilderContext.curriculumId;
+    });
+  }, [lessonBuilderContext?.curriculumId]);
 
   const classForm = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
@@ -183,18 +358,6 @@ export default function DashboardPage() {
     },
   });
 
-  const createLessonPlanMutation = useMutation({
-    mutationFn: (curriculumItemId: string) =>
-      createLessonPlanFromItem({ ownerId: user!.id, curriculumItemId }),
-    onSuccess: lessonPlan => {
-      toast({ description: t.dashboard.toasts.lessonPlanCreated });
-      navigate(`/lesson-builder/${lessonPlan.id}`);
-    },
-    onError: () => {
-      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
-    },
-  });
-
   const seedExampleDataMutation = useMutation({
     mutationFn: () => seedExampleDashboardData({ ownerId: user!.id }),
     onSuccess: result => {
@@ -219,7 +382,7 @@ export default function DashboardPage() {
         navigate("/blog/new");
         return;
       case "new-lesson-plan":
-        navigate("/lesson-builder");
+        setLessonBuilderContext(null);
         return;
       case "new-curriculum":
         setCurriculumDialogOpen(true);
@@ -290,6 +453,29 @@ export default function DashboardPage() {
 
   const curriculumItemsLoading = shouldFetchCurriculumItems ? curriculumItemsQuery.isLoading : false;
 
+  const handlePlanCurriculumLesson = useCallback(
+    (item: CurriculumItem & { isExample?: boolean }) => {
+      if (!item || item.isExample) {
+        return;
+      }
+
+      const classFromCurriculum = selectedCurriculum?.class ?? null;
+      const context: LessonBuilderRouteContext = {
+        title: item.lesson_title,
+        classId: classFromCurriculum?.id ?? null,
+        classTitle: classFromCurriculum?.title ?? null,
+        stage: item.stage ?? classFromCurriculum?.stage ?? null,
+        date: item.scheduled_on ?? null,
+        sequence: Number.isFinite(item.position) ? item.position : null,
+        curriculumId: item.curriculum_id,
+      };
+
+      setActiveCurriculumId(item.curriculum_id);
+      setLessonBuilderContext(context);
+    },
+    [selectedCurriculum, setLessonBuilderContext],
+  );
+
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
     return {
@@ -335,18 +521,13 @@ export default function DashboardPage() {
         hasCurriculumContext={hasCurriculumContext}
         onQuickAction={handleQuickAction}
       />
-      <Tabs defaultValue="curriculum" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList>
           <TabsTrigger value="curriculum">{t.dashboard.tabs.curriculum}</TabsTrigger>
           <TabsTrigger value="classes">{t.dashboard.tabs.classes}</TabsTrigger>
+          <TabsTrigger value="lessonBuilder">{t.dashboard.tabs.lessonBuilder}</TabsTrigger>
           <TabsTrigger value="students">{t.dashboard.tabs.students}</TabsTrigger>
           <TabsTrigger value="skills">{t.dashboard.tabs.skills}</TabsTrigger>
-          <TabsTrigger value="lessonPlans" disabled>
-            {t.dashboard.tabs.lessonPlans}
-          </TabsTrigger>
-          <TabsTrigger value="activity" disabled>
-            {t.dashboard.tabs.activity}
-          </TabsTrigger>
         </TabsList>
         <TabsContent value="curriculum" className="space-y-6">
           <CurriculaList
@@ -364,7 +545,7 @@ export default function DashboardPage() {
               <CurriculumEditor
                 items={curriculumItems}
                 loading={curriculumItemsLoading}
-                onCreateLessonPlan={id => createLessonPlanMutation.mutate(id)}
+                onPlanLesson={handlePlanCurriculumLesson}
               />
             </div>
           ) : null}
@@ -377,6 +558,49 @@ export default function DashboardPage() {
             onViewClass={classId => navigate(`/account/classes/${classId}`)}
             onEditClass={classId => navigate(`/account/classes/${classId}`)}
           />
+        </TabsContent>
+        <TabsContent value="lessonBuilder" className="space-y-6">
+          {lessonBuilderContext ? (
+            <div className="space-y-6">
+              <div className="rounded-lg border bg-card p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-foreground">
+                  {t.dashboard.lessonBuilder.contextTitle}
+                </h3>
+                <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {lessonBuilderSummaryItems.map(item => (
+                    <div key={item.key} className="space-y-1 text-left">
+                      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {item.label}
+                      </dt>
+                      <dd className="text-base font-semibold text-foreground">
+                        {item.value ?? t.dashboard.lessonBuilder.fallback}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              <LessonBuilderPage
+                layoutMode="embedded"
+                initialMeta={{
+                  title: lessonBuilderContext.title,
+                  date: lessonBuilderContext.date ?? null,
+                }}
+                initialClassId={lessonBuilderContext.classId ?? null}
+              />
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed bg-muted/30 p-10 text-center">
+              <h3 className="text-lg font-semibold text-foreground">
+                {t.dashboard.lessonBuilder.intercept.title}
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t.dashboard.lessonBuilder.intercept.description}
+              </p>
+              <Button className="mt-6" variant="outline" onClick={() => handleTabChange("curriculum")}>
+                {t.dashboard.lessonBuilder.intercept.cta}
+              </Button>
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="students">
           <StudentsSection

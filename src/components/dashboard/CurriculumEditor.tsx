@@ -8,7 +8,7 @@ import { format } from "date-fns";
 interface CurriculumEditorProps {
   items: Array<CurriculumItem & { isExample?: boolean }>;
   loading?: boolean;
-  onCreateLessonPlan: (curriculumItemId: string) => void;
+  onPlanLesson: (item: CurriculumItem & { isExample?: boolean }) => void;
 }
 
 const formatDate = (value?: string | null) => {
@@ -20,7 +20,7 @@ const formatDate = (value?: string | null) => {
   }
 };
 
-export function CurriculumEditor({ items, loading, onCreateLessonPlan }: CurriculumEditorProps) {
+export function CurriculumEditor({ items, loading, onPlanLesson }: CurriculumEditorProps) {
   const { t } = useLanguage();
 
   return (
@@ -78,7 +78,7 @@ export function CurriculumEditor({ items, loading, onCreateLessonPlan }: Curricu
                     variant="outline"
                     size="sm"
                     disabled={!item.id || item.isExample}
-                    onClick={() => onCreateLessonPlan(item.id)}
+                    onClick={() => onPlanLesson(item)}
                     aria-label={t.dashboard.curriculumView.actions.createLessonPlan}
                   >
                     {t.dashboard.curriculumView.actions.createLessonPlan}
