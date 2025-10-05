@@ -19,6 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useOptionalUser } from "@/hooks/useOptionalUser";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
 import { DashboardHeader, DashboardQuickAction } from "@/components/dashboard/DashboardHeader";
 import { ClassesTable } from "@/components/dashboard/ClassesTable";
 import { CurriculaList } from "@/components/dashboard/CurriculaList";
@@ -131,6 +132,12 @@ type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 const isDashboardTab = (value: string | null): value is DashboardTab =>
   Boolean(value && (DASHBOARD_TABS as readonly string[]).includes(value));
+
+const GLASS_PANEL_CLASS =
+  "rounded-[2rem] border border-white/15 bg-white/10 p-6 text-white shadow-[0_40px_120px_-50px_rgba(15,23,42,0.95)] backdrop-blur-2xl md:p-8";
+
+const GLASS_TAB_TRIGGER_CLASS =
+  "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/70 transition backdrop-blur-xl hover:border-white/40 hover:bg-white/15 hover:text-white data-[state=active]:border-white/60 data-[state=active]:bg-white/25 data-[state=active]:text-white data-[state=active]:shadow-[0_15px_45px_-25px_rgba(15,23,42,0.85)]";
 
 export default function DashboardPage() {
   const { t } = useLanguage();
@@ -659,48 +666,49 @@ export default function DashboardPage() {
           avatarUrl={avatarUrl}
           onQuickAction={handleQuickAction}
         />
-        <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-2xl md:p-10">
+        <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_25px_90px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl md:p-10">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full gap-3 border border-white/20 bg-white/10 p-2 text-white/70 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.75)] sm:grid-cols-6">
+            <TabsList className="grid w-full gap-3 rounded-[1.75rem] border border-white/20 bg-white/10 p-3 text-white/70 shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl sm:grid-cols-6">
               <TabsTrigger
                 value="curriculum"
-                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                className={GLASS_TAB_TRIGGER_CLASS}
               >
                 {t.dashboard.tabs.curriculum}
               </TabsTrigger>
               <TabsTrigger
                 value="classes"
-                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                className={GLASS_TAB_TRIGGER_CLASS}
               >
                 {t.dashboard.tabs.classes}
               </TabsTrigger>
               <TabsTrigger
                 value="lessonBuilder"
-                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                className={GLASS_TAB_TRIGGER_CLASS}
               >
                 {t.dashboard.tabs.lessonBuilder}
               </TabsTrigger>
               <TabsTrigger
                 value="students"
-                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                className={GLASS_TAB_TRIGGER_CLASS}
               >
                 {t.dashboard.tabs.students}
               </TabsTrigger>
               <TabsTrigger
                 value="skills"
-                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                className={GLASS_TAB_TRIGGER_CLASS}
               >
                 {t.dashboard.tabs.skills}
               </TabsTrigger>
               <TabsTrigger
                 value="assessments"
-                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                className={GLASS_TAB_TRIGGER_CLASS}
               >
                 {t.dashboard.tabs.assessments ?? "Assessments"}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="curriculum" className="space-y-6">
               <CurriculaList
+                className={cn(GLASS_PANEL_CLASS, "space-y-6")}
                 curricula={curricula}
                 loading={curriculaQuery.isLoading}
                 onNewCurriculum={() => setCurriculumDialogOpen(true)}
@@ -711,7 +719,7 @@ export default function DashboardPage() {
                 onExportCurriculum={id => toast({ description: t.dashboard.toasts.exportUnavailable })}
               />
               {selectedCurriculum ? (
-                <div className="space-y-4">
+                <div className={cn(GLASS_PANEL_CLASS, "space-y-4")}>
                   <h3 className="text-lg font-semibold">
                     {t.dashboard.curriculumView.title.replace("{title}", selectedCurriculum.title)}
                   </h3>
@@ -728,6 +736,7 @@ export default function DashboardPage() {
             </TabsContent>
             <TabsContent value="classes" className="space-y-6">
               <ClassesTable
+                className={cn(GLASS_PANEL_CLASS, "space-y-6")}
                 classes={classes}
                 loading={classesQuery.isLoading}
                 onNewClass={() => setClassDialogOpen(true)}
@@ -738,7 +747,7 @@ export default function DashboardPage() {
             <TabsContent value="lessonBuilder" className="space-y-6">
               {lessonBuilderContext ? (
                 <div className="space-y-6">
-                  <div className="rounded-3xl border border-white/15 bg-white/10 p-6 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+                  <div className={cn(GLASS_PANEL_CLASS, "space-y-6")}>
                     <h3 className="text-lg font-semibold">
                       {t.dashboard.lessonBuilder.contextTitle}
                     </h3>
@@ -755,17 +764,24 @@ export default function DashboardPage() {
                       ))}
                     </dl>
                   </div>
-                  <LessonBuilderPage
-                    layoutMode="embedded"
-                    initialMeta={{
-                      title: lessonBuilderContext.title,
-                      date: lessonBuilderContext.date ?? null,
-                    }}
-                    initialClassId={lessonBuilderContext.classId ?? null}
-                  />
+                  <div className={cn(GLASS_PANEL_CLASS, "overflow-hidden p-0 md:p-0")}>
+                    <LessonBuilderPage
+                      layoutMode="embedded"
+                      initialMeta={{
+                        title: lessonBuilderContext.title,
+                        date: lessonBuilderContext.date ?? null,
+                      }}
+                      initialClassId={lessonBuilderContext.classId ?? null}
+                    />
+                  </div>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+                <div
+                  className={cn(
+                    GLASS_PANEL_CLASS,
+                    "border-dashed border-white/25 bg-white/5 text-center shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)]",
+                  )}
+                >
                   <h3 className="text-lg font-semibold">
                     {t.dashboard.lessonBuilder.intercept.title}
                   </h3>
@@ -784,15 +800,16 @@ export default function DashboardPage() {
             </TabsContent>
             <TabsContent value="students" className="space-y-6">
               <StudentsSection
+                className={GLASS_PANEL_CLASS}
                 classes={classes}
                 onOpenStudent={studentId => navigate(`/teacher/students/${studentId}`)}
               />
             </TabsContent>
             <TabsContent value="skills" className="space-y-6">
-              <SkillsSection classes={classes} />
+              <SkillsSection className={GLASS_PANEL_CLASS} classes={classes} />
             </TabsContent>
             <TabsContent value="assessments" className="space-y-6">
-              <AssessmentsSection />
+              <AssessmentsSection className={GLASS_PANEL_CLASS} />
             </TabsContent>
           </Tabs>
         </section>

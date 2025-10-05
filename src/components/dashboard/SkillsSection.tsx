@@ -21,12 +21,14 @@ import {
   shouldUseStudentExamples,
 } from "@/features/students/api";
 import type { Class } from "../../../types/supabase-tables";
+import { cn } from "@/lib/utils";
 
 type SkillsSectionProps = {
   classes: Class[];
+  className?: string;
 };
 
-export function SkillsSection({ classes }: SkillsSectionProps) {
+export function SkillsSection({ classes, className }: SkillsSectionProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useOptionalUser();
@@ -94,21 +96,35 @@ export function SkillsSection({ classes }: SkillsSectionProps) {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <Card
+      className={cn(
+        "rounded-[2rem] border border-white/15 bg-white/10 text-white shadow-[0_35px_120px_-50px_rgba(15,23,42,0.95)] backdrop-blur-2xl",
+        className,
+      )}
+    >
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <CardTitle>{t.dashboard.skills.title}</CardTitle>
-          <CardDescription>{t.dashboard.skills.subtitle}</CardDescription>
+          <CardTitle className="text-2xl font-semibold text-white md:text-3xl">
+            {t.dashboard.skills.title}
+          </CardTitle>
+          <CardDescription className="text-white/70">
+            {t.dashboard.skills.subtitle}
+          </CardDescription>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>{t.dashboard.skills.actions.add}</Button>
+        <Button
+          onClick={() => setDialogOpen(true)}
+          className="h-11 rounded-xl border border-white/40 bg-white/90 px-5 text-sm font-semibold text-slate-900 shadow-[0_15px_45px_-25px_rgba(255,255,255,0.9)] transition hover:bg-white"
+        >
+          {t.dashboard.skills.actions.add}
+        </Button>
       </CardHeader>
-      <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <CardContent className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {skillsQuery.isLoading ? (
-          <div className="col-span-full rounded-lg border border-dashed bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+          <div className="col-span-full rounded-2xl border border-dashed border-white/30 bg-white/5 p-8 text-center text-sm text-white/70">
             {t.dashboard.common.loading}
           </div>
         ) : skills.length === 0 ? (
-          <div className="col-span-full rounded-lg border border-dashed bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+          <div className="col-span-full rounded-2xl border border-dashed border-white/30 bg-white/5 p-8 text-center text-sm text-white/70">
             {t.dashboard.skills.empty}
           </div>
         ) : (
@@ -116,22 +132,27 @@ export function SkillsSection({ classes }: SkillsSectionProps) {
             const skillClass = classOptions.find(option => option.id === skill.classId);
             const studentCount = students.filter(student => student.classId === skill.classId).length;
             return (
-              <div key={skill.id} className="rounded-xl border bg-card p-5 shadow-sm">
+              <div
+                key={skill.id}
+                className="rounded-2xl border border-white/15 bg-white/10 p-6 text-white/80 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-base font-semibold leading-tight">{skill.title}</h3>
+                    <h3 className="text-lg font-semibold leading-tight text-white">{skill.title}</h3>
                     {skill.description ? (
-                      <p className="mt-1 text-sm text-muted-foreground">{skill.description}</p>
+                      <p className="mt-2 text-sm text-white/70">{skill.description}</p>
                     ) : null}
                   </div>
                   {skill.isExample ? (
-                    <Badge variant="outline" className="text-xs uppercase text-muted-foreground">
+                    <Badge variant="outline" className="border-white/40 bg-white/10 text-xs uppercase text-white/80">
                       {t.dashboard.common.exampleTag}
                     </Badge>
                   ) : null}
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <Badge variant="secondary">{skillClass?.title ?? t.dashboard.skills.labels.unknownClass}</Badge>
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-white/70">
+                  <Badge variant="secondary" className="border-white/30 bg-white/15 text-white">
+                    {skillClass?.title ?? t.dashboard.skills.labels.unknownClass}
+                  </Badge>
                   <span>
                     {t.dashboard.skills.labels.studentCount
                       .replace("{count}", String(studentCount))
@@ -145,18 +166,18 @@ export function SkillsSection({ classes }: SkillsSectionProps) {
       </CardContent>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg border border-white/20 bg-white/10 text-white shadow-[0_35px_120px_-50px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
           <DialogHeader>
-            <DialogTitle>{t.dashboard.skills.dialog.title}</DialogTitle>
+            <DialogTitle className="text-2xl font-semibold text-white">{t.dashboard.skills.dialog.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid gap-2">
-              <Label>{t.dashboard.skills.dialog.classLabel}</Label>
+              <Label className="text-sm font-medium text-white/80">{t.dashboard.skills.dialog.classLabel}</Label>
               <Select value={classId} onValueChange={setClassId}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl border border-white/30 bg-white/5 text-white focus:ring-white/40">
                   <SelectValue placeholder={t.dashboard.skills.dialog.classPlaceholder} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-white/20 bg-slate-900/90 text-white backdrop-blur-xl">
                   {classOptions.length === 0 ? (
                     <SelectItem value="none" disabled>
                       {t.dashboard.skills.dialog.noClasses}
@@ -171,31 +192,45 @@ export function SkillsSection({ classes }: SkillsSectionProps) {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="skill-title">{t.dashboard.skills.dialog.nameLabel}</Label>
+              <Label htmlFor="skill-title" className="text-sm font-medium text-white/80">
+                {t.dashboard.skills.dialog.nameLabel}
+              </Label>
               <Input
                 id="skill-title"
                 value={title}
                 onChange={event => setTitle(event.target.value)}
                 placeholder={t.dashboard.skills.dialog.namePlaceholder}
+                className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="skill-description">{t.dashboard.skills.dialog.descriptionLabel}</Label>
+              <Label htmlFor="skill-description" className="text-sm font-medium text-white/80">
+                {t.dashboard.skills.dialog.descriptionLabel}
+              </Label>
               <Textarea
                 id="skill-description"
                 rows={4}
                 value={description}
                 onChange={event => setDescription(event.target.value)}
                 placeholder={t.dashboard.skills.dialog.descriptionPlaceholder}
+                className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+              className="border-white/40 text-white hover:bg-white/15"
+            >
               {t.common.cancel}
             </Button>
-            <Button onClick={handleSubmit} disabled={!classId || !title.trim() || createSkillMutation.isPending}>
-              {t.dashboard.skills.dialog.submit}
+            <Button
+              onClick={handleSubmit}
+              disabled={!classId || !title.trim() || createSkillMutation.isPending}
+              className="border border-white/40 bg-white/90 text-slate-900 hover:bg-white disabled:border-white/20 disabled:text-slate-700"
+            >
+              {createSkillMutation.isPending ? t.common.loading : t.dashboard.skills.dialog.submit}
             </Button>
           </DialogFooter>
         </DialogContent>
