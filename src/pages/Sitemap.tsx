@@ -6,34 +6,286 @@ import { supabase } from "@/integrations/supabase/client";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { en } from "@/translations/en";
+
+type TranslationDictionary = typeof import("@/translations/en").en;
 
 type RouteLink = {
   title: string;
   url: string;
 };
 
+type RouteBadge = keyof TranslationDictionary["sitemap"]["badges"];
+
+type DetailedRouteLink = RouteLink & {
+  description: string;
+  badges?: RouteBadge[];
+};
+
+type DetailedSection = {
+  title: string;
+  description?: string;
+  links: DetailedRouteLink[];
+};
+
 type DynamicLink = RouteLink & {
   updatedAt?: string | null;
 };
 
-type TranslationDictionary = typeof en;
+const createDetailedSections = (dictionary: TranslationDictionary): DetailedSection[] => {
+  const { sitemap, nav } = dictionary;
 
-const createStaticRoutes = (dictionary: TranslationDictionary): RouteLink[] => [
-  {
-    title: dictionary.nav.my_profile ?? dictionary.nav.profile ?? dictionary.nav.dashboard,
-    url: "/my-profile"
-  },
-  { title: dictionary.nav.home, url: "/home" },
-  { title: dictionary.nav.about, url: "/about" },
-  { title: dictionary.nav.services, url: "/services" },
-  { title: dictionary.nav.blog, url: "/blog" },
-  { title: dictionary.nav.events, url: "/events" },
-  { title: dictionary.nav.contact, url: "/contact" },
-  { title: dictionary.nav.faq, url: "/faq" },
-  { title: dictionary.sitemap.links.authPortal, url: "/auth" },
-  { title: dictionary.sitemap.links.sitemap, url: "/sitemap" },
-];
+  return [
+    {
+      title: sitemap.sections.publicPages,
+      description: sitemap.descriptions.publicPages,
+      links: [
+        { title: nav.home, url: "/", description: sitemap.details.home },
+        { title: nav.about, url: "/about", description: sitemap.details.about },
+        { title: nav.services, url: "/services", description: sitemap.details.services },
+        { title: nav.blog, url: "/blog", description: sitemap.details.blog },
+        {
+          title: sitemap.linkTitles.blogPost,
+          url: "/blog/:slug",
+          description: sitemap.details.blogPost,
+          badges: ["dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.resources,
+          url: "/resources",
+          description: sitemap.details.resources,
+        },
+        { title: nav.events, url: "/events", description: sitemap.details.events },
+        {
+          title: sitemap.linkTitles.eventsDetail,
+          url: "/events/:slug",
+          description: sitemap.details.eventDetail,
+          badges: ["dynamic"],
+        },
+        { title: nav.contact, url: "/contact", description: sitemap.details.contact },
+        { title: nav.faq, url: "/faq", description: sitemap.details.faq },
+        {
+          title: sitemap.links.sitemap,
+          url: "/sitemap",
+          description: sitemap.details.sitemap,
+        },
+      ],
+    },
+    {
+      title: sitemap.sections.contentAndPublishing,
+      description: sitemap.descriptions.contentAndPublishing,
+      links: [
+        {
+          title: sitemap.linkTitles.blogBuilder,
+          url: "/blog/new",
+          description: sitemap.details.blogBuilder,
+          badges: ["requiresAuth"],
+        },
+      ],
+    },
+    {
+      title: sitemap.sections.lessonPlanning,
+      description: sitemap.descriptions.lessonPlanning,
+      links: [
+        {
+          title: sitemap.linkTitles.builderLessonPlans,
+          url: "/builder/lesson-plans",
+          description: sitemap.details.builderLessonPlans,
+          badges: ["requiresAuth"],
+        },
+        {
+          title: sitemap.linkTitles.builderLessonPlanDetail,
+          url: "/builder/lesson-plans/:id",
+          description: sitemap.details.builderLessonPlanDetail,
+          badges: ["requiresAuth", "dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.lessonBuilder,
+          url: "/lesson-builder",
+          description: sitemap.details.lessonBuilder,
+          badges: ["requiresAuth"],
+        },
+        {
+          title: sitemap.linkTitles.lessonBuilderDetail,
+          url: "/lesson-builder/:id",
+          description: sitemap.details.lessonBuilderDetail,
+          badges: ["requiresAuth", "dynamic"],
+        },
+      ],
+    },
+    {
+      title: sitemap.sections.teacherWorkspace,
+      description: sitemap.descriptions.teacherWorkspace,
+      links: [
+        {
+          title: sitemap.linkTitles.teacherDashboard,
+          url: "/teacher",
+          description: sitemap.details.teacherDashboard,
+          badges: ["requiresAuth"],
+        },
+        {
+          title: sitemap.linkTitles.teacherCurriculumDetail,
+          url: "/teacher/curriculum/:id",
+          description: sitemap.details.teacherCurriculumDetail,
+          badges: ["requiresAuth", "dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.teacherClassDashboard,
+          url: "/teacher/classes/:id",
+          description: sitemap.details.teacherClassDashboard,
+          badges: ["requiresAuth", "dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.teacherStudentDashboard,
+          url: "/teacher/students/:id",
+          description: sitemap.details.teacherStudentDashboard,
+          badges: ["requiresAuth", "dynamic"],
+        },
+      ],
+    },
+    {
+      title: sitemap.sections.studentExperience,
+      description: sitemap.descriptions.studentExperience,
+      links: [
+        {
+          title: sitemap.linkTitles.studentExperience,
+          url: "/student",
+          description: sitemap.details.studentExperience,
+        },
+      ],
+    },
+    {
+      title: sitemap.sections.accountManagement,
+      description: sitemap.descriptions.accountManagement,
+      links: [
+        {
+          title: sitemap.links.authPortal,
+          url: "/auth",
+          description: sitemap.details.authPortal,
+        },
+        {
+          title: dictionary.nav.my_profile ?? dictionary.nav.profile ?? sitemap.linkTitles.accountResources,
+          url: "/my-profile",
+          description: sitemap.details.myProfile,
+          badges: ["requiresAuth"],
+        },
+        {
+          title: sitemap.linkTitles.accountResources,
+          url: "/account/resources",
+          description: sitemap.details.accountResources,
+          badges: ["requiresAuth"],
+        },
+        {
+          title: sitemap.linkTitles.accountResourceNew,
+          url: "/account/resources/new",
+          description: sitemap.details.accountResourceNew,
+          badges: ["requiresAuth"],
+        },
+        {
+          title: sitemap.linkTitles.accountResourceDetail,
+          url: "/account/resources/:id",
+          description: sitemap.details.accountResourceDetail,
+          badges: ["requiresAuth", "dynamic"],
+        },
+      ],
+    },
+    {
+      title: sitemap.sections.admin,
+      description: sitemap.descriptions.admin,
+      links: [
+        {
+          title: sitemap.linkTitles.adminLogin,
+          url: "/admin/login",
+          description: sitemap.details.adminLogin,
+          badges: ["prototype"],
+        },
+        {
+          title: sitemap.linkTitles.adminDashboard,
+          url: "/admin",
+          description: sitemap.details.adminDashboard,
+          badges: ["prototype", "requiresAuth"],
+        },
+        {
+          title: sitemap.linkTitles.adminNestedSegment,
+          url: "/admin/:segment",
+          description: sitemap.details.adminNested,
+          badges: ["prototype", "requiresAuth", "dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.adminNestedSubSegment,
+          url: "/admin/:segment/:subSegment",
+          description: sitemap.details.adminNested,
+          badges: ["prototype", "requiresAuth", "dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.adminNestedChild,
+          url: "/admin/:segment/:subSegment/:child",
+          description: sitemap.details.adminNested,
+          badges: ["prototype", "requiresAuth", "dynamic"],
+        },
+      ],
+    },
+    {
+      title: sitemap.sections.legacyRedirects,
+      description: sitemap.descriptions.legacyRedirects,
+      links: [
+        {
+          title: sitemap.linkTitles.legacyHome,
+          url: "/home",
+          description: sitemap.details.legacyHome,
+          badges: ["redirect"],
+        },
+        {
+          title: sitemap.linkTitles.legacyCurriculum,
+          url: "/curriculum",
+          description: sitemap.details.legacyCurriculum,
+          badges: ["redirect"],
+        },
+        {
+          title: sitemap.linkTitles.legacyLessonBuilder,
+          url: "/lesson-plans/builder",
+          description: sitemap.details.legacyLessonBuilder,
+          badges: ["redirect"],
+        },
+        {
+          title: sitemap.linkTitles.legacyLessonBuilderDetail,
+          url: "/lesson-plans/builder/:id",
+          description: sitemap.details.legacyLessonBuilderDetail,
+          badges: ["redirect", "dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.legacyAccount,
+          url: "/account",
+          description: sitemap.details.legacyAccount,
+          badges: ["redirect"],
+        },
+        {
+          title: sitemap.linkTitles.legacyDashboard,
+          url: "/dashboard",
+          description: sitemap.details.legacyDashboard,
+          badges: ["redirect"],
+        },
+        {
+          title: sitemap.linkTitles.legacyDashboardStudent,
+          url: "/dashboard/students/:id",
+          description: sitemap.details.legacyDashboardStudent,
+          badges: ["redirect", "dynamic"],
+        },
+        {
+          title: sitemap.linkTitles.legacyProfile,
+          url: "/profile",
+          description: sitemap.details.legacyProfile,
+          badges: ["redirect"],
+        },
+        {
+          title: sitemap.linkTitles.legacyAccountClass,
+          url: "/account/classes/:id",
+          description: sitemap.details.legacyAccountClass,
+          badges: ["redirect", "dynamic"],
+        },
+      ],
+    },
+  ];
+};
 
 const formatUpdatedAt = (value?: string | null) => {
   if (!value) return null;
@@ -76,12 +328,8 @@ const Sitemap = () => {
     }
   });
 
-  const staticSections = [
-    {
-      title: t.sitemap.sections.englishPages,
-      links: createStaticRoutes(en)
-    }
-  ];
+  const detailedSections = createDetailedSections(t);
+  const badgeLabels = t.sitemap.badges;
 
   const dynamicSections: { title: string; links: DynamicLink[] }[] = [
     {
@@ -120,21 +368,39 @@ const Sitemap = () => {
           </p>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {staticSections.map((section) => (
+            {detailedSections.map((section) => (
               <Card key={section.title}>
                 <CardHeader>
                   <CardTitle>{section.title}</CardTitle>
+                  {section.description && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {section.description}
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2">
+                  <ul className="space-y-4">
                     {section.links.map((link) => (
-                      <li key={link.url}>
-                        <Link
-                          to={link.url}
-                          className="text-primary hover:underline"
-                        >
-                          {link.title}
-                        </Link>
+                      <li key={`${link.url}-${link.title}`} className="space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <Link
+                            to={link.url}
+                            className="text-primary hover:underline font-medium"
+                          >
+                            {link.title}
+                          </Link>
+                          {link.badges?.map((badge) => (
+                            <span
+                              key={badge}
+                              className="whitespace-nowrap rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
+                            >
+                              {badgeLabels[badge]}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {link.description}
+                        </p>
                       </li>
                     ))}
                   </ul>
