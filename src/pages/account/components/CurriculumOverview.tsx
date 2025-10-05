@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, Loader2, Plus, BookOpen, Layers } from "lucide-react";
+import { CalendarDays, Loader2, Plus, BookOpen } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -190,8 +190,6 @@ export const CurriculumOverview = ({ onOpenPlanner }: CurriculumOverviewProps) =
             );
             const fallbackLesson = board.lessons[0] ?? null;
             const nextLesson = nextScheduled ?? fallbackLesson;
-            const previewLessons = board.lessons.slice(0, 3);
-
             return (
               <Card
                 key={board.id}
@@ -241,27 +239,6 @@ export const CurriculumOverview = ({ onOpenPlanner }: CurriculumOverviewProps) =
                     })}
                   </div>
 
-                  <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      <Layers className="h-3.5 w-3.5" /> Upcoming lessons
-                    </p>
-                    <ul className="space-y-1">
-                      {previewLessons.length === 0 ? (
-                        <li className="text-sm text-muted-foreground">No lessons added yet.</li>
-                      ) : (
-                        previewLessons.map(lesson => (
-                          <li key={lesson.id} className="flex items-center justify-between gap-2 text-sm">
-                            <span className="truncate font-medium text-foreground" title={lesson.title}>
-                              {lesson.title}
-                            </span>
-                            <span className="shrink-0 text-xs text-muted-foreground">
-                              {lesson.parsedDate ? format(lesson.parsedDate, "MMM d") : "TBC"}
-                            </span>
-                          </li>
-                        ))
-                      )}
-                    </ul>
-                  </div>
                 </CardContent>
                 <CardFooter>
                   <Button variant="ghost" className="w-full" onClick={() => onOpenPlanner({ classId: board.classId ?? undefined })}>
@@ -271,22 +248,32 @@ export const CurriculumOverview = ({ onOpenPlanner }: CurriculumOverviewProps) =
               </Card>
             );
           })}
-
-          <button
-            type="button"
+          <Card
+            role="button"
+            tabIndex={0}
             onClick={() => onOpenPlanner()}
+            onKeyDown={event => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onOpenPlanner();
+              }
+            }}
             className={cn(
-              "group flex h-full flex-col items-center justify-center rounded-xl border border-primary/30",
-              "bg-background/70 p-6 text-center shadow-[0_0_35px_hsl(var(--glow-primary)/0.12)] backdrop-blur transition",
+              "flex h-full cursor-pointer flex-col items-center justify-center border border-dashed border-primary/40",
+              "bg-background/70 text-center shadow-[0_0_35px_hsl(var(--glow-primary)/0.12)] backdrop-blur transition",
               "hover:border-primary/60 hover:shadow-[0_0_45px_hsl(var(--glow-primary)/0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
             )}
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary shadow-[0_0_45px_hsl(var(--glow-primary)/0.3)] transition group-hover:scale-105">
-              <Plus className="h-10 w-10" />
-            </div>
-            <p className="mt-4 text-base font-semibold text-foreground">Open curriculum planner</p>
-            <p className="mt-1 text-sm text-muted-foreground">Add lessons or update plans in one place.</p>
-          </button>
+            <CardContent className="flex w-full flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-primary shadow-[0_0_45px_hsl(var(--glow-primary)/0.3)] transition">
+                <Plus className="h-10 w-10" />
+              </div>
+              <div className="space-y-1">
+                <CardTitle className="text-lg">Add new curriculum</CardTitle>
+                <CardDescription>Click to start another curriculum plan.</CardDescription>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </section>
