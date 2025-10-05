@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import AnimatedCounter from "@/components/AnimatedCounter";
 import MouseGlowEffect from "@/components/MouseGlowEffect";
+import ScrollReveal from "@/components/ScrollReveal";
 import SparklesBackground from "@/components/SparklesBackground";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
@@ -96,10 +98,14 @@ const schoolSolutions: Feature[] = [
 ];
 
 const stats = [
-  { number: "12k+", label: "AI-accelerated lessons created on SchoolTech Hub" },
-  { number: "94%", label: "Teachers reporting smoother workflow management" },
-  { number: "60%", label: "Average reduction in time spent writing reports" },
-  { number: "35+", label: "Districts modernising teaching with our platform" },
+  {
+    value: 12,
+    suffix: "k+",
+    label: "AI-accelerated lessons created on SchoolTech Hub",
+  },
+  { value: 94, suffix: "%", label: "Teachers reporting smoother workflow management" },
+  { value: 60, suffix: "%", label: "Average reduction in time spent writing reports" },
+  { value: 35, suffix: "+", label: "Districts modernising teaching with our platform" },
 ];
 
 const testimonials: Testimonial[] = [
@@ -233,32 +239,34 @@ const Index = () => {
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
         <div className="container mx-auto px-4">
-          <div className="mx-auto mb-16 max-w-3xl text-center">
+          <ScrollReveal className="mx-auto mb-16 max-w-3xl text-center">
             <h2 className="text-3xl font-bold text-white md:text-4xl">
               Plan, track, and celebrate learning in one radiant hub
             </h2>
             <p className="mt-5 text-lg text-white/75">
               Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
             </p>
-          </div>
+          </ScrollReveal>
           <div className="grid gap-8 md:grid-cols-2">
             {workflowTools.map(({ title, description, icon: Icon }, index) => (
-              <Card key={title} className={cn("h-full", neonCardClass)}>
-                <div className="flex flex-col gap-4 text-left">
-                  <div
-                    className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-xl",
-                      iconColorClasses[index % iconColorClasses.length],
-                    )}
-                  >
-                    <Icon className="h-6 w-6" />
+              <ScrollReveal key={title} delay={index * 100}>
+                <Card className={cn("h-full", neonCardClass)}>
+                  <div className="flex flex-col gap-4 text-left">
+                    <div
+                      className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-xl",
+                        iconColorClasses[index % iconColorClasses.length],
+                      )}
+                    >
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-semibold text-primary">{title}</h3>
+                      <p className="mt-3 text-base text-white/80">{description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-semibold text-primary">{title}</h3>
-                    <p className="mt-3 text-base text-white/80">{description}</p>
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -267,7 +275,7 @@ const Index = () => {
       <section className="relative py-24">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center justify-between gap-12 md:flex-row">
-            <div className="max-w-xl space-y-6">
+            <ScrollReveal className="max-w-xl space-y-6">
               <Badge variant="secondary" className="bg-secondary/20 text-secondary-foreground">
                 School-wide technology solutions
               </Badge>
@@ -290,25 +298,27 @@ const Index = () => {
                   </Button>
                 </Link>
               </div>
-            </div>
+            </ScrollReveal>
             <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
               {schoolSolutions.map(({ title, description, icon: Icon }, index) => (
-                <Card key={title} className={cn("h-full", neonCardClass)}>
-                  <div className="flex flex-col gap-4 text-left">
-                    <div
-                      className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-xl",
-                        iconColorClasses[index % iconColorClasses.length],
-                      )}
-                    >
-                      <Icon className="h-6 w-6" />
+                <ScrollReveal key={title} delay={index * 100}>
+                  <Card className={cn("h-full", neonCardClass)}>
+                    <div className="flex flex-col gap-4 text-left">
+                      <div
+                        className={cn(
+                          "flex h-12 w-12 items-center justify-center rounded-xl",
+                          iconColorClasses[index % iconColorClasses.length],
+                        )}
+                      >
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-semibold text-secondary">{title}</h3>
+                        <p className="mt-3 text-base text-white/80">{description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-semibold text-secondary">{title}</h3>
-                      <p className="mt-3 text-base text-white/80">{description}</p>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </ScrollReveal>
               ))}
             </div>
           </div>
@@ -319,11 +329,15 @@ const Index = () => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
           <div className="grid gap-8 text-center md:grid-cols-4">
-            {stats.map((stat) => (
-              <Card key={stat.label} className={cn("p-8", neonCardClass)}>
-                <p className="text-4xl font-bold text-primary text-glow">{stat.number}</p>
-                <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
-              </Card>
+            {stats.map((stat, index) => (
+              <ScrollReveal key={stat.label} delay={index * 120}>
+                <Card className={cn("p-8", neonCardClass)}>
+                  <p className="text-4xl font-bold text-primary text-glow">
+                    <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                  </p>
+                  <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
+                </Card>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -331,31 +345,33 @@ const Index = () => {
 
       <section className="py-24">
         <div className="container mx-auto px-4">
-          <div className="mx-auto mb-16 max-w-2xl text-center">
+          <ScrollReveal className="mx-auto mb-16 max-w-2xl text-center">
             <h2 className="text-3xl font-bold text-white md:text-4xl">
               Teachers trust SchoolTech Hub for digital transformation
             </h2>
             <p className="mt-5 text-lg text-white/75">
               Hear how schools are building confident, future-ready classrooms with our AI-powered platform.
             </p>
-          </div>
+          </ScrollReveal>
           <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map(({ quote, name, role, image }) => (
-              <Card key={name} className={cn("p-8 text-center", neonCardClass)}>
-                <div className="mb-6 flex justify-center">
-                  <img
-                    src={image}
-                    alt={`Portrait of ${name}`}
-                    className="h-20 w-20 rounded-full border border-white/20 object-cover shadow-[0_0_18px_hsl(var(--glow-primary)/0.3)]"
-                    loading="lazy"
-                  />
-                </div>
-                <p className="mb-6 text-white/90 italic">“{quote}”</p>
-                <div className="space-y-1">
-                  <p className="text-lg font-semibold text-white">{name}</p>
-                  <p className="text-sm text-white/70">{role}</p>
-                </div>
-              </Card>
+            {testimonials.map(({ quote, name, role, image }, index) => (
+              <ScrollReveal key={name} delay={index * 120}>
+                <Card className={cn("p-8 text-center", neonCardClass)}>
+                  <div className="mb-6 flex justify-center">
+                    <img
+                      src={image}
+                      alt={`Portrait of ${name}`}
+                      className="h-20 w-20 rounded-full border border-white/20 object-cover shadow-[0_0_18px_hsl(var(--glow-primary)/0.3)]"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="mb-6 text-white/90 italic">“{quote}”</p>
+                  <div className="space-y-1">
+                    <p className="text-lg font-semibold text-white">{name}</p>
+                    <p className="text-sm text-white/70">{role}</p>
+                  </div>
+                </Card>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -364,35 +380,37 @@ const Index = () => {
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-background to-secondary/20" />
         <div className="container mx-auto px-4">
-          <Card
-            className={cn(
-              "mx-auto max-w-4xl rounded-[2rem] bg-gradient-to-br from-primary/15 via-background/80 to-secondary/15 p-12 text-center",
-              neonCardClass,
-            )}
-          >
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
-              <Award className="h-10 w-10" />
-            </div>
-            <h2 className="mt-8 text-3xl font-bold text-white md:text-4xl">
-              Ready to simplify your teaching workflow?
-            </h2>
-            <p className="mt-4 text-lg text-white/80">
-              Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to={getLocalizedPath("/auth", language)}>
-                <Button size="lg" className="neon-pulse">
-                  Get started free
-                </Button>
-              </Link>
-              <Link to={getLocalizedPath("/services", language)}>
-                <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                  <TrendingUp className="mr-2 h-5 w-5" />
-                  View implementation roadmap
-                </Button>
-              </Link>
-            </div>
-          </Card>
+          <ScrollReveal>
+            <Card
+              className={cn(
+                "mx-auto max-w-4xl rounded-[2rem] bg-gradient-to-br from-primary/15 via-background/80 to-secondary/15 p-12 text-center",
+                neonCardClass,
+              )}
+            >
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
+                <Award className="h-10 w-10" />
+              </div>
+              <h2 className="mt-8 text-3xl font-bold text-white md:text-4xl">
+                Ready to simplify your teaching workflow?
+              </h2>
+              <p className="mt-4 text-lg text-white/80">
+                Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
+              </p>
+              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Link to={getLocalizedPath("/auth", language)}>
+                  <Button size="lg" className="neon-pulse">
+                    Get started free
+                  </Button>
+                </Link>
+                <Link to={getLocalizedPath("/services", language)}>
+                  <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                    <TrendingUp className="mr-2 h-5 w-5" />
+                    View implementation roadmap
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </ScrollReveal>
         </div>
       </section>
     </div>
