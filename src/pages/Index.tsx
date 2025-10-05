@@ -313,13 +313,15 @@ const Index = () => {
                   <span className={convexOverlayClass} aria-hidden />
                   <span className="bolt-fastener absolute left-8 top-6 z-20 md:left-12 md:top-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 top-6 z-20 md:right-12 md:top-8" aria-hidden />
+                  <span className="bolt-fastener absolute left-8 bottom-6 z-20 md:left-12 md:bottom-8" aria-hidden />
+                  <span className="bolt-fastener absolute right-8 bottom-6 z-20 md:right-12 md:bottom-8" aria-hidden />
                   <div className="relative z-10 flex flex-col items-center gap-10 text-center">
                     <div className="flex flex-col items-center text-center">
                       <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
-                      <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
+                      <h2 className="mt-5 text-4xl font-semibold text-white/60 md:text-5xl">
                         Power every lesson with organised workflows and luminous insights
                       </h2>
-                      <p className="mt-6 max-w-xl text-base text-white/80 md:text-lg">
+                      <p className="mt-6 max-w-xl text-base text-white/60 md:text-lg">
                         SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
                       </p>
                     </div>
