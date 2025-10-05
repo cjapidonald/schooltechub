@@ -199,6 +199,8 @@ const neonCardGradients = [
   "bg-gradient-to-br from-accent/25 via-background/75 to-background/95",
 ];
 
+const convexOverlayClass = "convex-panel-sheen";
+
 const classroomTechnologyBackgrounds = {
   featureShowcase:
     "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=2100&q=80",
@@ -360,6 +362,9 @@ const Index = () => {
                     "before:absolute before:inset-[1.5px] before:rounded-[1.92rem] before:bg-[linear-gradient(150deg,rgba(255,255,255,0.22),rgba(15,15,35,0.65))] before:opacity-80 before:content-[''] before:z-0",
                   )}
                 >
+                  <span className={convexOverlayClass} aria-hidden />
+                  <span className="bolt-fastener absolute left-8 top-6 z-20 md:left-12 md:top-8" aria-hidden />
+                  <span className="bolt-fastener absolute right-8 top-6 z-20 md:right-12 md:top-8" aria-hidden />
                   <div className="relative z-10">
                     <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
                     <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
@@ -379,11 +384,16 @@ const Index = () => {
                 <Reveal>
                   <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-br from-primary/15 via-background/60 to-background")}
                   >
-                    <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
-                    <h3 className="mt-4 text-2xl font-semibold text-white">Class and student insights synchronised in real time</h3>
-                    <p className="mt-3 text-white/70">
-                      Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
-                    </p>
+                    <span className={convexOverlayClass} aria-hidden />
+                    <span className="bolt-fastener absolute left-6 top-5 z-20 md:left-8 md:top-7" aria-hidden />
+                    <span className="bolt-fastener absolute right-6 top-5 z-20 md:right-8 md:top-7" aria-hidden />
+                    <div className="relative z-10">
+                      <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
+                      <h3 className="mt-4 text-2xl font-semibold text-white">Class and student insights synchronised in real time</h3>
+                      <p className="mt-3 text-white/70">
+                        Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
+                      </p>
+                    </div>
                   </Card>
                 </Reveal>
                 <div className="grid gap-6 sm:grid-cols-2">
