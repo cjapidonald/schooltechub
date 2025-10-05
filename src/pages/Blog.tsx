@@ -702,7 +702,7 @@ const Blog = () => {
   ];
 
   const highlightCardClassName =
-    "flex h-full flex-col rounded-2xl border border-white/15 bg-white/10 p-4 shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl";
+    "flex h-full flex-col rounded-2xl border border-white/15 bg-white/10 p-[13px] shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
