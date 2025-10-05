@@ -20,7 +20,11 @@ export type DashboardCurriculumSummary = (Curriculum & {
   isExample?: boolean;
 });
 
-export type DashboardCurriculumItem = CurriculumItem & { isExample?: boolean };
+export type DashboardCurriculumItem = CurriculumItem & {
+  isExample?: boolean;
+  lesson_plan_id?: string | null;
+  resource_shortcut_ids?: string[];
+};
 
 export const DASHBOARD_EXAMPLE_CURRICULUM: DashboardCurriculumSummary = {
   id: DASHBOARD_EXAMPLE_CURRICULUM_ID,
@@ -39,30 +43,39 @@ export const DASHBOARD_EXAMPLE_CURRICULUM_ITEMS: DashboardCurriculumItem[] = [
     id: "example-curriculum-item-1",
     curriculum_id: DASHBOARD_EXAMPLE_CURRICULUM_ID,
     position: 1,
+    seq_index: 1,
     lesson_title: "Exploring Character Perspectives",
     stage: "Year 5",
     scheduled_on: "2024-09-09",
     status: "planned",
     isExample: true,
+    lesson_plan_id: null,
+    resource_shortcut_ids: [],
   },
   {
     id: "example-curriculum-item-2",
     curriculum_id: DASHBOARD_EXAMPLE_CURRICULUM_ID,
     position: 2,
+    seq_index: 2,
     lesson_title: "Building Tension in Short Stories",
     stage: "Year 5",
     scheduled_on: "2024-09-16",
     status: "planned",
     isExample: true,
+    lesson_plan_id: null,
+    resource_shortcut_ids: [],
   },
   {
     id: "example-curriculum-item-3",
     curriculum_id: DASHBOARD_EXAMPLE_CURRICULUM_ID,
     position: 3,
+    seq_index: 3,
     lesson_title: "Peer Review & Feedback Workshop",
     stage: "Year 5",
     scheduled_on: "2024-09-23",
     status: "planned",
     isExample: true,
+    lesson_plan_id: null,
+    resource_shortcut_ids: [],
   },
 ];

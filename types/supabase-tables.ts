@@ -32,6 +32,7 @@ export type CurriculumItem = {
   id: string;
   curriculum_id: string;
   position: number;
+  seq_index?: number;
   lesson_title: string;
   stage?: string;
   scheduled_on?: string;

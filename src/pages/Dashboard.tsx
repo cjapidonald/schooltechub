@@ -26,11 +26,13 @@ import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { SkillsSection } from "@/components/dashboard/SkillsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import {
+  attachResourceToLessonPlan,
   createClass,
   createCurriculum,
   fetchCurricula,
   fetchCurriculumItems,
   fetchMyClasses,
+  reorderCurriculumItems,
   seedExampleDashboardData,
 } from "@/features/dashboard/api";
 import {
@@ -38,10 +40,11 @@ import {
   DASHBOARD_EXAMPLE_CURRICULUM,
   DASHBOARD_EXAMPLE_CURRICULUM_ID,
   DASHBOARD_EXAMPLE_CURRICULUM_ITEMS,
+  type DashboardCurriculumItem,
   type DashboardCurriculumSummary,
 } from "@/features/dashboard/examples";
 import { useMyProfile } from "@/hooks/useMyProfile";
-import type { Class, CurriculumItem } from "../../types/supabase-tables";
+import type { Class } from "../../types/supabase-tables";
 
 const normalizeName = (value: string | null | undefined) => {
   if (!value) {
@@ -142,6 +145,7 @@ export default function DashboardPage() {
   const [isCurriculumDialogOpen, setCurriculumDialogOpen] = useState(false);
   const [activeCurriculumId, setActiveCurriculumId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [quickAttachTargetId, setQuickAttachTargetId] = useState<string | null>(null);
 
   const updateSearchParams = useCallback(
     (mutator: (params: URLSearchParams) => void, options: { replace?: boolean } = {}) => {
@@ -430,7 +434,7 @@ export default function DashboardPage() {
     effectiveCurriculumId && effectiveCurriculumId !== DASHBOARD_EXAMPLE_CURRICULUM_ID,
   );
 
-  const curriculumItemsQuery = useQuery<CurriculumItem[]>({
+  const curriculumItemsQuery = useQuery<DashboardCurriculumItem[]>({
     queryKey: ["dashboard-curriculum-items", effectiveCurriculumId],
     queryFn: () => fetchCurriculumItems(effectiveCurriculumId!),
     enabled: shouldFetchCurriculumItems,
@@ -441,7 +445,7 @@ export default function DashboardPage() {
     [curricula, effectiveCurriculumId],
   );
 
-  const curriculumItems = useMemo(() => {
+  const curriculumItems = useMemo<DashboardCurriculumItem[]>(() => {
     if (!effectiveCurriculumId) {
       return [];
     }
@@ -453,8 +457,21 @@ export default function DashboardPage() {
 
   const curriculumItemsLoading = shouldFetchCurriculumItems ? curriculumItemsQuery.isLoading : false;
 
+  const reorderCurriculumItemsMutation = useMutation({
+    mutationFn: ({ curriculumId, itemIds }: { curriculumId: string; itemIds: string[] }) =>
+      reorderCurriculumItems({ curriculumId, itemIds }),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-curriculum-items", variables.curriculumId] });
+    },
+    onError: (error: unknown, variables) => {
+      console.error("Failed to reorder curriculum items", error);
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-curriculum-items", variables.curriculumId] });
+    },
+  });
+
   const handlePlanCurriculumLesson = useCallback(
-    (item: CurriculumItem & { isExample?: boolean }) => {
+    (item: DashboardCurriculumItem) => {
       if (!item || item.isExample) {
         return;
       }
@@ -466,7 +483,7 @@ export default function DashboardPage() {
         classTitle: classFromCurriculum?.title ?? null,
         stage: item.stage ?? classFromCurriculum?.stage ?? null,
         date: item.scheduled_on ?? null,
-        sequence: Number.isFinite(item.position) ? item.position : null,
+        sequence: Number.isFinite(item.seq_index) ? item.seq_index : Number.isFinite(item.position) ? item.position : null,
         curriculumId: item.curriculum_id,
       };
 
@@ -474,6 +491,64 @@ export default function DashboardPage() {
       setLessonBuilderContext(context);
     },
     [selectedCurriculum, setLessonBuilderContext],
+  );
+
+  const handleOpenLessonPlan = useCallback(
+    (item: DashboardCurriculumItem) => {
+      if (!item || item.isExample) {
+        return;
+      }
+
+      if (!item.lesson_plan_id) {
+        toast({ description: t.dashboard.toasts.lessonPlanMissing });
+        return;
+      }
+
+      navigate(`/builder/lesson-plans/${item.lesson_plan_id}`);
+    },
+    [navigate, t.dashboard.toasts.lessonPlanMissing, toast],
+  );
+
+  const handleQuickAttachResource = useCallback(
+    async (item: DashboardCurriculumItem) => {
+      if (!item || item.isExample) {
+        return;
+      }
+
+      if (!item.lesson_plan_id) {
+        toast({ description: t.dashboard.toasts.lessonPlanMissing });
+        return;
+      }
+
+      const resourceId = item.resource_shortcut_ids?.[0] ?? null;
+      if (!resourceId) {
+        toast({ description: t.dashboard.toasts.resourceShortcutMissing });
+        return;
+      }
+
+      try {
+        setQuickAttachTargetId(item.id);
+        await attachResourceToLessonPlan({ lessonPlanId: item.lesson_plan_id, resourceId });
+        toast({ description: t.dashboard.toasts.resourceAttached });
+      } catch (error) {
+        console.error("Failed to quick attach resource", error);
+        toast({ description: t.dashboard.toasts.resourceAttachError, variant: "destructive" });
+      } finally {
+        setQuickAttachTargetId(null);
+      }
+    },
+    [toast, t.dashboard.toasts.lessonPlanMissing, t.dashboard.toasts.resourceShortcutMissing, t.dashboard.toasts.resourceAttached, t.dashboard.toasts.resourceAttachError],
+  );
+
+  const handleReorderCurriculumItems = useCallback(
+    (itemIds: string[]) => {
+      if (!effectiveCurriculumId || itemIds.length === 0 || selectedCurriculum?.isExample) {
+        return;
+      }
+
+      reorderCurriculumItemsMutation.mutate({ curriculumId: effectiveCurriculumId, itemIds });
+    },
+    [effectiveCurriculumId, reorderCurriculumItemsMutation, selectedCurriculum?.isExample],
   );
 
   const derivedNameParts = useMemo(() => {
@@ -545,7 +620,12 @@ export default function DashboardPage() {
               <CurriculumEditor
                 items={curriculumItems}
                 loading={curriculumItemsLoading}
+                reordering={reorderCurriculumItemsMutation.isPending}
+                quickAttachBusyId={quickAttachTargetId}
                 onPlanLesson={handlePlanCurriculumLesson}
+                onOpenLessonPlan={handleOpenLessonPlan}
+                onQuickAttachResource={handleQuickAttachResource}
+                onReorder={selectedCurriculum.isExample ? undefined : handleReorderCurriculumItems}
               />
             </div>
           ) : null}

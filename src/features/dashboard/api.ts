@@ -11,6 +11,7 @@ import {
   DASHBOARD_EXAMPLE_CLASS,
   DASHBOARD_EXAMPLE_CURRICULUM,
   DASHBOARD_EXAMPLE_CURRICULUM_ITEMS,
+  type DashboardCurriculumItem,
 } from "./examples";
 
 export type LessonPlanWithRelations = LessonPlan & {
@@ -125,7 +126,7 @@ export async function createCurriculum(input: {
   title: string;
   academicYear?: string;
   lessonTitles: string[];
-}): Promise<{ curriculum: Curriculum; items: CurriculumItem[] }> {
+}): Promise<{ curriculum: Curriculum; items: DashboardCurriculumItem[] }> {
   const { data: curriculum, error } = await supabase
     .from("curricula")
     .insert({
@@ -146,13 +147,14 @@ export async function createCurriculum(input: {
   const itemsPayload = input.lessonTitles.map((lessonTitle, index) => ({
     curriculum_id: curriculum.id,
     position: index + 1,
+    seq_index: index + 1,
     lesson_title: lessonTitle,
   }));
 
   const { data: items, error: itemsError } = await supabase
     .from("curriculum_items")
     .insert(itemsPayload)
-    .select("id,curriculum_id,position,lesson_title,stage,scheduled_on,status");
+    .select("id,curriculum_id,position,seq_index,lesson_title,stage,scheduled_on,status");
 
   if (itemsError) {
     console.error("Failed to create curriculum items", itemsError);
@@ -161,15 +163,73 @@ export async function createCurriculum(input: {
 
   return {
     curriculum,
-    items: items ?? [],
+    items: (items ?? []).map(item => ({
+      ...item,
+      lesson_plan_id: null,
+      resource_shortcut_ids: [],
+    })),
   };
 }
 
-export async function fetchCurriculumItems(curriculumId: string): Promise<CurriculumItem[]> {
+type RawCurriculumItemRow = CurriculumItem & {
+  seq_index?: number | null;
+  resource_shortcuts?: unknown;
+  lesson_plans?: { id: string }[] | { id: string } | null;
+};
+
+const extractResourceShortcutIds = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const ids = value
+    .map(entry => {
+      if (typeof entry === "string") {
+        return entry;
+      }
+
+      if (entry && typeof entry === "object") {
+        if ("id" in entry && typeof (entry as { id?: unknown }).id === "string") {
+          return (entry as { id: string }).id;
+        }
+
+        if ("resource_id" in entry && typeof (entry as { resource_id?: unknown }).resource_id === "string") {
+          return (entry as { resource_id: string }).resource_id;
+        }
+      }
+
+      return null;
+    })
+    .filter((id): id is string => typeof id === "string" && id.trim().length > 0);
+
+  return Array.from(new Set(ids));
+};
+
+const extractLessonPlanId = (value: RawCurriculumItemRow["lesson_plans"]): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  if (Array.isArray(value)) {
+    const match = value.find(item => item && typeof item.id === "string");
+    return match?.id ?? null;
+  }
+
+  if (typeof value === "object" && typeof value.id === "string") {
+    return value.id;
+  }
+
+  return null;
+};
+
+export async function fetchCurriculumItems(curriculumId: string): Promise<DashboardCurriculumItem[]> {
   const { data, error } = await supabase
     .from("curriculum_items")
-    .select("id,curriculum_id,position,lesson_title,stage,scheduled_on,status")
+    .select(
+      "id,curriculum_id,position,seq_index,lesson_title,stage,scheduled_on,status,resource_shortcuts,lesson_plans(id)",
+    )
     .eq("curriculum_id", curriculumId)
+    .order("seq_index", { ascending: true, nullsFirst: false })
     .order("position", { ascending: true });
 
   if (error) {
@@ -177,12 +237,47 @@ export async function fetchCurriculumItems(curriculumId: string): Promise<Curric
     throw error;
   }
 
-  return data ?? [];
+  const rows = (data ?? []) as RawCurriculumItemRow[];
+
+  return rows.map(row => {
+    const { lesson_plans, resource_shortcuts, seq_index, ...base } = row;
+    const normalizedSeqIndex =
+      typeof seq_index === "number" ? seq_index : seq_index === null ? null : base.seq_index ?? undefined;
+
+    return {
+      ...base,
+      seq_index: normalizedSeqIndex,
+      lesson_plan_id: extractLessonPlanId(lesson_plans ?? null),
+      resource_shortcut_ids: extractResourceShortcutIds(resource_shortcuts),
+    } satisfies DashboardCurriculumItem;
+  });
+}
+
+export async function reorderCurriculumItems(input: { curriculumId: string; itemIds: string[] }): Promise<void> {
+  if (input.itemIds.length === 0) {
+    return;
+  }
+
+  const updates = input.itemIds.map((id, index) => ({
+    id,
+    curriculum_id: input.curriculumId,
+    seq_index: index + 1,
+    position: index + 1,
+  }));
+
+  const { error } = await supabase
+    .from("curriculum_items")
+    .upsert(updates, { onConflict: "id" });
+
+  if (error) {
+    console.error("Failed to reorder curriculum items", error);
+    throw error;
+  }
 }
 
 export async function seedExampleDashboardData(input: {
   ownerId: string;
-}): Promise<{ class: Class; curriculum: Curriculum; items: CurriculumItem[] }> {
+}): Promise<{ class: Class; curriculum: Curriculum; items: DashboardCurriculumItem[] }> {
   const { data: createdClass, error: classError } = await supabase
     .from("classes")
     .insert({
@@ -221,6 +316,7 @@ export async function seedExampleDashboardData(input: {
   const itemsPayload = DASHBOARD_EXAMPLE_CURRICULUM_ITEMS.map(item => ({
     curriculum_id: createdCurriculum.id,
     position: item.position,
+    seq_index: item.seq_index ?? item.position,
     lesson_title: item.lesson_title,
     stage: item.stage ?? null,
     scheduled_on: item.scheduled_on ?? null,
@@ -230,7 +326,7 @@ export async function seedExampleDashboardData(input: {
   const { data: createdItems, error: itemsError } = await supabase
     .from("curriculum_items")
     .insert(itemsPayload)
-    .select("id,curriculum_id,position,lesson_title,stage,scheduled_on,status");
+    .select("id,curriculum_id,position,seq_index,lesson_title,stage,scheduled_on,status");
 
   if (itemsError) {
     console.error("Failed to copy example curriculum items", itemsError);
@@ -240,7 +336,11 @@ export async function seedExampleDashboardData(input: {
   return {
     class: createdClass,
     curriculum: createdCurriculum,
-    items: createdItems ?? [],
+    items: (createdItems ?? []).map(item => ({
+      ...item,
+      lesson_plan_id: null,
+      resource_shortcut_ids: [],
+    })),
   };
 }
 
