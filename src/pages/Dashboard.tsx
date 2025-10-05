@@ -25,6 +25,7 @@ import { CurriculaList } from "@/components/dashboard/CurriculaList";
 import { CurriculumEditor } from "@/components/dashboard/CurriculumEditor";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { SkillsSection } from "@/components/dashboard/SkillsSection";
+import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import {
   createClass,
@@ -125,7 +126,7 @@ const formatLessonContextDate = (value: string | null) => {
   }
 };
 
-const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "skills"] as const;
+const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "skills", "assessments"] as const;
 type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 const isDashboardTab = (value: string | null): value is DashboardTab =>
@@ -660,7 +661,7 @@ export default function DashboardPage() {
         />
         <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-2xl md:p-10">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full gap-3 border border-white/20 bg-white/10 p-2 text-white/70 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.75)] sm:grid-cols-5">
+            <TabsList className="grid w-full gap-3 border border-white/20 bg-white/10 p-2 text-white/70 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.75)] sm:grid-cols-6">
               <TabsTrigger
                 value="curriculum"
                 className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
@@ -690,6 +691,12 @@ export default function DashboardPage() {
                 className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
               >
                 {t.dashboard.tabs.skills}
+              </TabsTrigger>
+              <TabsTrigger
+                value="assessments"
+                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+              >
+                {t.dashboard.tabs.assessments ?? "Assessments"}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="curriculum" className="space-y-6">
@@ -724,8 +731,8 @@ export default function DashboardPage() {
                 classes={classes}
                 loading={classesQuery.isLoading}
                 onNewClass={() => setClassDialogOpen(true)}
-                onViewClass={classId => navigate(`/account/classes/${classId}`)}
-                onEditClass={classId => navigate(`/account/classes/${classId}`)}
+                onViewClass={classId => navigate(`/teacher/classes/${classId}`)}
+                onEditClass={classId => navigate(`/teacher/classes/${classId}`)}
               />
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">
@@ -783,6 +790,9 @@ export default function DashboardPage() {
             </TabsContent>
             <TabsContent value="skills" className="space-y-6">
               <SkillsSection classes={classes} />
+            </TabsContent>
+            <TabsContent value="assessments" className="space-y-6">
+              <AssessmentsSection />
             </TabsContent>
           </Tabs>
         </section>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
@@ -14,7 +14,6 @@ import FAQ from '@/pages/FAQ';
 import BuilderLessonPlan from '@/pages/BuilderLessonPlan';
 import BuilderLessonPlanDetail from '@/pages/BuilderLessonPlanDetail';
 import Auth from '@/pages/Auth';
-import Account from '@/pages/account';
 import Profile from '@/pages/Profile';
 import ClassDashboard from '@/pages/account/ClassDashboard';
 import AccountResources from '@/pages/AccountResources';
@@ -52,6 +51,30 @@ const LegacyBuilderRedirect: React.FC = () => {
   return <Navigate to={destination} replace />;
 };
 
+const LegacyAccountRedirect: React.FC = () => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const tab = searchParams.get('tab');
+  const tabMap: Record<string, string> = {
+    classes: 'classes',
+    students: 'students',
+    curriculum: 'curriculum',
+    builder: 'lessonBuilder',
+    assessments: 'assessments',
+  };
+
+  const mappedTab = tab ? tabMap[tab] : undefined;
+  const destination = mappedTab ? `/teacher?tab=${mappedTab}` : '/teacher';
+
+  return <Navigate to={destination} replace />;
+};
+
+const LegacyClassDashboardRedirect: React.FC = () => {
+  const params = useParams<{ id?: string }>();
+  const destination = params.id ? `/teacher/classes/${params.id}` : `/teacher?tab=classes`;
+  return <Navigate to={destination} replace />;
+};
+
 const LegacyStudentDashboardRedirect: React.FC = () => {
   const params = useParams<{ id?: string }>();
   const destination = params.id
@@ -73,7 +96,7 @@ export const LocalizedRoutes = () => {
       <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/builder/lesson-plans" element={<RouteWrapper><BuilderLessonPlan /></RouteWrapper>} />
       <Route path="/builder/lesson-plans/:id" element={<RouteWrapper><BuilderLessonPlanDetail /></RouteWrapper>} />
-      <Route path="/curriculum" element={<Navigate to="/account?tab=curriculum" replace />} />
+      <Route path="/curriculum" element={<Navigate to="/teacher?tab=curriculum" replace />} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
@@ -84,16 +107,17 @@ export const LocalizedRoutes = () => {
       <Route path="/contact" element={<RouteWrapper><Contact /></RouteWrapper>} />
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
-      <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
+      <Route path="/account" element={<LegacyAccountRedirect />} />
       <Route path="/teacher" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
       <Route path="/teacher/curriculum/:id" element={<RouteWrapper><TeacherCurriculumDetailPage /></RouteWrapper>} />
+      <Route path="/teacher/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
       <Route path="/dashboard" element={<Navigate to="/teacher" replace />} />
       <Route path="/student" element={<RouteWrapper><StudentPage /></RouteWrapper>} />
       <Route path="/teacher/students/:id" element={<RouteWrapper><StudentDashboardPage /></RouteWrapper>} />
       <Route path="/dashboard/students/:id" element={<LegacyStudentDashboardRedirect />} />
       <Route path="/my-profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
       <Route path="/profile" element={<Navigate to="/my-profile" replace />} />
-      <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
+      <Route path="/account/classes/:id" element={<LegacyClassDashboardRedirect />} />
       <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
       <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
       <Route path="/account/resources/:id" element={<RouteWrapper><AccountResourceEdit /></RouteWrapper>} />

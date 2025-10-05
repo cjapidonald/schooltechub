@@ -63,7 +63,7 @@ export function ClassDashboard() {
   }, [scheduleOccurrences]);
 
   if (!classId) {
-    return <Navigate to="/account" replace />;
+    return <Navigate to="/teacher" replace />;
   }
 
   const classData = classQuery.data;
@@ -76,12 +76,12 @@ export function ClassDashboard() {
       <SEO
         title={t.account.classes.dashboard.seoTitle}
         description={t.account.classes.dashboard.seoDescription}
-        canonicalUrl="https://schooltechhub.com/account/classes"
+        canonicalUrl="https://schooltechhub.com/teacher/classes"
       />
       <div className="container mx-auto space-y-8 px-4">
         <div className="flex items-center justify-between gap-4">
           <Button variant="ghost" asChild>
-            <Link to={getLocalizedPath("/account", language)} className="inline-flex items-center gap-2">
+            <Link to={getLocalizedPath("/teacher", language)} className="inline-flex items-center gap-2">
               <ChevronLeft className="h-4 w-4" />
               {t.account.classes.dashboard.backToOverview}
             </Link>

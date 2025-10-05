@@ -72,6 +72,7 @@ export const en = {
       lessonBuilder: "Lesson Builder",
       students: "My Students",
       skills: "Skills",
+      assessments: "Assessments",
       lessonPlans: "Lesson Plans",
       activity: "Activity",
     },

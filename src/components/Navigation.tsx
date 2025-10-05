@@ -146,7 +146,7 @@ const Navigation = () => {
                     {t.nav.my_profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}
+                    onClick={() => navigate(getLocalizedNavPath("/teacher?tab=classes"))}
                   >
                     <GraduationCap className="mr-2 h-4 w-4" />
                     {t.account.tabs.classes}
@@ -216,7 +216,7 @@ const Navigation = () => {
                       </Button>
                     </Link>
                     <Link
-                      to={getLocalizedNavPath("/account?tab=classes")}
+                      to={getLocalizedNavPath("/teacher?tab=classes")}
                       onClick={() => setIsOpen(false)}
                     >
                       <Button className="w-full" variant="outline">
