@@ -151,6 +151,15 @@ All colors MUST be HSL.
       0 0 25px hsl(var(--glow-primary) / 0.35),
       0 0 55px hsl(var(--glow-primary) / 0.25);
   }
+
+  .reveal-landing {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+  }
+
+  .reveal-landing-visible {
+    animation: reveal-slide-up-lock 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
 }
 
 /* Fix for blog post images overlapping text */
@@ -211,6 +220,38 @@ All colors MUST be HSL.
   100% {
     opacity: 0;
     transform: translate3d(var(--spark-x, 0px), -140px, 0) scale(1.1);
+  }
+}
+
+@keyframes reveal-slide-up-lock {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -8px, 0);
+  }
+
+  78% {
+    transform: translate3d(0, 4px, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-landing {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .reveal-landing-visible {
+    animation: none !important;
   }
 }
 
