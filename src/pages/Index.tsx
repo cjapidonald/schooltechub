@@ -38,6 +38,7 @@ type Testimonial = {
   quote: string;
   name: string;
   role: string;
+  image: string;
 };
 
 const workflowTools: Feature[] = [
@@ -107,18 +108,24 @@ const testimonials: Testimonial[] = [
       "SchoolTech Hub keeps our planning aligned and reflective. AI prompts help every lesson land for diverse learners.",
     name: "Emma Rodriguez",
     role: "Digital Learning Coach, Horizon Primary",
+    image:
+      "https://images.unsplash.com/photo-1573497491208-6b1acb260507?auto=format&fit=facearea&facepad=3&w=320&h=320&q=80",
   },
   {
     quote:
       "The dashboards give our team a living picture of student growth, so we can intervene and celebrate faster.",
     name: "James Patel",
     role: "Year 6 Teacher, Northside Academy",
+    image:
+      "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=facearea&facepad=3&w=320&h=320&q=80",
   },
   {
     quote:
       "Our leadership team finally has the analytics we need to coach staff and scale innovation responsibly.",
     name: "Dr. Amina Clarke",
     role: "Assistant Principal, Futures STEM School",
+    image:
+      "https://images.unsplash.com/photo-1544723795-3fb171a6f96b?auto=format&fit=facearea&facepad=3&w=320&h=320&q=80",
   },
 ];
 
@@ -355,8 +362,16 @@ const Index = () => {
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map(({ quote, name, role }) => (
+            {testimonials.map(({ quote, name, role, image }) => (
               <Card key={name} className={cn("p-8 text-center", neonCardClass)}>
+                <div className="mb-6 flex justify-center">
+                  <img
+                    src={image}
+                    alt={`Portrait of ${name}`}
+                    className="h-20 w-20 rounded-full border border-white/20 object-cover shadow-[0_0_18px_hsl(var(--glow-primary)/0.3)]"
+                    loading="lazy"
+                  />
+                </div>
                 <p className="mb-6 text-white/90 italic">“{quote}”</p>
                 <div className="space-y-1">
                   <p className="text-lg font-semibold text-white">{name}</p>
