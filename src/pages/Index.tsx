@@ -95,6 +95,11 @@ const schoolSolutions: Feature[] = [
   },
 ];
 
+const featureShowcase = [...workflowTools, ...schoolSolutions];
+
+const compactCardClass =
+  "group relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition-transform duration-300 hover:-translate-y-1 hover:border-primary/60";
+
 const stats = [
   { number: "12k+", label: "AI-accelerated lessons created on SchoolTech Hub" },
   { number: "94%", label: "Teachers reporting smoother workflow management" },
@@ -233,84 +238,68 @@ const Index = () => {
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
         <div className="container mx-auto px-4">
-          <div className="mx-auto mb-16 max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl space-y-6 text-center">
             <h2 className="text-3xl font-bold text-white md:text-4xl">
               Plan, track, and celebrate learning in one radiant hub
             </h2>
-            <p className="mt-5 text-lg text-white/75">
+            <p className="text-lg text-white/75">
               Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
             </p>
-          </div>
-          <div className="grid gap-8 md:grid-cols-2">
-            {workflowTools.map(({ title, description, icon: Icon }, index) => (
-              <Card key={title} className={cn("h-full", neonCardClass)}>
-                <div className="flex flex-col gap-4 text-left">
-                  <div
-                    className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-xl",
-                      iconColorClasses[index % iconColorClasses.length],
-                    )}
-                  >
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-semibold text-primary">{title}</h3>
-                    <p className="mt-3 text-base text-white/80">{description}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative py-24">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-12 md:flex-row">
-            <div className="max-w-xl space-y-6">
-              <Badge variant="secondary" className="bg-secondary/20 text-secondary-foreground">
+            <div className="space-y-3">
+              <Badge variant="secondary" className="mx-auto bg-secondary/20 text-secondary-foreground">
                 School-wide technology solutions
               </Badge>
-              <h2 className="text-3xl font-bold text-white md:text-4xl">
+              <h3 className="text-2xl font-semibold text-white">
                 Professional development and classroom technology aligned
-              </h2>
-              <p className="text-lg text-white/75">
+              </h3>
+              <p className="text-base text-white/75">
                 From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
               </p>
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <Link to={getLocalizedPath("/contact", language)}>
-                  <Button size="lg" className="neon-pulse">
-                    Talk with our team
-                  </Button>
-                </Link>
-                <Link to={getLocalizedPath("/events", language)}>
-                  <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                    <MessageSquare className="mr-2 h-5 w-5" />
-                    Join a training session
-                  </Button>
-                </Link>
-              </div>
             </div>
-            <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
-              {schoolSolutions.map(({ title, description, icon: Icon }, index) => (
-                <Card key={title} className={cn("h-full", neonCardClass)}>
+          </div>
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {featureShowcase.map(({ title, description, icon: Icon }, index) => {
+              const isWorkflowTool = index < workflowTools.length;
+
+              return (
+                <Card key={title} className={cn("h-full", compactCardClass)}>
                   <div className="flex flex-col gap-4 text-left">
                     <div
                       className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-xl",
+                        "flex h-10 w-10 items-center justify-center rounded-xl",
                         iconColorClasses[index % iconColorClasses.length],
                       )}
                     >
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-semibold text-secondary">{title}</h3>
-                      <p className="mt-3 text-base text-white/80">{description}</p>
+                      <h3
+                        className={cn(
+                          "text-xl font-semibold",
+                          isWorkflowTool ? "text-primary" : "text-secondary",
+                        )}
+                      >
+                        {title}
+                      </h3>
+                      <p className="mt-2 text-sm text-white/75">{description}</p>
                     </div>
                   </div>
                 </Card>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link to={getLocalizedPath("/contact", language)}>
+              <Button size="lg" className="neon-pulse">
+                Talk with our team
+              </Button>
+            </Link>
+            <Link to={getLocalizedPath("/events", language)}>
+              <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Join a training session
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
