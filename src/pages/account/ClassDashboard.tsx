@@ -195,7 +195,7 @@ export function ClassDashboard() {
                       </Link>
                     </Button>
                     <Button className="w-full" variant="outline" asChild>
-                      <Link to={getLocalizedPath("/builder/lesson-plans", language)}>
+                      <Link to={getLocalizedPath("/lesson-builder", language)}>
                         {t.account.classes.dashboard.managePlans}
                       </Link>
                     </Button>

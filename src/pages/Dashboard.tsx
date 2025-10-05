@@ -417,7 +417,7 @@ export default function DashboardPage() {
         navigate("/forum/new");
         return;
       case "post-blog":
-        navigate("/blog/new");
+        toast({ description: t.dashboard.toasts.blogUnavailable, variant: "destructive" });
         return;
       default:
         return;
@@ -521,7 +521,7 @@ export default function DashboardPage() {
         return;
       }
 
-      navigate(`/builder/lesson-plans/${item.lesson_plan_id}`);
+      navigate(`/lesson-builder?id=${encodeURIComponent(item.lesson_plan_id)}`);
     },
     [navigate, t.dashboard.toasts.lessonPlanMissing, toast],
   );
@@ -743,8 +743,12 @@ export default function DashboardPage() {
                 classes={classes}
                 loading={classesQuery.isLoading}
                 onNewClass={() => setClassDialogOpen(true)}
-                onViewClass={classId => navigate(`/teacher/classes/${classId}`)}
-                onEditClass={classId => navigate(`/teacher/classes/${classId}`)}
+                onViewClass={classId =>
+                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
+                }
+                onEditClass={classId =>
+                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
+                }
               />
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">

@@ -293,7 +293,7 @@ const CurriculumPage = () => {
         title: "Lesson plan created",
         description: "Opening the lesson builder so you can finish planning.",
       });
-      navigate(`/builder/lesson-plans/${plan.id}`);
+      navigate(`/lesson-builder?id=${encodeURIComponent(plan.id)}`);
     },
     onError: (error) => {
       const description =

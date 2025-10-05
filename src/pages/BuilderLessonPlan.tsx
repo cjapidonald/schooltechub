@@ -15,7 +15,7 @@ const BuilderLessonPlan = () => {
   const mutation = useMutation({
     mutationFn: createLessonBuilderDraft,
     onSuccess: (plan) => {
-      const path = getLocalizedPath(`/builder/lesson-plans/${plan.id}`, language);
+      const path = getLocalizedPath(`/lesson-builder?id=${encodeURIComponent(plan.id)}`, language);
       navigate(path, { replace: true });
     },
   });

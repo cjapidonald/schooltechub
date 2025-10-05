@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   Search,
   Tag,
@@ -627,23 +627,29 @@ const Blog = () => {
       return null;
     }
 
-    const items = filteredPosts.map((post, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "BlogPosting",
-        headline: post.title,
-        url: `https://schooltechub.com${getLocalizedPath(`/blog/${post.slug}`, language)}`,
-        datePublished: post.published_at ?? post.created_at ?? undefined,
-        dateModified: post.updated_at ?? undefined,
-        description: post.excerpt ?? undefined,
-        image: post.featured_image ?? undefined,
-        author: {
-          "@type": "Person",
-          name: getAuthorName(post),
+    const baseBlogUrl = `https://schooltechub.com${getLocalizedPath("/blog", language)}`;
+
+    const items = filteredPosts.map((post, index) => {
+      const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
+
+      return {
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "BlogPosting",
+          headline: post.title,
+          url: `${baseBlogUrl}#${anchorId}`,
+          datePublished: post.published_at ?? post.created_at ?? undefined,
+          dateModified: post.updated_at ?? undefined,
+          description: post.excerpt ?? undefined,
+          image: post.featured_image ?? undefined,
+          author: {
+            "@type": "Person",
+            name: getAuthorName(post),
+          },
         },
-      },
-    }));
+      };
+    });
 
     return {
       "@context": "https://schema.org",
@@ -952,13 +958,10 @@ const Blog = () => {
                     <div className="grid gap-5 md:grid-cols-2">
                       {featuredPosts.map(post => {
                         const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
+                        const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
 
                         return (
-                          <Link
-                            key={post.id}
-                            to={getLocalizedPath(`/blog/${post.slug}`, language)}
-                            className="group block"
-                          >
+                          <article key={post.id} id={anchorId} className="group block">
                             <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
                               <figure className="relative h-48 overflow-hidden">
                                 <img
@@ -977,7 +980,7 @@ const Blog = () => {
                                 ) : null}
                               </CardHeader>
                             </Card>
-                          </Link>
+                          </article>
                         );
                       })}
                     </div>
@@ -995,13 +998,10 @@ const Blog = () => {
                     <div className="grid gap-5 md:grid-cols-2">
                       {regularPosts.map(post => {
                         const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
+                        const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
 
                         return (
-                          <Link
-                            key={post.id}
-                            to={getLocalizedPath(`/blog/${post.slug}`, language)}
-                            className="group block h-full"
-                          >
+                          <article key={post.id} id={anchorId} className="group block h-full">
                             <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
                               <figure className="relative h-40 overflow-hidden">
                                 <img
@@ -1020,7 +1020,7 @@ const Blog = () => {
                                 ) : null}
                               </CardHeader>
                             </Card>
-                          </Link>
+                          </article>
                         );
                       })}
                     </div>
