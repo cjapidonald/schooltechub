@@ -42,7 +42,7 @@ type Testimonial = {
 
 const workflowTools: Feature[] = [
   {
-    title: "AI Lesson Planner",
+    title: "Lesson Builder Platform",
     description:
       "Draft engaging lessons in minutes with standards alignment, smart suggestions, and reusable templates.",
     icon: CalendarRange,
@@ -60,7 +60,7 @@ const workflowTools: Feature[] = [
     icon: BarChart3,
   },
   {
-    title: "AI Report Builder",
+    title: "Data-Driven Reports",
     description:
       "Transform evidence into narrative-rich reports and share them instantly with leadership teams and guardians.",
     icon: ClipboardList,
@@ -207,14 +207,14 @@ const Index = () => {
                 <div className="grid gap-6 sm:grid-cols-2">
                   <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-secondary/20 via-background/70 to-background")}
                   >
-                    <div className="text-sm font-semibold text-secondary">AI Lesson Planner</div>
+                    <div className="text-sm font-semibold text-secondary">Lesson Builder Platform</div>
                     <p className="mt-2 text-sm text-white/75">
                       Align objectives, differentiation, and formative checks in minutes with responsible AI support.
                     </p>
                   </Card>
                   <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-accent/20 via-background/70 to-background")}
                   >
-                    <div className="text-sm font-semibold text-accent">Report Builder</div>
+                    <div className="text-sm font-semibold text-accent">Data-Driven Reports</div>
                     <p className="mt-2 text-sm text-white/75">
                       Turn evidence into narrative-rich reports and share instantly with leadership and families.
                     </p>
