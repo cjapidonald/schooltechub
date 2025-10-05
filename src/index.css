@@ -122,17 +122,34 @@ All colors MUST be HSL.
   .glow-primary {
     box-shadow: 0 0 20px hsl(var(--glow-primary) / 0.5);
   }
-  
+
   .glow-secondary {
     box-shadow: 0 0 20px hsl(var(--glow-secondary) / 0.5);
   }
-  
+
   .glow-accent {
     box-shadow: 0 0 20px hsl(var(--glow-accent) / 0.5);
   }
-  
+
   .text-glow {
     text-shadow: 0 0 20px currentColor;
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-flow 8s ease infinite;
+  }
+
+  .animate-spark {
+    animation: spark-float 7s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+
+  .neon-pulse {
+    animation: neon-pulse 4s ease-in-out infinite;
+    box-shadow:
+      0 0 25px hsl(var(--glow-primary) / 0.35),
+      0 0 55px hsl(var(--glow-primary) / 0.25);
   }
 }
 
@@ -160,6 +177,55 @@ All colors MUST be HSL.
   100% {
     transform: translate(65%, -50%) scale(1.05);
     opacity: 0;
+  }
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes spark-float {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0) scale(0.6);
+  }
+
+  25% {
+    opacity: 0.8;
+  }
+
+  60% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--spark-x, 0px), -140px, 0) scale(1.1);
+  }
+}
+
+@keyframes neon-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 18px hsl(var(--glow-primary) / 0.25),
+      0 0 36px hsl(var(--glow-secondary) / 0.25);
+  }
+
+  50% {
+    box-shadow:
+      0 0 28px hsl(var(--glow-primary) / 0.45),
+      0 0 65px hsl(var(--glow-secondary) / 0.35);
   }
 }
 

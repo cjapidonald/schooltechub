@@ -16,6 +16,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import MouseGlowEffect from "@/components/MouseGlowEffect";
+import SparklesBackground from "@/components/SparklesBackground";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,8 @@ import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { cn } from "@/lib/utils";
+
+import heroImage from "@/assets/futuristic-classroom-hero.jpg";
 
 type Feature = {
   title: string;
@@ -141,8 +144,14 @@ const structuredData = {
   },
 };
 
-const accentCardClass =
-  "border border-primary/35 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] transition-colors duration-300 hover:border-primary/70";
+const neonCardClass =
+  "group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] backdrop-blur-xl transition-all duration-500 hover:border-primary/80 hover:shadow-[0_0_45px_hsl(var(--glow-primary)/0.35)]";
+
+const neonIconClass =
+  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-primary/35 bg-primary/15 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)] before:absolute before:-inset-3 before:rounded-full before:bg-primary/20 before:blur-xl before:content-['']";
+
+const neonIconSecondaryClass =
+  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-secondary/35 bg-secondary/15 text-secondary shadow-[0_0_35px_hsl(var(--glow-secondary)/0.45)] before:absolute before:-inset-3 before:rounded-full before:bg-secondary/20 before:blur-xl before:content-['']";
 
 const Index = () => {
   const { language } = useLanguage();
@@ -154,7 +163,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <SEO
         title="All-in-One Teacher Technology Platform | SchoolTech Hub"
         description="Empower teachers with an AI-ready workspace to plan lessons, track student progress, build reports, and embed technology across the school."
@@ -163,88 +172,139 @@ const Index = () => {
       />
       <StructuredData type="Organization" data={structuredData} />
 
-      <section className="relative overflow-hidden py-24">
+      <section className="relative overflow-hidden py-28">
         <MouseGlowEffect />
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="secondary" className="mb-6 bg-primary/15 text-primary">
-              The all-in-one technology workspace for teachers
-            </Badge>
-            <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Power every lesson with organised workflows and smart insights
-            </h1>
-            <p className="mt-6 text-lg text-white/80 md:text-xl">
-              SchoolTech Hub helps teachers organise their workflow, collaborate with colleagues, and use technology to elevate every classroom experience. Plan lessons, track progress, and publish AI-driven reports without leaving your digital staffroom.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to={getLocalizedPath("/services", language)}>
-                <Button size="lg">Explore platform features</Button>
-              </Link>
-              <Link to={getLocalizedPath("/resources", language)}>
-                <Button size="lg" variant="outline">
-                  <BookOpen className="mr-2 h-5 w-5" />
-                  Browse teaching resources
-                </Button>
-              </Link>
+        <SparklesBackground />
+        <div className="absolute inset-0">
+          <img
+            src={heroImage}
+            alt="Futuristic classroom with holographic interfaces"
+            className="h-full w-full object-cover object-center opacity-45"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsla(var(--glow-primary)/0.22),transparent_60%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/85 to-background" />
+        </div>
+        <div className="container relative z-10 mx-auto px-4">
+          <div className="grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
+            <div>
+              <Badge variant="secondary" className="mb-6 bg-primary/20 text-primary backdrop-blur">
+                The all-in-one technology workspace for teachers
+              </Badge>
+              <h1 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-4xl font-bold tracking-tight text-transparent animate-gradient md:text-6xl">
+                Power every lesson with organised workflows and luminous insights
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
+                SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
+              </p>
+              <div className="mt-10 flex flex-col items-center justify-start gap-4 sm:flex-row">
+                <Link to={getLocalizedPath("/services", language)}>
+                  <Button size="lg" className="neon-pulse">
+                    Explore platform features
+                  </Button>
+                </Link>
+                <Link to={getLocalizedPath("/resources", language)}>
+                  <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                    <BookOpen className="mr-2 h-5 w-5" />
+                    Browse teaching resources
+                  </Button>
+                </Link>
+              </div>
+              <div className="mt-12 flex flex-wrap items-center gap-4 text-sm text-white/75">
+                {highlightPills.map((highlight) => (
+                  <span
+                    key={highlight}
+                    className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 shadow-[0_0_25px_hsl(var(--glow-primary)/0.15)] backdrop-blur"
+                  >
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    {highlight}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-sm text-white/70">
-              {highlightPills.map((highlight) => (
-                <span
-                  key={highlight}
-                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"
+            <div className="relative hidden md:flex">
+              <div className="pointer-events-none absolute -inset-12 rounded-full bg-primary/10 blur-3xl" />
+              <div className="relative grid w-full max-w-2xl grid-cols-1 gap-6">
+                <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-br from-primary/15 via-background/60 to-background")}
                 >
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  {highlight}
-                </span>
-              ))}
+                  <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
+                  <h3 className="mt-4 text-2xl font-semibold text-white">Class and student insights synchronised in real time</h3>
+                  <p className="mt-3 text-white/70">
+                    Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
+                  </p>
+                </Card>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-secondary/20 via-background/70 to-background")}
+                  >
+                    <div className="text-sm font-semibold text-secondary">AI Lesson Planner</div>
+                    <p className="mt-2 text-sm text-white/75">
+                      Align objectives, differentiation, and formative checks in minutes with responsible AI support.
+                    </p>
+                  </Card>
+                  <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-accent/20 via-background/70 to-background")}
+                  >
+                    <div className="text-sm font-semibold text-accent">Report Builder</div>
+                    <p className="mt-2 text-sm text-white/75">
+                      Turn evidence into narrative-rich reports and share instantly with leadership and families.
+                    </p>
+                  </Card>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-muted/20 py-20">
+      <section className="relative py-24">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
         <div className="container mx-auto px-4">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">Plan, track, and celebrate learning in one hub</h2>
-            <p className="mt-4 text-lg text-white/70">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <h2 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
+              Plan, track, and celebrate learning in one radiant hub
+            </h2>
+            <p className="mt-5 text-lg text-white/75">
               Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-8 md:grid-cols-2">
             {workflowTools.map(({ title, description, icon: Icon }) => (
-              <Card key={title} className={cn("h-full p-6", accentCardClass)}>
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <Icon className="h-6 w-6 text-primary" />
+              <Card key={title} className={cn("h-full", neonCardClass)}>
+                <div className="flex flex-col items-center text-center">
+                  <div className={neonIconClass}>
+                    <Icon className="relative h-8 w-8 drop-shadow-[0_0_15px_hsl(var(--glow-primary)/0.55)]" />
                   </div>
-                  <h3 className="text-xl font-semibold">{title}</h3>
+                  <h3 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-2xl font-semibold text-transparent animate-gradient">
+                    {title}
+                  </h3>
+                  <p className="mt-4 text-base text-white/80">{description}</p>
                 </div>
-                <p className="text-white/80 leading-relaxed">{description}</p>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="relative py-24">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-10 md:flex-row">
-            <div className="max-w-xl">
+          <div className="flex flex-col items-center justify-between gap-12 md:flex-row">
+            <div className="max-w-xl space-y-6">
               <Badge variant="secondary" className="bg-secondary/20 text-secondary-foreground">
                 School-wide technology solutions
               </Badge>
-              <h2 className="mt-4 text-3xl font-bold md:text-4xl">
+              <h2 className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
                 Professional development and classroom technology aligned
               </h2>
-              <p className="mt-4 text-lg text-white/70">
+              <p className="text-lg text-white/75">
                 From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
               </p>
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+              <div className="flex flex-col gap-4 sm:flex-row">
                 <Link to={getLocalizedPath("/contact", language)}>
-                  <Button size="lg">Talk with our team</Button>
+                  <Button size="lg" className="neon-pulse">
+                    Talk with our team
+                  </Button>
                 </Link>
                 <Link to={getLocalizedPath("/events", language)}>
-                  <Button size="lg" variant="outline">
+                  <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
                     <MessageSquare className="mr-2 h-5 w-5" />
                     Join a training session
                   </Button>
@@ -253,14 +313,16 @@ const Index = () => {
             </div>
             <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
               {schoolSolutions.map(({ title, description, icon: Icon }) => (
-                <Card key={title} className={cn("h-full p-6", accentCardClass)}>
-                  <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary/15">
-                      <Icon className="h-6 w-6 text-secondary-foreground" />
+                <Card key={title} className={cn("h-full", neonCardClass)}>
+                  <div className="flex flex-col items-center text-center">
+                    <div className={neonIconSecondaryClass}>
+                      <Icon className="relative h-8 w-8 drop-shadow-[0_0_18px_hsl(var(--glow-secondary)/0.55)]" />
                     </div>
-                    <h3 className="text-xl font-semibold">{title}</h3>
+                    <h3 className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-2xl font-semibold text-transparent animate-gradient">
+                      {title}
+                    </h3>
+                    <p className="mt-4 text-base text-white/80">{description}</p>
                   </div>
-                  <p className="text-white/80 leading-relaxed">{description}</p>
                 </Card>
               ))}
             </div>
@@ -268,33 +330,36 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="bg-gradient-to-r from-primary/10 via-background to-secondary/10 py-20">
+      <section className="relative py-24">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
           <div className="grid gap-8 text-center md:grid-cols-4">
             {stats.map((stat) => (
-              <Card key={stat.label} className={cn("p-8", accentCardClass)}>
-                <p className="text-4xl font-bold text-primary">{stat.number}</p>
-                <p className="mt-3 text-sm uppercase tracking-wide text-white/60">{stat.label}</p>
+              <Card key={stat.label} className={cn("p-8", neonCardClass)}>
+                <p className="text-4xl font-bold text-primary text-glow">{stat.number}</p>
+                <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
               </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20">
+      <section className="py-24">
         <div className="container mx-auto px-4">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">Teachers trust SchoolTech Hub for digital transformation</h2>
-            <p className="mt-4 text-lg text-white/70">
+          <div className="mx-auto mb-16 max-w-2xl text-center">
+            <h2 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
+              Teachers trust SchoolTech Hub for digital transformation
+            </h2>
+            <p className="mt-5 text-lg text-white/75">
               Hear how schools are building confident, future-ready classrooms with our AI-powered platform.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map(({ quote, name, role }) => (
-              <Card key={name} className={cn("p-6", accentCardClass)}>
-                <p className="mb-4 text-white/90 italic">“{quote}”</p>
-                <div>
-                  <p className="font-semibold">{name}</p>
+              <Card key={name} className={cn("p-8 text-center", neonCardClass)}>
+                <p className="mb-6 text-white/90 italic">“{quote}”</p>
+                <div className="space-y-1">
+                  <p className="text-lg font-semibold text-white">{name}</p>
                   <p className="text-sm text-white/70">{role}</p>
                 </div>
               </Card>
@@ -303,27 +368,32 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="bg-muted/20 py-20">
+      <section className="relative py-24">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-background to-secondary/20" />
         <div className="container mx-auto px-4">
           <Card
             className={cn(
-              "mx-auto max-w-4xl bg-gradient-to-r from-primary/10 via-background to-secondary/10 p-10 text-center",
-              accentCardClass,
+              "mx-auto max-w-4xl rounded-[2rem] bg-gradient-to-br from-primary/15 via-background/80 to-secondary/15 p-12 text-center",
+              neonCardClass,
             )}
           >
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
-              <Award className="h-8 w-8 text-primary" />
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
+              <Award className="h-10 w-10" />
             </div>
-            <h2 className="mt-6 text-3xl font-bold md:text-4xl">Ready to simplify your teaching workflow?</h2>
-            <p className="mt-4 text-lg text-white/70">
+            <h2 className="mt-8 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
+              Ready to simplify your teaching workflow?
+            </h2>
+            <p className="mt-4 text-lg text-white/80">
               Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
             </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link to={getLocalizedPath("/auth", language)}>
-                <Button size="lg">Get started free</Button>
+                <Button size="lg" className="neon-pulse">
+                  Get started free
+                </Button>
               </Link>
               <Link to={getLocalizedPath("/services", language)}>
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
                   <TrendingUp className="mr-2 h-5 w-5" />
                   View implementation roadmap
                 </Button>
