@@ -323,21 +323,6 @@ const Index = () => {
                         SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
                       </p>
                     </div>
-                    <div className="relative w-full rounded-[1.75rem] border border-white/10 bg-white/5 p-6 text-left backdrop-blur-xl md:p-8">
-                      <span
-                        className="pointer-events-none absolute -inset-px rounded-[1.7rem] border border-white/10 opacity-60"
-                        aria-hidden
-                      />
-                      <div className="relative z-10 space-y-4 text-left">
-                        <div className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
-                        <h3 className="text-2xl font-semibold text-white md:text-3xl">
-                          Class and student insights synchronised in real time
-                        </h3>
-                        <p className="text-white/75">
-                          Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
-                        </p>
-                      </div>
-                    </div>
                   </div>
                   <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
                 </Card>
