@@ -125,7 +125,7 @@ const testimonials: Testimonial[] = [
     name: "Dr. Amina Clarke",
     role: "Assistant Principal, Futures STEM School",
     image:
-      "https://images.unsplash.com/photo-1544723795-3fb171a6f96b?auto=format&fit=facearea&facepad=3&w=320&h=320&q=80",
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=facearea&facepad=3&w=320&h=320&q=80",
   },
 ];
 
