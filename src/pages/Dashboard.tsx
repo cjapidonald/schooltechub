@@ -509,249 +509,290 @@ export default function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="container space-y-8 py-10">
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
         <SEO title="Teacher" description="Teacher workspace dashboard" />
-        <div className="rounded-xl border bg-muted/10 p-10 text-center text-muted-foreground">
-          {t.dashboard.common.signInPrompt}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-40 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-sky-500/20 blur-3xl" />
+          <div className="absolute bottom-[-10rem] right-[-4rem] h-[28rem] w-[28rem] rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="absolute top-1/3 left-[-10rem] h-[18rem] w-[18rem] rounded-full bg-emerald-500/20 blur-3xl" />
+        </div>
+        <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-24 md:px-8">
+          <section className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-10 text-center shadow-[0_25px_80px_-20px_rgba(15,23,42,0.75)] backdrop-blur-2xl">
+            <div className="space-y-4">
+              <h1 className="text-3xl font-semibold md:text-4xl">{t.dashboard.header.title}</h1>
+              <p className="text-white/70">{t.dashboard.common.signInPrompt}</p>
+            </div>
+          </section>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container space-y-8 py-10">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
       <SEO title="Teacher" description="Teacher workspace dashboard" />
-      {showingExampleData ? (
-        <Alert>
-          <AlertTitle>{t.dashboard.common.exampleActionsTitle}</AlertTitle>
-          <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span>{t.dashboard.common.exampleActionsDescription}</span>
-            <Button
-              onClick={() => seedExampleDataMutation.mutate()}
-              disabled={seedExampleDataMutation.isPending}
-              aria-label={t.dashboard.common.exampleActionsCta}
-            >
-              {seedExampleDataMutation.isPending ? t.common.loading : t.dashboard.common.exampleActionsCta}
-            </Button>
-          </AlertDescription>
-        </Alert>
-      ) : null}
-      <DashboardHeader
-        nameParts={derivedNameParts}
-        displayName={normalizeName(displayName) ?? normalizeName(fullName)}
-        avatarUrl={avatarUrl}
-        onQuickAction={handleQuickAction}
-      />
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-        <TabsList className="grid w-full gap-2 sm:grid-cols-5">
-          <TabsTrigger value="curriculum" className="w-full">
-            {t.dashboard.tabs.curriculum}
-          </TabsTrigger>
-          <TabsTrigger value="classes" className="w-full">
-            {t.dashboard.tabs.classes}
-          </TabsTrigger>
-          <TabsTrigger value="lessonBuilder" className="w-full">
-            {t.dashboard.tabs.lessonBuilder}
-          </TabsTrigger>
-          <TabsTrigger value="students" className="w-full">
-            {t.dashboard.tabs.students}
-          </TabsTrigger>
-          <TabsTrigger value="skills" className="w-full">
-            {t.dashboard.tabs.skills}
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="curriculum" className="space-y-6">
-          <CurriculaList
-            curricula={curricula}
-            loading={curriculaQuery.isLoading}
-            onNewCurriculum={() => setCurriculumDialogOpen(true)}
-            onOpenCurriculum={setActiveCurriculumId}
-            onExportCurriculum={id => toast({ description: t.dashboard.toasts.exportUnavailable })}
-          />
-          {selectedCurriculum ? (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">
-                {t.dashboard.curriculumView.title.replace("{title}", selectedCurriculum.title)}
-              </h3>
-              <CurriculumEditor
-                items={curriculumItems}
-                loading={curriculumItemsLoading}
-                reordering={reorderCurriculumItemsMutation.isPending}
-                onPlanLesson={handlePlanCurriculumLesson}
-                onOpenLessonPlan={handleOpenLessonPlan}
-                onReorder={selectedCurriculum.isExample ? undefined : handleReorderCurriculumItems}
-              />
-            </div>
-          ) : null}
-        </TabsContent>
-        <TabsContent value="classes">
-          <ClassesTable
-            classes={classes}
-            loading={classesQuery.isLoading}
-            onNewClass={() => setClassDialogOpen(true)}
-            onViewClass={classId => navigate(`/account/classes/${classId}`)}
-            onEditClass={classId => navigate(`/account/classes/${classId}`)}
-          />
-        </TabsContent>
-        <TabsContent value="lessonBuilder" className="space-y-6">
-          {lessonBuilderContext ? (
-            <div className="space-y-6">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-foreground">
-                  {t.dashboard.lessonBuilder.contextTitle}
-                </h3>
-                <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-                  {lessonBuilderSummaryItems.map(item => (
-                    <div key={item.key} className="space-y-1 text-left">
-                      <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        {item.label}
-                      </dt>
-                      <dd className="text-base font-semibold text-foreground">
-                        {item.value ?? t.dashboard.lessonBuilder.fallback}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-              <LessonBuilderPage
-                layoutMode="embedded"
-                initialMeta={{
-                  title: lessonBuilderContext.title,
-                  date: lessonBuilderContext.date ?? null,
-                }}
-                initialClassId={lessonBuilderContext.classId ?? null}
-              />
-            </div>
-          ) : (
-            <div className="rounded-lg border border-dashed bg-muted/30 p-10 text-center">
-              <h3 className="text-lg font-semibold text-foreground">
-                {t.dashboard.lessonBuilder.intercept.title}
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {t.dashboard.lessonBuilder.intercept.description}
-              </p>
-              <Button className="mt-6" variant="outline" onClick={() => handleTabChange("curriculum")}>
-                {t.dashboard.lessonBuilder.intercept.cta}
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-        <TabsContent value="students">
-          <StudentsSection
-            classes={classes}
-            onOpenStudent={studentId => navigate(`/dashboard/students/${studentId}`)}
-          />
-        </TabsContent>
-        <TabsContent value="skills">
-          <SkillsSection classes={classes} />
-        </TabsContent>
-      </Tabs>
-
-      <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t.dashboard.dialogs.newClass.title}</DialogTitle>
-          </DialogHeader>
-          <form
-            onSubmit={classForm.handleSubmit(values => createClassMutation.mutate(values))}
-            className="space-y-4"
-          >
-            <div className="grid gap-2">
-              <Label htmlFor="class-title">{t.dashboard.dialogs.newClass.fields.title}</Label>
-              <Input id="class-title" {...classForm.register("title")} required />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="class-stage">{t.dashboard.dialogs.newClass.fields.stage}</Label>
-              <Input id="class-stage" {...classForm.register("stage")} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="class-subject">{t.dashboard.dialogs.newClass.fields.subject}</Label>
-              <Input id="class-subject" {...classForm.register("subject")} />
-            </div>
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="class-start">{t.dashboard.dialogs.newClass.fields.startDate}</Label>
-                <Input id="class-start" type="date" {...classForm.register("start_date")} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
-                <Input id="class-end" type="date" {...classForm.register("end_date")} />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setClassDialogOpen(false)}>
-                {t.common.cancel}
-              </Button>
-              <Button type="submit" disabled={createClassMutation.isPending}>
-                {t.dashboard.dialogs.newClass.submit}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isCurriculumDialogOpen} onOpenChange={setCurriculumDialogOpen}>
-        <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>{t.dashboard.dialogs.newCurriculum.title}</DialogTitle>
-          </DialogHeader>
-          <form
-            onSubmit={curriculumForm.handleSubmit(values => createCurriculumMutation.mutate(values))}
-            className="space-y-4"
-          >
-            <div className="grid gap-2">
-              <Label htmlFor="curriculum-title">{t.dashboard.dialogs.newCurriculum.fields.title}</Label>
-              <Input id="curriculum-title" {...curriculumForm.register("title")} required />
-            </div>
-            <div className="grid gap-2">
-              <Label>{t.dashboard.dialogs.newCurriculum.fields.class}</Label>
-              <Select
-                value={curriculumForm.watch("class_id")}
-                onValueChange={value => curriculumForm.setValue("class_id", value)}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-48 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-sky-500/20 blur-3xl" />
+        <div className="absolute top-1/4 right-[-12rem] h-[28rem] w-[28rem] rounded-full bg-indigo-500/25 blur-3xl" />
+        <div className="absolute bottom-[-12rem] left-[-8rem] h-[24rem] w-[24rem] rounded-full bg-emerald-500/20 blur-3xl" />
+      </div>
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-24 md:px-8">
+        {showingExampleData ? (
+          <Alert className="border-white/20 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+            <AlertTitle className="text-lg font-semibold text-white">
+              {t.dashboard.common.exampleActionsTitle}
+            </AlertTitle>
+            <AlertDescription className="flex flex-col gap-3 text-white/75 sm:flex-row sm:items-center sm:justify-between">
+              <span>{t.dashboard.common.exampleActionsDescription}</span>
+              <Button
+                onClick={() => seedExampleDataMutation.mutate()}
+                disabled={seedExampleDataMutation.isPending}
+                aria-label={t.dashboard.common.exampleActionsCta}
+                className="rounded-xl border-white/40 bg-white/90 text-slate-900 hover:bg-white"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder={t.dashboard.dialogs.newCurriculum.fields.classPlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {(classesQuery.data ?? []).map(item => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="curriculum-subject">{t.dashboard.dialogs.newCurriculum.fields.subject}</Label>
-              <Input id="curriculum-subject" {...curriculumForm.register("subject")} required />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="curriculum-year">{t.dashboard.dialogs.newCurriculum.fields.academicYear}</Label>
-              <Input id="curriculum-year" {...curriculumForm.register("academic_year")} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="curriculum-lessons">{t.dashboard.dialogs.newCurriculum.fields.lessonTitles}</Label>
-              <Textarea
-                id="curriculum-lessons"
-                rows={6}
-                placeholder={t.dashboard.dialogs.newCurriculum.fields.lessonTitlesPlaceholder}
-                {...curriculumForm.register("lesson_titles")}
+                {seedExampleDataMutation.isPending ? t.common.loading : t.dashboard.common.exampleActionsCta}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        <DashboardHeader
+          nameParts={derivedNameParts}
+          displayName={normalizeName(displayName) ?? normalizeName(fullName)}
+          avatarUrl={avatarUrl}
+          onQuickAction={handleQuickAction}
+        />
+        <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-2xl md:p-10">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+            <TabsList className="grid w-full gap-3 border border-white/20 bg-white/10 p-2 text-white/70 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.75)] sm:grid-cols-5">
+              <TabsTrigger
+                value="curriculum"
+                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+              >
+                {t.dashboard.tabs.curriculum}
+              </TabsTrigger>
+              <TabsTrigger
+                value="classes"
+                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+              >
+                {t.dashboard.tabs.classes}
+              </TabsTrigger>
+              <TabsTrigger
+                value="lessonBuilder"
+                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+              >
+                {t.dashboard.tabs.lessonBuilder}
+              </TabsTrigger>
+              <TabsTrigger
+                value="students"
+                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+              >
+                {t.dashboard.tabs.students}
+              </TabsTrigger>
+              <TabsTrigger
+                value="skills"
+                className="w-full rounded-xl border border-transparent bg-transparent text-sm font-semibold text-white/70 transition data-[state=active]:border-white/60 data-[state=active]:bg-white/20 data-[state=active]:text-white"
+              >
+                {t.dashboard.tabs.skills}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="curriculum" className="space-y-6">
+              <CurriculaList
+                curricula={curricula}
+                loading={curriculaQuery.isLoading}
+                onNewCurriculum={() => setCurriculumDialogOpen(true)}
+                onOpenCurriculum={setActiveCurriculumId}
+                onExportCurriculum={id => toast({ description: t.dashboard.toasts.exportUnavailable })}
               />
-              <p className="text-xs text-muted-foreground">
-                {t.dashboard.dialogs.newCurriculum.helper}
-              </p>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setCurriculumDialogOpen(false)}>
-                {t.common.cancel}
-              </Button>
-              <Button type="submit" disabled={createCurriculumMutation.isPending}>
-                {t.dashboard.dialogs.newCurriculum.submit}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              {selectedCurriculum ? (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">
+                    {t.dashboard.curriculumView.title.replace("{title}", selectedCurriculum.title)}
+                  </h3>
+                  <CurriculumEditor
+                    items={curriculumItems}
+                    loading={curriculumItemsLoading}
+                    reordering={reorderCurriculumItemsMutation.isPending}
+                    onPlanLesson={handlePlanCurriculumLesson}
+                    onOpenLessonPlan={handleOpenLessonPlan}
+                    onReorder={selectedCurriculum.isExample ? undefined : handleReorderCurriculumItems}
+                  />
+                </div>
+              ) : null}
+            </TabsContent>
+            <TabsContent value="classes" className="space-y-6">
+              <ClassesTable
+                classes={classes}
+                loading={classesQuery.isLoading}
+                onNewClass={() => setClassDialogOpen(true)}
+                onViewClass={classId => navigate(`/account/classes/${classId}`)}
+                onEditClass={classId => navigate(`/account/classes/${classId}`)}
+              />
+            </TabsContent>
+            <TabsContent value="lessonBuilder" className="space-y-6">
+              {lessonBuilderContext ? (
+                <div className="space-y-6">
+                  <div className="rounded-3xl border border-white/15 bg-white/10 p-6 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+                    <h3 className="text-lg font-semibold">
+                      {t.dashboard.lessonBuilder.contextTitle}
+                    </h3>
+                    <dl className="mt-4 grid gap-4 text-sm text-white/70 sm:grid-cols-2">
+                      {lessonBuilderSummaryItems.map(item => (
+                        <div key={item.key} className="space-y-1 text-left">
+                          <dt className="text-xs font-medium uppercase tracking-wide text-white/60">
+                            {item.label}
+                          </dt>
+                          <dd className="text-base font-semibold text-white">
+                            {item.value ?? t.dashboard.lessonBuilder.fallback}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                  <LessonBuilderPage
+                    layoutMode="embedded"
+                    initialMeta={{
+                      title: lessonBuilderContext.title,
+                      date: lessonBuilderContext.date ?? null,
+                    }}
+                    initialClassId={lessonBuilderContext.classId ?? null}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+                  <h3 className="text-lg font-semibold">
+                    {t.dashboard.lessonBuilder.intercept.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-white/70">
+                    {t.dashboard.lessonBuilder.intercept.description}
+                  </p>
+                  <Button
+                    className="mt-6 rounded-xl border-white/40 bg-white/90 text-slate-900 hover:bg-white"
+                    variant="outline"
+                    onClick={() => handleTabChange("curriculum")}
+                  >
+                    {t.dashboard.lessonBuilder.intercept.cta}
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+            <TabsContent value="students" className="space-y-6">
+              <StudentsSection
+                classes={classes}
+                onOpenStudent={studentId => navigate(`/dashboard/students/${studentId}`)}
+              />
+            </TabsContent>
+            <TabsContent value="skills" className="space-y-6">
+              <SkillsSection classes={classes} />
+            </TabsContent>
+          </Tabs>
+        </section>
+
+        <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{t.dashboard.dialogs.newClass.title}</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={classForm.handleSubmit(values => createClassMutation.mutate(values))}
+              className="space-y-4"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="class-title">{t.dashboard.dialogs.newClass.fields.title}</Label>
+                <Input id="class-title" {...classForm.register("title")} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="class-stage">{t.dashboard.dialogs.newClass.fields.stage}</Label>
+                <Input id="class-stage" {...classForm.register("stage")} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="class-subject">{t.dashboard.dialogs.newClass.fields.subject}</Label>
+                <Input id="class-subject" {...classForm.register("subject")} />
+              </div>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="class-start">{t.dashboard.dialogs.newClass.fields.startDate}</Label>
+                  <Input id="class-start" type="date" {...classForm.register("start_date")} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
+                  <Input id="class-end" type="date" {...classForm.register("end_date")} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setClassDialogOpen(false)}>
+                  {t.common.cancel}
+                </Button>
+                <Button type="submit" disabled={createClassMutation.isPending}>
+                  {t.dashboard.dialogs.newClass.submit}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isCurriculumDialogOpen} onOpenChange={setCurriculumDialogOpen}>
+          <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle>{t.dashboard.dialogs.newCurriculum.title}</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={curriculumForm.handleSubmit(values => createCurriculumMutation.mutate(values))}
+              className="space-y-4"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="curriculum-title">{t.dashboard.dialogs.newCurriculum.fields.title}</Label>
+                <Input id="curriculum-title" {...curriculumForm.register("title")} required />
+              </div>
+              <div className="grid gap-2">
+                <Label>{t.dashboard.dialogs.newCurriculum.fields.class}</Label>
+                <Select
+                  value={curriculumForm.watch("class_id")}
+                  onValueChange={value => curriculumForm.setValue("class_id", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t.dashboard.dialogs.newCurriculum.fields.classPlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(classesQuery.data ?? []).map(item => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="curriculum-subject">{t.dashboard.dialogs.newCurriculum.fields.subject}</Label>
+                <Input id="curriculum-subject" {...curriculumForm.register("subject")} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="curriculum-year">{t.dashboard.dialogs.newCurriculum.fields.academicYear}</Label>
+                <Input id="curriculum-year" {...curriculumForm.register("academic_year")} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="curriculum-lessons">{t.dashboard.dialogs.newCurriculum.fields.lessonTitles}</Label>
+                <Textarea
+                  id="curriculum-lessons"
+                  rows={6}
+                  placeholder={t.dashboard.dialogs.newCurriculum.fields.lessonTitlesPlaceholder}
+                  {...curriculumForm.register("lesson_titles")}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t.dashboard.dialogs.newCurriculum.helper}
+                </p>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setCurriculumDialogOpen(false)}>
+                  {t.common.cancel}
+                </Button>
+                <Button type="submit" disabled={createCurriculumMutation.isPending}>
+                  {t.dashboard.dialogs.newCurriculum.submit}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
