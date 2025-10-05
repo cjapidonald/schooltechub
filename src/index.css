@@ -167,8 +167,8 @@ All colors MUST be HSL.
       radial-gradient(circle at 75% 78%, hsla(222 47% 18% / 0.55), transparent 68%),
       linear-gradient(150deg, hsla(0 0% 100% / 0.12), hsla(222 47% 14% / 0.92));
     box-shadow:
-      inset 14px 14px 32px hsla(222 67% 6% / 0.75),
-      inset -14px -14px 32px hsla(0 0% 100% / 0.08);
+      inset 9px 9px 22px hsla(222 67% 6% / 0.65),
+      inset -9px -9px 22px hsla(0 0% 100% / 0.06);
     opacity: 0.92;
     pointer-events: none;
     z-index: 0;
@@ -182,12 +182,12 @@ All colors MUST be HSL.
   .convex-panel-sheen::after {
     content: "";
     position: absolute;
-    inset: clamp(0.85rem, 2.5vw, 1.6rem);
+    inset: clamp(1rem, 2.8vw, 1.8rem);
     border-radius: inherit;
-    border: 1px solid hsla(0 0% 100% / 0.06);
-    background: linear-gradient(135deg, hsla(0 0% 100% / 0.12), hsla(222 47% 12% / 0));
+    border: 1px solid hsla(0 0% 100% / 0.05);
+    background: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(222 47% 12% / 0));
     mix-blend-mode: screen;
-    opacity: 0.75;
+    opacity: 0.68;
   }
 
   .bolt-fastener {
