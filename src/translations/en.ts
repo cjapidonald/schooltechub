@@ -1002,7 +1002,13 @@ export const en = {
     },
     hero: {
       title: "Get In Touch",
-      subtitle: "Book a consultation or ask us anything about educational technology"
+      subtitle: "Book a consultation or ask us anything about educational technology",
+      badge: "Your EdTech partner",
+      highlights: {
+        personalized: "Personalized planning for your learning community",
+        support: "Dedicated support from seasoned specialists",
+        futureReady: "Future-ready technology guidance"
+      }
     },
     info: {
       quickContact: {
@@ -1035,6 +1041,7 @@ export const en = {
     },
     form: {
       title: "Book a Session",
+      subtitle: "Share your goals and we'll tailor the perfect next step for your school.",
       fields: {
         name: {
           label: "Full Name *",
