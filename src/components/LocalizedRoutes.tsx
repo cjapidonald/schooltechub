@@ -1,7 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Index from '@/pages/Index';
-import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
 import Blog from '@/pages/Blog';
@@ -56,7 +55,7 @@ export const LocalizedRoutes = () => {
     <Routes>
       {/* English routes (default) */}
       <Route path="/" element={<RouteWrapper><Index /></RouteWrapper>} />
-      <Route path="/home" element={<RouteWrapper><Home /></RouteWrapper>} />
+      <Route path="/home" element={<Navigate to="/" replace />} />
       <Route path="/about" element={<RouteWrapper><About /></RouteWrapper>} />
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
