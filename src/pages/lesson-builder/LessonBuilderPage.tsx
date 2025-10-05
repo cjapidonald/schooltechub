@@ -726,7 +726,7 @@ const LessonBuilderPage = ({
           description="Plan lesson logistics and craft each instructional step from a single workspace."
         />
       ) : null}
-      <main className={mainClasses}>
+      <div className={mainClasses}>
         <header className="mx-auto max-w-3xl space-y-3 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Lesson Builder</h1>
           <div className="flex justify-center text-sm text-muted-foreground">
@@ -923,7 +923,7 @@ const LessonBuilderPage = ({
             </p>
           </div>
         </section>
-      </main>
+      </div>
 
       <ResourceSearchModal
         open={isResourceSearchOpen}

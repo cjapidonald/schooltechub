@@ -562,17 +562,17 @@ export default function DashboardPage() {
 
   if (!user) {
     return (
-      <main className="container space-y-8 py-10">
+      <div className="container space-y-8 py-10">
         <SEO title="My Dashboard" description="Teacher workspace dashboard" />
         <div className="rounded-xl border bg-muted/10 p-10 text-center text-muted-foreground">
           {t.dashboard.common.signInPrompt}
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="container space-y-8 py-10">
+    <div className="container space-y-8 py-10">
       <SEO title="My Dashboard" description="Teacher workspace dashboard" />
       {showingExampleData ? (
         <Alert>
@@ -798,6 +798,6 @@ export default function DashboardPage() {
           </form>
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
   );
 }

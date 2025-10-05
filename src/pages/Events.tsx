@@ -138,7 +138,7 @@ const Events = () => {
         canonicalUrl="https://schooltechhub.com/events"
       />
 
-      <main className="flex-1">
+      <div className="flex-1">
         <div className="container py-12">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
@@ -364,7 +364,7 @@ const Events = () => {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

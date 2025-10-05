@@ -74,7 +74,7 @@ const FAQ = () => {
           }}
         />
       )}
-      <main className="flex-1">
+      <div className="flex-1">
         <div className="container py-12">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -137,7 +137,7 @@ const FAQ = () => {
             </Card>
           </div>
         </div>
-      </main>
+      </div>
 
     </div>
   );

@@ -71,9 +71,9 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
+        <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
           <Outlet context={{ meta }} />
-        </main>
+        </div>
       </div>
     </div>
   );

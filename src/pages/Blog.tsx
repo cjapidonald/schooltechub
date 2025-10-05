@@ -659,7 +659,7 @@ const Blog = () => {
 
       {structuredData ? <StructuredData data={structuredData} /> : null}
 
-      <main className="flex-1">
+      <div className="flex-1">
         <section className="border-b border-border/50 bg-background/60 backdrop-blur">
           <div className="container py-8">
             <div className="mx-auto max-w-2xl">
@@ -890,7 +890,7 @@ const Blog = () => {
                 )}
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 };
