@@ -111,9 +111,51 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground font-space;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-orbitron;
+  }
+}
+
+@layer components {
+  .hero-floating-cluster {
+    @apply absolute inset-0 pointer-events-none;
+  }
+
+  .hero-floating-card {
+    @apply absolute overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 shadow-[0_45px_90px_-40px_rgba(10,12,45,0.85)];
+    width: clamp(14rem, 22vw, 20rem);
+    height: clamp(14rem, 22vw, 20rem);
+    backdrop-filter: blur(18px);
+    will-change: transform;
+  }
+
+  .hero-floating-card img {
+    @apply h-full w-full object-cover opacity-80 transition-opacity duration-700;
+  }
+
+  .hero-floating-card:hover img {
+    @apply opacity-100;
+  }
+
+  .hero-floating-card__glow {
+    @apply pointer-events-none absolute inset-0 mix-blend-screen opacity-75;
+    background: radial-gradient(circle at 25% 20%, hsla(var(--glow-primary) / 0.45), transparent 62%),
+      radial-gradient(circle at 80% 70%, hsla(var(--glow-secondary) / 0.25), transparent 55%);
+  }
+
+  .hero-floating-card--primary {
+    top: clamp(12%, 16vw, 18%);
+    left: clamp(1.5rem, 8vw, 6rem);
+    animation: hero-float 22s ease-in-out infinite;
+  }
+
+  .hero-floating-card--secondary {
+    bottom: clamp(-10rem, -6vw, -3rem);
+    right: clamp(-12rem, -8vw, -4rem);
+    animation: hero-float-alt 26s ease-in-out infinite;
+    width: clamp(16rem, 28vw, 24rem);
+    height: clamp(16rem, 28vw, 24rem);
   }
 }
 
@@ -267,6 +309,34 @@ All colors MUST be HSL.
     box-shadow:
       0 0 28px hsl(var(--glow-primary) / 0.45),
       0 0 65px hsl(var(--glow-secondary) / 0.35);
+  }
+}
+
+@keyframes hero-float {
+  0% {
+    transform: translate3d(-4px, 0, 0) rotate(-2deg) scale(0.98);
+  }
+
+  50% {
+    transform: translate3d(6px, -18px, 0) rotate(2deg) scale(1.02);
+  }
+
+  100% {
+    transform: translate3d(-4px, 0, 0) rotate(-2deg) scale(0.98);
+  }
+}
+
+@keyframes hero-float-alt {
+  0% {
+    transform: translate3d(6px, 0, 0) rotate(2deg) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-10px, 22px, 0) rotate(-3deg) scale(1.04);
+  }
+
+  100% {
+    transform: translate3d(6px, 0, 0) rotate(2deg) scale(1);
   }
 }
 
