@@ -161,6 +161,13 @@ const iconColorClasses = [
   "bg-orange-500 text-white",
 ];
 
+const gradientBackgroundClasses = [
+  "bg-gradient-to-br from-primary/20 via-background/75 to-background",
+  "bg-gradient-to-br from-secondary/20 via-background/75 to-background",
+  "bg-gradient-to-br from-accent/20 via-background/75 to-background",
+  "bg-gradient-to-br from-primary/15 via-background/75 to-background",
+];
+
 const Index = () => {
   const { language } = useLanguage();
 
@@ -243,7 +250,14 @@ const Index = () => {
           </div>
           <div className="grid gap-8 md:grid-cols-2">
             {workflowTools.map(({ title, description, icon: Icon }, index) => (
-              <Card key={title} className={cn("h-full", neonCardClass)}>
+              <Card
+                key={title}
+                className={cn(
+                  "h-full",
+                  neonCardClass,
+                  gradientBackgroundClasses[index % gradientBackgroundClasses.length],
+                )}
+              >
                 <div className="flex flex-col gap-4 text-left">
                   <div
                     className={cn(
@@ -293,7 +307,14 @@ const Index = () => {
             </div>
             <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
               {schoolSolutions.map(({ title, description, icon: Icon }, index) => (
-                <Card key={title} className={cn("h-full", neonCardClass)}>
+                <Card
+                  key={title}
+                  className={cn(
+                    "h-full",
+                    neonCardClass,
+                    gradientBackgroundClasses[index % gradientBackgroundClasses.length],
+                  )}
+                >
                   <div className="flex flex-col gap-4 text-left">
                     <div
                       className={cn(
@@ -319,8 +340,15 @@ const Index = () => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
           <div className="grid gap-8 text-center md:grid-cols-4">
-            {stats.map((stat) => (
-              <Card key={stat.label} className={cn("p-8", neonCardClass)}>
+            {stats.map((stat, index) => (
+              <Card
+                key={stat.label}
+                className={cn(
+                  "p-8",
+                  neonCardClass,
+                  gradientBackgroundClasses[index % gradientBackgroundClasses.length],
+                )}
+              >
                 <p className="text-4xl font-bold text-primary text-glow">{stat.number}</p>
                 <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
               </Card>
@@ -340,8 +368,15 @@ const Index = () => {
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map(({ quote, name, role, image }) => (
-              <Card key={name} className={cn("p-8 text-center", neonCardClass)}>
+            {testimonials.map(({ quote, name, role, image }, index) => (
+              <Card
+                key={name}
+                className={cn(
+                  "p-8 text-center",
+                  neonCardClass,
+                  gradientBackgroundClasses[index % gradientBackgroundClasses.length],
+                )}
+              >
                 <div className="mb-6 flex justify-center">
                   <img
                     src={image}
