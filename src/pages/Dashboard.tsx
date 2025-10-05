@@ -678,7 +678,7 @@ export default function DashboardPage() {
             <TabsContent value="students" className="space-y-6">
               <StudentsSection
                 classes={classes}
-                onOpenStudent={studentId => navigate(`/dashboard/students/${studentId}`)}
+                onOpenStudent={studentId => navigate(`/teacher/students/${studentId}`)}
               />
             </TabsContent>
             <TabsContent value="skills" className="space-y-6">
