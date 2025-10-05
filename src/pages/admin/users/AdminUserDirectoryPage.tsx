@@ -64,15 +64,36 @@ export default function AdminUserDirectoryPage() {
     keepPreviousData: true,
   });
 
-  useEffect(() => {
+  const directory = useMemo(() => {
     if (!data) {
+      return null;
+    }
+
+    const users = Array.isArray(data.users) ? data.users : [];
+    const currentPage = typeof data.page === "number" && data.page > 0 ? data.page : 1;
+    const perPage = typeof data.perPage === "number" && data.perPage > 0 ? data.perPage : PER_PAGE;
+    const total = typeof data.total === "number" && data.total >= 0 ? data.total : users.length;
+    const lastPage =
+      typeof data.lastPage === "number" && data.lastPage > 0
+        ? data.lastPage
+        : Math.max(1, Math.ceil(total / Math.max(perPage, 1)));
+    const nextPage =
+      typeof data.nextPage === "number" && data.nextPage > currentPage && data.nextPage <= lastPage
+        ? data.nextPage
+        : null;
+
+    return { users, page: currentPage, perPage, total, lastPage, nextPage };
+  }, [data]);
+
+  useEffect(() => {
+    if (!directory) {
       return;
     }
 
-    if (page > 1 && data.users.length === 0) {
-      setPage(Math.max(1, Math.min(page - 1, data.lastPage)));
+    if (page > 1 && directory.users.length === 0) {
+      setPage(Math.max(1, Math.min(page - 1, directory.lastPage)));
     }
-  }, [data, page]);
+  }, [directory, page]);
 
   const disableMutation = useMutation({
     mutationFn: ({ userId }: { userId: string }) => disableUser(userId),
@@ -179,17 +200,17 @@ export default function AdminUserDirectoryPage() {
     revokeMutation.isPending;
 
   const pagination = useMemo(() => {
-    if (!data) {
+    if (!directory) {
       return { start: 0, end: 0, total: 0, hasNext: false };
     }
 
-    const hasUsers = data.users.length > 0;
-    const start = (data.page - 1) * data.perPage + (hasUsers ? 1 : 0);
-    const end = hasUsers ? start + data.users.length - 1 : start;
-    const hasNext = data.nextPage !== null && data.nextPage > data.page;
+    const hasUsers = directory.users.length > 0;
+    const start = (directory.page - 1) * directory.perPage + (hasUsers ? 1 : 0);
+    const end = hasUsers ? start + directory.users.length - 1 : start;
+    const hasNext = directory.nextPage !== null && directory.nextPage > directory.page;
 
-    return { start, end: Math.max(start, end), total: data.total, hasNext };
-  }, [data]);
+    return { start, end: Math.max(start, end), total: directory.total, hasNext };
+  }, [directory]);
 
   function handleToggleStatus(user: DirectoryUser) {
     if (user.status === "enabled") {
@@ -253,8 +274,8 @@ export default function AdminUserDirectoryPage() {
                       </TableCell>
                     </TableRow>
                   ))
-                ) : data && data.users.length > 0 ? (
-                  data.users.map(user => (
+                ) : directory && directory.users.length > 0 ? (
+                  directory.users.map(user => (
                     <TableRow key={user.id} className={user.status === "disabled" ? "opacity-75" : undefined}>
                       <TableCell>
                         <div className="flex flex-col">
@@ -328,14 +349,15 @@ export default function AdminUserDirectoryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  if (data) {
-                    const next = data.nextPage ?? (data.lastPage > data.page ? data.page + 1 : data.page);
-                    if (next !== data.page) {
+                  if (directory) {
+                    const next = directory.nextPage ??
+                      (directory.lastPage > directory.page ? directory.page + 1 : directory.page);
+                    if (next !== directory.page) {
                       setPage(next);
                     }
                   }
                 }}
-                disabled={!data || !pagination.hasNext || isFetching || isLoading}
+                disabled={!directory || !pagination.hasNext || isFetching || isLoading}
               >
                 Next
               </Button>
