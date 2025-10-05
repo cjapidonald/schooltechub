@@ -148,10 +148,10 @@ const neonCardClass =
   "group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] backdrop-blur-xl transition-all duration-500 hover:border-primary/80 hover:shadow-[0_0_45px_hsl(var(--glow-primary)/0.35)]";
 
 const neonIconClass =
-  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-primary/35 bg-primary/15 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)] before:absolute before:-inset-3 before:rounded-full before:bg-primary/20 before:blur-xl before:content-['']";
+  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-[0_0_18px_hsl(var(--glow-primary)/0.25)] before:absolute before:-inset-3 before:rounded-full before:bg-primary/10 before:blur-lg before:content-['']";
 
 const neonIconSecondaryClass =
-  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-secondary/35 bg-secondary/15 text-secondary shadow-[0_0_35px_hsl(var(--glow-secondary)/0.45)] before:absolute before:-inset-3 before:rounded-full before:bg-secondary/20 before:blur-xl before:content-['']";
+  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-secondary/30 bg-secondary/10 text-secondary shadow-[0_0_18px_hsl(var(--glow-secondary)/0.25)] before:absolute before:-inset-3 before:rounded-full before:bg-secondary/10 before:blur-lg before:content-['']";
 
 const Index = () => {
   const { language } = useLanguage();
@@ -259,7 +259,7 @@ const Index = () => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
         <div className="container mx-auto px-4">
           <div className="mx-auto mb-16 max-w-3xl text-center">
-            <h2 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
+            <h2 className="text-3xl font-bold text-white md:text-4xl">
               Plan, track, and celebrate learning in one radiant hub
             </h2>
             <p className="mt-5 text-lg text-white/75">
@@ -271,9 +271,9 @@ const Index = () => {
               <Card key={title} className={cn("h-full", neonCardClass)}>
                 <div className="flex flex-col items-center text-center">
                   <div className={neonIconClass}>
-                    <Icon className="relative h-8 w-8 drop-shadow-[0_0_15px_hsl(var(--glow-primary)/0.55)]" />
+                    <Icon className="relative h-8 w-8 drop-shadow-[0_0_10px_hsl(var(--glow-primary)/0.35)]" />
                   </div>
-                  <h3 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-2xl font-semibold text-transparent animate-gradient">
+                  <h3 className="text-2xl font-semibold text-primary">
                     {title}
                   </h3>
                   <p className="mt-4 text-base text-white/80">{description}</p>
@@ -291,7 +291,7 @@ const Index = () => {
               <Badge variant="secondary" className="bg-secondary/20 text-secondary-foreground">
                 School-wide technology solutions
               </Badge>
-              <h2 className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
+              <h2 className="text-3xl font-bold text-white md:text-4xl">
                 Professional development and classroom technology aligned
               </h2>
               <p className="text-lg text-white/75">
@@ -316,9 +316,9 @@ const Index = () => {
                 <Card key={title} className={cn("h-full", neonCardClass)}>
                   <div className="flex flex-col items-center text-center">
                     <div className={neonIconSecondaryClass}>
-                      <Icon className="relative h-8 w-8 drop-shadow-[0_0_18px_hsl(var(--glow-secondary)/0.55)]" />
+                      <Icon className="relative h-8 w-8 drop-shadow-[0_0_10px_hsl(var(--glow-secondary)/0.35)]" />
                     </div>
-                    <h3 className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-2xl font-semibold text-transparent animate-gradient">
+                    <h3 className="text-2xl font-semibold text-secondary">
                       {title}
                     </h3>
                     <p className="mt-4 text-base text-white/80">{description}</p>
@@ -347,7 +347,7 @@ const Index = () => {
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <h2 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
+            <h2 className="text-3xl font-bold text-white md:text-4xl">
               Teachers trust SchoolTech Hub for digital transformation
             </h2>
             <p className="mt-5 text-lg text-white/75">
@@ -380,7 +380,7 @@ const Index = () => {
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
               <Award className="h-10 w-10" />
             </div>
-            <h2 className="mt-8 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-3xl font-bold text-transparent animate-gradient md:text-4xl">
+            <h2 className="mt-8 text-3xl font-bold text-white md:text-4xl">
               Ready to simplify your teaching workflow?
             </h2>
             <p className="mt-4 text-lg text-white/80">
