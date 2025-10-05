@@ -33,38 +33,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-
-const TYPE_OPTIONS = [
-  "Worksheet",
-  "Video",
-  "Interactive",
-  "Presentation",
-  "Assessment",
-  "Article",
-  "Audio",
-  "Game",
-  "Template",
-  "Other",
-];
-
-const SUBJECT_OPTIONS = [
-  "Math",
-  "Science",
-  "English",
-  "Social Studies",
-  "STEM",
-  "ICT",
-  "Arts",
-  "Languages",
-];
-
-const STAGE_OPTIONS = [
-  "Early Childhood",
-  "Primary",
-  "Lower Secondary",
-  "Upper Secondary",
-  "Higher Education",
-];
+import {
+  RESOURCE_STAGE_OPTIONS,
+  RESOURCE_SUBJECT_OPTIONS,
+  RESOURCE_TYPE_OPTIONS,
+} from "@/lib/resource-filters";
 
 type FilterState = {
   searchValue: string;
@@ -270,7 +243,7 @@ interface ResourceSearchModalProps {
 
 type MultiSelectFilterProps = {
   label: string;
-  options: string[];
+  options: readonly string[];
   selected: string[];
   onChange: (next: string[]) => void;
 };
@@ -891,19 +864,19 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
           <div className="flex flex-wrap items-center gap-2">
             <MultiSelectFilter
               label="Type"
-              options={TYPE_OPTIONS}
+              options={RESOURCE_TYPE_OPTIONS}
               selected={filters.types}
               onChange={types => setFilters(current => ({ ...current, types }))}
             />
             <MultiSelectFilter
               label="Subject"
-              options={SUBJECT_OPTIONS}
+              options={RESOURCE_SUBJECT_OPTIONS}
               selected={filters.subjects}
               onChange={subjects => setFilters(current => ({ ...current, subjects }))}
             />
             <MultiSelectFilter
               label="Stage"
-              options={STAGE_OPTIONS}
+              options={RESOURCE_STAGE_OPTIONS}
               selected={filters.stages}
               onChange={stages => setFilters(current => ({ ...current, stages }))}
             />
@@ -1155,4 +1128,10 @@ export const ResourceSearchModal = ({ open, onOpenChange, activeStepId }: Resour
     </Dialog>
   );
 };
+
+export {
+  RESOURCE_STAGE_OPTIONS,
+  RESOURCE_SUBJECT_OPTIONS,
+  RESOURCE_TYPE_OPTIONS,
+} from "@/lib/resource-filters";
 
