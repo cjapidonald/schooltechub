@@ -67,6 +67,7 @@ export const en = {
     tabs: {
       curriculum: "Curriculum",
       classes: "My Classes",
+      lessonBuilder: "Lesson Builder",
       students: "My Students",
       skills: "Skills",
       lessonPlans: "Lesson Plans",
@@ -174,6 +175,23 @@ export const en = {
       },
       toasts: {
         created: "Skill created",
+      },
+    },
+    lessonBuilder: {
+      contextTitle: "Planning details",
+      fallback: "—",
+      labels: {
+        lesson: "Lesson",
+        class: "Class",
+        stage: "Stage",
+        date: "Scheduled date",
+        sequence: "Sequence",
+      },
+      intercept: {
+        title: "Choose a lesson to start planning",
+        description:
+          "Select a lesson from your curriculum tab to prefill the builder. We'll load the workspace here once you've chosen one.",
+        cta: "Browse curriculum",
       },
     },
     curriculum: {
