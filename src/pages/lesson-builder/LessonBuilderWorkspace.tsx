@@ -305,7 +305,7 @@ export default function LessonBuilderWorkspace() {
       date,
       links: {
         lesson: `/builder/lesson-plans/${planQuery.data.id}`,
-        class: planQuery.data.class?.id ? `/account/classes/${planQuery.data.class.id}` : undefined,
+        class: planQuery.data.class?.id ? `/teacher/classes/${planQuery.data.class.id}` : undefined,
         stage: `/builder/lesson-plans/${planQuery.data.id}`,
         date: `/builder/lesson-plans/${planQuery.data.id}`,
       },
