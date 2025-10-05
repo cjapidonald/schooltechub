@@ -36,6 +36,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { SAMPLE_BLOG_POSTS } from "@/lib/sampleBlogPosts";
 
 interface AuthorInfo {
   name?: string | null;
@@ -292,109 +293,6 @@ const normalizeText = (input: string | string[] | null | undefined) => {
 };
 
 const FEATURED_TAGS = new Set(["featured", "spotlight"]);
-
-const SAMPLE_BLOG_POSTS: BlogPost[] = [
-  {
-    id: "sample-ai-coteacher",
-    title: "How an AI Co-Teacher Personalizes Every Classroom",
-    subtitle: "Inside a pilot program where teachers collaborate with AI for differentiated instruction.",
-    slug: "ai-co-teacher-personalizes-classrooms",
-    excerpt:
-      "Discover how Ms. Saunders uses an AI planning assistant to map out weekly lessons, surface intervention groups, and keep families in the loop.",
-    category: "eduTech",
-    tags: ["AI", "Differentiation", "Planning"],
-    keywords: ["secondary", "science", "ai"],
-    featured_image:
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=1200&q=80",
-    content: {
-      publisher: "SchoolTechHub Editorial",
-      heroImageCaption: "Ms. Saunders guiding students during a project-based science workshop.",
-      readingHighlight: "See the weekly planning template that keeps AI feedback aligned with state standards.",
-      stages: ["secondary"],
-      subjects: ["science"],
-      deliveryMode: ["inClass"],
-      pricing: ["free"],
-      platforms: ["webapp", "smartboard"],
-    },
-    author: { name: "Amelia Saunders", job_title: "Instructional Technologist" },
-    author_name: "Amelia Saunders",
-    author_image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80",
-    created_at: "2024-02-12T09:30:00Z",
-    published_at: "2024-02-12T09:30:00Z",
-    updated_at: "2024-02-12T09:30:00Z",
-    is_published: true,
-    read_time: 8,
-    view_count: 1430,
-    language: null,
-  },
-  {
-    id: "sample-vr-field-trip",
-    title: "Designing Virtual Reality Field Trips for Primary Classrooms",
-    subtitle: "Step-by-step guidance for building immersive explorations that fit a 40-minute block.",
-    slug: "virtual-reality-field-trips-primary",
-    excerpt:
-      "Learn how educators scaffold VR experiences with inquiry journals, safety checkpoints, and reflection prompts for young learners.",
-    category: "teachingTechniques",
-    tags: ["VR", "Primary", "Inquiry"],
-    keywords: ["primary", "steam", "virtual reality"],
-    featured_image:
-      "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80",
-    content: {
-      publisher: "Future of Learning Lab",
-      heroImageCaption: "Students explore coral reefs through a classroom VR station.",
-      readingHighlight: "Includes a printable VR reflection journal and parent communication template.",
-      stages: ["primary"],
-      subjects: ["steam", "science"],
-      delivery: ["inClass", "live"],
-      pricing: ["educationDiscount"],
-      platforms: ["mobileApp", "smartboard"],
-    },
-    author: { name: "Ritika Menon", job_title: "Primary Innovation Coach" },
-    author_name: "Ritika Menon",
-    author_image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
-    created_at: "2024-01-22T14:10:00Z",
-    published_at: "2024-01-22T14:10:00Z",
-    updated_at: "2024-01-22T14:10:00Z",
-    is_published: true,
-    read_time: 6,
-    is_featured: true,
-    view_count: 980,
-    language: null,
-  },
-  {
-    id: "sample-family-portal",
-    title: "Building a Family Portal for Project-Based Learning",
-    subtitle: "A case study on sharing artefacts, progress, and feedback in real time.",
-    slug: "family-portal-project-based-learning",
-    excerpt:
-      "Follow a middle school team that launched a secure family portal to document PBL milestones, celebrate wins, and streamline conferencing.",
-    category: "caseStudy",
-    tags: ["Community", "PBL", "Communication"],
-    keywords: ["secondary", "english", "project based"],
-    featured_image:
-      "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
-    content: {
-      publisher: "SchoolTechHub Research",
-      heroImageCaption: "Families reviewing student showcases during an exhibition night.",
-      readingHighlight: "Templates for progress snapshots, privacy agreements, and student-led conference scripts.",
-      stages: ["secondary"],
-      subjects: ["english", "history"],
-      delivery: ["online", "homework"],
-      pricing: ["paid"],
-      platforms: ["webapp", "mobileApp"],
-    },
-    author: { name: "Jordan Ellis", job_title: "Community Partnerships Lead" },
-    author_name: "Jordan Ellis",
-    author_image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
-    created_at: "2023-12-05T17:45:00Z",
-    published_at: "2023-12-05T17:45:00Z",
-    updated_at: "2023-12-05T17:45:00Z",
-    is_published: true,
-    read_time: 9,
-    view_count: 2110,
-    language: null,
-  },
-];
 
 const Blog = () => {
   const { language, t } = useLanguage();
@@ -832,10 +730,10 @@ const Blog = () => {
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-10 lg:flex-row">
-            <aside className="order-2 lg:order-1 lg:w-72 lg:flex-shrink-0">
-              <Card className="border-border/40 bg-background/80">
-                <CardHeader className="space-y-2">
+          <div className="flex flex-col gap-8 lg:flex-row">
+            <aside className="order-2 lg:order-1 lg:w-60 lg:flex-shrink-0 xl:w-64">
+              <Card className="border-border/40 bg-background/80 shadow-md">
+                <CardHeader className="space-y-2 p-5">
                   <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-muted-foreground">
                     <Filter className="h-4 w-4" aria-hidden="true" />
                     {t.blog.filters.title}
@@ -874,7 +772,7 @@ const Blog = () => {
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-5 px-5 pb-5">
                   {(["stage", "subject", "delivery", "payment", "platform"] as Array<Exclude<BlogFilterKey, "category">>)
                     .map(key => {
                       const options = optionEntries[key] ?? [];
@@ -926,9 +824,9 @@ const Blog = () => {
               ) : null}
 
               {loading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                   {Array.from({ length: 6 }).map((_, index) => (
-                    <Card key={index} className="overflow-hidden border-border/40">
+                    <Card key={index} className="overflow-hidden border-border/40 shadow-md">
                       <Skeleton className="h-48 w-full" />
                       <CardHeader className="space-y-3">
                         <Skeleton className="h-5 w-24" />
@@ -949,7 +847,7 @@ const Blog = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="space-y-12">
+                <div className="space-y-10">
                   {featuredPosts.length > 0 ? (
                     <div className="space-y-6">
                       <div className="flex items-center gap-3">
@@ -958,16 +856,16 @@ const Blog = () => {
                           {t.blog.badges.featured}
                         </span>
                       </div>
-                      <div className="grid gap-6 md:grid-cols-2">
+                      <div className="grid gap-5 md:grid-cols-2">
                         {featuredPosts.map(post => (
                           <Link
                             key={post.id}
                             to={getLocalizedPath(`/blog/${post.slug}`, language)}
                             className="group block"
                           >
-                            <Card className="overflow-hidden border-primary/30 bg-background/80 transition-transform hover:-translate-y-1 hover:border-primary/60">
+                            <Card className="overflow-hidden border-primary/30 bg-background/80 shadow-lg transition-transform hover:-translate-y-1 hover:border-primary/60 hover:shadow-xl">
                               {post.featured_image ? (
-                                <figure className="relative h-56 overflow-hidden">
+                                <figure className="relative h-48 overflow-hidden">
                                   <img
                                     src={post.featured_image}
                                     alt={post.title}
@@ -976,7 +874,7 @@ const Blog = () => {
                                   />
                                 </figure>
                               ) : null}
-                              <CardHeader className="space-y-3">
+                              <CardHeader className="space-y-3 p-5">
                                 <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-primary">
                                   {post.title}
                                 </h2>
@@ -999,16 +897,16 @@ const Blog = () => {
                           {regularPosts.length} {regularPosts.length === 1 ? "post" : "posts"}
                         </span>
                       </div>
-                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                         {regularPosts.map(post => (
                           <Link
                             key={post.id}
                             to={getLocalizedPath(`/blog/${post.slug}`, language)}
                             className="group block h-full"
                           >
-                            <Card className="flex h-full flex-col overflow-hidden border-border/40 bg-background/70 transition-transform hover:-translate-y-1 hover:border-primary/50">
+                            <Card className="flex h-full flex-col overflow-hidden border-border/40 bg-background/70 shadow-md transition-transform hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl">
                               {post.featured_image ? (
-                                <figure className="relative h-44 overflow-hidden">
+                                <figure className="relative h-36 overflow-hidden">
                                   <img
                                     src={post.featured_image}
                                     alt={post.title}
@@ -1017,7 +915,7 @@ const Blog = () => {
                                   />
                                 </figure>
                               ) : null}
-                              <CardHeader className="space-y-2">
+                              <CardHeader className="space-y-2 p-5">
                                 <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-primary">
                                   {post.title}
                                 </h3>
