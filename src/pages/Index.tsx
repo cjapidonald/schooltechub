@@ -217,6 +217,47 @@ const iconColorClasses = [
   "bg-orange-500 text-white",
 ];
 
+type DecorativeBackgroundImage = {
+  src: string;
+  className: string;
+};
+
+const heroBackgroundDecorations: DecorativeBackgroundImage[] = [
+  {
+    src: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+    className:
+      "-top-16 right-[-6%] hidden h-52 w-72 rotate-3 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_32px_80px_-28px_rgba(59,20,120,0.65)] lg:block",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1200&q=80",
+    className:
+      "bottom-[-18%] left-[-10%] hidden h-64 w-80 -rotate-6 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_24px_70px_-32px_rgba(12,102,194,0.55)] md:block",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    className:
+      "top-[22%] left-[52%] hidden h-56 w-56 rotate-12 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_28px_80px_-32px_rgba(255,141,41,0.45)] xl:block",
+  },
+];
+
+const featureBackgroundDecorations: DecorativeBackgroundImage[] = [
+  {
+    src: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80",
+    className:
+      "-top-20 left-[12%] hidden h-48 w-72 -rotate-3 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_32px_80px_-34px_rgba(55,48,163,0.55)] lg:block",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1200&q=80",
+    className:
+      "bottom-[-18%] right-[8%] hidden h-56 w-80 rotate-6 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_30px_90px_-28px_rgba(16,185,129,0.45)] xl:block",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80",
+    className:
+      "top-[40%] left-[-8%] hidden h-48 w-64 rotate-12 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_26px_72px_-30px_rgba(244,114,182,0.4)] 2xl:block",
+  },
+];
+
 type StatCardProps = {
   stat: Stat;
   index: number;
@@ -295,7 +336,21 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/85 to-background" />
         </div>
         <div className="container relative z-10 mx-auto px-4">
-          <div className="grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
+          <div className="relative grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
+            <div className="pointer-events-none absolute inset-0 -z-10">
+              {heroBackgroundDecorations.map(({ src, className }) => (
+                <div key={src} className={cn("absolute bg-white/5", className)}>
+                  <img
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover opacity-70"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/75 to-background/85" />
+                </div>
+              ))}
+              <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/85 to-background" />
+            </div>
             <div>
               <Reveal>
                 <Card
@@ -367,7 +422,21 @@ const Index = () => {
           />
         </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
-        <div className="container mx-auto px-4">
+        <div className="container relative mx-auto px-4">
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            {featureBackgroundDecorations.map(({ src, className }) => (
+              <div key={src} className={cn("absolute bg-white/5", className)}>
+                <img
+                  src={src}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover opacity-70"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/75 to-background/85" />
+              </div>
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/85 to-background" />
+          </div>
           <div className="mx-auto max-w-3xl space-y-6 text-center">
             <Reveal>
               <h2 className="text-3xl font-bold text-white md:text-4xl">
