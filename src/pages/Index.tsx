@@ -17,6 +17,7 @@ import type { LucideIcon } from "lucide-react";
 
 import MouseGlowEffect from "@/components/MouseGlowEffect";
 import SparklesBackground from "@/components/SparklesBackground";
+import { Reveal } from "@/components/animations/Reveal";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { useCountUp } from "@/hooks/useCountUp";
+import { useInView } from "@/hooks/useInView";
 import { cn } from "@/lib/utils";
 
 import heroImage from "@/assets/futuristic-classroom-hero.jpg";
@@ -107,11 +110,33 @@ const compactCardGradients = [
   "bg-gradient-to-br from-primary/25 via-background/80 to-background/95",
 ];
 
-const stats = [
-  { number: "12k+", label: "AI-accelerated lessons created on SchoolTech Hub" },
-  { number: "94%", label: "Teachers reporting smoother workflow management" },
-  { number: "60%", label: "Average reduction in time spent writing reports" },
-  { number: "35+", label: "Districts modernising teaching with our platform" },
+type Stat = {
+  value: number;
+  label: string;
+  formatter: (value: number) => string;
+};
+
+const stats: Stat[] = [
+  {
+    value: 12,
+    label: "AI-accelerated lessons created on SchoolTech Hub",
+    formatter: (value) => `${Math.round(value)}k+`,
+  },
+  {
+    value: 94,
+    label: "Teachers reporting smoother workflow management",
+    formatter: (value) => `${Math.round(value)}%`,
+  },
+  {
+    value: 60,
+    label: "Average reduction in time spent writing reports",
+    formatter: (value) => `${Math.round(value)}%`,
+  },
+  {
+    value: 35,
+    label: "Districts modernising teaching with our platform",
+    formatter: (value) => `${Math.round(value)}+`,
+  },
 ];
 
 const testimonials: Testimonial[] = [
@@ -179,8 +204,35 @@ const iconColorClasses = [
   "bg-orange-500 text-white",
 ];
 
+type StatCardProps = {
+  stat: Stat;
+  index: number;
+  shouldAnimate: boolean;
+};
+
+const StatCard = ({ stat, index, shouldAnimate }: StatCardProps) => {
+  const value = useCountUp(stat.value, shouldAnimate, { duration: 1800 });
+  const displayValue = stat.formatter(value);
+
+  return (
+    <Reveal delay={index * 120}>
+      <Card
+        className={cn(
+          "p-8",
+          neonCardClass,
+          neonCardGradients[index % neonCardGradients.length],
+        )}
+      >
+        <p className="text-4xl font-bold text-primary text-glow">{displayValue}</p>
+        <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
+      </Card>
+    </Reveal>
+  );
+};
+
 const Index = () => {
   const { language } = useLanguage();
+  const { ref: statsRef, isInView: statsInView } = useInView<HTMLDivElement>({ threshold: 0.3 });
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -208,39 +260,49 @@ const Index = () => {
         <div className="container relative z-10 mx-auto px-4">
           <div className="grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
             <div>
-              <h1 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-4xl font-bold tracking-tight text-transparent animate-gradient md:text-6xl">
-                Power every lesson with organised workflows and luminous insights
-              </h1>
-              <p className="mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
-                SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
-              </p>
+              <Reveal>
+                <h1 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-4xl font-bold tracking-tight text-transparent animate-gradient md:text-6xl">
+                  Power every lesson with organised workflows and luminous insights
+                </h1>
+              </Reveal>
+              <Reveal delay={120}>
+                <p className="mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
+                  SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
+                </p>
+              </Reveal>
             </div>
             <div className="relative hidden md:flex">
               <div className="pointer-events-none absolute -inset-12 rounded-full bg-primary/10 blur-3xl" />
               <div className="relative grid w-full max-w-2xl grid-cols-1 gap-6">
-                <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-br from-primary/15 via-background/60 to-background")}
-                >
-                  <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
-                  <h3 className="mt-4 text-2xl font-semibold text-white">Class and student insights synchronised in real time</h3>
-                  <p className="mt-3 text-white/70">
-                    Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
-                  </p>
-                </Card>
+                <Reveal>
+                  <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-br from-primary/15 via-background/60 to-background")}
+                  >
+                    <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
+                    <h3 className="mt-4 text-2xl font-semibold text-white">Class and student insights synchronised in real time</h3>
+                    <p className="mt-3 text-white/70">
+                      Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
+                    </p>
+                  </Card>
+                </Reveal>
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-secondary/20 via-background/70 to-background")}
-                  >
-                    <div className="text-sm font-semibold text-secondary">Lesson Builder Platform</div>
-                    <p className="mt-2 text-sm text-white/75">
-                      Align objectives, differentiation, and formative checks in minutes with responsible AI support.
-                    </p>
-                  </Card>
-                  <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-accent/20 via-background/70 to-background")}
-                  >
-                    <div className="text-sm font-semibold text-accent">Data-Driven Reports</div>
-                    <p className="mt-2 text-sm text-white/75">
-                      Turn evidence into narrative-rich reports and share instantly with leadership and families.
-                    </p>
-                  </Card>
+                  <Reveal delay={120}>
+                    <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-secondary/20 via-background/70 to-background")}
+                    >
+                      <div className="text-sm font-semibold text-secondary">Lesson Builder Platform</div>
+                      <p className="mt-2 text-sm text-white/75">
+                        Align objectives, differentiation, and formative checks in minutes with responsible AI support.
+                      </p>
+                    </Card>
+                  </Reveal>
+                  <Reveal delay={180}>
+                    <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-b from-accent/20 via-background/70 to-background")}
+                    >
+                      <div className="text-sm font-semibold text-accent">Data-Driven Reports</div>
+                      <p className="mt-2 text-sm text-white/75">
+                        Turn evidence into narrative-rich reports and share instantly with leadership and families.
+                      </p>
+                    </Card>
+                  </Reveal>
                 </div>
               </div>
             </div>
@@ -252,22 +314,32 @@ const Index = () => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl space-y-6 text-center">
-            <h2 className="text-3xl font-bold text-white md:text-4xl">
-              Plan, track, and celebrate learning in one radiant hub
-            </h2>
-            <p className="text-lg text-white/75">
-              Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
-            </p>
-            <div className="space-y-3">
-              <Badge variant="secondary" className="mx-auto bg-secondary/20 text-secondary-foreground">
-                School-wide technology solutions
-              </Badge>
-              <h3 className="text-2xl font-semibold text-white">
-                Professional development and classroom technology aligned
-              </h3>
-              <p className="text-base text-white/75">
-                From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
+            <Reveal>
+              <h2 className="text-3xl font-bold text-white md:text-4xl">
+                Plan, track, and celebrate learning in one radiant hub
+              </h2>
+            </Reveal>
+            <Reveal delay={120}>
+              <p className="text-lg text-white/75">
+                Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
               </p>
+            </Reveal>
+            <div className="space-y-3">
+              <Reveal delay={180}>
+                <Badge variant="secondary" className="mx-auto bg-secondary/20 text-secondary-foreground">
+                  School-wide technology solutions
+                </Badge>
+              </Reveal>
+              <Reveal delay={240}>
+                <h3 className="text-2xl font-semibold text-white">
+                  Professional development and classroom technology aligned
+                </h3>
+              </Reveal>
+              <Reveal delay={300}>
+                <p className="text-base text-white/75">
+                  From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
+                </p>
+              </Reveal>
             </div>
           </div>
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -276,44 +348,50 @@ const Index = () => {
               const gradientClass = compactCardGradients[index % compactCardGradients.length];
 
               return (
-                <Card key={title} className={cn("h-full", compactCardBaseClass, gradientClass)}>
-                  <div className="flex flex-col gap-4 text-left">
-                    <div
-                      className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-xl",
-                        iconColorClasses[index % iconColorClasses.length],
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3
+                <Reveal key={title} delay={index * 120}>
+                  <Card className={cn("h-full", compactCardBaseClass, gradientClass)}>
+                    <div className="flex flex-col gap-4 text-left">
+                      <div
                         className={cn(
-                          "text-xl font-semibold",
-                          isWorkflowTool ? "text-primary" : "text-secondary",
+                          "flex h-10 w-10 items-center justify-center rounded-xl",
+                          iconColorClasses[index % iconColorClasses.length],
                         )}
                       >
-                        {title}
-                      </h3>
-                      <p className="mt-2 text-sm text-white/75">{description}</p>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3
+                          className={cn(
+                            "text-xl font-semibold",
+                            isWorkflowTool ? "text-primary" : "text-secondary",
+                          )}
+                        >
+                          {title}
+                        </h3>
+                        <p className="mt-2 text-sm text-white/75">{description}</p>
+                      </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </Reveal>
               );
             })}
           </div>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link to={getLocalizedPath("/contact", language)}>
-              <Button size="lg" className="neon-pulse">
-                Talk with our team
-              </Button>
-            </Link>
-            <Link to={getLocalizedPath("/events", language)}>
-              <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Join a training session
-              </Button>
-            </Link>
+            <Reveal>
+              <Link to={getLocalizedPath("/contact", language)}>
+                <Button size="lg" className="neon-pulse">
+                  Talk with our team
+                </Button>
+              </Link>
+            </Reveal>
+            <Reveal delay={120}>
+              <Link to={getLocalizedPath("/events", language)}>
+                <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  Join a training session
+                </Button>
+              </Link>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -321,19 +399,9 @@ const Index = () => {
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
-          <div className="grid gap-8 text-center md:grid-cols-4">
+          <div ref={statsRef} className="grid gap-8 text-center md:grid-cols-4">
             {stats.map((stat, index) => (
-              <Card
-                key={stat.label}
-                className={cn(
-                  "p-8",
-                  neonCardClass,
-                  neonCardGradients[index % neonCardGradients.length],
-                )}
-              >
-                <p className="text-4xl font-bold text-primary text-glow">{stat.number}</p>
-                <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
-              </Card>
+              <StatCard key={stat.label} stat={stat} index={index} shouldAnimate={statsInView} />
             ))}
           </div>
         </div>
@@ -342,37 +410,42 @@ const Index = () => {
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-white md:text-4xl">
-              Teachers trust SchoolTech Hub for digital transformation
-            </h2>
-            <p className="mt-5 text-lg text-white/75">
-              Hear how schools are building confident, future-ready classrooms with our AI-powered platform.
-            </p>
+            <Reveal>
+              <h2 className="text-3xl font-bold text-white md:text-4xl">
+                Teachers trust SchoolTech Hub for digital transformation
+              </h2>
+            </Reveal>
+            <Reveal delay={120}>
+              <p className="mt-5 text-lg text-white/75">
+                Hear how schools are building confident, future-ready classrooms with our AI-powered platform.
+              </p>
+            </Reveal>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
             {testimonials.map(({ quote, name, role, image }, index) => (
-              <Card
-                key={name}
-                className={cn(
-                  "p-8 text-center",
-                  neonCardClass,
-                  neonCardGradients[index % neonCardGradients.length],
-                )}
-              >
-                <div className="mb-6 flex justify-center">
-                  <img
-                    src={image}
-                    alt={`Portrait of ${name}`}
-                    className="h-20 w-20 rounded-full border border-white/20 object-cover shadow-[0_0_18px_hsl(var(--glow-primary)/0.3)]"
-                    loading="lazy"
-                  />
-                </div>
-                <p className="mb-6 text-white/90 italic">“{quote}”</p>
-                <div className="space-y-1">
-                  <p className="text-lg font-semibold text-white">{name}</p>
-                  <p className="text-sm text-white/70">{role}</p>
-                </div>
-              </Card>
+              <Reveal key={name} delay={index * 150}>
+                <Card
+                  className={cn(
+                    "p-8 text-center",
+                    neonCardClass,
+                    neonCardGradients[index % neonCardGradients.length],
+                  )}
+                >
+                  <div className="mb-6 flex justify-center">
+                    <img
+                      src={image}
+                      alt={`Portrait of ${name}`}
+                      className="h-20 w-20 rounded-full border border-white/20 object-cover shadow-[0_0_18px_hsl(var(--glow-primary)/0.3)]"
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="mb-6 text-white/90 italic">“{quote}”</p>
+                  <div className="space-y-1">
+                    <p className="text-lg font-semibold text-white">{name}</p>
+                    <p className="text-sm text-white/70">{role}</p>
+                  </div>
+                </Card>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -381,35 +454,37 @@ const Index = () => {
       <section className="relative py-24">
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-background to-secondary/20" />
         <div className="container mx-auto px-4">
-          <Card
-            className={cn(
-              "mx-auto max-w-4xl rounded-[2rem] bg-gradient-to-br from-primary/15 via-background/80 to-secondary/15 p-12 text-center",
-              neonCardClass,
-            )}
-          >
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
-              <Award className="h-10 w-10" />
-            </div>
-            <h2 className="mt-8 text-3xl font-bold text-white md:text-4xl">
-              Ready to simplify your teaching workflow?
-            </h2>
-            <p className="mt-4 text-lg text-white/80">
-              Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to={getLocalizedPath("/auth", language)}>
-                <Button size="lg" className="neon-pulse">
-                  Get started free
-                </Button>
-              </Link>
-              <Link to={getLocalizedPath("/services", language)}>
-                <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                  <TrendingUp className="mr-2 h-5 w-5" />
-                  View implementation roadmap
-                </Button>
-              </Link>
-            </div>
-          </Card>
+          <Reveal>
+            <Card
+              className={cn(
+                "mx-auto max-w-4xl rounded-[2rem] bg-gradient-to-br from-primary/15 via-background/80 to-secondary/15 p-12 text-center",
+                neonCardClass,
+              )}
+            >
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
+                <Award className="h-10 w-10" />
+              </div>
+              <h2 className="mt-8 text-3xl font-bold text-white md:text-4xl">
+                Ready to simplify your teaching workflow?
+              </h2>
+              <p className="mt-4 text-lg text-white/80">
+                Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
+              </p>
+              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Link to={getLocalizedPath("/auth", language)}>
+                  <Button size="lg" className="neon-pulse">
+                    Get started free
+                  </Button>
+                </Link>
+                <Link to={getLocalizedPath("/services", language)}>
+                  <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                    <TrendingUp className="mr-2 h-5 w-5" />
+                    View implementation roadmap
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </Reveal>
         </div>
       </section>
     </div>
