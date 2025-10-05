@@ -404,13 +404,8 @@ const Index = () => {
                       <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
                         <div className="pointer-events-none absolute -top-3 left-6 h-5 w-12 rounded-full bg-white/40 blur-xl" />
                         <div className="pointer-events-none absolute -bottom-4 right-6 h-6 w-14 rounded-full bg-primary/35 blur-xl" />
-                        <div className="overflow-hidden rounded-[1.25rem] border border-white/10 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
-                          <img
-                            src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80"
-                            alt="Smart classroom with interactive displays"
-                            loading="lazy"
-                            className="block h-full w-full object-cover"
-                          />
+                        <div className="flex h-40 items-center justify-center rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-primary/25 via-background/80 to-background/95 text-sm font-semibold uppercase tracking-[0.35em] text-white/70 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
+                          Pulse metrics
                         </div>
                         <span className="pointer-events-none absolute left-5 top-4 inline-flex rotate-[-6deg] rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/80">
                           Pulse
@@ -419,13 +414,8 @@ const Index = () => {
                       <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
                         <div className="pointer-events-none absolute -top-4 right-7 h-5 w-10 rounded-full bg-secondary/35 blur-xl" />
                         <div className="pointer-events-none absolute -bottom-3 left-8 h-7 w-16 rounded-full bg-white/40 blur-2xl" />
-                        <div className="overflow-hidden rounded-[1.25rem] border border-white/10 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
-                          <img
-                            src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80"
-                            alt="Teacher working attentively on a laptop"
-                            loading="lazy"
-                            className="block h-full w-full object-cover"
-                          />
+                        <div className="flex h-40 items-center justify-center rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-secondary/25 via-background/80 to-background/95 text-sm font-semibold uppercase tracking-[0.35em] text-white/70 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
+                          Collaboration flow
                         </div>
                         <span className="pointer-events-none absolute right-4 bottom-5 inline-flex rotate-[8deg] rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
                           Collab
