@@ -112,9 +112,7 @@ const Navigation = () => {
                   className={cn(
                     "rounded-full px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap",
                     "border border-transparent hover:border-white/40 hover:bg-white/20 hover:text-foreground hover:backdrop-blur-sm",
-                    isActive
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "text-muted-foreground"
+                    "text-muted-foreground"
                   )}
                 >
                   {item.name}
@@ -198,9 +196,7 @@ const Navigation = () => {
                       onClick={() => setIsOpen(false)}
                       className={cn(
                         "py-2 text-lg font-medium transition-colors",
-                        isActive
-                          ? "text-primary"
-                          : "text-muted-foreground hover:text-primary"
+                        "text-muted-foreground hover:text-primary"
                       )}
                     >
                       {item.name}
