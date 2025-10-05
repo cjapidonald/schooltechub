@@ -33,7 +33,7 @@ const Events = () => {
     { value: "Webinar", label: "Webinars" },
     { value: "Meetup", label: "Meetups" },
     { value: "upcoming", label: "Upcoming Events" },
-    { value: "past", label: "Past Events & Recordings" }
+    { value: "past", label: "Past Events" }
   ];
 
   const filterOptions = {
