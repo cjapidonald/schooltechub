@@ -6,12 +6,13 @@ interface TextChild {
 }
 
 interface ContentBlock {
-  type: "paragraph" | "heading" | "image";
+  type: "paragraph" | "heading" | "image" | "youtube";
   level?: number;
   children?: TextChild[];
   src?: string;
   alt?: string;
   caption?: string;
+  videoId?: string;
 }
 
 interface AuthorInfo {
@@ -131,7 +132,7 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
           },
         ],
       },
-      {
+      { 
         type: "paragraph",
         children: [
           {
@@ -139,6 +140,10 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
               "While half the class dives into the virtual reef, the other half completes observation sketches at an analog station. The teacher circulates between groups, using the AI-generated prompts on a tablet to ask guiding questions tailored to each student’s journal responses.",
           },
         ],
+      },
+      {
+        type: "youtube",
+        videoId: "TVLqVTtCneE",
       },
       {
         type: "heading",
