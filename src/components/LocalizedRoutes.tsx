@@ -51,6 +51,14 @@ const LegacyBuilderRedirect: React.FC = () => {
   return <Navigate to={destination} replace />;
 };
 
+const LegacyStudentDashboardRedirect: React.FC = () => {
+  const params = useParams<{ id?: string }>();
+  const destination = params.id
+    ? `/teacher/students/${params.id}`
+    : `/teacher?tab=students`;
+  return <Navigate to={destination} replace />;
+};
+
 export const LocalizedRoutes = () => {
   return (
     <Routes>
@@ -76,9 +84,11 @@ export const LocalizedRoutes = () => {
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<RouteWrapper><Account /></RouteWrapper>} />
-      <Route path="/dashboard" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
+      <Route path="/teacher" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
+      <Route path="/dashboard" element={<Navigate to="/teacher" replace />} />
       <Route path="/student" element={<RouteWrapper><StudentPage /></RouteWrapper>} />
-      <Route path="/dashboard/students/:id" element={<RouteWrapper><StudentDashboardPage /></RouteWrapper>} />
+      <Route path="/teacher/students/:id" element={<RouteWrapper><StudentDashboardPage /></RouteWrapper>} />
+      <Route path="/dashboard/students/:id" element={<LegacyStudentDashboardRedirect />} />
       <Route path="/my-profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
       <Route path="/profile" element={<Navigate to="/my-profile" replace />} />
       <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />

@@ -77,7 +77,7 @@ export default function StudentDashboardPage() {
   useEffect(() => {
     if (!studentsQuery.isLoading && !student && id) {
       toast({ description: t.studentDashboard.toasts.notFound, variant: "destructive" });
-      navigate("/dashboard?tab=students", { replace: true });
+      navigate("/teacher?tab=students", { replace: true });
     }
   }, [id, navigate, student, studentsQuery.isLoading, t.studentDashboard.toasts.notFound, toast]);
 
@@ -180,7 +180,7 @@ export default function StudentDashboardPage() {
       <SEO title={`${student.fullName} • ${t.studentDashboard.title}`} description="Student progress overview" />
       <Button
         variant="ghost"
-        onClick={() => navigate("/dashboard?tab=students")}
+        onClick={() => navigate("/teacher?tab=students")}
         className="-ml-2 w-fit"
       >
         ← {t.studentDashboard.actions.back}
