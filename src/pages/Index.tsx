@@ -145,13 +145,14 @@ const structuredData = {
 };
 
 const neonCardClass =
-  "group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] backdrop-blur-xl transition-all duration-500 hover:border-primary/80 hover:shadow-[0_0_45px_hsl(var(--glow-primary)/0.35)]";
+  "group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:border-primary/60";
 
-const neonIconClass =
-  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary shadow-[0_0_18px_hsl(var(--glow-primary)/0.25)] before:absolute before:-inset-3 before:rounded-full before:bg-primary/10 before:blur-lg before:content-['']";
-
-const neonIconSecondaryClass =
-  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-secondary/30 bg-secondary/10 text-secondary shadow-[0_0_18px_hsl(var(--glow-secondary)/0.25)] before:absolute before:-inset-3 before:rounded-full before:bg-secondary/10 before:blur-lg before:content-['']";
+const iconColorClasses = [
+  "bg-green-500 text-white",
+  "bg-white text-slate-900",
+  "bg-blue-500 text-white",
+  "bg-orange-500 text-white",
+];
 
 const Index = () => {
   const { language } = useLanguage();
@@ -237,16 +238,21 @@ const Index = () => {
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-2">
-            {workflowTools.map(({ title, description, icon: Icon }) => (
+            {workflowTools.map(({ title, description, icon: Icon }, index) => (
               <Card key={title} className={cn("h-full", neonCardClass)}>
-                <div className="flex flex-col items-center text-center">
-                  <div className={neonIconClass}>
-                    <Icon className="relative h-8 w-8 drop-shadow-[0_0_10px_hsl(var(--glow-primary)/0.35)]" />
+                <div className="flex flex-col gap-4 text-left">
+                  <div
+                    className={cn(
+                      "flex h-12 w-12 items-center justify-center rounded-xl",
+                      iconColorClasses[index % iconColorClasses.length],
+                    )}
+                  >
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-primary">
-                    {title}
-                  </h3>
-                  <p className="mt-4 text-base text-white/80">{description}</p>
+                  <div>
+                    <h3 className="text-2xl font-semibold text-primary">{title}</h3>
+                    <p className="mt-3 text-base text-white/80">{description}</p>
+                  </div>
                 </div>
               </Card>
             ))}
@@ -282,16 +288,21 @@ const Index = () => {
               </div>
             </div>
             <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
-              {schoolSolutions.map(({ title, description, icon: Icon }) => (
+              {schoolSolutions.map(({ title, description, icon: Icon }, index) => (
                 <Card key={title} className={cn("h-full", neonCardClass)}>
-                  <div className="flex flex-col items-center text-center">
-                    <div className={neonIconSecondaryClass}>
-                      <Icon className="relative h-8 w-8 drop-shadow-[0_0_10px_hsl(var(--glow-secondary)/0.35)]" />
+                  <div className="flex flex-col gap-4 text-left">
+                    <div
+                      className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-xl",
+                        iconColorClasses[index % iconColorClasses.length],
+                      )}
+                    >
+                      <Icon className="h-6 w-6" />
                     </div>
-                    <h3 className="text-2xl font-semibold text-secondary">
-                      {title}
-                    </h3>
-                    <p className="mt-4 text-base text-white/80">{description}</p>
+                    <div>
+                      <h3 className="text-2xl font-semibold text-secondary">{title}</h3>
+                      <p className="mt-3 text-base text-white/80">{description}</p>
+                    </div>
                   </div>
                 </Card>
               ))}
