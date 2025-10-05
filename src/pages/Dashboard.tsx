@@ -351,6 +351,8 @@ export default function DashboardPage() {
       setCurriculumDialogOpen(false);
       curriculumForm.reset();
       setActiveCurriculumId(result.curriculum.id);
+      queryClient.setQueryData(["dashboard-curriculum-items", result.curriculum.id], result.items);
+      navigate(`/teacher/curriculum/${result.curriculum.id}`);
     },
     onError: () => {
       toast({ description: t.dashboard.toasts.error, variant: "destructive" });
@@ -600,7 +602,10 @@ export default function DashboardPage() {
                 curricula={curricula}
                 loading={curriculaQuery.isLoading}
                 onNewCurriculum={() => setCurriculumDialogOpen(true)}
-                onOpenCurriculum={setActiveCurriculumId}
+                onOpenCurriculum={id => {
+                  setActiveCurriculumId(id);
+                  navigate(`/teacher/curriculum/${id}`);
+                }}
                 onExportCurriculum={id => toast({ description: t.dashboard.toasts.exportUnavailable })}
               />
               {selectedCurriculum ? (
@@ -731,28 +736,44 @@ export default function DashboardPage() {
         </Dialog>
 
         <Dialog open={isCurriculumDialogOpen} onOpenChange={setCurriculumDialogOpen}>
-          <DialogContent className="sm:max-w-xl">
-            <DialogHeader>
-              <DialogTitle>{t.dashboard.dialogs.newCurriculum.title}</DialogTitle>
+          <DialogContent className="sm:max-w-xl border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="text-2xl font-semibold text-white">
+                {t.dashboard.dialogs.newCurriculum.title}
+              </DialogTitle>
+              <p className="text-sm text-white/70">
+                {t.dashboard.curriculum.empty.description}
+              </p>
             </DialogHeader>
             <form
               onSubmit={curriculumForm.handleSubmit(values => createCurriculumMutation.mutate(values))}
               className="space-y-4"
             >
               <div className="grid gap-2">
-                <Label htmlFor="curriculum-title">{t.dashboard.dialogs.newCurriculum.fields.title}</Label>
-                <Input id="curriculum-title" {...curriculumForm.register("title")} required />
+                <Label htmlFor="curriculum-title" className="text-sm font-medium text-white/80">
+                  {t.dashboard.dialogs.newCurriculum.fields.title}
+                </Label>
+                <Input
+                  id="curriculum-title"
+                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus:border-white/70 focus-visible:ring-white/40"
+                  {...curriculumForm.register("title")}
+                  required
+                />
               </div>
               <div className="grid gap-2">
-                <Label>{t.dashboard.dialogs.newCurriculum.fields.class}</Label>
+                <Label className="text-sm font-medium text-white/80">
+                  {t.dashboard.dialogs.newCurriculum.fields.class}
+                </Label>
                 <Select
                   value={curriculumForm.watch("class_id")}
                   onValueChange={value => curriculumForm.setValue("class_id", value)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t.dashboard.dialogs.newCurriculum.fields.classPlaceholder} />
+                  <SelectTrigger className="rounded-xl border-white/30 bg-white/10 text-white focus:ring-white/40">
+                    <SelectValue
+                      placeholder={t.dashboard.dialogs.newCurriculum.fields.classPlaceholder}
+                    />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="border border-white/20 bg-slate-900/90 text-white backdrop-blur-xl">
                     {(classesQuery.data ?? []).map(item => (
                       <SelectItem key={item.id} value={item.id}>
                         {item.title}
@@ -762,30 +783,55 @@ export default function DashboardPage() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="curriculum-subject">{t.dashboard.dialogs.newCurriculum.fields.subject}</Label>
-                <Input id="curriculum-subject" {...curriculumForm.register("subject")} required />
+                <Label htmlFor="curriculum-subject" className="text-sm font-medium text-white/80">
+                  {t.dashboard.dialogs.newCurriculum.fields.subject}
+                </Label>
+                <Input
+                  id="curriculum-subject"
+                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus:border-white/70 focus-visible:ring-white/40"
+                  {...curriculumForm.register("subject")}
+                  required
+                />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="curriculum-year">{t.dashboard.dialogs.newCurriculum.fields.academicYear}</Label>
-                <Input id="curriculum-year" {...curriculumForm.register("academic_year")} />
+                <Label htmlFor="curriculum-year" className="text-sm font-medium text-white/80">
+                  {t.dashboard.dialogs.newCurriculum.fields.academicYear}
+                </Label>
+                <Input
+                  id="curriculum-year"
+                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus:border-white/70 focus-visible:ring-white/40"
+                  {...curriculumForm.register("academic_year")}
+                />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="curriculum-lessons">{t.dashboard.dialogs.newCurriculum.fields.lessonTitles}</Label>
+                <Label htmlFor="curriculum-lessons" className="text-sm font-medium text-white/80">
+                  {t.dashboard.dialogs.newCurriculum.fields.lessonTitles}
+                </Label>
                 <Textarea
                   id="curriculum-lessons"
                   rows={6}
                   placeholder={t.dashboard.dialogs.newCurriculum.fields.lessonTitlesPlaceholder}
+                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus-visible:ring-white/40"
                   {...curriculumForm.register("lesson_titles")}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white/60">
                   {t.dashboard.dialogs.newCurriculum.helper}
                 </p>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setCurriculumDialogOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-white/40 bg-transparent text-white hover:bg-white/10"
+                  onClick={() => setCurriculumDialogOpen(false)}
+                >
                   {t.common.cancel}
                 </Button>
-                <Button type="submit" disabled={createCurriculumMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={createCurriculumMutation.isPending}
+                  className="border-white/60 bg-white/90 text-slate-900 hover:bg-white"
+                >
                   {t.dashboard.dialogs.newCurriculum.submit}
                 </Button>
               </DialogFooter>
