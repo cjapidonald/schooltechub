@@ -77,7 +77,7 @@ export function DashboardHeader({
             <Button
               onClick={() => onQuickAction("ask-question")}
               variant="outline"
-              className="w-full justify-center"
+              className="w-full justify-center whitespace-normal text-center leading-snug"
               aria-label={t.dashboard.quickActions.askQuestion}
             >
               {t.dashboard.quickActions.askQuestion}
@@ -85,7 +85,7 @@ export function DashboardHeader({
             <Button
               onClick={() => onQuickAction("post-blog")}
               variant="outline"
-              className="w-full justify-center"
+              className="w-full justify-center whitespace-normal text-center leading-snug"
               aria-label={t.dashboard.quickActions.postBlog}
             >
               {t.dashboard.quickActions.postBlog}
@@ -95,7 +95,7 @@ export function DashboardHeader({
                 <span className="w-full">
                   <Button
                     onClick={() => onQuickAction("new-lesson-plan")}
-                    className="w-full justify-center"
+                    className="w-full justify-center whitespace-normal text-center leading-snug"
                     aria-label={t.dashboard.quickActions.newLessonPlan}
                     disabled={!hasCurriculumContext}
                   >
@@ -111,14 +111,14 @@ export function DashboardHeader({
             </Tooltip>
             <Button
               onClick={() => onQuickAction("new-curriculum")}
-              className="w-full justify-center"
+              className="w-full justify-center whitespace-normal text-center leading-snug"
               aria-label={t.dashboard.quickActions.newCurriculum}
             >
               {t.dashboard.quickActions.newCurriculum}
             </Button>
             <Button
               onClick={() => onQuickAction("new-class")}
-              className="w-full justify-center"
+              className="w-full justify-center whitespace-normal text-center leading-snug"
               variant="secondary"
               aria-label={t.dashboard.quickActions.newClass}
             >
