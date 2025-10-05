@@ -721,7 +721,7 @@ const Blog = () => {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-24 md:px-8">
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-8 shadow-[0_25px_80px_-20px_rgba(15,23,42,0.65)] backdrop-blur-2xl transition-colors duration-500 md:p-12">
+        <section className="relative mt-[10px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-8 shadow-[0_25px_80px_-20px_rgba(15,23,42,0.65)] backdrop-blur-2xl transition-colors duration-500 md:mt-[10px] md:p-12">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
           <div className="absolute inset-y-0 right-[-20%] hidden w-[50%] rounded-full bg-gradient-to-br from-cyan-400/30 via-transparent to-transparent blur-3xl md:block" />
 
@@ -731,21 +731,35 @@ const Blog = () => {
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{t.blog.title}</h1>
                 <p className="text-lg text-white/70 md:max-w-2xl">{t.blog.subtitle}</p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {heroHighlights.map(item => (
-                  <div key={item.id} className={cn(highlightCardClassName, "items-center justify-center text-center")}>
+                  <div
+                    key={item.id}
+                    className={cn(
+                      highlightCardClassName,
+                      "items-center justify-center text-center"
+                    )}
+                  >
                     <p className="text-sm uppercase tracking-wide text-white/60">{item.label}</p>
                     <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
                     <p className="mt-1 text-xs text-white/60">{item.detail}</p>
                   </div>
                 ))}
-                <Card className={cn(highlightCardClassName, "justify-start gap-4 border-white/20 bg-white/10 text-left text-white")}> 
-                  <CardContent className="flex flex-col gap-3 p-0">
-                    <label htmlFor="blog-search" className="text-sm font-medium uppercase tracking-wide text-white/60">
+                <Card
+                  className={cn(
+                    highlightCardClassName,
+                    "items-center justify-center gap-4 border-white/20 bg-white/10 text-center text-white"
+                  )}
+                >
+                  <CardContent className="flex h-full w-full flex-col items-center justify-center gap-3 p-0">
+                    <label
+                      htmlFor="blog-search"
+                      className="text-sm font-medium uppercase tracking-wide text-white/60"
+                    >
                       {t.blog.searchPlaceholder}
                     </label>
-                    <div className="relative">
-                      <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+                    <div className="relative w-full max-w-[220px]">
+                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
                       <Input
                         id="blog-search"
                         value={searchValue}
