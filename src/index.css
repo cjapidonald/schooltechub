@@ -182,7 +182,7 @@ All colors MUST be HSL.
   .convex-panel-sheen::after {
     content: "";
     position: absolute;
-    inset: clamp(0.3rem, 1.2vw, 0.75rem);
+    inset: clamp(0.45rem, 1.4vw, 1rem);
     border-radius: inherit;
     border: 1px solid hsla(0 0% 100% / 0.05);
     background: linear-gradient(135deg, hsla(0 0% 100% / 0.1), hsla(222 47% 12% / 0));
@@ -202,7 +202,7 @@ All colors MUST be HSL.
   }
 
   .convex-panel-sheen--compact::after {
-    inset: clamp(0.18rem, 0.85vw, 0.45rem);
+    inset: clamp(0.32rem, 1vw, 0.6rem);
     border: 1px solid hsla(0 0% 100% / 0.08);
     opacity: 0.8;
   }
