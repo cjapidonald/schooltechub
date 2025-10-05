@@ -1,6 +1,6 @@
 export const en = {
   nav: {
-    dashboard: "My Dashboard",
+    dashboard: "Teacher",
     home: "Home",
     about: "About",
     services: "Services",
@@ -52,7 +52,7 @@ export const en = {
   dashboard: {
     fallbackDisplayName: "Teacher",
     header: {
-      title: "My Dashboard",
+      title: "Teacher",
       greeting: "Welcome {name}",
       subtitle: "Review your classes, build curricula, and start new lesson plans.",
     },
@@ -1735,7 +1735,7 @@ export const en = {
       research: "Research"
     },
     overview: {
-      title: "My Dashboard",
+      title: "Teacher",
       subtitle: "Here’s a personalized snapshot of your SchoolTech Hub activity and upcoming lessons.",
       ctas: {
         postBlog: "Post a blog",
