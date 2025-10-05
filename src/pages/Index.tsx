@@ -359,16 +359,26 @@ const Index = () => {
             ))}
             <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/85 to-background" />
           </div>
-          <div className="mx-auto max-w-3xl space-y-6 text-center">
+          <div className="mx-auto max-w-4xl">
             <Reveal>
-              <h2 className="text-3xl font-bold text-white md:text-4xl">
-                Plan, track, and celebrate learning in one radiant hub
-              </h2>
-            </Reveal>
-            <Reveal delay={120}>
-              <p className="text-lg text-white/75">
-                Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
-              </p>
+              <Card
+                className={cn(
+                  neonCardClass,
+                  "relative isolate rounded-[2rem] bg-gradient-to-br from-primary/20 via-background/45 to-background/70 p-8 backdrop-blur-lg shadow-[0_28px_60px_-20px_rgba(54,20,130,0.65)] transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.7)] md:p-12",
+                  "before:absolute before:inset-[1.5px] before:rounded-[1.92rem] before:bg-[linear-gradient(150deg,rgba(255,195,255,0.16),rgba(15,15,35,0.45))] before:opacity-60 before:content-[''] before:z-0"
+                )}
+              >
+                <span className={convexOverlayClass} aria-hidden />
+                <div className="relative z-10 flex flex-col items-center gap-6 text-center">
+                  <h2 className="text-3xl font-semibold text-white/70 md:text-4xl">
+                    Plan, track, and celebrate learning in one radiant hub
+                  </h2>
+                  <p className="max-w-2xl text-base text-white/65 md:text-lg">
+                    Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
+                  </p>
+                </div>
+                <div className="pointer-events-none absolute -right-24 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
+              </Card>
             </Reveal>
           </div>
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
