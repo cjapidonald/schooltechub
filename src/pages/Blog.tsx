@@ -795,10 +795,6 @@ const Blog = () => {
                     aria-label={t.blog.searchPlaceholder}
                   />
                 </div>
-                <div className="rounded-2xl border border-white/15 bg-white/5 p-4 text-sm text-white/70">
-                  <p className="font-medium text-white">Quick tip</p>
-                  <p className="mt-1">Combine filters below to surface stories that match your subject, grade, and goals.</p>
-                </div>
               </CardContent>
             </Card>
           </div>
