@@ -78,7 +78,9 @@ export function DashboardHeader({
               onClick={() => onQuickAction("ask-question")}
               variant="outline"
               className="w-full justify-center"
-              aria-label={t.dashboard.quickActions.askQuestion}
+              aria-label={
+                t.dashboard.quickActions.askQuestionLabel ?? t.dashboard.quickActions.askQuestion
+              }
             >
               {t.dashboard.quickActions.askQuestion}
             </Button>
