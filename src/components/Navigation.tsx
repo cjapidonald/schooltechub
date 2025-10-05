@@ -8,6 +8,7 @@ import {
   BookOpen,
   IdCard,
   GraduationCap,
+  LayoutDashboard,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -44,7 +45,7 @@ const Navigation = () => {
   const navItems = useMemo(() => {
     const items = [
       { name: t.nav.home, path: "/" },
-      { name: t.nav.dashboard, path: "/dashboard" },
+      { name: t.nav.dashboard, path: "/teacher" },
       { name: t.nav.student, path: "/student" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.events, path: "/events" },
@@ -148,6 +149,12 @@ const Navigation = () => {
                     {t.nav.my_profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    onClick={() => navigate(getLocalizedNavPath("/dashboard"))}
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    {t.nav.workspace}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}
                   >
                     <GraduationCap className="mr-2 h-4 w-4" />
@@ -216,7 +223,15 @@ const Navigation = () => {
                       onClick={() => setIsOpen(false)}
                     >
                       <Button className="w-full" variant="secondary">
-                        {t.nav.my_profile ?? t.nav.dashboard}
+                        {t.nav.my_profile}
+                      </Button>
+                    </Link>
+                    <Link
+                      to={getLocalizedNavPath("/dashboard")}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <Button className="w-full" variant="outline">
+                        {t.nav.workspace}
                       </Button>
                     </Link>
                     <Link
