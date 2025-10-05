@@ -16,13 +16,23 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Loader2 } from "lucide-react";
+import { ExternalLink, GripVertical, X } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { DashboardCurriculumItem } from "@/features/dashboard/examples";
 
@@ -30,10 +40,8 @@ interface CurriculumEditorProps {
   items: DashboardCurriculumItem[];
   loading?: boolean;
   reordering?: boolean;
-  quickAttachBusyId?: string | null;
   onPlanLesson: (item: DashboardCurriculumItem) => void;
   onOpenLessonPlan?: (item: DashboardCurriculumItem) => void;
-  onQuickAttachResource?: (item: DashboardCurriculumItem) => void;
   onReorder?: (orderedIds: string[]) => void;
 }
 
@@ -69,8 +77,9 @@ interface RowContentProps {
   t: ReturnType<typeof useLanguage>["t"];
   onPlanLesson: (item: DashboardCurriculumItem) => void;
   onOpenLessonPlan?: (item: DashboardCurriculumItem) => void;
-  onQuickAttachResource?: (item: DashboardCurriculumItem) => void;
-  quickAttachBusyId?: string | null;
+  presentations: string[];
+  onManagePresentations: (item: DashboardCurriculumItem) => void;
+  onRemovePresentation: (itemId: string, index: number) => void;
   dragHandle?: DragHandleProps;
 }
 
@@ -80,21 +89,17 @@ const RowContent = ({
   t,
   onPlanLesson,
   onOpenLessonPlan,
-  onQuickAttachResource,
-  quickAttachBusyId,
+  presentations,
+  onManagePresentations,
+  onRemovePresentation,
   dragHandle,
 }: RowContentProps) => {
   const displayOrder = item.seq_index ?? item.position ?? index + 1;
   const isExample = Boolean(item.isExample);
   const hasLessonPlan = Boolean(item.lesson_plan_id);
-  const resourceShortcutCount = item.resource_shortcut_ids?.length ?? 0;
   const canOpenLessonPlan = Boolean(onOpenLessonPlan) && hasLessonPlan && !isExample;
-  const canQuickAttach =
-    Boolean(onQuickAttachResource) && hasLessonPlan && resourceShortcutCount > 0 && !isExample;
-  const quickAttachLoading = quickAttachBusyId === item.id;
   const createDisabled = !item.id || isExample;
   const openDisabled = !canOpenLessonPlan;
-  const quickAttachDisabled = !canQuickAttach || quickAttachLoading;
 
   const handleDisabled = dragHandle?.disabled ?? true;
   const handleAttributes = dragHandle?.attributes ?? {};
@@ -141,7 +146,52 @@ const RowContent = ({
         <Badge>{t.dashboard.curriculumView.status[item.status]}</Badge>
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {presentations.length > 0 ? (
+              presentations.map((url, linkIndex) => (
+                <div
+                  key={`${item.id}-presentation-${linkIndex}`}
+                  className="flex items-center gap-1 rounded-md border px-2 py-1 text-sm"
+                >
+                  <span className="max-w-[10rem] truncate" title={url}>
+                    {t.dashboard.curriculumView.presentations.linkLabel.replace(
+                      "{index}",
+                      String(linkIndex + 1),
+                    )}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    type="button"
+                    onClick={() => window.open(url, "_blank", "noopener")}
+                    aria-label={t.dashboard.curriculumView.presentations.open}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    type="button"
+                    onClick={() => onRemovePresentation(item.id, linkIndex)}
+                    aria-label={t.dashboard.curriculumView.presentations.removeLabel.replace(
+                      "{index}",
+                      String(linkIndex + 1),
+                    )}
+                    disabled={isExample}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {t.dashboard.curriculumView.presentations.empty}
+              </p>
+            )}
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -166,12 +216,11 @@ const RowContent = ({
             variant="ghost"
             size="sm"
             type="button"
-            disabled={quickAttachDisabled}
-            onClick={() => onQuickAttachResource?.(item)}
-            aria-label={t.dashboard.curriculumView.actions.quickAttachResource}
+            onClick={() => onManagePresentations(item)}
+            aria-label={t.dashboard.curriculumView.actions.addPresentation}
+            disabled={isExample}
           >
-            {quickAttachLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {t.dashboard.curriculumView.actions.quickAttachResource}
+            {t.dashboard.curriculumView.actions.addPresentation}
           </Button>
         </div>
         {isExample ? (
@@ -188,8 +237,9 @@ interface RowProps {
   t: ReturnType<typeof useLanguage>["t"];
   onPlanLesson: (item: DashboardCurriculumItem) => void;
   onOpenLessonPlan?: (item: DashboardCurriculumItem) => void;
-  onQuickAttachResource?: (item: DashboardCurriculumItem) => void;
-  quickAttachBusyId?: string | null;
+  presentations: string[];
+  onManagePresentations: (item: DashboardCurriculumItem) => void;
+  onRemovePresentation: (itemId: string, index: number) => void;
   reorderEnabled: boolean;
   reordering: boolean;
 }
@@ -200,8 +250,9 @@ const SortableCurriculumRow = ({
   t,
   onPlanLesson,
   onOpenLessonPlan,
-  onQuickAttachResource,
-  quickAttachBusyId,
+  presentations,
+  onManagePresentations,
+  onRemovePresentation,
   reorderEnabled,
   reordering,
 }: RowProps) => {
@@ -241,8 +292,9 @@ const SortableCurriculumRow = ({
         t={t}
         onPlanLesson={onPlanLesson}
         onOpenLessonPlan={onOpenLessonPlan}
-        onQuickAttachResource={onQuickAttachResource}
-        quickAttachBusyId={quickAttachBusyId}
+        presentations={presentations}
+        onManagePresentations={onManagePresentations}
+        onRemovePresentation={onRemovePresentation}
         dragHandle={dragHandle}
       />
     </TableRow>
@@ -250,7 +302,7 @@ const SortableCurriculumRow = ({
 };
 
 const StaticCurriculumRow = (props: RowProps) => {
-  const { item, index, t, onPlanLesson, onOpenLessonPlan, onQuickAttachResource, quickAttachBusyId } = props;
+  const { item, index, t, onPlanLesson, onOpenLessonPlan, presentations, onManagePresentations, onRemovePresentation } = props;
   return (
     <TableRow>
       <RowContent
@@ -259,8 +311,9 @@ const StaticCurriculumRow = (props: RowProps) => {
         t={t}
         onPlanLesson={onPlanLesson}
         onOpenLessonPlan={onOpenLessonPlan}
-        onQuickAttachResource={onQuickAttachResource}
-        quickAttachBusyId={quickAttachBusyId}
+        presentations={presentations}
+        onManagePresentations={onManagePresentations}
+        onRemovePresentation={onRemovePresentation}
         dragHandle={{ attributes: {}, listeners: {}, disabled: true }}
       />
     </TableRow>
@@ -271,18 +324,43 @@ export function CurriculumEditor({
   items,
   loading = false,
   reordering = false,
-  quickAttachBusyId = null,
   onPlanLesson,
   onOpenLessonPlan,
-  onQuickAttachResource,
   onReorder,
 }: CurriculumEditorProps) {
   const { t } = useLanguage();
   const { orderedItems, setOrderedItems } = useSortedItems(items);
+  const [presentationsByItem, setPresentationsByItem] = useState<Record<string, string[]>>(() => {
+    const initial: Record<string, string[]> = {};
+    for (const item of items) {
+      initial[item.id] = Array.isArray(item.presentation_links) ? [...item.presentation_links] : [];
+    }
+    return initial;
+  });
+  const [presentationDialog, setPresentationDialog] = useState<{
+    open: boolean;
+    item: DashboardCurriculumItem | null;
+    value: string;
+    error: string;
+  }>({ open: false, item: null, value: "", error: "" });
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
+
+  useEffect(() => {
+    setPresentationsByItem(prev => {
+      const next: Record<string, string[]> = {};
+      for (const item of items) {
+        if (prev[item.id]) {
+          next[item.id] = prev[item.id];
+        } else {
+          next[item.id] = Array.isArray(item.presentation_links) ? [...item.presentation_links] : [];
+        }
+      }
+      return next;
+    });
+  }, [items]);
 
   const reorderEnabled = useMemo(
     () => Boolean(onReorder) && !loading && orderedItems.length > 1,
@@ -310,6 +388,55 @@ export function CurriculumEditor({
     setOrderedItems(next);
     onReorder?.(next.map(item => item.id));
   };
+
+  const handleManagePresentations = (item: DashboardCurriculumItem) => {
+    if (item.isExample) {
+      return;
+    }
+    setPresentationDialog({ open: true, item, value: "", error: "" });
+  };
+
+  const handleClosePresentationDialog = () => {
+    setPresentationDialog({ open: false, item: null, value: "", error: "" });
+  };
+
+  const handleSavePresentation = () => {
+    if (!presentationDialog.item) {
+      return;
+    }
+
+    const value = presentationDialog.value.trim();
+    if (!value) {
+      setPresentationDialog(prev => ({ ...prev, error: t.dashboard.curriculumView.presentations.required }));
+      return;
+    }
+
+    setPresentationsByItem(prev => {
+      const next = { ...prev };
+      const current = next[presentationDialog.item!.id] ? [...next[presentationDialog.item!.id]] : [];
+      if (!current.includes(value)) {
+        current.push(value);
+      }
+      next[presentationDialog.item!.id] = current;
+      return next;
+    });
+    setPresentationDialog(prev => ({ ...prev, value: "", error: "" }));
+  };
+
+  const handleRemovePresentation = (itemId: string, index: number) => {
+    setPresentationsByItem(prev => {
+      const current = prev[itemId] ?? [];
+      if (!current.length) {
+        return prev;
+      }
+      const nextList = current.filter((_, idx) => idx !== index);
+      return { ...prev, [itemId]: nextList };
+    });
+  };
+
+  const activePresentations = presentationDialog.item
+    ? presentationsByItem[presentationDialog.item.id] ?? []
+    : [];
 
   return (
     <div className="rounded-lg border">
@@ -352,8 +479,9 @@ export function CurriculumEditor({
                     t={t}
                     onPlanLesson={onPlanLesson}
                     onOpenLessonPlan={onOpenLessonPlan}
-                    onQuickAttachResource={onQuickAttachResource}
-                    quickAttachBusyId={quickAttachBusyId ?? null}
+                    presentations={presentationsByItem[item.id] ?? []}
+                    onManagePresentations={handleManagePresentations}
+                    onRemovePresentation={handleRemovePresentation}
                     reorderEnabled={reorderEnabled}
                     reordering={reordering}
                   />
@@ -369,8 +497,9 @@ export function CurriculumEditor({
                 t={t}
                 onPlanLesson={onPlanLesson}
                 onOpenLessonPlan={onOpenLessonPlan}
-                onQuickAttachResource={onQuickAttachResource}
-                quickAttachBusyId={quickAttachBusyId ?? null}
+                presentations={presentationsByItem[item.id] ?? []}
+                onManagePresentations={handleManagePresentations}
+                onRemovePresentation={handleRemovePresentation}
                 reorderEnabled={false}
                 reordering={reordering}
               />
@@ -378,6 +507,101 @@ export function CurriculumEditor({
           )}
         </TableBody>
       </Table>
+
+      <Dialog
+        open={presentationDialog.open}
+        onOpenChange={open => {
+          if (!open) {
+            handleClosePresentationDialog();
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              {t.dashboard.curriculumView.presentations.dialogTitle.replace(
+                "{lesson}",
+                presentationDialog.item?.lesson_title ?? t.dashboard.curriculumView.presentations.untitled,
+              )}
+            </DialogTitle>
+            <DialogDescription>{t.dashboard.curriculumView.presentations.dialogDescription}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="presentation-url">{t.dashboard.curriculumView.presentations.urlLabel}</Label>
+              <Input
+                id="presentation-url"
+                placeholder="https://"
+                value={presentationDialog.value}
+                onChange={event =>
+                  setPresentationDialog(prev => ({ ...prev, value: event.target.value, error: "" }))
+                }
+              />
+              {presentationDialog.error ? (
+                <p className="text-sm text-destructive">{presentationDialog.error}</p>
+              ) : null}
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">
+                {t.dashboard.curriculumView.presentations.listTitle}
+              </p>
+              {activePresentations.length > 0 ? (
+                <ul className="space-y-2">
+                  {activePresentations.map((url, index) => (
+                    <li
+                      key={`${presentationDialog.item?.id ?? "item"}-presentation-${index}`}
+                      className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+                    >
+                      <span className="max-w-[16rem] truncate" title={url}>
+                        {url}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          type="button"
+                          onClick={() => window.open(url, "_blank", "noopener")}
+                          aria-label={t.dashboard.curriculumView.presentations.open}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          type="button"
+                          onClick={() =>
+                            presentationDialog.item
+                              ? handleRemovePresentation(presentationDialog.item.id, index)
+                              : undefined
+                          }
+                          aria-label={t.dashboard.curriculumView.presentations.removeLabel.replace(
+                            "{index}",
+                            String(index + 1),
+                          )}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {t.dashboard.curriculumView.presentations.empty}
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={handleClosePresentationDialog}>
+              {t.common.cancel}
+            </Button>
+            <Button onClick={handleSavePresentation}>{t.dashboard.curriculumView.presentations.save}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

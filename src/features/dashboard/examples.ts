@@ -24,6 +24,7 @@ export type DashboardCurriculumItem = CurriculumItem & {
   isExample?: boolean;
   lesson_plan_id?: string | null;
   resource_shortcut_ids?: string[];
+  presentation_links?: string[];
 };
 
 export const DASHBOARD_EXAMPLE_CURRICULUM: DashboardCurriculumSummary = {
@@ -51,6 +52,7 @@ export const DASHBOARD_EXAMPLE_CURRICULUM_ITEMS: DashboardCurriculumItem[] = [
     isExample: true,
     lesson_plan_id: null,
     resource_shortcut_ids: [],
+    presentation_links: [],
   },
   {
     id: "example-curriculum-item-2",
@@ -64,6 +66,7 @@ export const DASHBOARD_EXAMPLE_CURRICULUM_ITEMS: DashboardCurriculumItem[] = [
     isExample: true,
     lesson_plan_id: null,
     resource_shortcut_ids: [],
+    presentation_links: [],
   },
   {
     id: "example-curriculum-item-3",
@@ -77,5 +80,6 @@ export const DASHBOARD_EXAMPLE_CURRICULUM_ITEMS: DashboardCurriculumItem[] = [
     isExample: true,
     lesson_plan_id: null,
     resource_shortcut_ids: [],
+    presentation_links: [],
   },
 ];

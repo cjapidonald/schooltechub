@@ -167,6 +167,7 @@ export async function createCurriculum(input: {
       ...item,
       lesson_plan_id: null,
       resource_shortcut_ids: [],
+      presentation_links: [],
     })),
   };
 }
@@ -249,6 +250,7 @@ export async function fetchCurriculumItems(curriculumId: string): Promise<Dashbo
       seq_index: normalizedSeqIndex,
       lesson_plan_id: extractLessonPlanId(lesson_plans ?? null),
       resource_shortcut_ids: extractResourceShortcutIds(resource_shortcuts),
+      presentation_links: [],
     } satisfies DashboardCurriculumItem;
   });
 }
