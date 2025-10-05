@@ -4,15 +4,74 @@ const MouseGlowEffect = () => {
   const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (glowRef.current) {
-        glowRef.current.style.left = `${e.clientX}px`;
-        glowRef.current.style.top = `${e.clientY}px`;
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    let isListening = false;
+    let lastMouseEvent: MouseEvent | null = null;
+    let frameRequested = false;
+    let animationFrameId: number | null = null;
+
+    const updateGlowPosition = () => {
+      frameRequested = false;
+      animationFrameId = null;
+      if (!lastMouseEvent || !glowRef.current) {
+        return;
+      }
+
+      const { clientX, clientY } = lastMouseEvent;
+      glowRef.current.style.left = `${clientX}px`;
+      glowRef.current.style.top = `${clientY}px`;
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      lastMouseEvent = event;
+      if (frameRequested) {
+        return;
+      }
+
+      frameRequested = true;
+      animationFrameId = window.requestAnimationFrame(updateGlowPosition);
+    };
+
+    const enableEffect = () => {
+      if (!isListening) {
+        window.addEventListener("mousemove", handleMouseMove);
+        isListening = true;
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    const disableEffect = () => {
+      if (isListening) {
+        window.removeEventListener("mousemove", handleMouseMove);
+        isListening = false;
+      }
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        frameRequested = false;
+      }
+      lastMouseEvent = null;
+    };
+
+    const handlePreferenceChange = () => {
+      if (mediaQuery.matches) {
+        disableEffect();
+      } else {
+        enableEffect();
+      }
+    };
+
+    handlePreferenceChange();
+    mediaQuery.addEventListener("change", handlePreferenceChange);
+
+    return () => {
+      disableEffect();
+      mediaQuery.removeEventListener("change", handlePreferenceChange);
+    };
   }, []);
 
   return (
