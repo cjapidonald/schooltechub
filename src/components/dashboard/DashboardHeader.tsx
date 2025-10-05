@@ -42,7 +42,7 @@ export function DashboardHeader({
     ?.toUpperCase() || "T";
 
   return (
-    <header className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 px-8 py-10 text-white shadow-[0_25px_80px_-20px_rgba(15,23,42,0.75)] backdrop-blur-2xl">
+    <header className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 px-6 py-6 text-white shadow-[0_25px_80px_-20px_rgba(15,23,42,0.75)] backdrop-blur-2xl">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-70" />
       <div className="absolute inset-y-0 right-[-15%] hidden w-[45%] rounded-full bg-gradient-to-br from-cyan-400/30 via-transparent to-transparent blur-3xl lg:block" />
       <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
