@@ -721,10 +721,6 @@ const Blog = () => {
 
           <div className="relative z-10 grid gap-10 md:grid-cols-[1.6fr,1fr] md:items-center">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
-                <Sparkles className="h-4 w-4" />
-                Fresh insights for modern classrooms
-              </div>
               <div className="space-y-4">
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{t.blog.title}</h1>
                 <p className="text-lg text-white/70 md:max-w-2xl">{t.blog.subtitle}</p>
