@@ -98,8 +98,6 @@ const schoolSolutions: Feature[] = [
   },
 ];
 
-const featureShowcase = [...workflowTools, ...schoolSolutions];
-
 const compactCardBaseClass =
   "group relative overflow-hidden rounded-[1.5rem] border border-white/15 bg-[hsla(222,47%,14%,0.68)] p-5 shadow-[0_22px_48px_-28px_rgba(10,18,55,0.65)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_30px_72px_-30px_rgba(35,78,182,0.6)] backdrop-blur-xl";
 
@@ -411,8 +409,7 @@ const Index = () => {
             </Reveal>
           </div>
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {featureShowcase.map(({ title, description, icon: Icon }, index) => {
-              const isWorkflowTool = index < workflowTools.length;
+            {schoolSolutions.map(({ title, description, icon: Icon }, index) => {
               const gradientClass = compactCardGradients[index % compactCardGradients.length];
 
               return (
@@ -432,14 +429,7 @@ const Index = () => {
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3
-                          className={cn(
-                            "text-xl font-semibold",
-                            isWorkflowTool ? "text-primary" : "text-secondary",
-                          )}
-                        >
-                          {title}
-                        </h3>
+                        <h3 className="text-xl font-semibold text-secondary">{title}</h3>
                         <p className="mt-2 text-sm text-white/80">{description}</p>
                       </div>
                     </div>
