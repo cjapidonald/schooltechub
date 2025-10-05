@@ -31,6 +31,8 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 import heroImage from "@/assets/futuristic-classroom-hero.jpg";
 
+const TARGET_COUNTERS = { lessons: 12000, resources: 4500, satisfaction: 97 } as const;
+
 type HomeLandingProps = {
   embedded?: boolean;
   canonicalUrl?: string;
@@ -49,24 +51,26 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
           if (entry.isIntersecting && !hasAnimated) {
             setHasAnimated(true);
             const duration = 2000;
-            const steps = 60;
-            const interval = duration / steps;
-            let currentStep = 0;
+            const start = performance.now();
 
-            const timer = setInterval(() => {
-              currentStep++;
-              const progress = currentStep / steps;
+            const animateCounters = (currentTime: number) => {
+              const elapsed = currentTime - start;
+              const progress = Math.min(elapsed / duration, 1);
 
               setCounters({
-                lessons: Math.floor(12000 * progress),
-                resources: Math.floor(4500 * progress),
-                satisfaction: Math.floor(97 * progress),
+                lessons: Math.floor(TARGET_COUNTERS.lessons * progress),
+                resources: Math.floor(TARGET_COUNTERS.resources * progress),
+                satisfaction: Math.floor(TARGET_COUNTERS.satisfaction * progress),
               });
 
-              if (currentStep >= steps) {
-                clearInterval(timer);
+              if (progress < 1) {
+                requestAnimationFrame(animateCounters);
+              } else {
+                setCounters({ ...TARGET_COUNTERS });
               }
-            }, interval);
+            };
+
+            requestAnimationFrame(animateCounters);
           }
         });
       },
