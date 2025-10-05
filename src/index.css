@@ -190,6 +190,23 @@ All colors MUST be HSL.
     opacity: 0.75;
   }
 
+  .convex-panel-sheen--compact {
+    background:
+      radial-gradient(circle at 24% 20%, hsla(0 0% 100% / 0.18), transparent 58%),
+      radial-gradient(circle at 80% 75%, hsla(222 47% 22% / 0.45), transparent 70%),
+      linear-gradient(150deg, hsla(0 0% 100% / 0.08), hsla(222 47% 16% / 0.88));
+    box-shadow:
+      inset 10px 10px 26px hsla(222 67% 6% / 0.6),
+      inset -10px -10px 26px hsla(0 0% 100% / 0.08);
+    opacity: 0.88;
+  }
+
+  .convex-panel-sheen--compact::after {
+    inset: clamp(0.55rem, 1.8vw, 1.05rem);
+    border: 1px solid hsla(0 0% 100% / 0.08);
+    opacity: 0.8;
+  }
+
   .bolt-fastener {
     position: absolute;
     display: inline-flex;
