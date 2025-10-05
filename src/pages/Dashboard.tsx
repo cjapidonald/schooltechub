@@ -405,15 +405,8 @@ export default function DashboardPage() {
   });
 
   const handleQuickAction = (action: DashboardQuickAction) => {
-    switch (action) {
-      case "ask-question":
-        navigate("/forum/new");
-        return;
-      case "post-blog":
-        navigate("/blog/new");
-        return;
-      default:
-        return;
+    if (action === "ask-question") {
+      navigate("/forum/new");
     }
   };
 
