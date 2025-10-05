@@ -330,6 +330,35 @@ const Index = () => {
                 </Card>
               </Reveal>
             </div>
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {workflowTools.map(({ title, description, icon: Icon }, index) => (
+                <Reveal key={title} delay={index * 120}>
+                  <Card
+                    className={cn(
+                      "h-full",
+                      compactCardBaseClass,
+                      compactCardGradients[index % compactCardGradients.length],
+                    )}
+                  >
+                    <span className={cn(convexOverlayClass, "convex-panel-sheen--compact")} aria-hidden />
+                    <div className="relative z-10 flex h-full flex-col gap-4 text-left">
+                      <div
+                        className={cn(
+                          "flex h-10 w-10 items-center justify-center rounded-xl",
+                          iconColorClasses[index % iconColorClasses.length],
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-semibold text-primary">{title}</h3>
+                        <p className="text-sm text-white/70">{description}</p>
+                      </div>
+                    </div>
+                  </Card>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
       </section>
