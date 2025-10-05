@@ -172,7 +172,7 @@ const Navigation = () => {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    onClick={() => navigate(getLocalizedNavPath("/account"))}
+                    onClick={() => navigate(getLocalizedNavPath("/my-profile"))}
                   >
                     <IdCard className="mr-2 h-4 w-4" />
                     {t.nav.my_profile}
@@ -258,7 +258,7 @@ const Navigation = () => {
                   <div className="border-t pt-4 space-y-3">
                     <p className="px-2 text-sm text-muted-foreground">{user.email}</p>
                     <Link
-                      to={getLocalizedNavPath("/account")}
+                      to={getLocalizedNavPath("/my-profile")}
                       onClick={() => setIsOpen(false)}
                     >
                       <Button className="w-full" variant="secondary">

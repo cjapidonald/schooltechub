@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Loader2, Mail, Phone, School, User as UserIcon } from "lucide-react";
+import { BookOpen, IdCard, Loader2, Mail, Phone, School, User as UserIcon } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +27,7 @@ const Profile = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user, loading } = useOptionalUser();
-  const { fullName, schoolName } = useMyProfile();
+  const { fullName, schoolName, honorific, firstName: profileFirstName, lastName: profileLastName } = useMyProfile();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isSendingReset, setIsSendingReset] = useState(false);
 
@@ -80,21 +80,38 @@ const Profile = () => {
   }, [user]);
 
   const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
-  const firstName = extractMetadataValue(metadata, "first_name");
-  const lastName = extractMetadataValue(metadata, "last_name");
+  const metadataFirstName = extractMetadataValue(metadata, "first_name");
+  const metadataLastName = extractMetadataValue(metadata, "last_name");
   const subject = extractMetadataValue(metadata, "subject");
   const phoneNumber = extractMetadataValue(metadata, "phone");
+  const firstName = profileFirstName ?? metadataFirstName;
+  const lastName = profileLastName ?? metadataLastName;
 
   const fallbackValue = t.profilePage.fallback.notProvided;
   const displayFullName = useMemo(() => {
+    const honorificPart = honorific?.trim();
+    const combinedParts = [honorificPart, firstName?.trim(), lastName?.trim()]
+      .filter((part): part is string => Boolean(part && part.length > 0))
+      .join(" ");
+
+    if (combinedParts.length > 0) {
+      return combinedParts;
+    }
+
     if (fullName && fullName.trim().length > 0) {
       return fullName.trim();
     }
-    if (firstName || lastName) {
-      return [firstName, lastName].filter(Boolean).join(" ");
+
+    const metadataParts = [metadataFirstName, metadataLastName]
+      .filter((part): part is string => Boolean(part && part.length > 0))
+      .join(" ");
+
+    if (metadataParts.length > 0) {
+      return metadataParts;
     }
+
     return fallbackValue;
-  }, [fallbackValue, firstName, fullName, lastName]);
+  }, [fallbackValue, firstName, fullName, honorific, lastName, metadataFirstName, metadataLastName]);
 
   const avatarFallback = useMemo(() => {
     const source = displayFullName !== fallbackValue ? displayFullName : user?.email ?? "";
@@ -176,6 +193,11 @@ const Profile = () => {
       label: t.profilePage.info.email,
       value: user.email ?? fallbackValue,
       icon: <Mail className="h-4 w-4" />,
+    },
+    {
+      label: t.profilePage.info.salutation,
+      value: honorific ?? fallbackValue,
+      icon: <IdCard className="h-4 w-4" />,
     },
     {
       label: t.profilePage.info.firstName,

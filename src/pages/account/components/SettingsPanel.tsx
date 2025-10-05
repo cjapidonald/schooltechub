@@ -32,6 +32,7 @@ import {
   isHttpUrl,
 } from "@/lib/avatar";
 import { createFileIdentifier } from "@/lib/files";
+import type { Salutation } from "@/types/supabase-tables";
 
 type ThemePreference = "system" | "light" | "dark";
 type SettingsPanelProps = {
@@ -51,15 +52,31 @@ const getMetadataString = (metadata: Record<string, unknown> | undefined, key: s
   return trimmed.length > 0 ? trimmed : "";
 };
 
+const SALUTATION_OPTIONS: Salutation[] = ["Mr", "Ms", "Mx"];
+type SalutationOption = Salutation | "none";
+
+const isSalutationValue = (value: unknown): value is Salutation =>
+  typeof value === "string" && (SALUTATION_OPTIONS as readonly string[]).includes(value);
+
+const getMetadataSalutation = (metadata: Record<string, unknown> | undefined): SalutationOption => {
+  if (!metadata) {
+    return "none";
+  }
+
+  const rawValue = metadata.salutation;
+  return isSalutationValue(rawValue) ? (rawValue as Salutation) : "none";
+};
+
 export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const metadata = user.user_metadata as Record<string, unknown> | undefined;
-  const [firstName, setFirstName] = useState<string>(getMetadataString(metadata, "first_name"));
-  const [lastName, setLastName] = useState<string>(getMetadataString(metadata, "last_name"));
-  const [subject, setSubject] = useState<string>(getMetadataString(metadata, "subject"));
-  const [phoneNumber, setPhoneNumber] = useState<string>(getMetadataString(metadata, "phone"));
+  const metadataFirstNameValue = getMetadataString(metadata, "first_name");
+  const metadataLastNameValue = getMetadataString(metadata, "last_name");
+  const metadataSubjectValue = getMetadataString(metadata, "subject");
+  const metadataPhoneValue = getMetadataString(metadata, "phone");
+  const metadataSalutationValue = getMetadataSalutation(metadata);
   const initialSchoolName =
     typeof metadata?.school_name === "string" && metadata.school_name.trim().length > 0
       ? metadata.school_name.trim()
@@ -71,9 +88,18 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
   const {
     schoolName: profileSchoolName,
     schoolLogoUrl: profileSchoolLogoUrl,
+    honorific: profileHonorific,
+    firstName: profileFirstName,
+    lastName: profileLastName,
     refresh: refreshProfile,
     isLoading: isProfileLoading,
   } = useMyProfile();
+  const initialSalutation: SalutationOption = profileHonorific ?? metadataSalutationValue;
+  const [salutation, setSalutation] = useState<SalutationOption>(initialSalutation);
+  const [firstName, setFirstName] = useState<string>(profileFirstName ?? metadataFirstNameValue);
+  const [lastName, setLastName] = useState<string>(profileLastName ?? metadataLastNameValue);
+  const [subject, setSubject] = useState<string>(metadataSubjectValue);
+  const [phoneNumber, setPhoneNumber] = useState<string>(metadataPhoneValue);
   const { reference: initialAvatarReference, url: initialAvatarUrl } =
     resolveAvatarReference(metadata ?? null);
   const [schoolName, setSchoolName] = useState<string>(initialSchoolName);
@@ -119,6 +145,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     setLastName(getMetadataString(metadata, "last_name"));
     setSubject(getMetadataString(metadata, "subject"));
     setPhoneNumber(getMetadataString(metadata, "phone"));
+    setSalutation(getMetadataSalutation(metadata));
 
     const storedTimezone = metadata?.timezone;
     const storedTheme = metadata?.theme;
@@ -159,7 +186,20 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
     if (schoolLogoInputRef.current) {
       schoolLogoInputRef.current.value = "";
     }
-  }, [isProfileLoading, profileSchoolName, profileSchoolLogoUrl]);
+    setSalutation(profileHonorific ?? metadataSalutationValue);
+    setFirstName(profileFirstName ?? metadataFirstNameValue);
+    setLastName(profileLastName ?? metadataLastNameValue);
+  }, [
+    isProfileLoading,
+    metadataFirstNameValue,
+    metadataLastNameValue,
+    metadataSalutationValue,
+    profileFirstName,
+    profileHonorific,
+    profileLastName,
+    profileSchoolLogoUrl,
+    profileSchoolName,
+  ]);
 
   useEffect(() => {
     if (!currentAvatarReference || isHttpUrl(currentAvatarReference)) {
@@ -359,12 +399,14 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
       const normalizedSubject = trimmedSubject.length > 0 ? trimmedSubject : null;
       const normalizedPhone = trimmedPhone.length > 0 ? trimmedPhone : null;
 
-      const fullNameParts = [normalizedFirstName, normalizedLastName].filter(Boolean) as string[];
+      const normalizedSalutation = salutation === "none" ? null : salutation;
+      const fullNameParts = [normalizedSalutation, normalizedFirstName, normalizedLastName].filter(Boolean) as string[];
       const combinedFullName = fullNameParts.join(" ").trim();
       const normalizedFullName = combinedFullName.length > 0 ? combinedFullName : null;
 
       const { error: authError } = await supabase.auth.updateUser({
         data: {
+          salutation: normalizedSalutation,
           first_name: normalizedFirstName,
           last_name: normalizedLastName,
           full_name: normalizedFullName,
@@ -379,7 +421,16 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
 
       const { error: profileError } = await supabase
         .from("profiles")
-        .upsert({ id: user.id, full_name: normalizedFullName }, { onConflict: "id" });
+        .upsert(
+          {
+            id: user.id,
+            full_name: normalizedFullName,
+            salutation: normalizedSalutation,
+            first_name: normalizedFirstName,
+            last_name: normalizedLastName,
+          },
+          { onConflict: "id" },
+        );
 
       if (profileError) {
         throw profileError;
@@ -387,6 +438,7 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
 
       setFirstName(normalizedFirstName ?? "");
       setLastName(normalizedLastName ?? "");
+      setSalutation(normalizedSalutation ?? "none");
       setSubject(normalizedSubject ?? "");
       setPhoneNumber(normalizedPhone ?? "");
 
@@ -626,6 +678,31 @@ export const SettingsPanel = ({ user }: SettingsPanelProps) => {
             <CardDescription>{t.account.personal.description}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="salutation">{t.account.personal.salutationLabel}</Label>
+                <Select
+                  value={salutation}
+                  onValueChange={value => setSalutation(value as SalutationOption)}
+                >
+                  <SelectTrigger id="salutation" disabled={isSavingPersonalInfo}>
+                    <SelectValue placeholder={t.account.personal.salutationPlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t.account.personal.salutationNone}</SelectItem>
+                    {SALUTATION_OPTIONS.map(option => (
+                      <SelectItem key={option} value={option}>
+                        {t.account.personal.salutationOptions[option]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">{t.account.personal.emailLabel}</Label>
+                <Input id="email" value={user.email ?? ""} disabled />
+              </div>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="first-name">{t.account.personal.firstNameLabel}</Label>

@@ -27,6 +27,7 @@ export const en = {
     info: {
       title: "Teacher Information",
       description: "Review the personal details connected to your SchoolTech Hub account.",
+      salutation: "Title",
       firstName: "First name",
       lastName: "Last name",
       school: "School",
@@ -1712,6 +1713,15 @@ export const en = {
     personal: {
       title: "Personal information",
       description: "Update the details that appear on your profile.",
+      salutationLabel: "Title",
+      salutationPlaceholder: "Select a title",
+      salutationNone: "No title",
+      salutationOptions: {
+        Mr: "Mr",
+        Ms: "Ms",
+        Mx: "Mx",
+      },
+      emailLabel: "Email address",
       firstNameLabel: "First name",
       firstNamePlaceholder: "e.g. Jordan",
       lastNameLabel: "Last name",

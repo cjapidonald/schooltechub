@@ -79,7 +79,8 @@ export const LocalizedRoutes = () => {
       <Route path="/dashboard" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
       <Route path="/student" element={<RouteWrapper><StudentPage /></RouteWrapper>} />
       <Route path="/dashboard/students/:id" element={<RouteWrapper><StudentDashboardPage /></RouteWrapper>} />
-      <Route path="/profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
+      <Route path="/my-profile" element={<RouteWrapper><Profile /></RouteWrapper>} />
+      <Route path="/profile" element={<Navigate to="/my-profile" replace />} />
       <Route path="/account/classes/:id" element={<RouteWrapper><ClassDashboard /></RouteWrapper>} />
       <Route path="/account/resources" element={<RouteWrapper><AccountResources /></RouteWrapper>} />
       <Route path="/account/resources/new" element={<RouteWrapper><AccountResourceNew /></RouteWrapper>} />
