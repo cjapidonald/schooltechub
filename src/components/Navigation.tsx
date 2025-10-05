@@ -84,7 +84,9 @@ const Navigation = () => {
             <div className="h-10 w-10 rounded-lg border border-white bg-muted flex items-center justify-center">
               <BookOpen className="h-6 w-6 text-primary" />
             </div>
-            <span className="text-xl font-bold">SchoolTech</span>
+            <span className="text-xl font-bold">
+              <span className="text-red-500">School</span>Tech
+            </span>
           </div>
         </Link>
 
