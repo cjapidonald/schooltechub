@@ -49,6 +49,7 @@ const Navigation = () => {
     const items = [
       { name: t.nav.home, path: "/" },
       { name: t.nav.dashboard, path: "/dashboard" },
+      { name: t.nav.student, path: "/student" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.events, path: "/events" },
       { name: t.nav.services, path: "/services" },
@@ -62,6 +63,7 @@ const Navigation = () => {
     t.nav.blog,
     t.nav.events,
     t.nav.home,
+    t.nav.student,
     t.nav.services,
   ]);
   

@@ -1,6 +1,7 @@
 export const en = {
   nav: {
     dashboard: "Teacher",
+    student: "Student",
     home: "Home",
     about: "About",
     services: "Services",
