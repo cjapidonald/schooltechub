@@ -13,9 +13,10 @@ import { StructuredData } from "@/components/StructuredData";
 import { ArrowLeft, Calendar, User, Clock, Tag, MessageCircle, ThumbsUp, Flag, Bookmark, BookmarkCheck } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { SAMPLE_BLOG_POSTS } from "@/data/sampleBlogPosts";
 
 const extractTags = (tags: string[] | string | null | undefined) => {
   if (Array.isArray(tags)) {
@@ -83,7 +84,7 @@ export default function BlogPost() {
   }, []);
 
   // Fetch blog post
-  const { data: post, isLoading } = useQuery<BlogPostRow | null>({
+  const { data: fetchedPost, isLoading } = useQuery<BlogPostRow | null>({
     queryKey: ["blog-post", slug, language],
     enabled: !!slug,
     queryFn: async () => {
@@ -111,11 +112,22 @@ export default function BlogPost() {
     }
   });
 
+  const samplePost = useMemo(() => {
+    if (!slug) {
+      return null;
+    }
+
+    return SAMPLE_BLOG_POSTS.find(item => item.slug === slug) ?? null;
+  }, [slug]);
+
+  const post = (fetchedPost ?? samplePost) as (BlogPostRow & { content?: unknown }) | null;
+  const isLoadingPost = isLoading && !samplePost;
+
   const savedPostQuery = useQuery({
-    queryKey: ["saved-post", user?.id, post?.id],
-    enabled: !!user?.id && !!post?.id,
+    queryKey: ["saved-post", user?.id, fetchedPost?.id],
+    enabled: !!user?.id && !!fetchedPost?.id,
     queryFn: async () => {
-      if (!user?.id || !post?.id) {
+      if (!user?.id || !fetchedPost?.id) {
         return null;
       }
 
@@ -123,7 +135,7 @@ export default function BlogPost() {
         .from("saved_posts")
         .select("*")
         .eq("user_id", user.id)
-        .eq("post_id", post.id)
+        .eq("post_id", fetchedPost.id)
         .maybeSingle();
 
       if (error) {
@@ -136,7 +148,7 @@ export default function BlogPost() {
 
   const toggleSaveMutation = useMutation({
     mutationFn: async (action: "save" | "remove") => {
-      if (!user?.id || !post?.id) {
+      if (!user?.id || !fetchedPost?.id) {
         throw new Error("Missing user or post");
       }
 
@@ -144,7 +156,7 @@ export default function BlogPost() {
         const { error } = await supabase
           .from("saved_posts")
           .upsert(
-            { user_id: user.id, post_id: post.id },
+            { user_id: user.id, post_id: fetchedPost.id },
             { onConflict: "user_id,post_id" }
           );
 
@@ -159,7 +171,7 @@ export default function BlogPost() {
         .from("saved_posts")
         .delete()
         .eq("user_id", user.id)
-        .eq("post_id", post.id);
+        .eq("post_id", fetchedPost.id);
 
       if (error) {
         throw error;
@@ -168,7 +180,7 @@ export default function BlogPost() {
       return action;
     },
     onSuccess: (action) => {
-      queryClient.invalidateQueries({ queryKey: ["saved-post", user?.id, post?.id] });
+      queryClient.invalidateQueries({ queryKey: ["saved-post", user?.id, fetchedPost?.id] });
       queryClient.invalidateQueries({ queryKey: ["saved-posts", user?.id] });
       toast({
         title: t.blogPost.toast.successTitle,
@@ -195,7 +207,7 @@ export default function BlogPost() {
       return;
     }
 
-    if (!post?.id || savedPostQuery.isLoading || toggleSaveMutation.isPending) {
+    if (!fetchedPost?.id || savedPostQuery.isLoading || toggleSaveMutation.isPending) {
       return;
     }
 
@@ -204,16 +216,20 @@ export default function BlogPost() {
   };
 
   const isPostSaved = !!savedPostQuery.data;
+  const canInteractWithPost = !!fetchedPost?.id;
 
   // Fetch comments
   useEffect(() => {
-    if (!post?.id) return;
+    if (!fetchedPost?.id) {
+      setComments([]);
+      return;
+    }
 
     const fetchComments = async () => {
       const { data, error } = await supabase
         .from("comments")
         .select("*")
-        .eq("blog_id", post.id)
+        .eq("blog_id", fetchedPost.id)
         .order("created_at", { ascending: false });
 
       if (!error && data) {
@@ -237,12 +253,12 @@ export default function BlogPost() {
 
     // Subscribe to real-time updates
     const subscription = supabase
-      .channel(`comments-${post.id}`)
-      .on("postgres_changes", { 
-        event: "*", 
-        schema: "public", 
+      .channel(`comments-${fetchedPost.id}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
         table: "comments",
-        filter: `content_id=eq.${post.id}`
+        filter: `content_id=eq.${fetchedPost.id}`
       }, () => {
         fetchComments();
       })
@@ -251,7 +267,7 @@ export default function BlogPost() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [post?.id]);
+  }, [fetchedPost?.id]);
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,13 +282,13 @@ export default function BlogPost() {
       return;
     }
 
-    if (!comment.trim()) return;
+    if (!comment.trim() || !fetchedPost?.id) return;
 
     const { error } = await supabase
       .from("comments")
       .insert({
         content: comment,
-        blog_id: post?.id,
+        blog_id: fetchedPost.id,
         user_id: user.id,
         parent_id: null
       });
@@ -303,13 +319,13 @@ export default function BlogPost() {
       return;
     }
 
-    if (!replyText.trim()) return;
+    if (!replyText.trim() || !fetchedPost?.id) return;
 
     const { error } = await supabase
       .from("comments")
       .insert({
         content: replyText,
-        blog_id: post?.id,
+        blog_id: fetchedPost.id,
         user_id: user.id,
         parent_id: parentId
       });
@@ -330,7 +346,7 @@ export default function BlogPost() {
     }
   };
 
-  if (isLoading) {
+  if (isLoadingPost) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
@@ -570,7 +586,7 @@ export default function BlogPost() {
             <Button
               variant={isPostSaved ? "secondary" : "outline"}
               onClick={handleToggleSave}
-              disabled={savedPostQuery.isLoading || toggleSaveMutation.isPending}
+              disabled={!canInteractWithPost || savedPostQuery.isLoading || toggleSaveMutation.isPending}
               aria-pressed={isPostSaved}
               className="gap-2"
             >
@@ -601,45 +617,53 @@ export default function BlogPost() {
               {t.blogPost.comments} ({comments.filter(c => !c.parent_id).length})
             </h2>
 
-            {/* Comment Form */}
-            {user ? (
-              <Card className="p-4 mb-6">
-                <form onSubmit={handleCommentSubmit}>
-                  <Textarea
-                    placeholder={t.blogPost.commentPlaceholder}
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    className="min-h-[100px] mb-4"
-                  />
-                  <Button type="submit">{t.blogPost.postComment}</Button>
-                </form>
-              </Card>
+            {canInteractWithPost ? (
+              <>
+                {user ? (
+                  <Card className="p-4 mb-6">
+                    <form onSubmit={handleCommentSubmit}>
+                      <Textarea
+                        placeholder={t.blogPost.commentPlaceholder}
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="min-h-[100px] mb-4"
+                      />
+                      <Button type="submit">{t.blogPost.postComment}</Button>
+                    </form>
+                  </Card>
+                ) : (
+                  <Card className="p-4 mb-6 text-center">
+                    <p className="text-white mb-4">
+                      {t.blogPost.loginPrompt}
+                    </p>
+                    <Button onClick={() => navigate(getLocalizedPath("/auth", language))}>
+                      {t.blogPost.loginCta}
+                    </Button>
+                  </Card>
+                )}
+
+                <div className="space-y-4">
+                  {comments
+                    .filter(c => !c.parent_id)
+                    .map(comment => renderComment(comment))}
+
+                  {comments.length === 0 && (
+                    <Card className="p-8 text-center">
+                      <MessageCircle className="h-12 w-12 mx-auto mb-4 text-white" />
+                      <p className="text-white">
+                        {t.blogPost.emptyState}
+                      </p>
+                    </Card>
+                  )}
+                </div>
+              </>
             ) : (
-              <Card className="p-4 mb-6 text-center">
-                <p className="text-white mb-4">
-                  {t.blogPost.loginPrompt}
+              <Card className="p-6 text-center">
+                <p className="text-white">
+                  Preview articles are available to read, but saving and comments are reserved for published posts.
                 </p>
-                <Button onClick={() => navigate(getLocalizedPath("/auth", language))}>
-                  {t.blogPost.loginCta}
-                </Button>
               </Card>
             )}
-
-            {/* Comments List */}
-            <div className="space-y-4">
-              {comments
-                .filter(c => !c.parent_id)
-                .map(comment => renderComment(comment))}
-              
-              {comments.length === 0 && (
-                <Card className="p-8 text-center">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-white" />
-                  <p className="text-white">
-                    {t.blogPost.emptyState}
-                  </p>
-                </Card>
-              )}
-            </div>
           </section>
         </div>
       </article>
