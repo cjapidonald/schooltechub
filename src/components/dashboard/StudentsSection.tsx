@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useOptionalUser } from "@/hooks/useOptionalUser";
+import {
+  bulkAddStudents,
+  fetchStudents,
+  getStudentsQueryKey,
+  shouldUseStudentExamples,
+} from "@/features/students/api";
 import type { Class } from "../../../types/supabase-tables";
-import { useStudentsStore } from "@/stores/students";
 
 const splitNames = (input: string) =>
   input
@@ -27,13 +34,51 @@ type StudentsSectionProps = {
 export function StudentsSection({ classes, onOpenStudent }: StudentsSectionProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const students = useStudentsStore(state => state.students);
-  const addStudents = useStudentsStore(state => state.addStudents);
+  const { user } = useOptionalUser();
+  const queryClient = useQueryClient();
 
   const [filterClassId, setFilterClassId] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [namesInput, setNamesInput] = useState("");
+
+  const classIds = useMemo(() => classes.map(item => item.id), [classes]);
+  const studentsQueryKey = useMemo(
+    () => getStudentsQueryKey(user?.id, classIds),
+    [classIds, user?.id],
+  );
+
+  const studentsQuery = useQuery({
+    queryKey: studentsQueryKey,
+    queryFn: () => fetchStudents({ ownerId: user?.id, classIds }),
+    enabled: classIds.length > 0 && (Boolean(user?.id) || shouldUseStudentExamples(user?.id)),
+  });
+
+  useEffect(() => {
+    if (studentsQuery.error) {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    }
+  }, [studentsQuery.error, t.dashboard.toasts.error, toast]);
+
+  const addStudentsMutation = useMutation({
+    mutationFn: (input: { classId: string; names: string[] }) =>
+      bulkAddStudents({ ownerId: user?.id, ...input }),
+    onSuccess: (_, variables) => {
+      toast({ description: t.dashboard.students.toasts.added });
+      setNamesInput("");
+      setSelectedClassId("");
+      setDialogOpen(false);
+      if (filterClassId !== "all" && variables.classId) {
+        setFilterClassId(variables.classId);
+      }
+      void queryClient.invalidateQueries({ queryKey: studentsQueryKey });
+    },
+    onError: () => {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    },
+  });
+
+  const students = studentsQuery.data ?? [];
 
   const classOptions = useMemo(() => {
     if (classes.length === 0) {
@@ -60,14 +105,7 @@ export function StudentsSection({ classes, onOpenStudent }: StudentsSectionProps
       return;
     }
 
-    addStudents(selectedClassId, names);
-    toast({ description: t.dashboard.students.toasts.added });
-    setNamesInput("");
-    setSelectedClassId("");
-    setDialogOpen(false);
-    if (filterClassId !== "all" && selectedClassId) {
-      setFilterClassId(selectedClassId);
-    }
+    addStudentsMutation.mutate({ classId: selectedClassId, names });
   };
 
   return (
@@ -97,7 +135,11 @@ export function StudentsSection({ classes, onOpenStudent }: StudentsSectionProps
         </div>
       </CardHeader>
       <CardContent>
-        {filteredStudents.length === 0 ? (
+        {studentsQuery.isLoading ? (
+          <div className="rounded-lg border border-dashed bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+            {t.dashboard.common.loading}
+          </div>
+        ) : filteredStudents.length === 0 ? (
           <div className="rounded-lg border border-dashed bg-muted/30 p-8 text-center text-sm text-muted-foreground">
             {t.dashboard.students.empty}
           </div>
@@ -212,7 +254,10 @@ export function StudentsSection({ classes, onOpenStudent }: StudentsSectionProps
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               {t.common.cancel}
             </Button>
-            <Button onClick={handleSubmit} disabled={!selectedClassId || !namesInput.trim()}>
+            <Button
+              onClick={handleSubmit}
+              disabled={!selectedClassId || !namesInput.trim() || addStudentsMutation.isPending}
+            >
               {t.dashboard.students.dialog.submit}
             </Button>
           </DialogFooter>

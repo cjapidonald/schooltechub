@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +11,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { useOptionalUser } from "@/hooks/useOptionalUser";
+import {
+  createSkillForClass,
+  fetchClassSkills,
+  fetchStudents,
+  getSkillsQueryKey,
+  getStudentsQueryKey,
+  shouldUseStudentExamples,
+} from "@/features/students/api";
 import type { Class } from "../../../types/supabase-tables";
-import { useStudentsStore } from "@/stores/students";
 
 type SkillsSectionProps = {
   classes: Class[];
@@ -20,9 +29,8 @@ type SkillsSectionProps = {
 export function SkillsSection({ classes }: SkillsSectionProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const skills = useStudentsStore(state => state.skills);
-  const students = useStudentsStore(state => state.students);
-  const addSkill = useStudentsStore(state => state.addSkill);
+  const { user } = useOptionalUser();
+  const queryClient = useQueryClient();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [classId, setClassId] = useState<string>("");
@@ -30,18 +38,59 @@ export function SkillsSection({ classes }: SkillsSectionProps) {
   const [description, setDescription] = useState("");
 
   const classOptions = useMemo(() => classes.map(item => ({ id: item.id, title: item.title })), [classes]);
+  const classIds = useMemo(() => classes.map(item => item.id), [classes]);
+
+  const skillsQueryKey = useMemo(
+    () => getSkillsQueryKey(user?.id, classIds),
+    [classIds, user?.id],
+  );
+  const studentsQueryKey = useMemo(
+    () => getStudentsQueryKey(user?.id, classIds),
+    [classIds, user?.id],
+  );
+
+  const skillsQuery = useQuery({
+    queryKey: skillsQueryKey,
+    queryFn: () => fetchClassSkills({ ownerId: user?.id, classIds }),
+    enabled: classIds.length > 0 && (Boolean(user?.id) || shouldUseStudentExamples(user?.id)),
+  });
+
+  const studentsQuery = useQuery({
+    queryKey: studentsQueryKey,
+    queryFn: () => fetchStudents({ ownerId: user?.id, classIds }),
+    enabled: classIds.length > 0 && (Boolean(user?.id) || shouldUseStudentExamples(user?.id)),
+  });
+
+  const createSkillMutation = useMutation({
+    mutationFn: () =>
+      createSkillForClass({
+        ownerId: user?.id,
+        classId,
+        title,
+        description: description.trim() || undefined,
+      }),
+    onSuccess: () => {
+      toast({ description: t.dashboard.skills.toasts.created });
+      setDialogOpen(false);
+      setClassId("");
+      setTitle("");
+      setDescription("");
+      void queryClient.invalidateQueries({ queryKey: skillsQueryKey });
+      void queryClient.invalidateQueries({ queryKey: studentsQueryKey });
+    },
+    onError: () => {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    },
+  });
+
+  const skills = skillsQuery.data ?? [];
+  const students = studentsQuery.data ?? [];
 
   const handleSubmit = () => {
     if (!classId || !title.trim()) {
       return;
     }
-
-    addSkill({ classId, title: title.trim(), description: description.trim() || undefined });
-    toast({ description: t.dashboard.skills.toasts.created });
-    setClassId("");
-    setTitle("");
-    setDescription("");
-    setDialogOpen(false);
+    createSkillMutation.mutate();
   };
 
   return (
@@ -54,7 +103,11 @@ export function SkillsSection({ classes }: SkillsSectionProps) {
         <Button onClick={() => setDialogOpen(true)}>{t.dashboard.skills.actions.add}</Button>
       </CardHeader>
       <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {skills.length === 0 ? (
+        {skillsQuery.isLoading ? (
+          <div className="col-span-full rounded-lg border border-dashed bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+            {t.dashboard.common.loading}
+          </div>
+        ) : skills.length === 0 ? (
           <div className="col-span-full rounded-lg border border-dashed bg-muted/30 p-8 text-center text-sm text-muted-foreground">
             {t.dashboard.skills.empty}
           </div>
@@ -141,7 +194,7 @@ export function SkillsSection({ classes }: SkillsSectionProps) {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               {t.common.cancel}
             </Button>
-            <Button onClick={handleSubmit} disabled={!classId || !title.trim()}>
+            <Button onClick={handleSubmit} disabled={!classId || !title.trim() || createSkillMutation.isPending}>
               {t.dashboard.skills.dialog.submit}
             </Button>
           </DialogFooter>
