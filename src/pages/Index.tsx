@@ -208,11 +208,22 @@ const classroomTechnologyBackgrounds = {
     "https://images.unsplash.com/photo-1530229525026-1b0e9753a0c1?auto=format&fit=crop&w=2100&q=80",
 };
 
-const iconColorClasses = [
-  "border border-white/30 bg-[hsla(var(--glow-accent)/0.28)] text-white shadow-[0_0_18px_hsla(var(--glow-accent)/0.4)] backdrop-blur-sm",
-  "border border-white/30 bg-[hsla(var(--glow-secondary)/0.28)] text-white shadow-[0_0_18px_hsla(var(--glow-secondary)/0.38)] backdrop-blur-sm",
-  "border border-white/30 bg-[hsla(var(--glow-primary)/0.28)] text-white shadow-[0_0_18px_hsla(var(--glow-primary)/0.38)] backdrop-blur-sm",
-  "border border-white/30 bg-[hsla(var(--glow-primary)/0.24)] text-white shadow-[0_0_18px_hsla(var(--glow-primary)/0.32)] backdrop-blur-sm",
+const iconStyles = [
+  {
+    iconWrapper:
+      "border border-white/5 bg-[hsl(var(--glow-accent))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-accent)/0.9)]",
+    title: "text-[hsl(var(--glow-accent))]",
+  },
+  {
+    iconWrapper:
+      "border border-white/5 bg-[hsl(var(--glow-secondary))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-secondary)/0.85)]",
+    title: "text-[hsl(var(--glow-secondary))]",
+  },
+  {
+    iconWrapper:
+      "border border-white/5 bg-[hsl(var(--glow-primary))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-primary)/0.85)]",
+    title: "text-[hsl(var(--glow-primary))]",
+  },
 ];
 
 type DecorativeBackgroundImage = {
@@ -329,33 +340,37 @@ const Index = () => {
               </Reveal>
             </div>
             <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {workflowTools.map(({ title, description, icon: Icon }, index) => (
-                <Reveal key={title} delay={index * 120}>
-                  <Card
-                    className={cn(
-                      "h-full",
-                      compactCardBaseClass,
-                      compactCardGradients[index % compactCardGradients.length],
-                    )}
-                  >
-                    <span className={cn(convexOverlayClass, "convex-panel-sheen--compact")} aria-hidden />
-                    <div className="relative z-10 flex h-full flex-col gap-4 text-left">
-                      <div
-                        className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-xl",
-                          iconColorClasses[index % iconColorClasses.length],
-                        )}
-                      >
-                        <Icon className="h-5 w-5" />
+              {workflowTools.map(({ title, description, icon: Icon }, index) => {
+                const { iconWrapper, title: titleColor } = iconStyles[index % iconStyles.length];
+
+                return (
+                  <Reveal key={title} delay={index * 120}>
+                    <Card
+                      className={cn(
+                        "h-full",
+                        compactCardBaseClass,
+                        compactCardGradients[index % compactCardGradients.length],
+                      )}
+                    >
+                      <span className={cn(convexOverlayClass, "convex-panel-sheen--compact")} aria-hidden />
+                      <div className="relative z-10 flex h-full flex-col gap-4 text-left">
+                        <div
+                          className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-xl",
+                            iconWrapper,
+                          )}
+                        >
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className={cn("text-xl font-semibold", titleColor)}>{title}</h3>
+                          <p className="text-sm text-white/70">{description}</p>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold text-primary">{title}</h3>
-                        <p className="text-sm text-white/70">{description}</p>
-                      </div>
-                    </div>
-                  </Card>
-                </Reveal>
-              ))}
+                    </Card>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -412,6 +427,7 @@ const Index = () => {
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {schoolSolutions.map(({ title, description, icon: Icon }, index) => {
               const gradientClass = compactCardGradients[index % compactCardGradients.length];
+              const { iconWrapper, title: titleColor } = iconStyles[index % iconStyles.length];
 
               return (
                 <Reveal key={title} delay={index * 120}>
@@ -424,13 +440,13 @@ const Index = () => {
                       <div
                         className={cn(
                           "flex h-10 w-10 items-center justify-center rounded-xl",
-                          iconColorClasses[index % iconColorClasses.length],
+                          iconWrapper,
                         )}
                       >
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-semibold text-secondary">{title}</h3>
+                        <h3 className={cn("text-xl font-semibold", titleColor)}>{title}</h3>
                         <p className="mt-2 text-sm text-white/80">{description}</p>
                       </div>
                     </div>
