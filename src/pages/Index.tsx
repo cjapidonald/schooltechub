@@ -306,8 +306,8 @@ const Index = () => {
                 <Card
                   className={cn(
                     neonCardClass,
-                    "relative isolate rounded-[2rem] bg-gradient-to-br from-primary/30 via-background/70 to-background/85 p-8 backdrop-blur-xl shadow-[0_28px_60px_-20px_rgba(54,20,130,0.65)] transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.7)] md:p-10",
-                    "before:absolute before:inset-[1.5px] before:rounded-[1.92rem] before:bg-[linear-gradient(150deg,rgba(255,255,255,0.22),rgba(15,15,35,0.65))] before:opacity-80 before:content-[''] before:z-0",
+                    "relative isolate rounded-[2rem] bg-gradient-to-br from-primary/20 via-background/45 to-background/70 p-8 backdrop-blur-lg shadow-[0_28px_60px_-20px_rgba(54,20,130,0.65)] transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.7)] md:p-10",
+                    "before:absolute before:inset-[1.5px] before:rounded-[1.92rem] before:bg-[linear-gradient(150deg,rgba(255,255,255,0.16),rgba(15,15,35,0.45))] before:opacity-60 before:content-[''] before:z-0",
                   )}
                 >
                   <span className={convexOverlayClass} aria-hidden />
