@@ -29,9 +29,7 @@ import { useCountUp } from "@/hooks/useCountUp";
 import { useInView } from "@/hooks/useInView";
 import { cn } from "@/lib/utils";
 
-import aiCollaborationImage from "@/assets/ai-collaboration.jpg";
 import futuristicHeroImage from "@/assets/futuristic-classroom-hero.jpg";
-import holographicTeachingImage from "@/assets/holographic-teaching.jpg";
 
 type Feature = {
   title: string;
@@ -224,24 +222,6 @@ type DecorativeBackgroundImage = {
   className: string;
 };
 
-const heroBackgroundDecorations: DecorativeBackgroundImage[] = [
-  {
-    src: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
-    className:
-      "-top-16 right-[-6%] hidden h-52 w-72 rotate-3 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_32px_80px_-28px_rgba(59,20,120,0.65)] lg:block",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1200&q=80",
-    className:
-      "bottom-[-18%] left-[-10%] hidden h-64 w-80 -rotate-6 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_24px_70px_-32px_rgba(12,102,194,0.55)] md:block",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80",
-    className:
-      "top-[22%] left-[52%] hidden h-56 w-56 rotate-12 overflow-hidden rounded-[2rem] border border-white/10 shadow-[0_28px_80px_-32px_rgba(255,141,41,0.45)] xl:block",
-  },
-];
-
 const featureBackgroundDecorations: DecorativeBackgroundImage[] = [
   {
     src: "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80",
@@ -313,44 +293,12 @@ const Index = () => {
             />
           </div>
 
-          <div className="hero-floating-cluster">
-            <div className="hero-floating-card hero-floating-card--primary hidden lg:block">
-              <img
-                src={aiCollaborationImage}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
-              <div className="hero-floating-card__glow" />
-            </div>
-            <div className="hero-floating-card hero-floating-card--secondary hidden xl:block">
-              <img
-                src={holographicTeachingImage}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover"
-              />
-              <div className="hero-floating-card__glow" />
-            </div>
-          </div>
-
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsla(var(--glow-primary)/0.14),transparent_62%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background/90" />
         </div>
         <div className="container relative z-10 mx-auto px-4">
           <div className="relative grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
             <div className="pointer-events-none absolute inset-0 -z-10">
-              {heroBackgroundDecorations.map(({ src, className }) => (
-                <div key={src} className={cn("absolute bg-white/5", className)}>
-                  <img
-                    src={src}
-                    alt=""
-                    loading="lazy"
-                    className="h-full w-full object-cover opacity-70"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-background/40 via-background/65 to-background/80" />
-                </div>
-              ))}
               <div className="absolute inset-0 bg-gradient-to-br from-background/45 via-background/70 to-background/85" />
             </div>
             <div>
