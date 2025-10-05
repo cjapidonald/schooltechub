@@ -5,7 +5,6 @@ import {
   Menu,
   User,
   LogOut,
-  BookOpen,
   IdCard,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -21,8 +20,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import TeacherAuthDialog from "@/components/auth/TeacherAuthDialog";
+
+type NavItem = {
+  name: string;
+  path: string;
+  type?: "link" | "teacher-auth";
+};
+
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isTeacherAuthOpen, setIsTeacherAuthOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,10 +48,10 @@ const Navigation = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const navItems = useMemo(() => {
-    const items = [
+  const navItems: NavItem[] = useMemo(() => {
+    const items: NavItem[] = [
       { name: t.nav.home, path: "/" },
-      { name: t.nav.dashboard, path: "/teacher" },
+      { name: t.nav.dashboard, path: "/teacher", type: "teacher-auth" },
       { name: t.nav.student, path: "/student" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.events, path: "/events" },
@@ -70,7 +78,8 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <>
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
@@ -99,6 +108,27 @@ const Navigation = () => {
                 targetParams.toString().length === 0 ||
                 Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
               const isActive = matchesPath && matchesQuery;
+
+              if (item.type === "teacher-auth") {
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    onClick={() => setIsTeacherAuthOpen(true)}
+                    aria-current={isActive ? "page" : undefined}
+                    aria-haspopup="dialog"
+                    aria-expanded={isTeacherAuthOpen}
+                    aria-controls="teacher-auth-dialog"
+                    className={cn(
+                      "rounded-full px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap",
+                      "border border-transparent hover:border-white/40 hover:bg-white/20 hover:text-foreground hover:backdrop-blur-sm",
+                      "text-muted-foreground"
+                    )}
+                  >
+                    {item.name}
+                  </button>
+                );
+              }
 
               return (
                 <Link
@@ -178,6 +208,29 @@ const Navigation = () => {
                     Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
                   const isActive = matchesPath && matchesQuery;
 
+                  if (item.type === "teacher-auth") {
+                    return (
+                      <button
+                        key={item.path}
+                        type="button"
+                        onClick={() => {
+                          setIsTeacherAuthOpen(true);
+                          setIsOpen(false);
+                        }}
+                        aria-current={isActive ? "page" : undefined}
+                        aria-haspopup="dialog"
+                        aria-expanded={isTeacherAuthOpen}
+                        aria-controls="teacher-auth-dialog"
+                        className={cn(
+                          "py-2 text-left text-lg font-medium transition-colors",
+                          "text-muted-foreground hover:text-primary"
+                        )}
+                      >
+                        {item.name}
+                      </button>
+                    );
+                  }
+
                   return (
                     <Link
                       key={item.path}
@@ -228,6 +281,15 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
+      <TeacherAuthDialog
+        open={isTeacherAuthOpen}
+        onOpenChange={setIsTeacherAuthOpen}
+        onConfirm={() => {
+          setIsTeacherAuthOpen(false);
+          navigate(getLocalizedNavPath("/teacher"));
+        }}
+      />
+    </>
   );
 };
 
