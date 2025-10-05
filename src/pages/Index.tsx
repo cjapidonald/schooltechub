@@ -398,7 +398,7 @@ const Index = () => {
               >
                 <span className={convexOverlayClass} aria-hidden />
                 <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-                  <h2 className="text-3xl font-semibold text-white/70 md:text-4xl">
+                  <h2 className="text-3xl font-semibold text-white md:text-4xl">
                     Plan, track, and celebrate learning in one radiant hub
                   </h2>
                   <p className="max-w-2xl text-base text-white/65 md:text-lg">
