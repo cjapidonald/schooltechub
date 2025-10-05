@@ -154,6 +154,13 @@ const iconColorClasses = [
   "bg-orange-500 text-white",
 ];
 
+const gradientClasses = [
+  "bg-gradient-to-b from-primary/20 via-background/80 to-background",
+  "bg-gradient-to-b from-secondary/20 via-background/80 to-background",
+  "bg-gradient-to-b from-accent/20 via-background/80 to-background",
+  "bg-gradient-to-b from-muted/20 via-background/80 to-background",
+];
+
 const Index = () => {
   const { language } = useLanguage();
 
@@ -239,7 +246,10 @@ const Index = () => {
           </div>
           <div className="grid gap-8 md:grid-cols-2">
             {workflowTools.map(({ title, description, icon: Icon }, index) => (
-              <Card key={title} className={cn("h-full", neonCardClass)}>
+              <Card
+                key={title}
+                className={cn("h-full", neonCardClass, gradientClasses[index % gradientClasses.length])}
+              >
                 <div className="flex flex-col gap-4 text-left">
                   <div
                     className={cn(
@@ -289,7 +299,10 @@ const Index = () => {
             </div>
             <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
               {schoolSolutions.map(({ title, description, icon: Icon }, index) => (
-                <Card key={title} className={cn("h-full", neonCardClass)}>
+                <Card
+                  key={title}
+                  className={cn("h-full", neonCardClass, gradientClasses[index % gradientClasses.length])}
+                >
                   <div className="flex flex-col gap-4 text-left">
                     <div
                       className={cn(
@@ -315,8 +328,15 @@ const Index = () => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
           <div className="grid gap-8 text-center md:grid-cols-4">
-            {stats.map((stat) => (
-              <Card key={stat.label} className={cn("p-8", neonCardClass)}>
+            {stats.map((stat, index) => (
+              <Card
+                key={stat.label}
+                className={cn(
+                  "p-8",
+                  neonCardClass,
+                  gradientClasses[index % gradientClasses.length],
+                )}
+              >
                 <p className="text-4xl font-bold text-primary text-glow">{stat.number}</p>
                 <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
               </Card>
@@ -336,8 +356,15 @@ const Index = () => {
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map(({ quote, name, role }) => (
-              <Card key={name} className={cn("p-8 text-center", neonCardClass)}>
+            {testimonials.map(({ quote, name, role }, index) => (
+              <Card
+                key={name}
+                className={cn(
+                  "p-8 text-center",
+                  neonCardClass,
+                  gradientClasses[index % gradientClasses.length],
+                )}
+              >
                 <p className="mb-6 text-white/90 italic">“{quote}”</p>
                 <div className="space-y-1">
                   <p className="text-lg font-semibold text-white">{name}</p>
