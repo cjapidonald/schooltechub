@@ -79,7 +79,9 @@ const Navigation = () => {
       </a>
       <div className="container flex h-16 items-center gap-4">
         <Link to={getLocalizedNavPath("/")} className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-xl font-bold">SchoolTech</span>
+          <span className="text-xl font-bold">
+            <span className="text-red-500">School</span>Tech
+          </span>
         </Link>
 
         <div className="flex flex-1 items-center justify-end gap-3">
