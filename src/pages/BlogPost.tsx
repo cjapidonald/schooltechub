@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { SAMPLE_BLOG_POSTS } from "@/lib/sampleBlogPosts";
 
 const extractTags = (tags: string[] | string | null | undefined) => {
   if (Array.isArray(tags)) {
@@ -107,7 +108,16 @@ export default function BlogPost() {
         return null;
       }
 
-      return (post as BlogPostRow) ?? null;
+      if (post) {
+        return post as BlogPostRow;
+      }
+
+      const samplePost = SAMPLE_BLOG_POSTS.find(item => item.slug === slug);
+      if (samplePost) {
+        return samplePost;
+      }
+
+      return null;
     }
   });
 
