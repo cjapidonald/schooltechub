@@ -97,8 +97,15 @@ const schoolSolutions: Feature[] = [
 
 const featureShowcase = [...workflowTools, ...schoolSolutions];
 
-const compactCardClass =
-  "group relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/5 p-5 transition-transform duration-300 hover:-translate-y-1 hover:border-primary/60";
+const compactCardBaseClass =
+  "group relative overflow-hidden rounded-[1.5rem] border border-white/10 p-5 transition-transform duration-300 hover:-translate-y-1 hover:border-primary/60";
+
+const compactCardGradients = [
+  "bg-gradient-to-br from-primary/20 via-background/75 to-background/95",
+  "bg-gradient-to-br from-secondary/25 via-background/75 to-background/95",
+  "bg-gradient-to-br from-accent/25 via-background/75 to-background/95",
+  "bg-gradient-to-br from-primary/25 via-background/80 to-background/95",
+];
 
 const stats = [
   { number: "12k+", label: "AI-accelerated lessons created on SchoolTech Hub" },
@@ -157,7 +164,13 @@ const structuredData = {
 };
 
 const neonCardClass =
-  "group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 transition-colors duration-300 hover:border-primary/60";
+  "group relative overflow-hidden rounded-[1.75rem] border border-white/10 p-6 transition-colors duration-300 hover:border-primary/60";
+
+const neonCardGradients = [
+  "bg-gradient-to-br from-primary/20 via-background/75 to-background/95",
+  "bg-gradient-to-br from-secondary/25 via-background/75 to-background/95",
+  "bg-gradient-to-br from-accent/25 via-background/75 to-background/95",
+];
 
 const iconColorClasses = [
   "bg-green-500 text-white",
@@ -260,9 +273,10 @@ const Index = () => {
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {featureShowcase.map(({ title, description, icon: Icon }, index) => {
               const isWorkflowTool = index < workflowTools.length;
+              const gradientClass = compactCardGradients[index % compactCardGradients.length];
 
               return (
-                <Card key={title} className={cn("h-full", compactCardClass)}>
+                <Card key={title} className={cn("h-full", compactCardBaseClass, gradientClass)}>
                   <div className="flex flex-col gap-4 text-left">
                     <div
                       className={cn(
@@ -308,8 +322,15 @@ const Index = () => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
           <div className="grid gap-8 text-center md:grid-cols-4">
-            {stats.map((stat) => (
-              <Card key={stat.label} className={cn("p-8", neonCardClass)}>
+            {stats.map((stat, index) => (
+              <Card
+                key={stat.label}
+                className={cn(
+                  "p-8",
+                  neonCardClass,
+                  neonCardGradients[index % neonCardGradients.length],
+                )}
+              >
                 <p className="text-4xl font-bold text-primary text-glow">{stat.number}</p>
                 <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
               </Card>
@@ -329,8 +350,15 @@ const Index = () => {
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
-            {testimonials.map(({ quote, name, role, image }) => (
-              <Card key={name} className={cn("p-8 text-center", neonCardClass)}>
+            {testimonials.map(({ quote, name, role, image }, index) => (
+              <Card
+                key={name}
+                className={cn(
+                  "p-8 text-center",
+                  neonCardClass,
+                  neonCardGradients[index % neonCardGradients.length],
+                )}
+              >
                 <div className="mb-6 flex justify-center">
                   <img
                     src={image}
