@@ -199,7 +199,7 @@ const convexOverlayClass = "convex-panel-sheen";
 
 const classroomTechnologyBackgrounds = {
   featureShowcase:
-    "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=2100&q=80",
+    "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=2100&q=80",
   stats:
     "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2100&q=80",
   testimonials:
@@ -366,11 +366,12 @@ const Index = () => {
           <img
             src={classroomTechnologyBackgrounds.featureShowcase}
             alt="Collaborative classroom using interactive technology"
-            className="h-full w-full object-cover object-center opacity-25"
+            className="h-full w-full object-cover object-center opacity-55"
             loading="lazy"
           />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsla(var(--glow-primary)/0.18),transparent_62%)]" />
         </div>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/10 to-background" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/40 via-background/70 to-background" />
         <div className="container relative mx-auto px-4">
           <div className="pointer-events-none absolute inset-0 -z-10">
             {featureBackgroundDecorations.map(({ src, className }) => (
