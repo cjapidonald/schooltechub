@@ -400,25 +400,16 @@ const Index = () => {
                         Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
                       </p>
                     </div>
-                    <div className="relative grid gap-6 sm:grid-cols-2">
-                      <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
-                        <div className="pointer-events-none absolute -top-3 left-6 h-5 w-12 rounded-full bg-white/40 blur-xl" />
-                        <div className="pointer-events-none absolute -bottom-4 right-6 h-6 w-14 rounded-full bg-primary/35 blur-xl" />
-                        <div className="flex h-40 items-center justify-center rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-primary/25 via-background/80 to-background/95 text-sm font-semibold uppercase tracking-[0.35em] text-white/70 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
-                          Pulse metrics
-                        </div>
-                        <span className="pointer-events-none absolute left-5 top-4 inline-flex rotate-[-6deg] rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/80">
-                          Pulse
+                    <div className="relative rounded-[1.75rem] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
+                      <div className="pointer-events-none absolute -top-5 left-10 h-6 w-16 rounded-full bg-white/40 blur-xl" />
+                      <div className="pointer-events-none absolute -bottom-6 right-12 h-10 w-24 rounded-full bg-primary/35 blur-2xl" />
+                      <div className="flex h-48 flex-col justify-center gap-3 rounded-[1.35rem] border border-white/10 bg-gradient-to-br from-primary/20 via-background/80 to-background/95 px-8 text-center shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
+                        <span className="text-xs uppercase tracking-[0.4em] text-white/60">Unified planning board</span>
+                        <span className="text-2xl font-semibold text-white md:text-3xl">
+                          Lesson momentum, wellbeing insights, and collaboration highlights in one glance
                         </span>
-                      </div>
-                      <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
-                        <div className="pointer-events-none absolute -top-4 right-7 h-5 w-10 rounded-full bg-secondary/35 blur-xl" />
-                        <div className="pointer-events-none absolute -bottom-3 left-8 h-7 w-16 rounded-full bg-white/40 blur-2xl" />
-                        <div className="flex h-40 items-center justify-center rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-secondary/25 via-background/80 to-background/95 text-sm font-semibold uppercase tracking-[0.35em] text-white/70 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
-                          Collaboration flow
-                        </div>
-                        <span className="pointer-events-none absolute right-4 bottom-5 inline-flex rotate-[8deg] rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
-                          Collab
+                        <span className="text-sm text-white/70">
+                          Stay aligned with your teaching team by tracking class progress, follow-ups, and focus areas from a single live workspace.
                         </span>
                       </div>
                     </div>
