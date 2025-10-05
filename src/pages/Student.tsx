@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 import { SEO } from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
@@ -202,6 +202,21 @@ const timeline = [
 
 export default function StudentPage() {
   const [hasEntered, setHasEntered] = useState(false);
+  const journeyContentRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!hasEntered) {
+      return;
+    }
+
+    journeyContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hasEntered]);
+
+  const handleEnterJourney = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setHasEntered(true);
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
@@ -294,8 +309,9 @@ export default function StudentPage() {
                   type="button"
                   className="h-12 w-full rounded-2xl bg-white/90 text-base font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white disabled:cursor-default disabled:bg-white/70"
                   size="lg"
-                  onClick={() => setHasEntered(true)}
+                  onClick={handleEnterJourney}
                   disabled={hasEntered}
+                  aria-pressed={hasEntered}
                 >
                   {hasEntered ? (
                     <>
@@ -367,7 +383,7 @@ export default function StudentPage() {
         )}
 
         {hasEntered && skillInsights.length > 0 && (
-          <section className="grid gap-8">
+          <section ref={journeyContentRef} className="grid gap-8">
             <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
               <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
@@ -554,7 +570,7 @@ export default function StudentPage() {
         )}
 
         {hasEntered && (
-          <section className="grid gap-8 lg:grid-cols-[1.4fr,1fr]">
+          <section ref={skillInsights.length > 0 ? undefined : journeyContentRef} className="grid gap-8 lg:grid-cols-[1.4fr,1fr]">
             <Card className="border-white/15 bg-white/10 text-white shadow-[0_20px_60px_-35px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
               <CardHeader className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
                 <div>
