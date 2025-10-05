@@ -11,6 +11,7 @@ import { SEO } from "@/components/SEO";
 import { format, differenceInMilliseconds } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
+import { cn } from "@/lib/utils";
 
 const Events = () => {
   const { language } = useLanguage();
@@ -130,240 +131,275 @@ const Events = () => {
     return <Badge variant="outline">{available}/{capacity} seats</Badge>;
   };
 
+  const glassCardClass =
+    "border border-white/15 bg-white/10 text-white shadow-[0_20px_70px_-30px_rgba(15,23,42,0.85)] backdrop-blur-2xl";
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
       <SEO
         title="EdTech Events: Webinars, Workshops & Meetups"
         description="Join live EdTech webinars, workshops, and meetups. Browse upcoming and past events, and watch recordings to level up your classroom technology skills."
         canonicalUrl="https://schooltechhub.com/events"
       />
 
-      <div className="flex-1">
-        <div className="container py-12">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute -top-48 left-1/3 h-[30rem] w-[30rem] -translate-x-1/2 rounded-full bg-sky-500/25 blur-3xl" />
+        <div className="absolute bottom-[-12rem] right-[-6rem] h-[32rem] w-[32rem] rounded-full bg-purple-500/20 blur-3xl" />
+        <div className="absolute top-1/4 right-1/4 h-[20rem] w-[20rem] rounded-full bg-emerald-500/20 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-24 md:px-8">
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-10 shadow-[0_25px_80px_-20px_rgba(15,23,42,0.65)] backdrop-blur-2xl md:p-16">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
+          <div className="relative z-10 flex flex-col gap-6 text-center md:text-left">
+            <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
+              <Badge className="rounded-full border border-white/25 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
+                Live & On-Demand Learning
+              </Badge>
+              <Badge className="rounded-full border border-white/25 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
+                Global Educator Community
+              </Badge>
+            </div>
+            <h1 className="flex items-center justify-center gap-3 text-4xl font-semibold tracking-tight md:justify-start md:text-5xl">
               <CalendarClock className="h-10 w-10" />
               EdTech Events
             </h1>
-            <p className="text-muted-foreground">
-              Join webinars, workshops, meetups—see upcoming, past, and recordings.
+            <p className="mx-auto max-w-2xl text-lg text-white/75 md:mx-0">
+              Join webinars, workshops, and meetups designed to level up your classroom technology practice. Explore upcoming sessions or catch up on recordings anytime.
             </p>
-          </div>
-
-          <div className="mb-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <div className="mx-auto w-full max-w-2xl md:mx-0">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
+                <Input
+                  type="text"
+                  placeholder="Search events..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-12 rounded-2xl border-white/20 bg-white/10 pl-12 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                />
+              </div>
             </div>
           </div>
+        </section>
 
-          <Tabs value={selectedType} onValueChange={setSelectedType} className="mb-8">
-            <TabsList className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <section className="rounded-[2rem] border border-white/10 bg-white/10 p-8 shadow-[0_20px_70px_-30px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
+          <Tabs value={selectedType} onValueChange={setSelectedType}>
+            <TabsList className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/15 bg-white/5 p-1 text-white/80 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {eventTypes.map((type) => (
-                <TabsTrigger key={type.value} value={type.value}>
+                <TabsTrigger
+                  key={type.value}
+                  value={type.value}
+                  className="rounded-2xl text-sm data-[state=active]:bg-white/20 data-[state=active]:text-white"
+                >
                   {type.label}
                 </TabsTrigger>
               ))}
             </TabsList>
           </Tabs>
+        </section>
 
-          <div className="grid lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-1">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Filters</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <h4 className="font-medium mb-3">Delivery/Mode</h4>
+        <section className="grid gap-8 lg:grid-cols-[320px,1fr]">
+          <div className="space-y-6">
+            <Card className={cn(glassCardClass)}>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-white">Filters</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h4 className="font-medium text-white/80">Delivery/Mode</h4>
+                  <div className="mt-3 space-y-2 text-sm text-white/70">
                     {filterOptions.eventMode.map((mode) => (
-                      <label key={mode} className="flex items-center space-x-2 mb-2">
+                      <label key={mode} className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={filters.eventMode.includes(mode)}
                           onChange={() => toggleFilter("eventMode", mode)}
-                          className="rounded border-gray-300"
+                          className="h-4 w-4 rounded border-white/30 bg-white/10 text-sky-300 focus:ring-white/50"
                         />
-                        <span className="text-sm">{mode}</span>
+                        <span>{mode}</span>
                       </label>
                     ))}
                   </div>
+                </div>
 
-                  <div>
-                    <h4 className="font-medium mb-3">Price Type</h4>
+                <div>
+                  <h4 className="font-medium text-white/80">Price Type</h4>
+                  <div className="mt-3 space-y-2 text-sm text-white/70">
                     {filterOptions.eventPriceType.map((type) => (
-                      <label key={type} className="flex items-center space-x-2 mb-2">
+                      <label key={type} className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={filters.eventPriceType.includes(type)}
                           onChange={() => toggleFilter("eventPriceType", type)}
-                          className="rounded border-gray-300"
+                          className="h-4 w-4 rounded border-white/30 bg-white/10 text-sky-300 focus:ring-white/50"
                         />
-                        <span className="text-sm">{type}</span>
+                        <span>{type}</span>
                       </label>
                     ))}
                   </div>
+                </div>
 
-                  <div>
-                    <h4 className="font-medium mb-3">Stage (Optional)</h4>
+                <div>
+                  <h4 className="font-medium text-white/80">Stage (Optional)</h4>
+                  <div className="mt-3 space-y-2 text-sm text-white/70">
                     {filterOptions.stage.map((stage) => (
-                      <label key={stage} className="flex items-center space-x-2 mb-2">
+                      <label key={stage} className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={filters.stage.includes(stage)}
                           onChange={() => toggleFilter("stage", stage)}
-                          className="rounded border-gray-300"
+                          className="h-4 w-4 rounded border-white/30 bg-white/10 text-sky-300 focus:ring-white/50"
                         />
-                        <span className="text-sm">{stage}</span>
+                        <span>{stage}</span>
                       </label>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Newsletter</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Get notified about upcoming events and recordings!
-                  </p>
-                  <Button className="w-full">Subscribe</Button>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="lg:col-span-3">
-              {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <p className="text-muted-foreground">Loading events...</p>
-                </div>
-              ) : events.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No events found matching your criteria.</p>
-                </div>
-              ) : (
-                <div className="grid gap-6">
-                  {events.map((event) => {
-                    const countdown = event.start_datetime ? getCountdown(event.start_datetime) : null;
-                    const isPast = event.start_datetime && new Date(event.start_datetime) < new Date();
-                    
-                    return (
-                      <Card key={event.id} className={`hover:shadow-lg transition-shadow ${isPast ? 'opacity-75' : ''}`}>
-                        <CardContent className="p-6">
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
-                            <div className="flex flex-wrap gap-2">
-                              <Badge variant={isPast ? "secondary" : "default"}>
-                                {event.event_type}
+            <Card className={cn(glassCardClass, "p-0")}> 
+              <CardHeader className="space-y-2">
+                <CardTitle className="text-xl font-semibold text-white">Newsletter</CardTitle>
+                <p className="text-sm text-white/70">Get notified about upcoming events and recordings!</p>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full rounded-2xl bg-white/90 text-slate-900 shadow-[0_15px_45px_-25px_rgba(226,232,240,0.9)] hover:bg-white">
+                  Subscribe
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            {loading ? (
+              <div className={cn(glassCardClass, "flex h-64 items-center justify-center rounded-[2rem]")}> 
+                <p className="text-white/70">Loading events...</p>
+              </div>
+            ) : events.length === 0 ? (
+              <div className={cn(glassCardClass, "rounded-[2rem] p-10 text-center text-white/70")}>
+                No events found matching your criteria.
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {events.map((event) => {
+                  const countdown = event.start_datetime ? getCountdown(event.start_datetime) : null;
+                  const isPast = event.start_datetime && new Date(event.start_datetime) < new Date();
+
+                  return (
+                    <Card
+                      key={event.id}
+                      className={cn(
+                        glassCardClass,
+                        "overflow-hidden transition-all duration-300 hover:-translate-y-1",
+                        isPast ? "opacity-80" : ""
+                      )}
+                    >
+                      <CardContent className="space-y-6 p-6">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className="rounded-full border border-white/20 bg-white/10 text-xs uppercase tracking-wide text-white/80">
+                              {event.event_type}
+                            </Badge>
+                            <Badge className="rounded-full border border-white/20 bg-white/10 text-xs uppercase tracking-wide text-white/70">
+                              {event.event_mode}
+                            </Badge>
+                            {event.event_price_type && (
+                              <Badge className="rounded-full border border-white/20 bg-white/10 text-xs uppercase tracking-wide text-white/80">
+                                {event.event_price_type}
+                                {event.price && event.event_price_type === "Paid" && ` $${event.price}`}
                               </Badge>
-                              <Badge variant="outline">
-                                {event.event_mode}
+                            )}
+                            {event.event_certificate_pd && (
+                              <Badge className="flex items-center gap-1 rounded-full border border-purple-200/40 bg-purple-200/20 text-xs uppercase tracking-wide text-purple-100">
+                                <Award className="h-3 w-3" />
+                                PD Certificate
                               </Badge>
-                              {event.event_price_type && (
-                                <Badge variant={event.event_price_type === "Free" ? "secondary" : "outline"}>
-                                  {event.event_price_type}
-                                  {event.price && event.event_price_type === "Paid" && ` $${event.price}`}
+                            )}
+                          </div>
+                          {(!isPast && countdown) || (isPast && event.recording_url) ? (
+                            <div className="flex flex-wrap gap-2 sm:justify-end">
+                              {!isPast && countdown && (
+                                <Badge className="rounded-full border border-rose-200/40 bg-rose-200/20 text-xs uppercase tracking-wide text-rose-100">
+                                  {countdown}
                                 </Badge>
                               )}
-                              {event.event_certificate_pd && (
-                                <Badge className="bg-purple-100 text-purple-800">
-                                  <Award className="h-3 w-3 mr-1" />
-                                  PD Certificate
+                              {isPast && event.recording_url && (
+                                <Badge className="flex items-center gap-1 rounded-full border border-emerald-200/40 bg-emerald-200/20 text-xs uppercase tracking-wide text-emerald-100">
+                                  <Video className="h-3 w-3" />
+                                  Recording Available
                                 </Badge>
                               )}
                             </div>
-                            {(!isPast && countdown) || (isPast && event.recording_url) ? (
-                              <div className="flex flex-wrap gap-2 sm:justify-end">
-                                {!isPast && countdown && (
-                                  <Badge variant="destructive">{countdown}</Badge>
-                                )}
-                                {isPast && event.recording_url && (
-                                  <Badge className="bg-green-100 text-green-800">
-                                    <Video className="h-3 w-3 mr-1" />
-                                    Recording Available
-                                  </Badge>
-                                )}
-                              </div>
-                            ) : null}
-                          </div>
-                          
-                          <h3 className="text-xl font-semibold mb-2">
-                            <Link
-                              to={getLocalizedPath(`/events/${event.slug}`, language)}
-                              className="hover:text-primary"
-                            >
+                          ) : null}
+                        </div>
+
+                        <div className="space-y-2">
+                          <h3 className="text-2xl font-semibold text-white">
+                            <Link to={getLocalizedPath(`/events/${event.slug}`, language)} className="hover:text-white/80">
                               {event.title}
                             </Link>
                           </h3>
-                          
-                          {event.subtitle && (
-                            <p className="text-sm text-muted-foreground mb-2">{event.subtitle}</p>
+                          {event.subtitle && <p className="text-sm text-white/70">{event.subtitle}</p>}
+                          <p className="text-sm text-white/70">{event.excerpt || "Click for more details..."}</p>
+                        </div>
+
+                        <div className="grid gap-4 text-sm text-white/65 md:grid-cols-2">
+                          {event.start_datetime && (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-white/50" />
+                              {format(new Date(event.start_datetime), "MMM d, yyyy")}
+                            </div>
                           )}
-                          
-                          <p className="text-muted-foreground mb-4">
-                            {event.excerpt || "Click for more details..."}
-                          </p>
-                          
-                          <div className="grid grid-cols-2 gap-4 mb-4">
-                            {event.start_datetime && (
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <Calendar className="h-4 w-4 mr-2" />
-                                {format(new Date(event.start_datetime), "MMM d, yyyy")}
-                              </div>
-                            )}
-                            {event.start_datetime && (
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4 mr-2" />
-                                {format(new Date(event.start_datetime), "h:mm a")} Bangkok
-                              </div>
-                            )}
-                            {event.venue && (
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <MapPin className="h-4 w-4 mr-2" />
-                                {event.venue}
-                              </div>
-                            )}
-                            {event.event_capacity && (
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <Users className="h-4 w-4 mr-2" />
-                                {getSeatsAvailable(event.event_capacity, event.event_registered || 0)}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            {!isPast && event.registration_url && (
-                              <Button asChild>
-                                <Link to={event.registration_url}>Register Now</Link>
-                              </Button>
-                            )}
-                            {isPast && event.recording_url && (
-                              <Button asChild variant="secondary">
-                                <a href={event.recording_url} target="_blank" rel="noopener noreferrer">
-                                  Watch Recording
-                                </a>
-                              </Button>
-                            )}
-                            <Button variant="outline" asChild>
-                              <Link to={getLocalizedPath(`/events/${event.slug}`, language)}>View Details</Link>
+                          {event.start_datetime && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-white/50" />
+                              {format(new Date(event.start_datetime), "h:mm a")} Bangkok
+                            </div>
+                          )}
+                          {event.venue && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-white/50" />
+                              {event.venue}
+                            </div>
+                          )}
+                          {event.event_capacity && (
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-white/50" />
+                              {getSeatsAvailable(event.event_capacity, event.event_registered || 0)}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                          {!isPast && event.registration_url && (
+                            <Button asChild className="rounded-2xl bg-white/90 text-slate-900 shadow-[0_15px_45px_-25px_rgba(226,232,240,0.9)] hover:bg-white">
+                              <Link to={event.registration_url}>Register Now</Link>
                             </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                          )}
+                          {isPast && event.recording_url && (
+                            <Button asChild variant="secondary" className="rounded-2xl border-white/20 bg-white/10 text-white hover:bg-white/20">
+                              <a href={event.recording_url} target="_blank" rel="noopener noreferrer">
+                                Watch Recording
+                              </a>
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            asChild
+                            className="rounded-2xl border-white/30 text-white hover:bg-white/10 hover:text-white"
+                          >
+                            <Link to={getLocalizedPath(`/events/${event.slug}`, language)}>View Details</Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );
