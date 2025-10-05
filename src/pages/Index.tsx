@@ -190,9 +190,6 @@ const Index = () => {
         <div className="container relative z-10 mx-auto px-4">
           <div className="grid gap-16 md:grid-cols-[minmax(0,1fr)_0.9fr]">
             <div>
-              <Badge variant="secondary" className="mb-6 bg-primary/20 text-primary backdrop-blur">
-                The all-in-one technology workspace for teachers
-              </Badge>
               <h1 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-4xl font-bold tracking-tight text-transparent animate-gradient md:text-6xl">
                 Power every lesson with organised workflows and luminous insights
               </h1>
