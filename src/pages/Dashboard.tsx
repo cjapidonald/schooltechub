@@ -634,7 +634,10 @@ export default function DashboardPage() {
         <div className="absolute top-1/4 right-[-12rem] h-[28rem] w-[28rem] rounded-full bg-indigo-500/25 blur-3xl" />
         <div className="absolute bottom-[-12rem] left-[-8rem] h-[24rem] w-[24rem] rounded-full bg-emerald-500/20 blur-3xl" />
       </div>
-      <div ref={journeyContentRef} className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-24 md:px-8">
+      <div
+        ref={journeyContentRef}
+        className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-24 pt-2.5 md:px-8"
+      >
         {showingExampleData ? (
           <Alert className="border-white/20 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
             <AlertTitle className="text-lg font-semibold text-white">
