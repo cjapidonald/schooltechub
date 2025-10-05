@@ -39,6 +39,8 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { SAMPLE_BLOG_POSTS, type SampleBlogPost } from "@/data/sampleBlogPosts";
 import { cn } from "@/lib/utils";
 
+const FALLBACK_BLOG_IMAGE = "/placeholder.svg";
+
 interface AuthorInfo {
   name?: string | null;
   job_title?: string | null;
@@ -900,7 +902,7 @@ const Blog = () => {
             ) : null}
 
             {loading ? (
-              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-5 md:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <Card
                     key={index}
@@ -934,34 +936,36 @@ const Blog = () => {
                       </span>
                     </div>
                     <div className="grid gap-5 md:grid-cols-2">
-                      {featuredPosts.map(post => (
-                        <Link
-                          key={post.id}
-                          to={getLocalizedPath(`/blog/${post.slug}`, language)}
-                          className="group block"
-                        >
-                          <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
-                            {post.featured_image ? (
+                      {featuredPosts.map(post => {
+                        const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
+
+                        return (
+                          <Link
+                            key={post.id}
+                            to={getLocalizedPath(`/blog/${post.slug}`, language)}
+                            className="group block"
+                          >
+                            <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
                               <figure className="relative h-48 overflow-hidden">
                                 <img
-                                  src={post.featured_image}
+                                  src={imageSrc}
                                   alt={post.title}
                                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   loading="lazy"
                                 />
                               </figure>
-                            ) : null}
-                            <CardHeader className="space-y-3">
-                              <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
-                                {post.title}
-                              </h2>
-                              {post.subtitle ? (
-                                <p className="text-base text-white/70">{post.subtitle}</p>
-                              ) : null}
-                            </CardHeader>
-                          </Card>
-                        </Link>
-                      ))}
+                              <CardHeader className="space-y-3">
+                                <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
+                                  {post.title}
+                                </h2>
+                                {post.subtitle ? (
+                                  <p className="text-base text-white/70">{post.subtitle}</p>
+                                ) : null}
+                              </CardHeader>
+                            </Card>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : null}
@@ -974,35 +978,37 @@ const Blog = () => {
                         {regularPosts.length} {regularPosts.length === 1 ? "post" : "posts"}
                       </span>
                     </div>
-                    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-                      {regularPosts.map(post => (
-                        <Link
-                          key={post.id}
-                          to={getLocalizedPath(`/blog/${post.slug}`, language)}
-                          className="group block h-full"
-                        >
-                          <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
-                            {post.featured_image ? (
+                    <div className="grid gap-5 md:grid-cols-2">
+                      {regularPosts.map(post => {
+                        const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
+
+                        return (
+                          <Link
+                            key={post.id}
+                            to={getLocalizedPath(`/blog/${post.slug}`, language)}
+                            className="group block h-full"
+                          >
+                            <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
                               <figure className="relative h-40 overflow-hidden">
                                 <img
-                                  src={post.featured_image}
+                                  src={imageSrc}
                                   alt={post.title}
                                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   loading="lazy"
                                 />
                               </figure>
-                            ) : null}
-                            <CardHeader className="space-y-2">
-                              <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
-                                {post.title}
-                              </h3>
-                              {post.subtitle ? (
-                                <p className="text-sm text-white/70">{post.subtitle}</p>
-                              ) : null}
-                            </CardHeader>
-                          </Card>
-                        </Link>
-                      ))}
+                              <CardHeader className="space-y-2">
+                                <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
+                                  {post.title}
+                                </h3>
+                                {post.subtitle ? (
+                                  <p className="text-sm text-white/70">{post.subtitle}</p>
+                                ) : null}
+                              </CardHeader>
+                            </Card>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : null}
