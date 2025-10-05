@@ -380,57 +380,61 @@ const Index = () => {
             </div>
             <div className="relative hidden md:flex">
               <div className="pointer-events-none absolute -inset-12 rounded-full bg-primary/10 blur-3xl" />
-              <div className="relative grid w-full max-w-2xl grid-cols-1 gap-6">
-                <Reveal>
-                  <Card className={cn(neonCardClass, "rounded-[1.75rem] bg-gradient-to-br from-primary/15 via-background/60 to-background")}
-                  >
-                    <span className={convexOverlayClass} aria-hidden />
-                    <span className="bolt-fastener absolute left-6 top-5 z-20 md:left-8 md:top-7" aria-hidden />
-                    <span className="bolt-fastener absolute right-6 top-5 z-20 md:right-8 md:top-7" aria-hidden />
-                    <div className="relative z-10 flex flex-col items-center text-center">
+              <Reveal>
+                <Card
+                  className={cn(
+                    neonCardClass,
+                    "relative w-full max-w-2xl rounded-[2.25rem] bg-gradient-to-br from-primary/18 via-background/65 to-background/95 p-8 md:p-10"
+                  )}
+                >
+                  <span className={convexOverlayClass} aria-hidden />
+                  <span className="bolt-fastener absolute left-7 top-6 z-20 md:left-9 md:top-8" aria-hidden />
+                  <span className="bolt-fastener absolute right-7 top-6 z-20 md:right-9 md:top-8" aria-hidden />
+                  <div className="relative z-10 flex flex-col gap-8">
+                    <div className="text-center">
                       <div className="text-sm uppercase tracking-[0.3em] text-white/60">Live dashboards</div>
-                      <h3 className="mt-4 text-2xl font-semibold text-white">Class and student insights synchronised in real time</h3>
-                      <p className="mt-3 text-white/70">
+                      <h3 className="mt-4 text-2xl font-semibold text-white md:text-3xl">
+                        Class and student insights synchronised in real time
+                      </h3>
+                      <p className="mt-4 text-white/70">
                         Monitor attendance, mastery, and wellbeing signals in one luminous workspace designed for teaching teams.
                       </p>
                     </div>
-                  </Card>
-                </Reveal>
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <Reveal delay={120}>
-                    <Card
-                      className={cn(
-                        neonCardClass,
-                        "rounded-[1.75rem] bg-gradient-to-b from-secondary/20 via-background/70 to-background p-0 aspect-[4/5]"
-                      )}
-                    >
-                      <img
-                        src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80"
-                        alt="Smart classroom with interactive displays"
-                        loading="lazy"
-                        className="block h-full w-full object-cover"
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-background/10 via-transparent to-transparent" />
-                    </Card>
-                  </Reveal>
-                  <Reveal delay={180}>
-                    <Card
-                      className={cn(
-                        neonCardClass,
-                        "rounded-[1.75rem] bg-gradient-to-b from-accent/20 via-background/70 to-background p-0 aspect-[4/5]"
-                      )}
-                    >
-                      <img
-                        src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80"
-                        alt="Teacher working attentively on a laptop"
-                        loading="lazy"
-                        className="block h-full w-full object-cover"
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-background/10 via-transparent to-transparent" />
-                    </Card>
-                  </Reveal>
-                </div>
-              </div>
+                    <div className="relative grid gap-6 sm:grid-cols-2">
+                      <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
+                        <div className="pointer-events-none absolute -top-3 left-6 h-5 w-12 rounded-full bg-white/40 blur-xl" />
+                        <div className="pointer-events-none absolute -bottom-4 right-6 h-6 w-14 rounded-full bg-primary/35 blur-xl" />
+                        <div className="overflow-hidden rounded-[1.25rem] border border-white/10 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
+                          <img
+                            src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80"
+                            alt="Smart classroom with interactive displays"
+                            loading="lazy"
+                            className="block h-full w-full object-cover"
+                          />
+                        </div>
+                        <span className="pointer-events-none absolute left-5 top-4 inline-flex rotate-[-6deg] rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/80">
+                          Pulse
+                        </span>
+                      </div>
+                      <div className="relative rounded-[1.5rem] border border-white/10 bg-white/5 p-2 backdrop-blur-xl">
+                        <div className="pointer-events-none absolute -top-4 right-7 h-5 w-10 rounded-full bg-secondary/35 blur-xl" />
+                        <div className="pointer-events-none absolute -bottom-3 left-8 h-7 w-16 rounded-full bg-white/40 blur-2xl" />
+                        <div className="overflow-hidden rounded-[1.25rem] border border-white/10 shadow-[0_18px_40px_rgba(15,10,60,0.35)]">
+                          <img
+                            src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80"
+                            alt="Teacher working attentively on a laptop"
+                            loading="lazy"
+                            className="block h-full w-full object-cover"
+                          />
+                        </div>
+                        <span className="pointer-events-none absolute right-4 bottom-5 inline-flex rotate-[8deg] rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
+                          Collab
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </Reveal>
             </div>
           </div>
         </div>
