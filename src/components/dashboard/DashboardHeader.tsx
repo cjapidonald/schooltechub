@@ -27,19 +27,21 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const { t } = useLanguage();
 
-  const honorific = nameParts.honorific?.trim() ?? null;
-  const firstName = nameParts.firstName?.trim() ?? null;
-  const lastName = nameParts.lastName?.trim() ?? null;
+  const normalizedDisplayName = displayName?.trim() ?? "";
+  const honorific = nameParts.honorific?.trim() ?? "";
+  const firstName = nameParts.firstName?.trim() ?? "";
+  const lastName = nameParts.lastName?.trim() ?? "";
 
-  const greetingName = honorific && lastName
-    ? `${honorific} ${lastName}`
-    : firstName
-      ? `Mr ${firstName}`
-      : t.dashboard.fallbackDisplayName;
+  const combinedName = [firstName, lastName].filter(Boolean).join(" ");
+  const greetingName =
+    normalizedDisplayName ||
+    (honorific && lastName ? `${honorific} ${lastName}` : "") ||
+    combinedName ||
+    t.dashboard.fallbackDisplayName;
 
-  const fallbackInitial = (lastName ?? firstName ?? displayName ?? t.dashboard.fallbackDisplayName)
-    ?.charAt(0)
-    ?.toUpperCase() || "T";
+  const fallbackInitial = (greetingName || t.dashboard.fallbackDisplayName)
+    .charAt(0)
+    .toUpperCase();
 
   return (
     <header className="rounded-xl border bg-card px-6 py-5 shadow-sm">

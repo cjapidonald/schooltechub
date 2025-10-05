@@ -1,24 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Loader2, Mail, Phone, School, User as UserIcon } from "lucide-react";
+import { Loader2, Trash2, Upload } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useOptionalUser } from "@/hooks/useOptionalUser";
 import { useToast } from "@/hooks/use-toast";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import { supabase } from "@/integrations/supabase/client";
-import { createProfileImageSignedUrl, resolveAvatarReference } from "@/lib/avatar";
-import { SettingsPanel } from "@/pages/account/components/SettingsPanel";
+import {
+  PROFILE_IMAGE_BUCKET,
+  createProfileImageSignedUrl,
+  resolveAvatarReference,
+  isHttpUrl,
+} from "@/lib/avatar";
+import { createFileIdentifier } from "@/lib/files";
 
-const extractMetadataValue = (metadata: Record<string, unknown>, key: string): string | null => {
-  const value = metadata[key];
-  if (typeof value !== "string") {
-    return null;
-  }
+const HONORIFIC_OPTIONS = [
+  { value: "Ms", label: "Ms" },
+  { value: "Mr", label: "Mr" },
+  { value: "Mx", label: "Mx" },
+] as const;
+
+type HonorificOption = (typeof HONORIFIC_OPTIONS)[number]["value"];
+
+const toNullable = (value: string): string | null => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
@@ -27,118 +39,293 @@ const Profile = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user, loading } = useOptionalUser();
-  const { fullName, schoolName } = useMyProfile();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [isSendingReset, setIsSendingReset] = useState(false);
+  const {
+    firstName: savedFirstName,
+    lastName: savedLastName,
+    honorific: savedHonorific,
+    schoolName: savedSchoolName,
+    avatarUrl: profileAvatarUrl,
+    isLoading: isProfileLoading,
+    refresh,
+  } = useMyProfile();
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [honorific, setHonorific] = useState<HonorificOption>("Ms");
+  const [schoolName, setSchoolName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
+  const [baseAvatarUrl, setBaseAvatarUrl] = useState<string | null>(null);
+  const [storedAvatarPublicUrl, setStoredAvatarPublicUrl] = useState<string | null>(null);
+  const [currentAvatarReference, setCurrentAvatarReference] = useState<string | null>(null);
+  const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const metadataStrings = useMemo(() => {
+    const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
+    const getString = (key: string) => {
+      const value = metadata[key];
+      return typeof value === "string" ? value.trim() : "";
+    };
+
+    return {
+      firstName: getString("first_name"),
+      lastName: getString("last_name"),
+      honorific: getString("salutation"),
+      schoolName: getString("school_name"),
+    };
+  }, [user?.user_metadata]);
+
+  const avatarMetadata = useMemo(() => {
+    const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
+    const { reference, url } = resolveAvatarReference(metadata);
+    const directUrl = url ?? (reference && isHttpUrl(reference) ? reference : null);
+    const storageReference = reference && !isHttpUrl(reference) ? reference : null;
+
+    return {
+      directUrl,
+      storageReference,
+    };
+  }, [user?.user_metadata]);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadAvatar = async () => {
-      if (!user) {
-        if (isMounted) {
-          setAvatarUrl(null);
-        }
-        return;
-      }
-
-      const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
-      const { reference, url } = resolveAvatarReference(metadata);
-
-      if (url) {
-        if (isMounted) {
-          setAvatarUrl(url);
-        }
-        return;
-      }
-
-      if (!reference) {
-        if (isMounted) {
-          setAvatarUrl(null);
-        }
-        return;
-      }
-
-      try {
-        const signedUrl = await createProfileImageSignedUrl(reference);
-        if (isMounted) {
-          setAvatarUrl(signedUrl);
-        }
-      } catch (error) {
-        console.error("Failed to resolve avatar", error);
-        if (isMounted) {
-          setAvatarUrl(null);
-        }
-      }
-    };
-
-    void loadAvatar();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user]);
-
-  const metadata = (user?.user_metadata ?? {}) as Record<string, unknown>;
-  const firstName = extractMetadataValue(metadata, "first_name");
-  const lastName = extractMetadataValue(metadata, "last_name");
-  const subject = extractMetadataValue(metadata, "subject");
-  const phoneNumber = extractMetadataValue(metadata, "phone");
-
-  const fallbackValue = t.profilePage.fallback.notProvided;
-  const displayFullName = useMemo(() => {
-    if (fullName && fullName.trim().length > 0) {
-      return fullName.trim();
-    }
-    if (firstName || lastName) {
-      return [firstName, lastName].filter(Boolean).join(" ");
-    }
-    return fallbackValue;
-  }, [fallbackValue, firstName, fullName, lastName]);
-
-  const avatarFallback = useMemo(() => {
-    const source = displayFullName !== fallbackValue ? displayFullName : user?.email ?? "";
-    return source ? source.charAt(0).toUpperCase() : "?";
-  }, [displayFullName, fallbackValue, user?.email]);
-
-  const handleSendPasswordReset = async () => {
-    if (!user?.email) {
-      toast({
-        title: t.profilePage.security.resetError,
-        description: t.profilePage.security.noEmail,
-        variant: "destructive",
-      });
+    if (loading || isProfileLoading) {
       return;
     }
 
-    setIsSendingReset(true);
-    try {
-      const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth` : undefined;
-      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-        redirectTo,
-      });
+    const nextFirstName = savedFirstName ?? metadataStrings.firstName ?? "";
+    const nextLastName = savedLastName ?? metadataStrings.lastName ?? "";
+    const nextHonorific = (savedHonorific ?? metadataStrings.honorific ?? "") as HonorificOption | "";
+    const nextSchoolName = savedSchoolName ?? metadataStrings.schoolName ?? "";
 
-      if (error) {
-        throw error;
+    setFirstName(previous => (previous === nextFirstName ? previous : nextFirstName));
+    setLastName(previous => (previous === nextLastName ? previous : nextLastName));
+    setSchoolName(previous => (previous === nextSchoolName ? previous : nextSchoolName));
+    setHonorific(previous => {
+      if (nextHonorific && HONORIFIC_OPTIONS.some(option => option.value === nextHonorific)) {
+        return nextHonorific;
+      }
+      return previous || "Ms";
+    });
+  }, [
+    loading,
+    isProfileLoading,
+    savedFirstName,
+    savedLastName,
+    savedHonorific,
+    savedSchoolName,
+    metadataStrings.firstName,
+    metadataStrings.lastName,
+    metadataStrings.honorific,
+    metadataStrings.schoolName,
+  ]);
+
+  useEffect(() => {
+    setCurrentAvatarReference(avatarMetadata.storageReference ?? null);
+
+    const loadAvatar = async () => {
+      let nextUrl = profileAvatarUrl ?? avatarMetadata.directUrl ?? null;
+
+      if (!nextUrl && avatarMetadata.storageReference) {
+        try {
+          nextUrl = await createProfileImageSignedUrl(avatarMetadata.storageReference);
+        } catch (error) {
+          console.error("Failed to create signed avatar URL", error);
+          nextUrl = null;
+        }
       }
 
-      toast({
-        title: t.profilePage.security.resetSent,
-        description: t.profilePage.security.resetDescription,
+      setBaseAvatarUrl(previous => (previous === nextUrl ? previous : nextUrl));
+      setStoredAvatarPublicUrl(previous => {
+        if (avatarMetadata.directUrl === previous) {
+          return previous;
+        }
+        return avatarMetadata.directUrl ?? null;
       });
-    } catch (error) {
-      console.error("Failed to send password reset email", error);
-      toast({
-        title: t.profilePage.security.resetError,
-        description: t.common.tryAgain,
-        variant: "destructive",
-      });
-    } finally {
-      setIsSendingReset(false);
+      setIsAvatarRemoved(false);
+    };
+
+    if (!avatarPreviewUrl) {
+      void loadAvatar();
+    }
+  }, [avatarMetadata.directUrl, avatarMetadata.storageReference, profileAvatarUrl, avatarPreviewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreviewUrl && avatarPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreviewUrl);
+      }
+    };
+  }, [avatarPreviewUrl]);
+
+  const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (avatarPreviewUrl && avatarPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreviewUrl);
+    }
+
+    setAvatarFile(file);
+    setAvatarPreviewUrl(URL.createObjectURL(file));
+    setIsAvatarRemoved(false);
+  };
+
+  const handleRemoveAvatar = () => {
+    if (avatarPreviewUrl && avatarPreviewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreviewUrl);
+    }
+
+    setAvatarFile(null);
+    setAvatarPreviewUrl(null);
+    setBaseAvatarUrl(null);
+    setStoredAvatarPublicUrl(null);
+    setCurrentAvatarReference(null);
+    setIsAvatarRemoved(true);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
-  if (loading) {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!user) {
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      let nextAvatarReference = currentAvatarReference;
+      let nextAvatarPublicUrl = storedAvatarPublicUrl;
+      let nextAvatarDisplayUrl = baseAvatarUrl;
+
+      if (avatarFile) {
+        const fileExtension = avatarFile.name.split(".").pop();
+        const safeExtension = fileExtension ? fileExtension.toLowerCase() : "png";
+        const filePath = `${user.id}/profile/${createFileIdentifier()}.${safeExtension}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from(PROFILE_IMAGE_BUCKET)
+          .upload(filePath, avatarFile, {
+            cacheControl: "3600",
+            upsert: true,
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from(PROFILE_IMAGE_BUCKET).getPublicUrl(filePath);
+
+        const signedUrl = await createProfileImageSignedUrl(filePath);
+
+        nextAvatarReference = filePath;
+        nextAvatarPublicUrl = publicUrl;
+        nextAvatarDisplayUrl = signedUrl;
+      } else if (isAvatarRemoved) {
+        nextAvatarReference = null;
+        nextAvatarPublicUrl = null;
+        nextAvatarDisplayUrl = null;
+      }
+
+      const normalizedFirstName = toNullable(firstName) ?? null;
+      const normalizedLastName = toNullable(lastName) ?? null;
+      const normalizedSchoolName = toNullable(schoolName) ?? null;
+      const normalizedHonorific = toNullable(honorific) ?? null;
+
+      const fullNameParts = [normalizedFirstName, normalizedLastName].filter(Boolean) as string[];
+      const combinedFullName = fullNameParts.join(" ").trim();
+      const normalizedFullName = combinedFullName.length > 0 ? combinedFullName : null;
+      const displayName = normalizedHonorific && normalizedLastName
+        ? `${normalizedHonorific} ${normalizedLastName}`
+        : normalizedFullName;
+
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          salutation: normalizedHonorific,
+          first_name: normalizedFirstName,
+          last_name: normalizedLastName,
+          full_name: normalizedFullName,
+          display_name: displayName,
+          school_name: normalizedSchoolName,
+          avatar_url: nextAvatarPublicUrl,
+          avatar_storage_path: nextAvatarReference,
+        },
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            salutation: normalizedHonorific,
+            first_name: normalizedFirstName,
+            last_name: normalizedLastName,
+            full_name: normalizedFullName,
+            display_name: displayName,
+            school_name: normalizedSchoolName,
+            avatar_url: nextAvatarPublicUrl,
+          },
+          { onConflict: "id" },
+        );
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      if (avatarPreviewUrl && avatarPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreviewUrl);
+      }
+
+      setAvatarFile(null);
+      setAvatarPreviewUrl(null);
+      setBaseAvatarUrl(nextAvatarDisplayUrl ?? null);
+      setStoredAvatarPublicUrl(nextAvatarPublicUrl ?? null);
+      setCurrentAvatarReference(nextAvatarReference ?? null);
+      setIsAvatarRemoved(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      toast({
+        title: t.profilePage.toasts.saved,
+      });
+
+      void refresh();
+    } catch (error) {
+      console.error("Failed to update profile", error);
+      toast({
+        variant: "destructive",
+        title: t.profilePage.toasts.errorTitle,
+        description: t.profilePage.toasts.errorDescription ?? t.common.tryAgain,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const displayedAvatarUrl = avatarPreviewUrl ?? baseAvatarUrl ?? undefined;
+  const avatarFallback = useMemo(() => {
+    const source = `${firstName} ${lastName}`.trim() || user?.email || "T";
+    return source.charAt(0).toUpperCase();
+  }, [firstName, lastName, user?.email]);
+
+  if (loading || isProfileLoading) {
     return (
       <div className="min-h-screen bg-muted/10">
         <SEO title={t.profilePage.title} description={t.profilePage.subtitle} />
@@ -171,110 +358,128 @@ const Profile = () => {
     );
   }
 
-  const detailItems = [
-    {
-      label: t.profilePage.info.email,
-      value: user.email ?? fallbackValue,
-      icon: <Mail className="h-4 w-4" />,
-    },
-    {
-      label: t.profilePage.info.firstName,
-      value: firstName ?? fallbackValue,
-      icon: <UserIcon className="h-4 w-4" />,
-    },
-    {
-      label: t.profilePage.info.lastName,
-      value: lastName ?? fallbackValue,
-      icon: <UserIcon className="h-4 w-4" />,
-    },
-    {
-      label: t.profilePage.info.subject,
-      value: subject ?? fallbackValue,
-      icon: <BookOpen className="h-4 w-4" />,
-    },
-    {
-      label: t.profilePage.info.phone,
-      value: phoneNumber ?? fallbackValue,
-      icon: <Phone className="h-4 w-4" />,
-    },
-    {
-      label: t.profilePage.info.school,
-      value: schoolName ?? extractMetadataValue(metadata, "school_name") ?? fallbackValue,
-      icon: <School className="h-4 w-4" />,
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-muted/10 pb-16">
       <SEO title={t.profilePage.title} description={t.profilePage.subtitle} />
-      <div className="container space-y-8 py-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">{t.profilePage.title}</h1>
-            <p className="mt-2 max-w-2xl text-muted-foreground">{t.profilePage.subtitle}</p>
-          </div>
-          <Button asChild className="sm:shrink-0" variant="outline">
-            <a href="#profile-settings">{t.profilePage.editButton}</a>
-          </Button>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[360px,1fr]">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.profilePage.info.title}</CardTitle>
-                <CardDescription>{t.profilePage.info.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                    {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
+      <div className="container py-10">
+        <div className="mx-auto max-w-3xl">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t.profilePage.title}</CardTitle>
+              <CardDescription>{t.profilePage.form.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form className="space-y-8" onSubmit={handleSubmit}>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <Avatar className="h-24 w-24 border">
+                    {displayedAvatarUrl ? <AvatarImage src={displayedAvatarUrl} alt="" /> : null}
                     <AvatarFallback>{avatarFallback}</AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="text-lg font-semibold text-foreground">{displayFullName}</p>
-                    <p className="text-sm text-muted-foreground">{subject ?? fallbackValue}</p>
-                    <p className="text-sm text-muted-foreground">{phoneNumber ?? fallbackValue}</p>
+                  <div className="space-y-2">
+                    <div>
+                      <Label>{t.profilePage.form.photoLabel}</Label>
+                      <p className="text-sm text-muted-foreground">{t.profilePage.form.photoHelp}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleAvatarFileChange}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isSaving}
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        {t.profilePage.form.uploadButton}
+                      </Button>
+                      {(displayedAvatarUrl || storedAvatarPublicUrl) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={handleRemoveAvatar}
+                          disabled={isSaving}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          {t.profilePage.form.removeButton}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <dl className="space-y-4">
-                  {detailItems.map(item => (
-                    <div key={item.label} className="flex items-start gap-3 rounded-lg border border-border/60 bg-background/80 p-3">
-                      <div className="mt-0.5 text-muted-foreground">{item.icon}</div>
-                      <div className="space-y-1">
-                        <dt className="text-xs uppercase tracking-wide text-muted-foreground">{item.label}</dt>
-                        <dd className="text-sm font-medium text-foreground">{item.value}</dd>
-                      </div>
-                    </div>
-                  ))}
-                </dl>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.profilePage.security.title}</CardTitle>
-                <CardDescription>{t.profilePage.security.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{t.profilePage.security.instructions}</p>
-                <Button onClick={handleSendPasswordReset} disabled={isSendingReset}>
-                  {isSendingReset ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t.common.loading}
-                    </>
-                  ) : (
-                    t.profilePage.security.resetButton
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label htmlFor="profile-honorific">{t.profilePage.form.honorificLabel}</Label>
+                    <Select
+                      value={honorific}
+                      onValueChange={value => setHonorific(value as HonorificOption)}
+                      disabled={isSaving}
+                    >
+                      <SelectTrigger id="profile-honorific">
+                        <SelectValue placeholder={t.profilePage.form.honorificPlaceholder} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {HONORIFIC_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="profile-first-name">{t.profilePage.info.firstName}</Label>
+                    <Input
+                      id="profile-first-name"
+                      value={firstName}
+                      onChange={event => setFirstName(event.target.value)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="profile-last-name">{t.profilePage.info.lastName}</Label>
+                    <Input
+                      id="profile-last-name"
+                      value={lastName}
+                      onChange={event => setLastName(event.target.value)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="profile-school">{t.profilePage.info.school}</Label>
+                    <Input
+                      id="profile-school"
+                      value={schoolName}
+                      onChange={event => setSchoolName(event.target.value)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="profile-email">{t.profilePage.info.email}</Label>
+                    <Input id="profile-email" value={user.email ?? ""} disabled readOnly />
+                  </div>
+                </div>
 
-          <div id="profile-settings">
-            <SettingsPanel user={user} />
-          </div>
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t.common.loading}
+                      </>
+                    ) : (
+                      t.profilePage.form.saveButton
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

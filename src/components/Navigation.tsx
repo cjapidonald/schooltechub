@@ -8,7 +8,6 @@ import {
   User,
   LogOut,
   BookOpen,
-  IdCard,
   GraduationCap,
   LayoutDashboard,
 } from "lucide-react";
@@ -177,12 +176,6 @@ const Navigation = () => {
                   >
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     {t.nav.dashboard}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => navigate(getLocalizedNavPath("/account"))}
-                  >
-                    <IdCard className="mr-2 h-4 w-4" />
-                    {t.nav.my_profile}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => navigate(getLocalizedNavPath("/account?tab=classes"))}

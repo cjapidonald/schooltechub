@@ -22,8 +22,17 @@ export const en = {
   },
   profilePage: {
     title: "My Profile",
-    subtitle: "Manage your teacher information and security preferences.",
-    editButton: "Edit profile",
+    subtitle: "Share your teacher details so we can personalize your experience.",
+    form: {
+      description: "Tell us about yourself so your dashboard can welcome you by name.",
+      photoLabel: "Profile photo",
+      photoHelp: "Upload a picture that will appear on your teacher dashboard.",
+      uploadButton: "Upload photo",
+      removeButton: "Remove photo",
+      honorificLabel: "Title",
+      honorificPlaceholder: "Select a title",
+      saveButton: "Save profile",
+    },
     info: {
       title: "Teacher Information",
       description: "Review the personal details connected to your SchoolTech Hub account.",
@@ -34,20 +43,14 @@ export const en = {
       phone: "Phone number",
       email: "Email",
     },
-    security: {
-      title: "Security",
-      description: "Keep your account secure by updating your password when needed.",
-      instructions:
-        "Send a password reset link to your email address. Follow the instructions in the email to choose a new password.",
-      resetButton: "Send password reset email",
-      resetSent: "Password reset sent",
-      resetDescription: "Check your inbox for the password reset email and follow the link provided.",
-      resetError: "Unable to send reset email",
-      noEmail: "We could not find an email associated with your account.",
-    },
     fallback: {
       notProvided: "Not provided",
       signInRequired: "Sign in to view your profile details.",
+    },
+    toasts: {
+      saved: "Profile updated",
+      errorTitle: "Unable to save profile",
+      errorDescription: "Please try again.",
     },
   },
   dashboard: {
