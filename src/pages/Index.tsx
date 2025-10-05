@@ -145,13 +145,13 @@ const structuredData = {
 };
 
 const neonCardClass =
-  "group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] backdrop-blur-xl transition-all duration-500 hover:border-primary/80 hover:shadow-[0_0_45px_hsl(var(--glow-primary)/0.35)]";
+  "group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 px-5 py-6 shadow-[0_0_25px_hsl(var(--glow-primary)/0.12)] backdrop-blur-xl transition-all duration-500 hover:border-primary/80 hover:shadow-[0_0_45px_hsl(var(--glow-primary)/0.35)] sm:px-6";
 
 const neonIconClass =
-  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-primary/35 bg-primary/15 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)] before:absolute before:-inset-3 before:rounded-full before:bg-primary/20 before:blur-xl before:content-['']";
+  "relative mb-4 flex h-12 w-12 items-center justify-center self-start rounded-full border border-primary/35 bg-primary/15 text-primary shadow-[0_0_30px_hsl(var(--glow-primary)/0.45)] before:absolute before:-inset-2 before:rounded-full before:bg-primary/20 before:blur-xl before:content-['']";
 
 const neonIconSecondaryClass =
-  "relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-secondary/35 bg-secondary/15 text-secondary shadow-[0_0_35px_hsl(var(--glow-secondary)/0.45)] before:absolute before:-inset-3 before:rounded-full before:bg-secondary/20 before:blur-xl before:content-['']";
+  "relative mb-4 flex h-12 w-12 items-center justify-center self-start rounded-full border border-secondary/35 bg-secondary/15 text-secondary shadow-[0_0_30px_hsl(var(--glow-secondary)/0.45)] before:absolute before:-inset-2 before:rounded-full before:bg-secondary/20 before:blur-xl before:content-['']";
 
 const Index = () => {
   const { language } = useLanguage();
@@ -266,17 +266,17 @@ const Index = () => {
               Lesson planning, student dashboards, and report building live together so every teacher can deliver technology-enabled learning with confidence.
             </p>
           </div>
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {workflowTools.map(({ title, description, icon: Icon }) => (
               <Card key={title} className={cn("h-full", neonCardClass)}>
-                <div className="flex flex-col items-center text-center">
+                <div className="flex h-full flex-col items-start gap-2 text-left">
                   <div className={neonIconClass}>
-                    <Icon className="relative h-8 w-8 drop-shadow-[0_0_15px_hsl(var(--glow-primary)/0.55)]" />
+                    <Icon className="relative h-6 w-6 drop-shadow-[0_0_12px_hsl(var(--glow-primary)/0.55)]" />
                   </div>
-                  <h3 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-2xl font-semibold text-transparent animate-gradient">
+                  <h3 className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-xl font-semibold leading-snug text-transparent animate-gradient md:text-2xl">
                     {title}
                   </h3>
-                  <p className="mt-4 text-base text-white/80">{description}</p>
+                  <p className="text-sm text-white/75 md:text-base">{description}</p>
                 </div>
               </Card>
             ))}
@@ -311,17 +311,17 @@ const Index = () => {
                 </Link>
               </div>
             </div>
-            <div className="grid w-full max-w-2xl gap-6 md:grid-cols-2">
+            <div className="grid w-full max-w-2xl gap-5 md:grid-cols-2">
               {schoolSolutions.map(({ title, description, icon: Icon }) => (
                 <Card key={title} className={cn("h-full", neonCardClass)}>
-                  <div className="flex flex-col items-center text-center">
+                  <div className="flex h-full flex-col items-start gap-2 text-left">
                     <div className={neonIconSecondaryClass}>
-                      <Icon className="relative h-8 w-8 drop-shadow-[0_0_18px_hsl(var(--glow-secondary)/0.55)]" />
+                      <Icon className="relative h-6 w-6 drop-shadow-[0_0_14px_hsl(var(--glow-secondary)/0.55)]" />
                     </div>
-                    <h3 className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-2xl font-semibold text-transparent animate-gradient">
+                    <h3 className="bg-gradient-to-r from-secondary via-primary to-accent bg-clip-text text-xl font-semibold leading-snug text-transparent animate-gradient md:text-2xl">
                       {title}
                     </h3>
-                    <p className="mt-4 text-base text-white/80">{description}</p>
+                    <p className="text-sm text-white/75 md:text-base">{description}</p>
                   </div>
                 </Card>
               ))}
