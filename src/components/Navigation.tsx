@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User as SupabaseUser } from "@supabase/supabase-js";
@@ -8,13 +8,12 @@ import RoleAuthDialog, { type AuthRole } from "@/components/auth/RoleAuthDialog"
 import DesktopNavLinks from "@/components/navigation/DesktopNavLinks";
 import AccountMenu from "@/components/navigation/AccountMenu";
 import MobileNavSheet from "@/components/navigation/MobileNavSheet";
-import type { LocalizedNavItem, NavItem } from "@/components/navigation/types";
+import type { NavItem } from "@/components/navigation/types";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [authRole, setAuthRole] = useState<AuthRole | null>(null);
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const location = useLocation();
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -52,27 +51,6 @@ const Navigation = () => {
     (path: string) => getLocalizedPath(path, "en"),
     []
   );
-
-  const localizedNavItems: LocalizedNavItem[] = useMemo(() => {
-    return navItems.map(item => {
-      const localizedPath = getLocalizedNavPath(item.path);
-      const [targetPath, queryString] = localizedPath.split("?");
-      const matchesPath =
-        location.pathname === targetPath ||
-        (item.path !== "/" && targetPath && location.pathname.startsWith(targetPath));
-      const targetParams = new URLSearchParams(queryString ?? "");
-      const currentParams = new URLSearchParams(location.search);
-      const matchesQuery =
-        targetParams.toString().length === 0 ||
-        Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
-
-      return {
-        ...item,
-        localizedPath,
-        isActive: matchesPath && matchesQuery,
-      };
-    });
-  }, [getLocalizedNavPath, location.pathname, location.search, navItems]);
 
   const isAuthDialogOpen = authRole !== null;
 
@@ -117,7 +95,8 @@ const Navigation = () => {
 
           <div className="flex flex-1 items-center justify-end gap-3">
             <DesktopNavLinks
-              items={localizedNavItems}
+              items={navItems}
+              getLocalizedNavPath={getLocalizedNavPath}
               onAuthRoleSelect={role => setAuthRole(role)}
               isAuthDialogOpen={isAuthDialogOpen}
             />
@@ -135,7 +114,8 @@ const Navigation = () => {
             </div>
 
             <MobileNavSheet
-              items={localizedNavItems}
+              items={navItems}
+              getLocalizedNavPath={getLocalizedNavPath}
               isOpen={isOpen}
               onOpenChange={setIsOpen}
               onAuthRoleSelect={role => setAuthRole(role)}
