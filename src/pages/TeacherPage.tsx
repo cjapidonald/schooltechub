@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useOptionalUser } from "@/hooks/useOptionalUser";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -25,6 +26,7 @@ import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import { createClass, fetchMyClasses } from "@/features/dashboard/api";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
+import { bulkAddStudents } from "@/features/students/api";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
 import { BarChart3, ClipboardList, LogIn, Sparkles, Users } from "lucide-react";
@@ -69,6 +71,7 @@ const classSchema = z.object({
   subject: z.string().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
+  studentNames: z.string().optional(),
 });
 
 type ClassFormValues = z.infer<typeof classSchema>;
@@ -105,6 +108,12 @@ const GLASS_PANEL_CLASS =
 
 const GLASS_TAB_TRIGGER_CLASS =
   "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/70 transition backdrop-blur-xl hover:border-white/40 hover:bg-white/15 hover:text-white data-[state=active]:border-white/60 data-[state=active]:bg-white/25 data-[state=active]:text-white data-[state=active]:shadow-[0_15px_45px_-25px_rgba(15,23,42,0.85)]";
+
+const splitStudentNames = (input: string | undefined) =>
+  (input ?? "")
+    .split(/\r?\n/)
+    .map(name => name.trim())
+    .filter(Boolean);
 
 export default function TeacherPage() {
   const { t } = useLanguage();
@@ -275,7 +284,7 @@ export default function TeacherPage() {
 
   const classForm = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
-    defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "" },
+    defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "", studentNames: "" },
   });
 
   const classesQuery = useQuery<Class[]>({
@@ -284,21 +293,44 @@ export default function TeacherPage() {
     enabled: Boolean(user?.id),
   });
 
+  const queryClient = useQueryClient();
+
   const createClassMutation = useMutation({
-    mutationFn: (values: ClassFormValues) =>
-      createClass({
+    mutationFn: async (values: ClassFormValues) => {
+      const createdClass = await createClass({
         ownerId: user!.id,
         title: values.title,
         stage: values.stage,
         subject: values.subject,
         start_date: values.start_date,
         end_date: values.end_date,
-      }),
-    onSuccess: () => {
+      });
+
+      const rosterNames = splitStudentNames(values.studentNames);
+
+      if (rosterNames.length > 0) {
+        await bulkAddStudents({ ownerId: user?.id, classId: createdClass.id, names: rosterNames });
+      }
+
+      return { rosterCount: rosterNames.length };
+    },
+    onSuccess: ({ rosterCount }, variables) => {
       setClassDialogOpen(false);
       classForm.reset();
       void classesQuery.refetch();
-      toast({ description: t.dashboard.toasts.classCreated });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-students"] });
+
+      const toastDescription =
+        rosterCount > 0
+          ? t.dashboard.toasts.classCreatedWithStudents
+              .replace("{title}", variables.title)
+              .replace("{count}", rosterCount.toLocaleString())
+          : t.dashboard.toasts.classCreatedNoStudents.replace("{title}", variables.title);
+
+      toast({
+        title: t.dashboard.toasts.classCreated,
+        description: toastDescription,
+      });
     },
     onError: error => {
       const description = error instanceof Error ? error.message : t.dashboard.toasts.classError;
@@ -530,7 +562,11 @@ export default function TeacherPage() {
               )}
             </TabsContent>
             <TabsContent value="students" className="space-y-6">
-              <StudentsSection className={cn(GLASS_PANEL_CLASS, "space-y-6")} />
+              <StudentsSection
+                classes={classes}
+                onOpenStudent={studentId => navigate(`/teacher/students/${encodeURIComponent(studentId)}`)}
+                className={cn(GLASS_PANEL_CLASS, "space-y-6")}
+              />
             </TabsContent>
             <TabsContent value="assessments" className="space-y-6">
               <AssessmentsSection className={cn(GLASS_PANEL_CLASS, "space-y-6")} />
@@ -569,6 +605,17 @@ export default function TeacherPage() {
                 <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
                 <Input id="class-end" type="date" {...classForm.register("end_date")} />
               </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="class-roster">{t.dashboard.dialogs.newClass.roster.label}</Label>
+              <Textarea
+                id="class-roster"
+                rows={5}
+                placeholder={t.dashboard.dialogs.newClass.roster.placeholder}
+                className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
+                {...classForm.register("studentNames")}
+              />
+              <p className="text-xs text-white/60">{t.dashboard.dialogs.newClass.roster.helper}</p>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setClassDialogOpen(false)}>
