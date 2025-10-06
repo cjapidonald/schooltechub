@@ -110,7 +110,7 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
           id="lesson-meta-teacher"
           value={value.teacher ?? ""}
           onChange={event => onChange({ ...value, teacher: event.target.value })}
-          placeholder="Prefilled from curriculum"
+          placeholder="Prefilled from saved context"
         />
       </div>
 

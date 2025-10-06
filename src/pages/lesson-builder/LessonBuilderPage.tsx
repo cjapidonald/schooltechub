@@ -791,7 +791,7 @@ const LessonBuilderPage = ({
                 <h2 className="text-xl font-semibold text-foreground">Lesson plan document</h2>
                 <p className="text-sm text-muted-foreground">
                   Draft the lesson narrative while exploring resources alongside your document. Fields are prefilled from your
-                  curriculum entry to keep everything aligned.
+                  saved context to keep everything aligned.
                 </p>
               </div>
 

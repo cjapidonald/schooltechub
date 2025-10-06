@@ -82,7 +82,7 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
       <aside className="space-y-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-sm">
         <p className="font-medium text-primary">Add resources</p>
         <p className="text-muted-foreground">
-          Sign in and open a curriculum lesson to search approved resources and insert them directly into your document.
+          Sign in and open a lesson workspace to search approved resources and insert them directly into your document.
         </p>
       </aside>
     );

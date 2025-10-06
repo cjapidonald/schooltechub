@@ -76,12 +76,6 @@ const createDetailedSections = (dictionary: TranslationDictionary): DetailedSect
           badges: ["requiresAuth"],
         },
         {
-          title: sitemap.linkTitles.teacherCurriculumManagement,
-          url: "/teacher/curriculum/manage",
-          description: sitemap.details.teacherCurriculumManagement,
-          badges: ["requiresAuth"],
-        },
-        {
           title: sitemap.linkTitles.teacherStudentDashboard,
           url: "/teacher/students/:id",
           description: sitemap.details.teacherStudentDashboard,
@@ -179,12 +173,6 @@ const createDetailedSections = (dictionary: TranslationDictionary): DetailedSect
           title: sitemap.linkTitles.legacyHome,
           url: "/home",
           description: sitemap.details.legacyHome,
-          badges: ["redirect"],
-        },
-        {
-          title: sitemap.linkTitles.legacyCurriculum,
-          url: "/curriculum",
-          description: sitemap.details.legacyCurriculum,
           badges: ["redirect"],
         },
         {
