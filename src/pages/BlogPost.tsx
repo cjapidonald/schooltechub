@@ -349,7 +349,7 @@ export default function BlogPost() {
     fetchComments();
 
     // Subscribe to real-time updates
-    const subscription = supabase
+    const channel = supabase
       .channel(`comments-${fetchedPost.id}`)
       .on("postgres_changes", {
         event: "*",
@@ -362,7 +362,7 @@ export default function BlogPost() {
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, [fetchedPost?.id]);
 
