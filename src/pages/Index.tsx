@@ -356,7 +356,7 @@ const Index = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:border-white/40 hover:bg-white/10 hover:text-white/70"
                         onClick={() => setAuthRole("teacher")}
                       >
                         I am a teacher
@@ -364,7 +364,7 @@ const Index = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:border-white/40 hover:bg-white/10 hover:text-white/70"
                         onClick={() => setAuthRole("student")}
                       >
                         I am a student
