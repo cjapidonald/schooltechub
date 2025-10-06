@@ -798,6 +798,12 @@ export const en = {
       loading: "Loading blog posts...",
       empty: "No blog posts found matching your criteria."
     },
+    sort: {
+      newestFirst: "Newest → Oldest",
+      oldestFirst: "Oldest → Newest",
+      toggleToNewest: "Show newest posts first",
+      toggleToOldest: "Show oldest posts first"
+    },
     badges: {
       pinned: "Pinned"
     },
