@@ -418,6 +418,9 @@ export default function DashboardPage() {
       case "post-blog":
         toast({ description: t.dashboard.toasts.blogUnavailable, variant: "destructive" });
         return;
+      case "open-profile":
+        navigate("/my-profile");
+        return;
       default:
         return;
     }

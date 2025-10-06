@@ -61,6 +61,7 @@ export const en = {
     quickActions: {
       askQuestion: "Ask",
       postBlog: "Write",
+      profile: "My Profile",
       newLessonPlan: "New Lesson Plan",
       newLessonPlanTooltip: "Create a curriculum first to unlock lesson planning.",
       newCurriculum: "New Curriculum",

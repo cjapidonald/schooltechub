@@ -4,7 +4,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export type DashboardQuickAction =
   | "ask-question"
-  | "post-blog";
+  | "post-blog"
+  | "open-profile";
 
 export interface DashboardHeaderNameParts {
   honorific?: string | null;
@@ -65,7 +66,7 @@ export function DashboardHeader({
             </p>
           </div>
         </div>
-        <div className="grid w-full gap-3 sm:grid-cols-2 lg:w-auto">
+        <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:w-auto">
           <Button
             onClick={() => onQuickAction("ask-question")}
             variant="outline"
@@ -81,6 +82,14 @@ export function DashboardHeader({
             aria-label={t.dashboard.quickActions.postBlog}
           >
             {t.dashboard.quickActions.postBlog}
+          </Button>
+          <Button
+            onClick={() => onQuickAction("open-profile")}
+            variant="outline"
+            className="h-12 w-full justify-center rounded-2xl border-white/40 bg-white/10 text-sm font-semibold text-white/90 transition hover:border-white/60 hover:bg-white/20"
+            aria-label={t.dashboard.quickActions.profile}
+          >
+            {t.dashboard.quickActions.profile}
           </Button>
         </div>
       </div>
