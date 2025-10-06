@@ -1221,6 +1221,27 @@ export const en = {
       title: "Welcome to SchoolTechHub",
       description: "Sign in to access exclusive content and features"
     },
+    demoCredentials: {
+      title: "Prototype logins",
+      subtitle: "Use these connected accounts to explore the teacher and student dashboards.",
+      emailLabel: "Email",
+      passwordLabel: "Password",
+      note: "Both accounts are pre-loaded with linked classes, lessons, and progress data.",
+      teacher: {
+        label: "Teacher login",
+        name: "Ms. Taylor Rivera",
+        roleDescription: "Lead Literacy Teacher",
+        email: "TaylorRivera@gmail.com",
+        password: "123"
+      },
+      student: {
+        label: "Student login",
+        name: "Linh San",
+        roleDescription: "Year 5 student in Ms. Rivera's class",
+        email: "linhsan@gmail.com",
+        password: "123"
+      }
+    },
     tabs: {
       signIn: "Sign In",
       signUp: "Sign Up"

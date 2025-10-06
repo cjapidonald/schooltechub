@@ -63,12 +63,13 @@ const STUDENT_UNLOCKED_TOAST = {
   description: "Explore the student journey preview—no real credentials required.",
 } as const;
 
-const fallbackStudentName = "Jordan Martinez";
+const fallbackStudentName = "Linh San";
 const exampleStudentFullName = exampleStudent?.fullName ?? fallbackStudentName;
 const exampleStudentPreferredName =
   exampleStudent?.preferredName ?? exampleStudentFullName.split(/\s+/)[0] ?? exampleStudentFullName;
 const exampleStudentGuardian = exampleStudent?.guardianName ?? "Family Advocate";
 const exampleStudentGuardianContact = exampleStudent?.guardianContact ?? "family@example.com";
+const exampleStudentEmail = exampleStudent?.email ?? "linhsan@gmail.com";
 const exampleStudentInitials = getInitials(exampleStudentFullName);
 const exampleStudentClassTitle = DASHBOARD_EXAMPLE_CLASS.title;
 const exampleStudentStage = DASHBOARD_EXAMPLE_CLASS.stage;
@@ -82,6 +83,7 @@ const exampleStudentAcademicComment =
 const profileHighlights = [
   { label: "Class group", value: `${exampleStudentClassTitle} • ${exampleStudentStage}` },
   { label: "Preferred name", value: exampleStudentPreferredName },
+  { label: "Student login email", value: exampleStudentEmail },
   { label: "Primary guardian", value: exampleStudentGuardian },
   { label: "Family contact", value: exampleStudentGuardianContact },
 ];

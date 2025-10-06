@@ -142,6 +142,7 @@ type BlogPostRow = Database["public"]["Tables"]["blogs"]["Row"] & {
   author_job_title?: string | null;
   time_required?: string | null;
   language?: string | null;
+  featured_image_caption?: string | null;
 };
 
 export default function BlogPost() {
@@ -481,8 +482,8 @@ export default function BlogPost() {
   const canonicalUrl = `${siteUrl}${languagePrefix}${articlePath}`;
   const authorName =
     typeof post.author === "object" && post.author !== null
-      ? (post.author as any).name || "SchoolTech Hub"
-      : post.author || "SchoolTech Hub";
+      ? (post.author as any).name || "Ms. Taylor Rivera"
+      : post.author || "Ms. Taylor Rivera";
   const publishedAtISO = post.published_at ? new Date(post.published_at).toISOString() : undefined;
   const modifiedAtISO = post.updated_at ? new Date(post.updated_at).toISOString() : publishedAtISO;
   const description = post.meta_description || post.excerpt || "";
@@ -608,13 +609,20 @@ export default function BlogPost() {
 
           {/* Featured Image */}
           {post.featured_image && (
-            <div className="aspect-video w-full overflow-hidden rounded-lg mb-8">
-              <img
-                src={post.featured_image}
-                alt={post.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <figure className="mb-8">
+              <div className="aspect-video w-full overflow-hidden rounded-lg">
+                <img
+                  src={post.featured_image}
+                  alt={post.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              {post.featured_image_caption ? (
+                <figcaption className="mt-3 text-sm text-white/70">
+                  {post.featured_image_caption}
+                </figcaption>
+              ) : null}
+            </figure>
           )}
 
           {/* Article Header */}
@@ -656,7 +664,7 @@ export default function BlogPost() {
                   )}
                   <div>
                     <span className="font-medium">
-                      {typeof post.author === 'object' ? (post.author as any).name : "SchoolTechHub Team"}
+                      {typeof post.author === 'object' ? (post.author as any).name ?? "Ms. Taylor Rivera" : post.author ?? "Ms. Taylor Rivera"}
                     </span>
                     {post.author_job_title && (
                       <span className="text-xs text-white ml-2">• {post.author_job_title}</span>

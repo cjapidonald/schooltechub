@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Search,
   Tag,
@@ -21,6 +21,7 @@ import {
   CreditCard,
   Globe,
   X,
+  User,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,9 +49,11 @@ interface AuthorInfo {
 type BlogPostRow = Database["public"]["Tables"]["blogs"]["Row"] & {
   subtitle?: string | null;
   author_name?: string | null;
+  author_job_title?: string | null;
   time_required?: string | null;
   language?: string | null;
   is_pinned?: boolean | null;
+  featured_image_caption?: string | null;
 };
 
 type BlogPost = BlogPostRow & {
@@ -285,7 +288,7 @@ const getAuthorName = (post: BlogPost): string => {
     }
   }
 
-  return "SchoolTech Hub";
+  return "Ms. Taylor Rivera";
 };
 
 const normalizeText = (input: string | string[] | null | undefined) => {
@@ -574,6 +577,15 @@ const Blog = () => {
   const pinnedPosts = filteredPosts.filter(post => post.is_pinned);
 
   const regularPosts = filteredPosts.filter(post => !pinnedPosts.includes(post));
+
+  const buildPostUrl = useCallback(
+    (post: BlogPost) => {
+      const slug = post.slug?.trim();
+      const identifier = slug && slug.length > 0 ? slug : post.id;
+      return getLocalizedPath(`/blog/${identifier}`, language);
+    },
+    [language],
+  );
 
   const clearAllFilters = useCallback(() => {
     setFilters(createEmptyFilters());
@@ -893,27 +905,43 @@ const Blog = () => {
                       {pinnedPosts.map(post => {
                         const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
                         const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
+                        const authorLabel = getAuthorName(post);
 
                         return (
-                          <article key={post.id} id={anchorId} className="group block">
-                            <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
-                              <figure className="relative h-48 overflow-hidden">
-                                <img
-                                  src={imageSrc}
-                                  alt={post.title}
-                                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                  loading="lazy"
-                                />
-                              </figure>
-                              <CardHeader className="space-y-3">
-                                <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
-                                  {post.title}
-                                </h2>
-                                {post.subtitle ? (
-                                  <p className="text-base text-white/70">{post.subtitle}</p>
-                                ) : null}
-                              </CardHeader>
-                            </Card>
+                          <article key={post.id} id={anchorId}>
+                            <Link
+                              to={buildPostUrl(post)}
+                              className="group block rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                              aria-label={post.title}
+                            >
+                              <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
+                                <figure className="relative h-48 overflow-hidden">
+                                  <img
+                                    src={imageSrc}
+                                    alt={post.title}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                  />
+                                  {post.featured_image_caption ? (
+                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-2 text-xs uppercase tracking-wide text-white/80">
+                                      {post.featured_image_caption}
+                                    </figcaption>
+                                  ) : null}
+                                </figure>
+                                <CardHeader className="space-y-3">
+                                  <div className="flex items-center gap-2 text-sm text-white/70">
+                                    <User className="h-4 w-4" aria-hidden="true" />
+                                    <span className="font-medium">{authorLabel}</span>
+                                  </div>
+                                  <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
+                                    {post.title}
+                                  </h2>
+                                  {post.subtitle ? (
+                                    <p className="text-base text-white/70">{post.subtitle}</p>
+                                  ) : null}
+                                </CardHeader>
+                              </Card>
+                            </Link>
                           </article>
                         );
                       })}
@@ -933,31 +961,43 @@ const Blog = () => {
                       {regularPosts.map(post => {
                         const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
                         const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
+                        const authorLabel = getAuthorName(post);
 
                         return (
-                          <article
-                            key={post.id}
-                            id={anchorId}
-                            className="group mb-5 block break-inside-avoid"
-                          >
-                            <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
-                              <figure className="relative overflow-hidden">
-                                <img
-                                  src={imageSrc}
-                                  alt={post.title}
-                                  className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                  loading="lazy"
-                                />
-                              </figure>
-                              <CardHeader className="space-y-2">
-                                <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
-                                  {post.title}
-                                </h3>
-                                {post.subtitle ? (
-                                  <p className="text-sm text-white/70">{post.subtitle}</p>
-                                ) : null}
-                              </CardHeader>
-                            </Card>
+                          <article key={post.id} id={anchorId} className="mb-5 break-inside-avoid">
+                            <Link
+                              to={buildPostUrl(post)}
+                              className="group block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                              aria-label={post.title}
+                            >
+                              <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
+                                <figure className="relative overflow-hidden">
+                                  <img
+                                    src={imageSrc}
+                                    alt={post.title}
+                                    className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                  />
+                                  {post.featured_image_caption ? (
+                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-2 text-[0.7rem] uppercase tracking-wide text-white/80">
+                                      {post.featured_image_caption}
+                                    </figcaption>
+                                  ) : null}
+                                </figure>
+                                <CardHeader className="space-y-2">
+                                  <div className="flex items-center gap-2 text-xs text-white/60">
+                                    <User className="h-3.5 w-3.5" aria-hidden="true" />
+                                    <span className="font-medium tracking-wide">{authorLabel}</span>
+                                  </div>
+                                  <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
+                                    {post.title}
+                                  </h3>
+                                  {post.subtitle ? (
+                                    <p className="text-sm text-white/70">{post.subtitle}</p>
+                                  ) : null}
+                                </CardHeader>
+                              </Card>
+                            </Link>
                           </article>
                         );
                       })}

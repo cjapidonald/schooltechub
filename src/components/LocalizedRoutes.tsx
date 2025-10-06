@@ -23,6 +23,7 @@ import AdminLoginPrototype from '@/pages/admin/AdminLoginPrototype';
 import TeacherPage from '@/pages/TeacherPage';
 import StudentPage from '@/pages/Student';
 import StudentDashboardPage from '@/pages/StudentDashboard';
+import BlogPost from '@/pages/BlogPost';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>
@@ -86,7 +87,7 @@ export const LocalizedRoutes = () => {
       <Route path="/services" element={<RouteWrapper><Services /></RouteWrapper>} />
       <Route path="/blog" element={<RouteWrapper><Blog /></RouteWrapper>} />
       <Route path="/blog/new" element={<Navigate to="/" replace />} />
-      <Route path="/blog/:slug" element={<Navigate to="/blog" replace />} />
+      <Route path="/blog/:slug" element={<RouteWrapper><BlogPost /></RouteWrapper>} />
       <Route path="/builder/lesson-plans" element={<Navigate to="/lesson-builder" replace />} />
       <Route path="/builder/lesson-plans/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />

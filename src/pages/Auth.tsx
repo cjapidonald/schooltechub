@@ -145,6 +145,25 @@ const Auth = () => {
 
   type RoleKey = keyof typeof roleIconMap;
 
+  const credentialEntries = [
+    {
+      key: "teacher",
+      label: t.auth.demoCredentials.teacher.label,
+      name: t.auth.demoCredentials.teacher.name,
+      roleDescription: t.auth.demoCredentials.teacher.roleDescription,
+      email: t.auth.demoCredentials.teacher.email,
+      password: t.auth.demoCredentials.teacher.password,
+    },
+    {
+      key: "student",
+      label: t.auth.demoCredentials.student.label,
+      name: t.auth.demoCredentials.student.name,
+      roleDescription: t.auth.demoCredentials.student.roleDescription,
+      email: t.auth.demoCredentials.student.email,
+      password: t.auth.demoCredentials.student.password,
+    },
+  ] as const;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 px-4 py-16">
       <SEO
@@ -154,138 +173,176 @@ const Auth = () => {
       />
 
       <div className="container mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,420px)_1fr]">
-        <Card className="w-full self-start shadow-lg lg:sticky lg:top-10">
-          <CardHeader className="space-y-3 text-center">
-            <div className="flex justify-center">
-              <Badge variant="outline" className="px-3 py-1 text-xs font-medium uppercase tracking-wide">
-                {t.auth.roleShowcase.badge}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              <CardTitle className="text-2xl">{t.auth.card.title}</CardTitle>
-              <CardDescription>{t.auth.card.description}</CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">{t.auth.tabs.signIn}</TabsTrigger>
-                <TabsTrigger value="signup">{t.auth.tabs.signUp}</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">{t.auth.email}</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder={t.auth.emailPlaceholder}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">{t.auth.password}</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      placeholder={t.auth.passwordPlaceholder}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? t.auth.signingIn : t.auth.signIn}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">{t.auth.name}</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder={t.auth.namePlaceholder}
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">{t.auth.email}</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder={t.auth.emailPlaceholder}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">{t.auth.password}</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder={t.auth.passwordCreatePlaceholder}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">{t.auth.role}</Label>
-                    <Select value={role} onValueChange={setRole}>
-                      <SelectTrigger id="role">
-                        <SelectValue placeholder={t.auth.selectRole} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Teacher">{t.auth.roles.teacher}</SelectItem>
-                        <SelectItem value="Admin">{t.auth.roles.admin}</SelectItem>
-                        <SelectItem value="Parent">{t.auth.roles.parent}</SelectItem>
-                        <SelectItem value="Student">{t.auth.roles.student}</SelectItem>
-                        <SelectItem value="Other">{t.auth.roles.other}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? t.auth.signingUp : t.auth.signUp}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+        <div className="flex flex-col gap-6 lg:gap-8">
+          <Card className="w-full self-start shadow-lg lg:sticky lg:top-10">
+            <CardHeader className="space-y-3 text-center">
+              <div className="flex justify-center">
+                <Badge variant="outline" className="px-3 py-1 text-xs font-medium uppercase tracking-wide">
+                  {t.auth.roleShowcase.badge}
+                </Badge>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">{t.auth.orContinueWith}</span>
+              <div className="space-y-1">
+                <CardTitle className="text-2xl">{t.auth.card.title}</CardTitle>
+                <CardDescription>{t.auth.card.description}</CardDescription>
               </div>
-            </div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">{t.auth.tabs.signIn}</TabsTrigger>
+                  <TabsTrigger value="signup">{t.auth.tabs.signUp}</TabsTrigger>
+                </TabsList>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleGoogleSignIn}
-              disabled={loading}
-            >
-              <Chrome className="mr-2 h-4 w-4" />
-              {googleLoading ? t.auth.googleSigningIn : t.auth.googleSignIn}
-            </Button>
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email">{t.auth.email}</Label>
+                      <Input
+                        id="signin-email"
+                        type="email"
+                        placeholder={t.auth.emailPlaceholder}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password">{t.auth.password}</Label>
+                      <Input
+                        id="signin-password"
+                        type="password"
+                        placeholder={t.auth.passwordPlaceholder}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? t.auth.signingIn : t.auth.signIn}
+                    </Button>
+                  </form>
+                </TabsContent>
 
-            <div className="mt-4 text-center text-sm">
-              <Link to={getLocalizedPath("/", language)} className="text-primary hover:underline">
-                {t.auth.backToHome}
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+                <TabsContent value="signup">
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">{t.auth.name}</Label>
+                      <Input
+                        id="signup-name"
+                        type="text"
+                        placeholder={t.auth.namePlaceholder}
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">{t.auth.email}</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder={t.auth.emailPlaceholder}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">{t.auth.password}</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder={t.auth.passwordCreatePlaceholder}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="role">{t.auth.role}</Label>
+                      <Select value={role} onValueChange={setRole}>
+                        <SelectTrigger id="role">
+                          <SelectValue placeholder={t.auth.selectRole} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Teacher">{t.auth.roles.teacher}</SelectItem>
+                          <SelectItem value="Admin">{t.auth.roles.admin}</SelectItem>
+                          <SelectItem value="Parent">{t.auth.roles.parent}</SelectItem>
+                          <SelectItem value="Student">{t.auth.roles.student}</SelectItem>
+                          <SelectItem value="Other">{t.auth.roles.other}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? t.auth.signingUp : t.auth.signUp}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">{t.auth.orContinueWith}</span>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+              >
+                <Chrome className="mr-2 h-4 w-4" />
+                {googleLoading ? t.auth.googleSigningIn : t.auth.googleSignIn}
+              </Button>
+
+              <div className="mt-4 text-center text-sm">
+                <Link to={getLocalizedPath("/", language)} className="text-primary hover:underline">
+                  {t.auth.backToHome}
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="w-full border-primary/20 bg-primary/5 shadow-lg">
+            <CardHeader className="space-y-2">
+              <CardTitle className="text-xl">{t.auth.demoCredentials.title}</CardTitle>
+              <CardDescription>{t.auth.demoCredentials.subtitle}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {credentialEntries.map(entry => (
+                <div
+                  key={entry.key}
+                  className="rounded-2xl border border-primary/20 bg-background/80 p-4 shadow-sm"
+                >
+                  <div className="flex flex-col gap-2">
+                    <Badge variant="outline" className="w-fit text-xs uppercase tracking-wide">
+                      {entry.label}
+                    </Badge>
+                    <div>
+                      <h3 className="text-base font-semibold text-foreground">{entry.name}</h3>
+                      <p className="text-sm text-muted-foreground">{entry.roleDescription}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-2 text-sm">
+                    <div className="flex items-center justify-between rounded-lg bg-primary/10 px-3 py-2">
+                      <span className="text-muted-foreground">{t.auth.demoCredentials.emailLabel}</span>
+                      <span className="font-medium text-foreground">{entry.email}</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg bg-primary/10 px-3 py-2">
+                      <span className="text-muted-foreground">{t.auth.demoCredentials.passwordLabel}</span>
+                      <span className="font-medium text-foreground">{entry.password}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <p className="text-xs text-muted-foreground">{t.auth.demoCredentials.note}</p>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="space-y-10">
           <div className="space-y-3">

@@ -32,16 +32,17 @@ export const DASHBOARD_EXAMPLE_SKILLS: SkillDefinition[] = [
 
 export const DASHBOARD_EXAMPLE_STUDENTS: StudentRecord[] = [
   {
-    id: "example-student-amelia",
+    id: "example-student-linh-san",
     classId: DASHBOARD_EXAMPLE_CLASS_ID,
-    fullName: "Amelia Johnson",
-    preferredName: "Millie",
-    guardianName: "Sarah Johnson",
-    guardianContact: "sarah.johnson@example.com",
+    fullName: "Linh San",
+    preferredName: "Linh",
+    email: "linhsan@gmail.com",
+    guardianName: "Mai San",
+    guardianContact: "mai.san@example.com",
     behaviorComment:
-      "Consistently supportive of classmates and contributes thoughtful ideas during class discussions.",
+      "Leads morning reflection circles with poise and encourages quieter peers to share their thinking.",
     academicComment:
-      "Showing strong progress in reading comprehension with increasing confidence in writing tasks.",
+      "Drafts vivid narratives and is experimenting with audio reflections to extend her stories beyond the page.",
     skills: [
       {
         skillId: DASHBOARD_EXAMPLE_SKILLS[0]!.id,
@@ -77,13 +78,15 @@ export const DASHBOARD_EXAMPLE_STUDENTS: StudentRecord[] = [
     isExample: true,
   },
   {
-    id: "example-student-oliver",
+    id: "example-student-amelia",
     classId: DASHBOARD_EXAMPLE_CLASS_ID,
-    fullName: "Oliver Chen",
-    guardianName: "David Chen",
-    guardianContact: "david.chen@example.com",
+    fullName: "Amelia Johnson",
+    preferredName: "Millie",
+    email: "amelia.johnson@example.com",
+    guardianName: "Sarah Johnson",
+    guardianContact: "sarah.johnson@example.com",
     behaviorComment:
-      "Friendly and collaborative, often volunteers to support peers during project work.",
+      "Jumps in to coach peers during workshop time and documents class norms on the board.",
     academicComment:
       "Improving narrative structure and developing a more confident writing voice.",
     skills: [
@@ -121,15 +124,16 @@ export const DASHBOARD_EXAMPLE_STUDENTS: StudentRecord[] = [
     isExample: true,
   },
   {
-    id: "example-student-lina",
+    id: "example-student-oliver",
     classId: DASHBOARD_EXAMPLE_CLASS_ID,
-    fullName: "Lina Ahmed",
-    guardianName: "Amina Ahmed",
-    guardianContact: "amina.ahmed@example.com",
+    fullName: "Oliver Chen",
+    email: "oliver.chen@example.com",
+    guardianName: "David Chen",
+    guardianContact: "david.chen@example.com",
     behaviorComment:
-      "Highly engaged during group work and responds well to constructive feedback.",
+      "Sets up media equipment for peer presentations and offers thoughtful feedback questions.",
     academicComment:
-      "Demonstrating rapid growth in both comprehension and creative writing tasks.",
+      "Curating stronger evidence in reflective journals and experimenting with multimedia storytelling.",
     skills: [
       {
         skillId: DASHBOARD_EXAMPLE_SKILLS[0]!.id,
