@@ -270,16 +270,18 @@ const StatCard = ({ stat, index, shouldAnimate }: StatCardProps) => {
 
   return (
     <Reveal delay={index * 120}>
-      <Card
-        className={cn(
-          "p-8",
-          neonCardClass,
-          neonCardGradients[index % neonCardGradients.length],
-        )}
-      >
-        <p className="text-4xl font-bold text-primary text-glow">{displayValue}</p>
-        <p className="mt-3 text-sm uppercase tracking-wide text-white/65">{stat.label}</p>
-      </Card>
+      <div className="h-full">
+        <Card
+          className={cn(
+            "flex h-full flex-col items-center justify-center gap-4 p-8 text-center",
+            neonCardClass,
+            neonCardGradients[index % neonCardGradients.length],
+          )}
+        >
+          <p className="text-4xl font-bold text-primary text-glow">{displayValue}</p>
+          <p className="text-sm uppercase tracking-wide text-white/65 leading-snug">{stat.label}</p>
+        </Card>
+      </div>
     </Reveal>
   );
 };
@@ -527,7 +529,7 @@ const Index = () => {
         </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
-          <div ref={statsRef} className="grid gap-[15px] text-center md:grid-cols-4">
+          <div ref={statsRef} className="grid auto-rows-fr gap-[15px] text-center md:grid-cols-4">
             {stats.map((stat, index) => (
               <StatCard key={stat.label} stat={stat} index={index} shouldAnimate={statsInView} />
             ))}
