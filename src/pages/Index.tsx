@@ -574,51 +574,39 @@ const Index = () => {
               </Reveal>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden py-24">
-        <div className="absolute inset-0 -z-20">
-          <img
-            src={classroomTechnologyBackgrounds.cta}
-            alt="Educators collaborating with immersive classroom tools"
-            className="h-full w-full object-cover object-center opacity-25"
-            loading="lazy"
-          />
-        </div>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 via-background to-secondary/20" />
-        <div className="container mx-auto px-4">
-          <Reveal>
-            <Card
-              className={cn(
-                "mx-auto max-w-4xl rounded-[2rem] bg-gradient-to-br from-primary/15 via-background/80 to-secondary/15 p-12 text-center",
-                neonCardClass,
-              )}
-            >
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
-                <Award className="h-10 w-10" />
-              </div>
-              <h2 className="mt-8 text-3xl font-bold text-white md:text-4xl">
-                Ready to simplify your teaching workflow?
-              </h2>
-              <p className="mt-4 text-lg text-white/80">
-                Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
-              </p>
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link to={getLocalizedPath("/auth", language)}>
-                  <Button size="lg" className="neon-pulse">
-                    Get started free
-                  </Button>
-                </Link>
-                <Link to={getLocalizedPath("/services", language)}>
-                  <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                    <TrendingUp className="mr-2 h-5 w-5" />
-                    View implementation roadmap
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          </Reveal>
+          <div className="mt-[10px]">
+            <Reveal>
+              <Card
+                className={cn(
+                  "mx-auto max-w-4xl rounded-[2rem] bg-gradient-to-br from-primary/15 via-background/80 to-secondary/15 p-12 text-center",
+                  neonCardClass,
+                )}
+              >
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/40 bg-primary/20 text-primary shadow-[0_0_35px_hsl(var(--glow-primary)/0.45)]">
+                  <Award className="h-10 w-10" />
+                </div>
+                <h2 className="mt-8 text-3xl font-bold text-white md:text-4xl">
+                  Ready to simplify your teaching workflow?
+                </h2>
+                <p className="mt-4 text-lg text-white/80">
+                  Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
+                </p>
+                <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                  <Link to={getLocalizedPath("/auth", language)}>
+                    <Button size="lg" className="neon-pulse">
+                      Get started free
+                    </Button>
+                  </Link>
+                  <Link to={getLocalizedPath("/services", language)}>
+                    <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                      <TrendingUp className="mr-2 h-5 w-5" />
+                      View implementation roadmap
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            </Reveal>
+          </div>
         </div>
       </section>
     </div>
