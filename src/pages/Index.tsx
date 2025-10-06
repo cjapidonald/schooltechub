@@ -197,6 +197,12 @@ const neonCardGradients = [
 
 const convexOverlayClass = "convex-panel-sheen";
 
+const glassBoardClass =
+  "relative overflow-hidden rounded-[2.25rem] border border-white/12 bg-white/10 p-8 text-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.82)] backdrop-blur-2xl sm:p-12";
+
+const glassBoardOverlayClass =
+  "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.22)_0%,_rgba(15,23,42,0.55)_60%,_rgba(15,23,42,0.92)_100%)] opacity-85";
+
 const classroomTechnologyBackgrounds = {
   featureShowcase:
     "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=2100&q=80",
@@ -455,33 +461,36 @@ const Index = () => {
               );
             })}
           </div>
-          <div className="mt-10 space-y-3 text-center">
+          <div className="mt-10">
             <Reveal delay={120}>
-              <h3 className="text-2xl font-semibold text-white">
-                Professional development and classroom technology aligned
-              </h3>
-            </Reveal>
-            <Reveal delay={180}>
-              <p className="text-base text-white/75">
-                From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
-              </p>
-            </Reveal>
-          </div>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Reveal>
-              <Link to={getLocalizedPath("/contact", language)}>
-                <Button size="lg" className="neon-pulse">
-                  Talk with our team
-                </Button>
-              </Link>
-            </Reveal>
-            <Reveal delay={120}>
-              <Link to={getLocalizedPath("/events", language)}>
-                <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                  <MessageSquare className="mr-2 h-5 w-5" />
-                  Join a training session
-                </Button>
-              </Link>
+              <Card className={cn(glassBoardClass, "mx-auto flex max-w-4xl flex-col items-center gap-8 text-center")}> 
+                <span className={glassBoardOverlayClass} aria-hidden />
+                <div className="relative z-10 space-y-3">
+                  <h3 className="text-2xl font-semibold text-white md:text-3xl">
+                    Professional development and classroom technology aligned
+                  </h3>
+                  <p className="text-base text-white/75">
+                    From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof. Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
+                  </p>
+                </div>
+                <div className="relative z-10 flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
+                  <Reveal direction="up">
+                    <Link to={getLocalizedPath("/contact", language)}>
+                      <Button size="lg" className="neon-pulse">
+                        Talk with our team
+                      </Button>
+                    </Link>
+                  </Reveal>
+                  <Reveal delay={120} direction="up">
+                    <Link to={getLocalizedPath("/events", language)}>
+                      <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                        <MessageSquare className="mr-2 h-5 w-5" />
+                        Join a training session
+                      </Button>
+                    </Link>
+                  </Reveal>
+                </div>
+              </Card>
             </Reveal>
           </div>
         </div>
