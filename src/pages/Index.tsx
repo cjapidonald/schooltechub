@@ -320,28 +320,46 @@ const Index = () => {
               <Reveal>
                 <Card
                   className={cn(
-                    neonCardClass,
-                    "relative isolate rounded-[2rem] bg-gradient-to-br from-primary/20 via-background/45 to-background/70 p-8 backdrop-blur-lg shadow-[0_28px_60px_-20px_rgba(54,20,130,0.65)] transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.7)] md:p-10",
-                    "before:absolute before:inset-[1.5px] before:rounded-[1.92rem] before:bg-[linear-gradient(150deg,rgba(255,255,255,0.16),rgba(15,15,35,0.45))] before:opacity-60 before:content-[''] before:z-0",
+                    glassBoardClass,
+                    "mx-auto flex max-w-4xl flex-col items-center gap-10 text-center",
                   )}
                 >
+                  <span className={glassBoardOverlayClass} aria-hidden />
                   <span className={convexOverlayClass} aria-hidden />
                   <span className="bolt-fastener absolute left-8 top-6 z-20 md:left-12 md:top-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 top-6 z-20 md:right-12 md:top-8" aria-hidden />
                   <span className="bolt-fastener absolute left-8 bottom-6 z-20 md:left-12 md:bottom-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 bottom-6 z-20 md:right-12 md:bottom-8" aria-hidden />
-                  <div className="relative z-10 flex flex-col items-center gap-10 text-center">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
-                      <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
-                        Power every lesson with organised workflows and luminous insights
-                      </h2>
-                      <p className="mt-6 max-w-xl text-base text-white/60 md:text-lg">
-                        SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.
-                      </p>
+                  <div className="relative z-10 flex flex-col items-center gap-8 text-center">
+                    <Badge
+                      variant="outline"
+                      className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur"
+                    >
+                      Glasshouse alignment
+                    </Badge>
+                    <h1 className="text-4xl font-semibold text-white md:text-5xl">
+                      Professional development and classroom technology aligned
+                    </h1>
+                    <p className="max-w-2xl text-base text-white/75 md:text-lg">
+                      From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof.
+                      Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
+                    </p>
+                    <div className="mt-2 flex flex-col items-center gap-4 sm:flex-row">
+                      <Link to={getLocalizedPath("/contact", language)}>
+                        <Button size="lg" className="neon-pulse">
+                          Talk with our team
+                        </Button>
+                      </Link>
+                      <Link to={getLocalizedPath("/services", language)}>
+                        <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Explore our playbooks
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                   <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
+                  <div className="pointer-events-none absolute -right-20 top-1/2 hidden h-56 w-56 -translate-y-1/2 rounded-full bg-secondary/25 blur-3xl md:block" />
                 </Card>
               </Reveal>
             </div>
