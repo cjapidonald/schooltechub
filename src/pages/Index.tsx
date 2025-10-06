@@ -201,7 +201,7 @@ const convexBevelClass =
   "border-[3px] border-white/20 shadow-[inset_0_3px_12px_rgba(255,255,255,0.18),inset_0_-3px_18px_rgba(15,23,42,0.55)]";
 
 const glassBoardClass =
-  "relative overflow-hidden rounded-[2.25rem] border border-white/12 bg-white/10 p-8 text-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.82)] backdrop-blur-2xl sm:p-12";
+  "relative overflow-hidden rounded-[2.25rem] border border-white/12 bg-white/10 p-8 text-white backdrop-blur-2xl sm:p-12";
 
 const glassBoardOverlayClass =
   "pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.22)_0%,_rgba(15,23,42,0.55)_60%,_rgba(15,23,42,0.92)_100%)] opacity-85";
