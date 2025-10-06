@@ -20,7 +20,6 @@ import SparklesBackground from "@/components/SparklesBackground";
 import { Reveal } from "@/components/animations/Reveal";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import RoleAuthDialog, { type AuthRole } from "@/components/auth/RoleAuthDialog";
@@ -350,13 +349,25 @@ const Index = () => {
                   <span className="bolt-fastener absolute right-8 top-6 z-20 md:right-12 md:top-8" aria-hidden />
                   <span className="bolt-fastener absolute left-8 bottom-6 z-20 md:left-12 md:bottom-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 bottom-6 z-20 md:right-12 md:bottom-8" aria-hidden />
-                  <div className="relative z-10 flex flex-col items-center gap-8 text-center">
-                    <Badge
-                      variant="outline"
-                      className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur"
-                    >
-                      Glasshouse alignment
-                    </Badge>
+                  <div className="relative z-10 flex flex-col items-start gap-8 text-left">
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur"
+                        onClick={() => setAuthRole("teacher")}
+                      >
+                        I am a teacher
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur"
+                        onClick={() => setAuthRole("student")}
+                      >
+                        I am a student
+                      </Button>
+                    </div>
                     <h1 className="text-4xl font-semibold text-white md:text-5xl">
                       Professional development and classroom technology aligned
                     </h1>
