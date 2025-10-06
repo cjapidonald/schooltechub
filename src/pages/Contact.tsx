@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,31 +15,85 @@ import { SEO } from "@/components/SEO";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+type ContactValidationMessages = {
+  required: string;
+  email: string;
+  phone: string;
+  serviceType: string;
+};
+
+const createContactSchema = (messages: ContactValidationMessages) =>
+  z.object({
+    name: z.string().min(1, { message: messages.required }),
+    email: z
+      .string()
+      .min(1, { message: messages.required })
+      .email(messages.email),
+    phone: z
+      .string()
+      .optional()
+      .refine(
+        (value) => !value || /^(\+?[0-9().\s-]{7,20})$/.test(value),
+        messages.phone
+      ),
+    school: z.string().optional(),
+    bookingType: z.enum(["consultation", "whole_school"], {
+      errorMap: () => ({ message: messages.serviceType }),
+    }),
+    topic: z.string().optional(),
+    preferredDate: z.string().optional(),
+    preferredTime: z.string().optional(),
+    message: z.string().optional(),
+  });
+
+type ContactFormValues = z.infer<ReturnType<typeof createContactSchema>>;
 
 const Contact = () => {
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    school: "",
-    bookingType: "consultation",
-    topic: "",
-    preferredDate: "",
-    preferredTime: "",
-    message: "",
+  const contactSchema = useMemo(
+    () => createContactSchema(t.contact.form.validation),
+    [t]
+  );
+
+  const defaultValues = useMemo<ContactFormValues>(
+    () => ({
+      name: "",
+      email: "",
+      phone: "",
+      school: "",
+      bookingType: "consultation",
+      topic: "",
+      preferredDate: "",
+      preferredTime: "",
+      message: "",
+    }),
+    []
+  );
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues,
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
 
     try {
       // For now, we'll store contact form submissions locally
-      console.log('Contact form submission:', formData);
-      
+      console.log("Contact form submission:", data);
+
       // You can implement email sending or save to a different table later
       // For now, just simulate success
 
@@ -48,18 +102,7 @@ const Contact = () => {
         description: t.contact.form.toast.successDescription,
       });
 
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        school: "",
-        bookingType: "consultation",
-        topic: "",
-        preferredDate: "",
-        preferredTime: "",
-        message: "",
-      });
+      reset(defaultValues);
     } catch (error) {
       const fallbackDescription = t.contact.form.toast.errorDescription;
       const description =
@@ -75,16 +118,7 @@ const Contact = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  });
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
@@ -199,7 +233,7 @@ const Contact = () => {
               <p className="mt-3 text-sm text-white/70">
                 {t.contact.form.subtitle}
               </p>
-              <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+              <form onSubmit={onSubmit} className="mt-8 space-y-6" noValidate>
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-sm font-medium text-white/80">
@@ -207,13 +241,21 @@ const Contact = () => {
                     </Label>
                     <Input
                       id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
+                      {...register("name")}
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? "name-error" : undefined}
                       placeholder={t.contact.form.fields.name.placeholder}
-                      className="h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                      className={cn(
+                        "h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40",
+                        errors.name &&
+                          "border-rose-400/70 focus-visible:ring-rose-400/60"
+                      )}
                     />
+                    {errors.name && (
+                      <p id="name-error" className="text-sm text-rose-300">
+                        {errors.name.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-medium text-white/80">
@@ -221,14 +263,22 @@ const Contact = () => {
                     </Label>
                     <Input
                       id="email"
-                      name="email"
                       type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
+                      {...register("email")}
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "email-error" : undefined}
                       placeholder={t.contact.form.fields.email.placeholder}
-                      className="h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                      className={cn(
+                        "h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40",
+                        errors.email &&
+                          "border-rose-400/70 focus-visible:ring-rose-400/60"
+                      )}
                     />
+                    {errors.email && (
+                      <p id="email-error" className="text-sm text-rose-300">
+                        {errors.email.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -239,13 +289,22 @@ const Contact = () => {
                     </Label>
                     <Input
                       id="phone"
-                      name="phone"
                       type="tel"
-                      value={formData.phone}
-                      onChange={handleChange}
+                      {...register("phone")}
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={errors.phone ? "phone-error" : undefined}
                       placeholder={t.contact.form.fields.phone.placeholder}
-                      className="h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                      className={cn(
+                        "h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40",
+                        errors.phone &&
+                          "border-rose-400/70 focus-visible:ring-rose-400/60"
+                      )}
                     />
+                    {errors.phone && (
+                      <p id="phone-error" className="text-sm text-rose-300">
+                        {errors.phone.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="school" className="text-sm font-medium text-white/80">
@@ -253,9 +312,7 @@ const Contact = () => {
                     </Label>
                     <Input
                       id="school"
-                      name="school"
-                      value={formData.school}
-                      onChange={handleChange}
+                      {...register("school")}
                       placeholder={t.contact.form.fields.school.placeholder}
                       className="h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40"
                     />
@@ -266,34 +323,60 @@ const Contact = () => {
                   <Label className="text-sm font-medium text-white/80">
                     {t.contact.form.serviceType.label}
                   </Label>
-                  <RadioGroup
-                    value={formData.bookingType}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, bookingType: value }))
-                    }
-                    className="grid gap-3 sm:grid-cols-2"
-                  >
-                    <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-3">
-                      <RadioGroupItem
-                        value="consultation"
-                        id="consultation"
-                        className="border-white/40 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
-                      />
-                      <Label htmlFor="consultation" className="font-normal text-white/80">
-                        {t.contact.form.serviceType.options.consultation}
-                      </Label>
-                    </div>
-                    <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-3">
-                      <RadioGroupItem
-                        value="whole_school"
-                        id="whole_school"
-                        className="border-white/40 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
-                      />
-                      <Label htmlFor="whole_school" className="font-normal text-white/80">
-                        {t.contact.form.serviceType.options.wholeSchool}
-                      </Label>
-                    </div>
-                  </RadioGroup>
+                  <Controller
+                    control={control}
+                    name="bookingType"
+                    render={({ field }) => (
+                      <RadioGroup
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onBlur={field.onBlur}
+                        className="grid gap-3 sm:grid-cols-2"
+                      >
+                        <div
+                          className={cn(
+                            "flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-3",
+                            errors.bookingType && "border-rose-400/70"
+                          )}
+                        >
+                          <RadioGroupItem
+                            value="consultation"
+                            id="consultation"
+                            className="border-white/40 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
+                            aria-describedby={
+                              errors.bookingType ? "bookingType-error" : undefined
+                            }
+                          />
+                          <Label htmlFor="consultation" className="font-normal text-white/80">
+                            {t.contact.form.serviceType.options.consultation}
+                          </Label>
+                        </div>
+                        <div
+                          className={cn(
+                            "flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-3",
+                            errors.bookingType && "border-rose-400/70"
+                          )}
+                        >
+                          <RadioGroupItem
+                            value="whole_school"
+                            id="whole_school"
+                            className="border-white/40 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
+                            aria-describedby={
+                              errors.bookingType ? "bookingType-error" : undefined
+                            }
+                          />
+                          <Label htmlFor="whole_school" className="font-normal text-white/80">
+                            {t.contact.form.serviceType.options.wholeSchool}
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    )}
+                  />
+                  {errors.bookingType && (
+                    <p id="bookingType-error" className="text-sm text-rose-300">
+                      {errors.bookingType.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -301,70 +384,93 @@ const Contact = () => {
                     <Label htmlFor="preferredDate" className="text-sm font-medium text-white/80">
                       {t.contact.form.fields.preferredDate.label}
                     </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "h-12 w-full justify-start rounded-2xl border-white/20 bg-white/10 text-left text-base font-normal text-white/80 hover:bg-white/20",
-                            !formData.preferredDate && "text-white/50"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {formData.preferredDate ? (
-                            format(new Date(formData.preferredDate), "PPP")
-                          ) : (
-                            <span>{t.contact.form.fields.preferredDate.placeholder}</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        className="z-[100] w-auto border border-white/15 bg-slate-950/80 p-0 text-white backdrop-blur"
-                        align="start"
-                      >
-                        <Calendar
-                          mode="single"
-                          selected={formData.preferredDate ? new Date(formData.preferredDate) : undefined}
-                          onSelect={(date) => {
-                            if (date) {
-                              setFormData((prev) => ({
-                                ...prev,
-                                preferredDate: format(date, "yyyy-MM-dd"),
-                              }));
-                            }
-                          }}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                          className="pointer-events-auto rounded-2xl bg-transparent p-3 text-white"
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Controller
+                      control={control}
+                      name="preferredDate"
+                      render={({ field }) => (
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "h-12 w-full justify-start rounded-2xl border-white/20 bg-white/10 text-left text-base font-normal text-white/80 hover:bg-white/20",
+                                !field.value && "text-white/50"
+                              )}
+                              onBlur={field.onBlur}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(new Date(field.value), "PPP")
+                              ) : (
+                                <span>{t.contact.form.fields.preferredDate.placeholder}</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            className="z-[100] w-auto border border-white/15 bg-slate-950/80 p-0 text-white backdrop-blur"
+                            align="start"
+                          >
+                            <Calendar
+                              mode="single"
+                              selected={field.value ? new Date(field.value) : undefined}
+                              onSelect={(date) => {
+                                field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                              }}
+                              disabled={(date) => date < new Date()}
+                              initialFocus
+                              className="pointer-events-auto rounded-2xl bg-transparent p-3 text-white"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="preferredTime" className="text-sm font-medium text-white/80">
                       {t.contact.form.fields.preferredTime.label}
                     </Label>
-                    <Select
-                      value={formData.preferredTime}
-                      onValueChange={(value) =>
-                        setFormData((prev) => ({ ...prev, preferredTime: value }))
-                      }
-                    >
-                      <SelectTrigger className="h-12 w-full rounded-2xl border-white/20 bg-white/10 text-left text-white placeholder:text-white/40">
-                        <SelectValue placeholder={t.contact.form.fields.preferredTime.placeholder} />
-                      </SelectTrigger>
-                      <SelectContent className="z-[100] rounded-2xl border border-white/15 bg-slate-950/80 text-white backdrop-blur">
-                        {t.contact.form.fields.preferredTime.options.map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className="data-[state=checked]:bg-white/20"
+                    <Controller
+                      control={control}
+                      name="preferredTime"
+                      render={({ field }) => (
+                        <Select
+                          value={field.value ?? undefined}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger
+                            ref={field.ref}
+                            onBlur={field.onBlur}
+                            className={cn(
+                              "h-12 w-full rounded-2xl border-white/20 bg-white/10 text-left text-white placeholder:text-white/40",
+                              errors.preferredTime &&
+                                "border-rose-400/70 focus-visible:ring-rose-400/60"
+                            )}
+                            aria-invalid={!!errors.preferredTime}
+                            aria-describedby={
+                              errors.preferredTime ? "preferredTime-error" : undefined
+                            }
                           >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                            <SelectValue placeholder={t.contact.form.fields.preferredTime.placeholder} />
+                          </SelectTrigger>
+                          <SelectContent className="z-[100] rounded-2xl border border-white/15 bg-slate-950/80 text-white backdrop-blur">
+                            {t.contact.form.fields.preferredTime.options.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="data-[state=checked]:bg-white/20"
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.preferredTime && (
+                      <p id="preferredTime-error" className="text-sm text-rose-300">
+                        {errors.preferredTime.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -374,9 +480,7 @@ const Contact = () => {
                   </Label>
                   <Input
                     id="topic"
-                    name="topic"
-                    value={formData.topic}
-                    onChange={handleChange}
+                    {...register("topic")}
                     placeholder={t.contact.form.fields.topic.placeholder}
                     className="h-12 rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40"
                   />
@@ -388,9 +492,7 @@ const Contact = () => {
                   </Label>
                   <Textarea
                     id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
+                    {...register("message")}
                     placeholder={t.contact.form.fields.message.placeholder}
                     className="min-h-[140px] rounded-2xl border-white/20 bg-white/10 text-white placeholder:text-white/40 focus-visible:ring-white/40"
                   />

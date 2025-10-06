@@ -1153,6 +1153,12 @@ export const en = {
           wholeSchool: "Whole School Consulting ($60)"
         }
       },
+      validation: {
+        required: "This field is required.",
+        email: "Please enter a valid email address.",
+        phone: "Please enter a valid phone number.",
+        serviceType: "Please select a service type."
+      },
       cta: {
         idle: "Send Booking Request",
         loading: "Sending..."
