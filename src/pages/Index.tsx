@@ -514,21 +514,7 @@ const Index = () => {
               <StatCard key={stat.label} stat={stat} index={index} shouldAnimate={statsInView} />
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden py-24">
-        <div className="absolute inset-0 -z-20">
-          <img
-            src={classroomTechnologyBackgrounds.testimonials}
-            alt="Students collaborating with digital tablets"
-            className="h-full w-full object-cover object-center opacity-25"
-            loading="lazy"
-          />
-        </div>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/95 via-background/80 to-background" />
-        <div className="container mx-auto px-4">
-          <div className="mx-auto mb-16 max-w-2xl">
+          <div className="mt-[10px] flex justify-center">
             <Reveal>
               <Card className={cn(neonCardClass, glassBoardClass)}>
                 <span className={convexOverlayClass} aria-hidden />
@@ -547,6 +533,20 @@ const Index = () => {
               </Card>
             </Reveal>
           </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden py-24">
+        <div className="absolute inset-0 -z-20">
+          <img
+            src={classroomTechnologyBackgrounds.testimonials}
+            alt="Students collaborating with digital tablets"
+            className="h-full w-full object-cover object-center opacity-25"
+            loading="lazy"
+          />
+        </div>
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/95 via-background/80 to-background" />
+        <div className="container mx-auto px-4">
           <div className="grid gap-[15px] md:grid-cols-3">
             {testimonials.map(({ quote, name, role, image }, index) => (
               <Reveal key={name} delay={index * 150}>
