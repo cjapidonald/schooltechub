@@ -20,17 +20,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
-import TeacherAuthDialog from "@/components/auth/TeacherAuthDialog";
+import RoleAuthDialog, { type AuthRole } from "@/components/auth/RoleAuthDialog";
 
 type NavItem = {
   name: string;
   path: string;
-  type?: "link" | "teacher-auth";
+  type?: "link" | "teacher-auth" | "student-auth";
 };
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isTeacherAuthOpen, setIsTeacherAuthOpen] = useState(false);
+  const [authRole, setAuthRole] = useState<AuthRole | null>(null);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ const Navigation = () => {
     const items: NavItem[] = [
       { name: t.nav.home, path: "/" },
       { name: t.nav.dashboard, path: "/teacher", type: "teacher-auth" },
-      { name: t.nav.student, path: "/student" },
+      { name: t.nav.student, path: "/student", type: "student-auth" },
       { name: t.nav.blog, path: "/blog" },
       { name: t.nav.events, path: "/events" },
       { name: t.nav.services, path: "/services" },
@@ -75,6 +75,15 @@ const Navigation = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate(getLocalizedNavPath("/"));
+  };
+
+  const isAuthDialogOpen = authRole !== null;
+
+  const handleAuthSuccess = (role: AuthRole) => {
+    const targetPath = role === "student" ? "/student" : "/teacher";
+    const localizedTarget = getLocalizedNavPath(targetPath);
+    setAuthRole(null);
+    navigate(localizedTarget);
   };
 
   return (
@@ -109,16 +118,16 @@ const Navigation = () => {
                 Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
               const isActive = matchesPath && matchesQuery;
 
-              if (item.type === "teacher-auth") {
+              if (item.type === "teacher-auth" || item.type === "student-auth") {
                 return (
                   <button
                     key={item.path}
                     type="button"
-                    onClick={() => setIsTeacherAuthOpen(true)}
+                    onClick={() => setAuthRole(item.type === "student-auth" ? "student" : "teacher")}
                     aria-current={isActive ? "page" : undefined}
                     aria-haspopup="dialog"
-                    aria-expanded={isTeacherAuthOpen}
-                    aria-controls="teacher-auth-dialog"
+                    aria-expanded={isAuthDialogOpen}
+                    aria-controls="role-auth-dialog"
                     className={cn(
                       "rounded-full px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap",
                       "border border-transparent hover:border-white/40 hover:bg-white/20 hover:text-foreground hover:backdrop-blur-sm",
@@ -208,19 +217,19 @@ const Navigation = () => {
                     Array.from(targetParams.entries()).every(([key, value]) => currentParams.get(key) === value);
                   const isActive = matchesPath && matchesQuery;
 
-                  if (item.type === "teacher-auth") {
-                    return (
-                      <button
-                        key={item.path}
-                        type="button"
-                        onClick={() => {
-                          setIsTeacherAuthOpen(true);
+              if (item.type === "teacher-auth" || item.type === "student-auth") {
+                return (
+                  <button
+                    key={item.path}
+                    type="button"
+                    onClick={() => {
+                          setAuthRole(item.type === "student-auth" ? "student" : "teacher");
                           setIsOpen(false);
                         }}
-                        aria-current={isActive ? "page" : undefined}
-                        aria-haspopup="dialog"
-                        aria-expanded={isTeacherAuthOpen}
-                        aria-controls="teacher-auth-dialog"
+                    aria-current={isActive ? "page" : undefined}
+                    aria-haspopup="dialog"
+                        aria-expanded={isAuthDialogOpen}
+                        aria-controls="role-auth-dialog"
                         className={cn(
                           "py-2 text-left text-lg font-medium transition-colors",
                           "text-muted-foreground hover:text-primary"
@@ -281,13 +290,15 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
-      <TeacherAuthDialog
-        open={isTeacherAuthOpen}
-        onOpenChange={setIsTeacherAuthOpen}
-        onConfirm={() => {
-          setIsTeacherAuthOpen(false);
-          navigate(getLocalizedNavPath("/teacher"));
+      <RoleAuthDialog
+        open={isAuthDialogOpen}
+        role={authRole ?? "teacher"}
+        onOpenChange={open => {
+          if (!open) {
+            setAuthRole(null);
+          }
         }}
+        onSuccess={handleAuthSuccess}
       />
     </>
   );

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -33,23 +34,37 @@ const Auth = () => {
 
   const { language, t } = useLanguage();
 
+  const nextPath = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const next = params.get("next");
+    if (!next) {
+      return "/";
+    }
+    try {
+      const decoded = decodeURIComponent(next);
+      return decoded.startsWith("/") ? decoded : "/";
+    } catch {
+      return "/";
+    }
+  }, [location.search]);
+
   useEffect(() => {
     // Set up auth state listener FIRST to handle redirects/code exchange
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate(getLocalizedPath("/", language));
+        navigate(getLocalizedPath(nextPath, language));
       }
     });
 
     // Then check for existing session (also triggers code exchange on redirect)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate(getLocalizedPath("/", language));
+        navigate(getLocalizedPath(nextPath, language));
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, language]);
+  }, [navigate, language, nextPath]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
