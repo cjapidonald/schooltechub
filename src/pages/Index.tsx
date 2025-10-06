@@ -532,7 +532,9 @@ const Index = () => {
             <Reveal>
               <Card className={cn(neonCardClass, glassBoardClass)}>
                 <span className={convexOverlayClass} aria-hidden />
-                <div className="relative z-10 space-y-5">
+                <div
+                  className="relative z-10 space-y-5 rounded-[1.75rem] border border-white/15 bg-white/10 p-8 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.65)] backdrop-blur-2xl sm:p-10"
+                >
                   <h2 className="text-3xl font-bold text-white md:text-4xl">
                     Teachers trust SchoolTech Hub for digital transformation
                   </h2>
