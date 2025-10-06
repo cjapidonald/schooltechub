@@ -25,7 +25,6 @@ import { ClassesTable } from "@/components/dashboard/ClassesTable";
 import { CurriculaList } from "@/components/dashboard/CurriculaList";
 import { CurriculumEditor } from "@/components/dashboard/CurriculumEditor";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
-import { SkillsSection } from "@/components/dashboard/SkillsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import {
@@ -127,7 +126,7 @@ const formatLessonContextDate = (value: string | null) => {
   }
 };
 
-const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "skills", "assessments"] as const;
+const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "assessments"] as const;
 type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 const isDashboardTab = (value: string | null): value is DashboardTab =>
@@ -697,12 +696,6 @@ export default function DashboardPage() {
                 {t.dashboard.tabs.students}
               </TabsTrigger>
               <TabsTrigger
-                value="skills"
-                className={GLASS_TAB_TRIGGER_CLASS}
-              >
-                {t.dashboard.tabs.skills}
-              </TabsTrigger>
-              <TabsTrigger
                 value="assessments"
                 className={GLASS_TAB_TRIGGER_CLASS}
               >
@@ -811,9 +804,6 @@ export default function DashboardPage() {
                 classes={classes}
                 onOpenStudent={studentId => navigate(`/teacher/students/${studentId}`)}
               />
-            </TabsContent>
-            <TabsContent value="skills" className="space-y-6">
-              <SkillsSection className={GLASS_PANEL_CLASS} classes={classes} />
             </TabsContent>
             <TabsContent value="assessments" className="space-y-6">
               <AssessmentsSection className={GLASS_PANEL_CLASS} />
