@@ -109,6 +109,14 @@ export const RoleAuthDialog = ({ open, role, onOpenChange, onSuccess }: RoleAuth
 
   const copy = roleCopy[role];
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
+  const handleOverlayClick = () => {
+    handleClose();
+  };
+
   return (
     <div
       id="role-auth-dialog"
@@ -117,6 +125,14 @@ export const RoleAuthDialog = ({ open, role, onOpenChange, onSuccess }: RoleAuth
       role="dialog"
       aria-modal="true"
       aria-labelledby="role-auth-title"
+      onClick={handleOverlayClick}
+      onKeyDown={event => {
+        if (event.key === "Escape") {
+          event.stopPropagation();
+          handleClose();
+        }
+      }}
+      tabIndex={-1}
     >
       <div
         className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/30 bg-white/10 text-white shadow-[0_18px_60px_-30px_rgba(15,23,42,1)] backdrop-blur-2xl"
@@ -124,7 +140,7 @@ export const RoleAuthDialog = ({ open, role, onOpenChange, onSuccess }: RoleAuth
       >
         <button
           type="button"
-          onClick={() => onOpenChange(false)}
+          onClick={handleClose}
           className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white/70 transition hover:text-white"
           aria-label="Close login dialog"
         >

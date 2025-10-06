@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StudentSkillChart } from "@/components/students/StudentSkillChart";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
 import { DASHBOARD_EXAMPLE_SKILLS, DASHBOARD_EXAMPLE_STUDENTS } from "@/features/students/examples";
+import { useToast } from "@/hooks/use-toast";
 import { CalendarDays, CheckCircle2, Clock, LogIn, Notebook, Sparkles, TrendingUp, Trophy } from "lucide-react";
 
 const getInitials = (name: string): string => {
@@ -56,6 +57,12 @@ const overallLatestAverageDisplay = Math.round(overallLatestAverage);
 const observationCheckIns = exampleStudentSkills.reduce((max, skill) => Math.max(max, skill.scores.length), 0);
 const observationLabel = observationCheckIns > 0 ? `${observationCheckIns} check-ins` : "recent updates";
 const emptySkillChartLabel = "Skill trend data will appear once your teacher shares updates.";
+
+const STUDENT_LOCKED_TOAST = {
+  title: "Student login coming soon",
+  description:
+    "We're still building secure student authentication, so the dashboard preview stays locked for now.",
+} as const;
 
 const fallbackStudentName = "Jordan Martinez";
 const exampleStudentFullName = exampleStudent?.fullName ?? fallbackStudentName;
@@ -201,6 +208,7 @@ const timeline = [
 ];
 
 export default function StudentPage() {
+  const { toast } = useToast();
   const [hasEntered, setHasEntered] = useState(false);
   const journeyContentRef = useRef<HTMLElement | null>(null);
 
@@ -212,10 +220,21 @@ export default function StudentPage() {
     journeyContentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [hasEntered]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("preview") === "student") {
+      setHasEntered(true);
+    }
+  }, []);
+
   const handleEnterJourney = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    setHasEntered(true);
+    toast(STUDENT_LOCKED_TOAST);
   };
 
   return (

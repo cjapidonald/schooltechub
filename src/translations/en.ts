@@ -99,6 +99,9 @@ export const en = {
       resourceShortcutMissing: "No quick resources are available yet for this lesson.",
       resourceAttached: "Resource attached to the lesson plan.",
       resourceAttachError: "We couldn't attach that resource. Please try again.",
+      prototypeLocked: "Teacher login coming soon.",
+      prototypeLockedDescription:
+        "Secure authentication is still in progress, so this preview stays locked for now.",
       error: "Something went wrong. Please try again.",
       blogUnavailable: "Blog submissions are currently unavailable.",
     },
