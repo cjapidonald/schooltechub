@@ -298,28 +298,19 @@ export default function StudentPage() {
               </Card>
             </div>
           ) : (
-            <div className="relative z-10 mx-auto max-w-md">
-              <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl">
-                <CardHeader className="space-y-3 text-center">
-                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/80 backdrop-blur">
+            <div className="relative z-10 mx-auto max-w-sm">
+              <Card className="border-white/15 bg-white/10 text-white shadow-[0_16px_50px_-30px_rgba(15,23,42,0.85)] backdrop-blur-xl">
+                <CardHeader className="space-y-2 text-center">
+                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[0.7rem] font-medium text-white/80 backdrop-blur">
                     <Sparkles className="h-4 w-4" />
                     Student journey portal
                   </div>
-                  <CardTitle className="text-2xl font-semibold text-white">Log in to your journey</CardTitle>
-                  <CardDescription className="text-sm text-white/70">
+                  <CardTitle className="text-xl font-semibold text-white">Log in to your journey</CardTitle>
+                  <CardDescription className="text-xs text-white/70">
                     Access assignments, celebrate streaks, and follow teacher guidance the moment you sign in.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 p-3">
-                    <Avatar className="h-11 w-11 border border-white/30">
-                      <AvatarFallback className="bg-white/10 text-lg text-white">{exampleStudentInitials}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-xs uppercase tracking-wide text-white/60">Previewing as</p>
-                      <p className="text-base font-medium text-white">{exampleStudentFullName}</p>
-                    </div>
-                  </div>
+                <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <Label htmlFor="student-email" className="text-[0.65rem] uppercase tracking-wide text-white/60">
@@ -343,27 +334,6 @@ export default function StudentPage() {
                         className="h-11 rounded-2xl border-white/20 bg-white/10 text-sm text-white placeholder:text-white/40 focus-visible:ring-white/40"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-3 text-sm text-white/70">
-                    <p className="font-medium text-white">What you&apos;ll unlock</p>
-                    <ul className="grid gap-2 text-left sm:grid-cols-2">
-                      <li className="flex items-start gap-2">
-                        <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
-                        Guided skill growth updates
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Notebook className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
-                        Real-time homework tracking
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
-                        Focus highlights from teachers
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-white/80" />
-                        Upcoming sessions overview
-                      </li>
-                    </ul>
                   </div>
                   <Button
                     type="button"
