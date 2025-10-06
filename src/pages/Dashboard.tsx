@@ -158,6 +158,13 @@ export default function DashboardPage() {
   const [activeCurriculumId, setActiveCurriculumId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
+  const prototypeLockedToast = useMemo(
+    () => ({
+      title: t.dashboard.toasts.prototypeLocked,
+      description: t.dashboard.toasts.prototypeLockedDescription,
+    }),
+    [t.dashboard.toasts.prototypeLocked, t.dashboard.toasts.prototypeLockedDescription],
+  );
   const journeyContentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -175,8 +182,13 @@ export default function DashboardPage() {
   }, [hasEnteredPrototype, user]);
 
   const handleEnterPrototype = useCallback(() => {
+    if (!user) {
+      toast(prototypeLockedToast);
+      return;
+    }
+
     setHasEnteredPrototype(true);
-  }, []);
+  }, [prototypeLockedToast, toast, user]);
 
   const updateSearchParams = useCallback(
     (mutator: (params: URLSearchParams) => void, options: { replace?: boolean } = {}) => {
