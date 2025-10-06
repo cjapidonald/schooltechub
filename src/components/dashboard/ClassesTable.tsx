@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import type { Class } from "../../../types/supabase-tables";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
 
 interface ClassesTableProps {
   classes: Array<Class & { isExample?: boolean }>;
@@ -59,10 +60,27 @@ export function ClassesTable({
       <div className="rounded-3xl border border-white/20 bg-white/5 p-6 text-white/80 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl">
         {loading ? (
           <div className="py-10 text-center text-white/70">{t.dashboard.common.loading}</div>
-        ) : classes.length === 0 ? (
-          <div className="py-10 text-center text-white/70">{t.dashboard.classes.empty}</div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <button
+              type="button"
+              onClick={onNewClass}
+              aria-label={t.dashboard.classes.addCard.title}
+              className="group flex h-full min-h-[220px] flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-white/25 bg-white/5 p-6 text-center text-white/70 shadow-[0_35px_120px_-60px_rgba(15,23,42,0.95)] transition duration-300 hover:border-white/60 hover:bg-white/10 hover:text-white"
+            >
+              <span className="flex h-16 w-16 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white">
+                <Plus className="h-8 w-8" aria-hidden="true" />
+              </span>
+              <div className="space-y-1">
+                <p className="text-lg font-semibold text-white">{t.dashboard.classes.addCard.title}</p>
+                <p className="text-sm text-white/70">{t.dashboard.classes.addCard.description}</p>
+              </div>
+            </button>
+            {classes.length === 0 ? (
+              <div className="flex min-h-[220px] flex-col items-center justify-center rounded-3xl border border-white/15 bg-white/10 p-6 text-center text-white/70 shadow-[0_35px_120px_-60px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
+                <p className="text-sm">{t.dashboard.classes.empty}</p>
+              </div>
+            ) : null}
             {classes.map(item => (
               <div
                 key={item.id}

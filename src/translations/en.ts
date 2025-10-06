@@ -93,6 +93,9 @@ export const en = {
       classCreated: "Class created",
       classCreatedWithStudents: "“{title}” was created and {count} students were added.",
       classCreatedNoStudents: "“{title}” was created. Add students anytime from the Students tab.",
+      classCreatedWithCurriculum: "“{title}” was created and the curriculum board is ready.",
+      classCreatedWithStudentsAndCurriculum:
+        "“{title}” was created, {count} students were added, and the curriculum board is ready.",
       curriculumCreated: "Curriculum created",
       lessonPlanCreated: "Lesson plan created",
       exportUnavailable: "CSV export will be available soon.",
@@ -110,6 +113,10 @@ export const en = {
     classes: {
       title: "My Classes",
       subtitle: "Track the classes you own and jump into their dashboards.",
+      addCard: {
+        title: "Add a class",
+        description: "Paste your roster and curriculum outline to build everything in one step.",
+      },
       columns: {
         title: "Class",
         stage: "Stage",
@@ -125,7 +132,7 @@ export const en = {
         view: "View",
         edit: "Edit",
       },
-      empty: "You haven't created any classes yet.",
+      empty: "You haven't created any classes yet. Use the + card to start a class in seconds.",
     },
     students: {
       title: "My Students",
@@ -359,10 +366,17 @@ export const en = {
           startDate: "Start date",
           endDate: "End date",
         },
+        curriculum: {
+          label: "Curriculum outline (optional)",
+          placeholder: "Paste unit goals, essential questions, pacing, and lesson ideas...",
+          helper: "We'll prefill the curriculum board with anything you share here.",
+          example:
+            "Unit: Solar System Expedition\nVision: Students investigate how planets compare and design a travel guide.\nEssential questions: How do conditions differ across planets? What makes Earth unique?\nLessons:\n1. Launch Briefing - Preview the planets | NASA VR tour\n2. Mission Teams - Research planet conditions | Lab notebooks\n3. Prototype Exhibit - Build an interactive model | Makerspace carts",
+        },
         roster: {
           label: "Student roster (optional)",
-          placeholder: "Paste student names here, one per line",
-          helper: "We'll add these students to the class as soon as it's created.",
+          placeholder: "Paste student names separated by commas or line breaks",
+          helper: "We'll add these students to the class as soon as it's created. Separate each student with a comma or a new line.",
         },
         submit: "Create class",
       },

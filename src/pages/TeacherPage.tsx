@@ -72,6 +72,7 @@ const classSchema = z.object({
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   studentNames: z.string().optional(),
+  curriculumOutline: z.string().optional(),
 });
 
 type ClassFormValues = z.infer<typeof classSchema>;
@@ -111,7 +112,7 @@ const GLASS_TAB_TRIGGER_CLASS =
 
 const splitStudentNames = (input: string | undefined) =>
   (input ?? "")
-    .split(/\r?\n/)
+    .split(/[\r?\n,;\t]+/)
     .map(name => name.trim())
     .filter(Boolean);
 
@@ -163,6 +164,163 @@ const createEmptyCurriculumDraft = (cls: Class): CurriculumDraft => ({
   notes: "",
   lessons: [],
 });
+
+const normalizeSectionLabel = (label: string) =>
+  label
+    .toLowerCase()
+    .replace(/[^a-z/&]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const createCurriculumDraftFromOutline = (cls: Class, outline: string | undefined): CurriculumDraft => {
+  const draft = createEmptyCurriculumDraft(cls);
+  const raw = outline?.trim();
+
+  if (!raw) {
+    return draft;
+  }
+
+  const sectionMap: Record<string, CurriculumTextField | "lessons"> = {
+    unit: "unitTitle",
+    "unit title": "unitTitle",
+    title: "unitTitle",
+    theme: "unitTitle",
+    vision: "vision",
+    goals: "vision",
+    "big idea": "vision",
+    "essential question": "essentialQuestions",
+    "essential questions": "essentialQuestions",
+    "guiding question": "essentialQuestions",
+    "guiding questions": "essentialQuestions",
+    objectives: "knowledgeSkills",
+    "learning objective": "knowledgeSkills",
+    "learning objectives": "knowledgeSkills",
+    "learning target": "knowledgeSkills",
+    "learning targets": "knowledgeSkills",
+    knowledge: "knowledgeSkills",
+    skills: "knowledgeSkills",
+    assessments: "assessments",
+    assessment: "assessments",
+    evidence: "assessments",
+    pacing: "pacing",
+    timeline: "pacing",
+    schedule: "pacing",
+    notes: "notes",
+    reminders: "notes",
+    overview: "notes",
+    lessons: "lessons",
+    "lesson sequence": "lessons",
+    sequence: "lessons",
+  };
+
+  let currentSection: CurriculumTextField | "lessons" | null = null;
+  let notesBuffer: string[] = [];
+
+  const setFieldValue = (field: CurriculumTextField, value: string) => {
+    if (field === "notes") {
+      notesBuffer = value ? [value] : [];
+      return;
+    }
+
+    draft[field] = value;
+  };
+
+  const appendFieldValue = (field: CurriculumTextField, value: string) => {
+    if (!value) {
+      return;
+    }
+
+    if (field === "notes") {
+      notesBuffer.push(value);
+      return;
+    }
+
+    draft[field] = draft[field] ? `${draft[field]}\n${value}` : value;
+  };
+
+  const pushLesson = (value: string) => {
+    const expand = (segment: string) => {
+      const trimmed = segment.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      const cleaned = trimmed.replace(/^(?:lesson\s*\d+[:.)-]?\s*)/i, "");
+      const [titleFocus, resourcePart] = cleaned.split(/\s*\|\s*/, 2);
+      const [titlePart, focusPart] = titleFocus.split(/\s+-\s+/, 2);
+      const title = (titlePart ?? "").trim() || trimmed;
+      const focus = (focusPart ?? "").trim();
+      const resources = (resourcePart ?? "").trim();
+
+      draft.lessons.push({
+        id: generateLessonId(),
+        title,
+        focus,
+        resources,
+      });
+    };
+
+    value
+      .split(/(?:\s*;\s*|\s*[•\u2022]\s*)/)
+      .map(segment => segment.trim())
+      .filter(Boolean)
+      .forEach(expand);
+  };
+
+  const lines = raw
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  const firstMeaningfulLine = lines[0];
+
+  lines.forEach(line => {
+    const headingMatch = line.match(/^([A-Za-z][A-Za-z\s/&]+):\s*(.*)$/);
+    if (headingMatch) {
+      const [, rawLabel, rest] = headingMatch;
+      const normalized = normalizeSectionLabel(rawLabel);
+      const section = sectionMap[normalized];
+
+      if (section) {
+        currentSection = section;
+
+        if (section === "lessons") {
+          if (rest) {
+            pushLesson(rest);
+          }
+        } else {
+          setFieldValue(section, rest.trim());
+        }
+        return;
+      }
+    }
+
+    const lessonLineMatch = line.match(/^(?:\d+[.)-]?\s+|[-•\u2022]\s+)(.+)$/);
+    if (currentSection === "lessons" || lessonLineMatch) {
+      const lessonContent = currentSection === "lessons" && !lessonLineMatch ? line : lessonLineMatch?.[1] ?? line;
+      pushLesson(lessonContent);
+      currentSection = "lessons";
+      return;
+    }
+
+    if (currentSection && currentSection !== "lessons") {
+      appendFieldValue(currentSection, line);
+      return;
+    }
+
+    notesBuffer.push(line);
+  });
+
+  if (notesBuffer.length > 0) {
+    draft.notes = notesBuffer.join("\n");
+  }
+
+  if (!draft.unitTitle || draft.unitTitle === `${cls.title} overview`) {
+    draft.unitTitle = firstMeaningfulLine ?? draft.unitTitle;
+  }
+
+  return draft;
+};
 
 const createMsRiveraCurriculumDraft = (): CurriculumDraft => ({
   unitTitle: "Personal Narratives Writing Unit",
@@ -377,7 +535,15 @@ export default function TeacherPage() {
 
   const classForm = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
-    defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "", studentNames: "" },
+    defaultValues: {
+      title: "",
+      stage: "",
+      subject: "",
+      start_date: "",
+      end_date: "",
+      studentNames: "",
+      curriculumOutline: "",
+    },
   });
 
   const classesQuery = useQuery<Class[]>({
@@ -405,20 +571,37 @@ export default function TeacherPage() {
         await bulkAddStudents({ ownerId: user?.id, classId: createdClass.id, names: rosterNames });
       }
 
-      return { rosterCount: rosterNames.length };
+      const trimmedOutline = values.curriculumOutline?.trim() ?? "";
+      const draft = createCurriculumDraftFromOutline(createdClass, trimmedOutline);
+
+      return {
+        rosterCount: rosterNames.length,
+        createdClass,
+        draft,
+        hasCurriculumOutline: trimmedOutline.length > 0,
+      };
     },
-    onSuccess: ({ rosterCount }, variables) => {
+    onSuccess: ({ rosterCount, createdClass, draft, hasCurriculumOutline }, variables) => {
       setClassDialogOpen(false);
       classForm.reset();
       void classesQuery.refetch();
       void queryClient.invalidateQueries({ queryKey: ["dashboard-students"] });
 
+      setCurriculumDrafts(prev => ({ ...prev, [createdClass.id]: draft }));
+      setSelectedCurriculumClassId(createdClass.id);
+
       const toastDescription =
-        rosterCount > 0
-          ? t.dashboard.toasts.classCreatedWithStudents
+        rosterCount > 0 && hasCurriculumOutline
+          ? t.dashboard.toasts.classCreatedWithStudentsAndCurriculum
               .replace("{title}", variables.title)
               .replace("{count}", rosterCount.toLocaleString())
-          : t.dashboard.toasts.classCreatedNoStudents.replace("{title}", variables.title);
+          : rosterCount > 0
+            ? t.dashboard.toasts.classCreatedWithStudents
+                .replace("{title}", variables.title)
+                .replace("{count}", rosterCount.toLocaleString())
+            : hasCurriculumOutline
+              ? t.dashboard.toasts.classCreatedWithCurriculum.replace("{title}", variables.title)
+              : t.dashboard.toasts.classCreatedNoStudents.replace("{title}", variables.title);
 
       toast({
         title: t.dashboard.toasts.classCreated,
@@ -1106,6 +1289,20 @@ export default function TeacherPage() {
               <div className="grid gap-2">
                 <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
                 <Input id="class-end" type="date" {...classForm.register("end_date")} />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="class-curriculum">{t.dashboard.dialogs.newClass.curriculum.label}</Label>
+              <Textarea
+                id="class-curriculum"
+                rows={6}
+                placeholder={t.dashboard.dialogs.newClass.curriculum.placeholder}
+                className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
+                {...classForm.register("curriculumOutline")}
+              />
+              <p className="text-xs text-white/60">{t.dashboard.dialogs.newClass.curriculum.helper}</p>
+              <div className="rounded-xl border border-dashed border-white/20 bg-white/5 p-3 text-xs text-white/70 whitespace-pre-wrap">
+                {t.dashboard.dialogs.newClass.curriculum.example}
               </div>
             </div>
             <div className="grid gap-2">
