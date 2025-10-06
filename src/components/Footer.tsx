@@ -55,11 +55,9 @@ const Footer = () => {
             {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center">
-                <img
-                  src="/logo.png"
-                  alt="School Tech Hub Solutions"
-                  className="h-10 w-auto"
-                />
+                <span className="text-lg font-semibold">
+                  School Tech Hub Solutions
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">
                 {t.footer.tagline}
