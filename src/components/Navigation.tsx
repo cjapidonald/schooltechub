@@ -63,18 +63,12 @@ const Navigation = () => {
 
   const homePath = getLocalizedNavPath("/");
   const authPath = getLocalizedNavPath("/auth");
-  const profilePath = getLocalizedNavPath("/my-profile");
   const authLabel = `${t.nav.signUp} / ${t.nav.signIn}`;
-  const myProfileLabel = t.nav.my_profile ?? t.nav.dashboard;
   const signOutLabel = t.nav.signOut;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate(homePath);
-  };
-
-  const handleNavigateToProfile = () => {
-    navigate(profilePath);
   };
 
   return (
@@ -106,9 +100,7 @@ const Navigation = () => {
                 user={user}
                 authPath={authPath}
                 authLabel={authLabel}
-                myProfileLabel={myProfileLabel}
                 signOutLabel={signOutLabel}
-                onNavigateToProfile={handleNavigateToProfile}
                 onSignOut={handleSignOut}
               />
             </div>
@@ -122,9 +114,7 @@ const Navigation = () => {
               isAuthDialogOpen={isAuthDialogOpen}
               user={user}
               authPath={authPath}
-              profilePath={profilePath}
               authLabel={authLabel}
-              myProfileLabel={myProfileLabel}
               signOutLabel={signOutLabel}
               onSignOut={handleSignOut}
             />
