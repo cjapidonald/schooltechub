@@ -168,6 +168,137 @@ export const DASHBOARD_EXAMPLE_STUDENTS: StudentRecord[] = [
     ],
     isExample: true,
   },
+  {
+    id: "example-student-ravi",
+    classId: DASHBOARD_EXAMPLE_CLASS_ID,
+    fullName: "Ravi Singh",
+    preferredName: "Ravi",
+    email: "ravi.singh@example.com",
+    guardianName: "Priya Singh",
+    guardianContact: "priya.singh@example.com",
+    behaviorComment: "Builds community by pairing classmates for peer review and checking in on new arrivals.",
+    academicComment: "Experimenting with stronger evidence in persuasive writing and reflecting confidently on feedback.",
+    skills: [
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[0]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[0]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 58 },
+          { month: "2024-10", score: 63 },
+          { month: "2024-11", score: 68 },
+          { month: "2024-12", score: 73 },
+        ]),
+      },
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[1]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[1]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 56 },
+          { month: "2024-10", score: 61 },
+          { month: "2024-11", score: 66 },
+          { month: "2024-12", score: 71 },
+        ]),
+      },
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[2]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[2]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 60 },
+          { month: "2024-10", score: 65 },
+          { month: "2024-11", score: 70 },
+          { month: "2024-12", score: 75 },
+        ]),
+      },
+    ],
+    isExample: true,
+  },
+  {
+    id: "example-student-maya",
+    classId: DASHBOARD_EXAMPLE_CLASS_ID,
+    fullName: "Maya Lopez",
+    preferredName: "Maya",
+    email: "maya.lopez@example.com",
+    guardianName: "Elena Lopez",
+    guardianContact: "elena.lopez@example.com",
+    behaviorComment: "Keeps group projects organized with shared checklists and celebrates teammates' wins on the class board.",
+    academicComment: "Applying new vocabulary intentionally in daily writing warm-ups and reading discussions.",
+    skills: [
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[0]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[0]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 61 },
+          { month: "2024-10", score: 66 },
+          { month: "2024-11", score: 71 },
+          { month: "2024-12", score: 75 },
+        ]),
+      },
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[1]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[1]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 59 },
+          { month: "2024-10", score: 64 },
+          { month: "2024-11", score: 69 },
+          { month: "2024-12", score: 73 },
+        ]),
+      },
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[2]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[2]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 63 },
+          { month: "2024-10", score: 68 },
+          { month: "2024-11", score: 72 },
+          { month: "2024-12", score: 77 },
+        ]),
+      },
+    ],
+    isExample: true,
+  },
+  {
+    id: "example-student-harper",
+    classId: DASHBOARD_EXAMPLE_CLASS_ID,
+    fullName: "Harper Lee",
+    email: "harper.lee@example.com",
+    guardianName: "Jordan Lee",
+    guardianContact: "jordan.lee@example.com",
+    behaviorComment: "Leads tech setup for storytelling stations and offers encouraging peer feedback during share-outs.",
+    academicComment: "Growing confidence with inferencing and experimenting with multimodal storytelling drafts.",
+    skills: [
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[0]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[0]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 54 },
+          { month: "2024-10", score: 59 },
+          { month: "2024-11", score: 64 },
+          { month: "2024-12", score: 69 },
+        ]),
+      },
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[1]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[1]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 55 },
+          { month: "2024-10", score: 60 },
+          { month: "2024-11", score: 65 },
+          { month: "2024-12", score: 70 },
+        ]),
+      },
+      {
+        skillId: DASHBOARD_EXAMPLE_SKILLS[2]!.id,
+        skillName: DASHBOARD_EXAMPLE_SKILLS[2]!.title,
+        scores: createScoreSeries([
+          { month: "2024-09", score: 57 },
+          { month: "2024-10", score: 62 },
+          { month: "2024-11", score: 66 },
+          { month: "2024-12", score: 71 },
+        ]),
+      },
+    ],
+    isExample: true,
+  },
 ];
 
 export const DASHBOARD_EXAMPLE_STUDENT_CLASSES = [DASHBOARD_EXAMPLE_CLASS];

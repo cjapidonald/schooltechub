@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { SEO } from "@/components/SEO";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import { ClassesTable } from "@/components/dashboard/ClassesTable";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
-import { createClass, fetchMyClasses } from "@/features/dashboard/api";
+import { createClass, fetchMyClasses, updateClassDetails } from "@/features/dashboard/api";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
 import { bulkAddStudents } from "@/features/students/api";
 import { useMyProfile } from "@/hooks/useMyProfile";
@@ -75,6 +75,15 @@ const classSchema = z.object({
 });
 
 type ClassFormValues = z.infer<typeof classSchema>;
+
+const defaultClassFormValues: ClassFormValues = {
+  title: "",
+  stage: "",
+  subject: "",
+  start_date: "",
+  end_date: "",
+  studentNames: "",
+};
 
 type LessonBuilderRouteContext = {
   title: string;
@@ -284,7 +293,12 @@ export default function TeacherPage() {
 
   const classForm = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
-    defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "", studentNames: "" },
+    defaultValues: { ...defaultClassFormValues },
+  });
+
+  const editClassForm = useForm<ClassFormValues>({
+    resolver: zodResolver(classSchema),
+    defaultValues: { ...defaultClassFormValues },
   });
 
   const classesQuery = useQuery<Class[]>({
@@ -294,6 +308,9 @@ export default function TeacherPage() {
   });
 
   const queryClient = useQueryClient();
+
+  const editClassIdParam = searchParams.get("editClassId");
+  const editingClassId = editClassIdParam && editClassIdParam.trim().length > 0 ? editClassIdParam : null;
 
   const createClassMutation = useMutation({
     mutationFn: async (values: ClassFormValues) => {
@@ -338,6 +355,57 @@ export default function TeacherPage() {
     },
   });
 
+  const updateClassMutation = useMutation({
+    mutationFn: async (values: ClassFormValues) => {
+      if (!editingClassId) {
+        throw new Error(t.dashboard.toasts.error);
+      }
+
+      if (!user?.id) {
+        throw new Error(t.dashboard.toasts.error);
+      }
+
+      const title = values.title.trim();
+      const stage = values.stage?.trim() ?? "";
+      const subject = values.subject?.trim() ?? "";
+      const startDate = values.start_date?.trim() ?? "";
+      const endDate = values.end_date?.trim() ?? "";
+
+      return updateClassDetails({
+        id: editingClassId,
+        ownerId: user.id,
+        title,
+        stage: stage.length > 0 ? stage : undefined,
+        subject: subject.length > 0 ? subject : undefined,
+        start_date: startDate.length > 0 ? startDate : undefined,
+        end_date: endDate.length > 0 ? endDate : undefined,
+      });
+    },
+    onSuccess: updatedClass => {
+      const safeTitle = updatedClass.title?.trim().length
+        ? updatedClass.title
+        : t.dashboard.classes.title;
+      const description = t.dashboard.toasts.classUpdatedDescription.replace("{title}", safeTitle);
+
+      toast({
+        title: t.dashboard.toasts.classUpdated,
+        description,
+      });
+
+      editClassForm.reset({ ...defaultClassFormValues });
+      updateSearchParams(params => {
+        params.delete("editClassId");
+      });
+
+      void classesQuery.refetch();
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-students"] });
+    },
+    onError: error => {
+      const description = error instanceof Error ? error.message : t.dashboard.toasts.error;
+      toast({ description, variant: "destructive" });
+    },
+  });
+
   const handleQuickAction = useCallback(
     (action: DashboardQuickAction) => {
       switch (action) {
@@ -363,6 +431,55 @@ export default function TeacherPage() {
     }
     return [DASHBOARD_EXAMPLE_CLASS];
   }, [classesQuery.data]);
+
+  const editingClass = useMemo(() => {
+    if (!editingClassId) {
+      return null;
+    }
+    return classes.find(item => item.id === editingClassId) ?? null;
+  }, [classes, editingClassId]);
+
+  useEffect(() => {
+    if (!editingClass) {
+      return;
+    }
+
+    editClassForm.reset({
+      title: editingClass.title ?? "",
+      stage: editingClass.stage ?? "",
+      subject: editingClass.subject ?? "",
+      start_date: editingClass.start_date ?? "",
+      end_date: editingClass.end_date ?? "",
+      studentNames: "",
+    });
+  }, [editingClass, editClassForm]);
+
+  const handleOpenEditDialog = useCallback(
+    (classId: string) => {
+      updateSearchParams(params => {
+        params.set("tab", "classes");
+        params.set("editClassId", classId);
+      });
+    },
+    [updateSearchParams],
+  );
+
+  const handleCloseEditDialog = useCallback(() => {
+    editClassForm.reset({ ...defaultClassFormValues });
+    updateClassMutation.reset();
+    updateSearchParams(params => {
+      params.delete("editClassId");
+    });
+  }, [editClassForm, updateClassMutation, updateSearchParams]);
+
+  useEffect(() => {
+    if (editingClassId) {
+      return;
+    }
+
+    updateClassMutation.reset();
+    editClassForm.reset({ ...defaultClassFormValues });
+  }, [editingClassId, editClassForm, updateClassMutation]);
 
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
@@ -502,9 +619,7 @@ export default function TeacherPage() {
                 onViewClass={classId =>
                   navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
                 }
-                onEditClass={classId =>
-                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
-                }
+                onEditClass={handleOpenEditDialog}
               />
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">
@@ -574,6 +689,98 @@ export default function TeacherPage() {
           </Tabs>
         </section>
       </div>
+
+      <Dialog
+        open={Boolean(editingClassId)}
+        onOpenChange={open => {
+          if (!open) {
+            handleCloseEditDialog();
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-lg border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
+          <DialogHeader>
+            <DialogTitle>{t.dashboard.dialogs.editClass.title}</DialogTitle>
+            <DialogDescription>
+              {editingClass
+                ? t.dashboard.dialogs.editClass.description.replace(
+                    "{title}",
+                    editingClass.title ?? t.dashboard.classes.title,
+                  )
+                : t.dashboard.dialogs.editClass.loading}
+            </DialogDescription>
+          </DialogHeader>
+          {editingClass ? (
+            <form
+              onSubmit={editClassForm.handleSubmit(values => updateClassMutation.mutate(values))}
+              className="space-y-4"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="edit-class-title">{t.dashboard.dialogs.newClass.fields.title}</Label>
+                <Input
+                  id="edit-class-title"
+                  {...editClassForm.register("title")}
+                  required
+                  disabled={updateClassMutation.isPending}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-class-stage">{t.dashboard.dialogs.newClass.fields.stage}</Label>
+                <Input
+                  id="edit-class-stage"
+                  {...editClassForm.register("stage")}
+                  disabled={updateClassMutation.isPending}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-class-subject">{t.dashboard.dialogs.newClass.fields.subject}</Label>
+                <Input
+                  id="edit-class-subject"
+                  {...editClassForm.register("subject")}
+                  disabled={updateClassMutation.isPending}
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-class-start">{t.dashboard.dialogs.newClass.fields.startDate}</Label>
+                  <Input
+                    id="edit-class-start"
+                    type="date"
+                    {...editClassForm.register("start_date")}
+                    disabled={updateClassMutation.isPending}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
+                  <Input
+                    id="edit-class-end"
+                    type="date"
+                    {...editClassForm.register("end_date")}
+                    disabled={updateClassMutation.isPending}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseEditDialog}
+                  disabled={updateClassMutation.isPending}
+                >
+                  {t.common.cancel}
+                </Button>
+                <Button type="submit" disabled={updateClassMutation.isPending}>
+                  {t.dashboard.dialogs.editClass.submit}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <div className="py-6 text-sm text-white/70">
+              {t.dashboard.dialogs.editClass.loading}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
         <DialogContent className="sm:max-w-lg border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">

@@ -93,6 +93,8 @@ export const en = {
       classCreated: "Class created",
       classCreatedWithStudents: "“{title}” was created and {count} students were added.",
       classCreatedNoStudents: "“{title}” was created. Add students anytime from the Students tab.",
+      classUpdated: "Class updated",
+      classUpdatedDescription: "“{title}” has been updated.",
       curriculumCreated: "Curriculum created",
       lessonPlanCreated: "Lesson plan created",
       exportUnavailable: "CSV export will be available soon.",
@@ -365,6 +367,12 @@ export const en = {
           helper: "We'll add these students to the class as soon as it's created.",
         },
         submit: "Create class",
+      },
+      editClass: {
+        title: "Edit class",
+        description: "Update the details for “{title}”.",
+        loading: "Loading class details…",
+        submit: "Save changes",
       },
       newCurriculum: {
         title: "New Curriculum",

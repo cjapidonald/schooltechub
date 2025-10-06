@@ -273,7 +273,7 @@ export async function fetchClassSkills(input: { ownerId?: string | null; classId
 
   try {
     const { data, error } = await supabase
-      .from<SupabaseClassSkillRow>("class_skills" as "class_skills")
+      .from<SupabaseClassSkillRow>("class_skills")
       .select("class_id,skill_id,skills(id,title,description)")
       .in("class_id", classIds);
 
@@ -319,7 +319,7 @@ export async function fetchStudents(input: {
 
   try {
     const { data: classStudents, error: classStudentsError } = await supabase
-      .from<SupabaseClassStudentRow>("class_students" as "class_students")
+      .from<SupabaseClassStudentRow>("class_students")
       .select(
         "class_id,student_id,students(id,first_name,last_name,full_name,preferred_name,guardian_name,guardian_contact,behavior_comment,academic_comment,avatar_url)"
       )
@@ -342,7 +342,7 @@ export async function fetchStudents(input: {
 
     const studentIds = Array.from(uniqueStudents.keys());
     const { data: scoreRows, error: scoresError } = await supabase
-      .from<SupabaseStudentSkillScoreRow>("student_skill_scores" as "student_skill_scores")
+      .from<SupabaseStudentSkillScoreRow>("student_skill_scores")
       .select("id,student_id,skill_id,month,score")
       .in("student_id", studentIds);
 
@@ -439,7 +439,7 @@ export async function bulkAddStudents(input: {
     });
 
     const { data: insertedStudents, error: insertError } = await supabase
-      .from<Omit<SupabaseStudentRow, "id"> & { id: string }>("students" as "students")
+      .from<Omit<SupabaseStudentRow, "id"> & { id: string }>("students")
       .insert(studentPayload)
       .select("id");
 
@@ -454,7 +454,7 @@ export async function bulkAddStudents(input: {
 
     if (enrollmentPayload.length > 0) {
       const { error: enrollmentError } = await supabase
-        .from<SupabaseClassStudentRow>("class_students" as "class_students")
+        .from<SupabaseClassStudentRow>("class_students")
         .insert(enrollmentPayload);
 
       if (enrollmentError) {
@@ -496,7 +496,7 @@ export async function createSkillForClass(input: {
 
   try {
     const { data: skillRow, error: skillError } = await supabase
-      .from<SupabaseSkillRow>("skills" as "skills")
+      .from<SupabaseSkillRow>("skills")
       .insert({
         owner_id: ownerId,
         title: title.trim(),
@@ -510,7 +510,7 @@ export async function createSkillForClass(input: {
     }
 
     const { error: linkError } = await supabase
-      .from<SupabaseClassSkillRow>("class_skills" as "class_skills")
+      .from<SupabaseClassSkillRow>("class_skills")
       .insert({ class_id: classId, skill_id: skillRow.id });
 
     if (linkError) {
@@ -567,7 +567,7 @@ export async function updateStudentComments(input: {
     }
 
     const { error } = await supabase
-      .from("students" as "students")
+      .from("students")
       .update(updates)
       .eq("id", studentId);
 
@@ -603,7 +603,7 @@ export async function upsertStudentSkillScore(input: {
     };
 
     const { error } = await supabase
-      .from("student_skill_scores" as "student_skill_scores")
+      .from("student_skill_scores")
       .upsert(payload, { onConflict: "student_id,skill_id,month" });
 
     if (error) {

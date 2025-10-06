@@ -72,6 +72,9 @@ class MockMutationResult<T = any> {
 }
 
 class MockQuery<T = any> {
+  private eqFilters = new Map<string, unknown>();
+  private pendingUpdate: Partial<T> | null = null;
+
   constructor(private tableName: string) {
     ensureTable(tableName);
   }
@@ -80,11 +83,65 @@ class MockQuery<T = any> {
     return ensureTable(this.tableName) as T[];
   }
 
+  private clearFilters() {
+    this.eqFilters.clear();
+  }
+
+  private getTargetIndices(): number[] {
+    const table = this.table;
+    if (this.eqFilters.size === 0) {
+      return table.map((_, index) => index);
+    }
+    return table
+      .map((row, index) => ({ row, index }))
+      .filter(({ row }) => {
+        for (const [column, value] of this.eqFilters.entries()) {
+          if ((row as any)[column] !== value) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map(({ index }) => index);
+  }
+
+  private runQuery(): T[] {
+    const table = this.table;
+    const targetIndices = this.getTargetIndices();
+    let rows: T[] = [];
+
+    if (this.pendingUpdate) {
+      const indicesToUpdate = this.eqFilters.size > 0 ? targetIndices : table.map((_, index) => index);
+
+      if (indicesToUpdate.length === 0) {
+        rows = [];
+      } else {
+        rows = indicesToUpdate.map(index => {
+          const updated = { ...(table[index] as any), ...this.pendingUpdate } as T;
+          table[index] = updated;
+          return updated;
+        });
+      }
+
+      this.pendingUpdate = null;
+    } else {
+      if (this.eqFilters.size > 0) {
+        rows = targetIndices.map(index => table[index]);
+      } else {
+        rows = table.slice();
+      }
+    }
+
+    this.clearFilters();
+    return rows;
+  }
+
   select(): this {
     return this;
   }
 
-  eq(): this {
+  eq(column: string, value: unknown): this {
+    this.eqFilters.set(column, value);
     return this;
   }
 
@@ -161,11 +218,13 @@ class MockQuery<T = any> {
   }
 
   maybeSingle() {
-    return noopPromise(this.table[0] ?? null);
+    const rows = this.runQuery();
+    return noopPromise(rows[0] ?? null);
   }
 
   single() {
-    return noopPromise(this.table[0] ?? null);
+    const rows = this.runQuery();
+    return noopPromise(rows[0] ?? null);
   }
 
   insert(values: Partial<T> | Partial<T>[]) {
@@ -202,14 +261,8 @@ class MockQuery<T = any> {
   }
 
   update(values: Partial<T>) {
-    const table = this.table;
-    if (table.length === 0) {
-      const created: any = { ...values, id: createMockId(this.tableName) };
-      table.push(created);
-      return new MockMutationResult([created]);
-    }
-    Object.assign(table[0] as any, values);
-    return new MockMutationResult([table[0]]);
+    this.pendingUpdate = { ...(this.pendingUpdate ?? {}), ...values };
+    return this;
   }
 
   delete() {
@@ -222,7 +275,7 @@ class MockQuery<T = any> {
     onfulfilled?: (value: SupabaseResponse<T[]>) => TResult1 | PromiseLike<TResult1>,
     onrejected?: (reason: unknown) => TResult2 | PromiseLike<TResult2>,
   ) {
-    const rows = this.table.slice();
+    const rows = this.runQuery();
     return Promise.resolve({ data: rows, error: null }).then(onfulfilled, onrejected);
   }
 }

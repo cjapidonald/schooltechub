@@ -49,6 +49,37 @@ export async function createClass(input: {
   return data;
 }
 
+export async function updateClassDetails(input: {
+  id: string;
+  ownerId: string;
+  title: string;
+  stage?: string;
+  subject?: string;
+  start_date?: string;
+  end_date?: string;
+}): Promise<Class> {
+  const { data, error } = await supabase
+    .from("classes")
+    .update({
+      title: input.title,
+      stage: input.stage ?? null,
+      subject: input.subject ?? null,
+      start_date: input.start_date ?? null,
+      end_date: input.end_date ?? null,
+    })
+    .eq("id", input.id)
+    .eq("owner_id", input.ownerId)
+    .select("id,title,stage,subject,start_date,end_date")
+    .single();
+
+  if (error) {
+    console.error("Failed to update class", error);
+    throw error;
+  }
+
+  return data;
+}
+
 export async function fetchLessonPlan(id: string): Promise<LessonPlanWithRelations | null> {
   const { data, error } = await supabase
     .from("lesson_plans")
