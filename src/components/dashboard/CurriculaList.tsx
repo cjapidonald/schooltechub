@@ -1,6 +1,6 @@
 import { format } from "date-fns";
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowUpRight, Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,15 @@ export function CurriculaList({
             {t.dashboard.curriculum.title}
           </h2>
           <p className="text-sm text-white/70">{t.dashboard.curriculum.subtitle}</p>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
+            <span>Need a refresher?</span>
+            <Button asChild variant="link" className="h-auto px-0 text-white hover:text-white/90">
+              <Link to="/teacher/curriculum/manage" className="inline-flex items-center gap-1">
+                Curriculum management guide
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
         </div>
         <Button
           onClick={onNewCurriculum}
