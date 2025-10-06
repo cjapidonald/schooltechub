@@ -34,6 +34,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { FilterSection } from "@/components/filters/FilterSection";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { SAMPLE_BLOG_POSTS, type SampleBlogPost } from "@/data/sampleBlogPosts";
@@ -831,28 +832,34 @@ const Blog = () => {
 
                     const Icon = filterSectionIcons[key];
                     return (
-                      <div key={key} className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-white/70">
-                          <Icon className="h-4 w-4 text-white/80" aria-hidden="true" />
-                          <span>{t.blog.filters[key]}</span>
-                        </div>
-                        <div className="space-y-2 text-sm text-white/70">
-                          {options.map(([value, label]) => {
-                            const isActive = filters[key].includes(value);
-                            return (
-                              <label key={value} className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={isActive}
-                                  onChange={() => handleFilterToggle(key, value)}
-                                  className="h-4 w-4 rounded border-white/30 bg-white/10 text-sky-300 focus:ring-white/50"
-                                />
-                                <span>{label}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <FilterSection
+                        key={key}
+                        defaultOpen={filters[key].length > 0}
+                        triggerClassName="text-sm font-medium uppercase tracking-wide text-white/70"
+                        titleWrapperClassName="flex items-center gap-2"
+                        contentClassName="space-y-2 text-sm text-white/70"
+                        title={
+                          <>
+                            <Icon className="h-4 w-4 text-white/80" aria-hidden="true" />
+                            <span>{t.blog.filters[key]}</span>
+                          </>
+                        }
+                      >
+                        {options.map(([value, label]) => {
+                          const isActive = filters[key].includes(value);
+                          return (
+                            <label key={value} className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={isActive}
+                                onChange={() => handleFilterToggle(key, value)}
+                                className="h-4 w-4 rounded border-white/30 bg-white/10 text-sky-300 focus:ring-white/50"
+                              />
+                              <span>{label}</span>
+                            </label>
+                          );
+                        })}
+                      </FilterSection>
                     );
                   })}
               </CardContent>
