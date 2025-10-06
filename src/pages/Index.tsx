@@ -357,7 +357,7 @@ const Index = () => {
                   <span className="bolt-fastener absolute right-8 top-6 z-20 md:right-12 md:top-8" aria-hidden />
                   <span className="bolt-fastener absolute left-8 bottom-6 z-20 md:left-12 md:bottom-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 bottom-6 z-20 md:right-12 md:bottom-8" aria-hidden />
-                  <div className="relative z-10 flex flex-col items-start gap-8 text-left">
+                  <div className="relative z-10 flex flex-col items-center gap-8 text-center">
                     <div className="flex flex-col items-center gap-3 self-center sm:flex-row sm:justify-center">
                       <Button
                         type="button"
