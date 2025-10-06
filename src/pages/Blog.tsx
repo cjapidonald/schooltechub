@@ -685,30 +685,6 @@ const Blog = () => {
     );
   };
 
-  const totalCategories = optionEntries.category?.length ?? 0;
-  const heroHighlights = [
-    {
-      id: "stories",
-      label: "Stories",
-      value: filteredPosts.length,
-      detail: filteredPosts.length === 1 ? "Curated insight" : "Curated insights",
-    },
-    {
-      id: "featured",
-      label: "Spotlights",
-      value: featuredPosts.length,
-      detail: featuredPosts.length === 1 ? "Featured idea" : "Featured ideas",
-    },
-    {
-      id: "categories",
-      label: "Categories",
-      value: totalCategories,
-      detail: totalCategories === 1 ? "Theme to explore" : "Themes to explore",
-    },
-  ];
-
-  const highlightCardClassName =
-    "flex h-full flex-col rounded-2xl border border-white/15 bg-white/10 p-[13px] shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
@@ -737,58 +713,39 @@ const Blog = () => {
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{t.blog.title}</h1>
                 <p className="text-lg text-white/70 md:max-w-2xl">{t.blog.subtitle}</p>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {heroHighlights.map(item => (
-                  <div
-                    key={item.id}
-                    className={cn(
-                      highlightCardClassName,
-                      "items-center justify-center text-center"
-                    )}
+              <Card className="border-white/20 bg-white/10 text-white shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl">
+                <CardContent className="flex flex-col gap-3 p-6">
+                  <label
+                    htmlFor="blog-search"
+                    className="text-sm font-medium uppercase tracking-wide text-white/60"
                   >
-                    <p className="text-sm uppercase tracking-wide text-white/60">{item.label}</p>
-                    <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
-                    <p className="mt-1 text-xs text-white/60">{item.detail}</p>
+                    {t.blog.searchPlaceholder}
+                  </label>
+                  <div className="relative w-full">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+                    <Input
+                      id="blog-search"
+                      value={searchValue}
+                      onChange={(event) => handleSearchChange(event.target.value)}
+                      placeholder={t.blog.searchPlaceholder}
+                      className="h-12 rounded-2xl border-white/20 bg-white/10 pl-11 text-base text-white placeholder:text-white/50 focus-visible:ring-white/40"
+                      aria-label={t.blog.searchPlaceholder}
+                    />
                   </div>
-                ))}
-                <Card
-                  className={cn(
-                    highlightCardClassName,
-                    "items-center justify-center gap-4 border-white/20 bg-white/10 text-center text-white"
-                  )}
-                >
-                  <CardContent className="flex h-full w-full flex-col items-center justify-center gap-3 p-0">
-                    <label
-                      htmlFor="blog-search"
-                      className="text-sm font-medium uppercase tracking-wide text-white/60"
-                    >
-                      {t.blog.searchPlaceholder}
-                    </label>
-                    <div className="relative w-full max-w-[220px]">
-                      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-                      <Input
-                        id="blog-search"
-                        value={searchValue}
-                        onChange={(event) => handleSearchChange(event.target.value)}
-                        placeholder={t.blog.searchPlaceholder}
-                        className="h-12 rounded-2xl border-white/20 bg-white/10 pl-11 text-base text-white placeholder:text-white/50 focus-visible:ring-white/40"
-                        aria-label={t.blog.searchPlaceholder}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                </CardContent>
+              </Card>
               {categoryTabs.length > 0 ? (
-                <div className="grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                <div className="flex w-full flex-wrap items-center gap-3 overflow-x-auto pb-2">
                   <Button
                     type="button"
                     size="sm"
                     variant={activeCategory === "all" ? "default" : "outline"}
-                    className={`w-full rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white ${
+                    className={cn(
+                      "flex-shrink-0 rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white",
                       activeCategory === "all"
                         ? "border-transparent bg-white/90 text-slate-900 hover:bg-white"
                         : "hover:bg-white/20"
-                    }`}
+                    )}
                     onClick={() => handleCategoryButtonClick("all")}
                   >
                     {t.blog.filters.all ?? "All"}
@@ -802,9 +759,12 @@ const Blog = () => {
                         type="button"
                         size="sm"
                         variant={isActive ? "default" : "outline"}
-                        className={`w-full gap-2 rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white ${
-                          isActive ? "border-transparent bg-white/90 text-slate-900 hover:bg-white" : "hover:bg-white/20"
-                        }`}
+                        className={cn(
+                          "flex-shrink-0 gap-2 rounded-full border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.9)] transition hover:text-white",
+                          isActive
+                            ? "border-transparent bg-white/90 text-slate-900 hover:bg-white"
+                            : "hover:bg-white/20"
+                        )}
                         onClick={() => handleCategoryButtonClick(value)}
                       >
                         <Icon className={`h-4 w-4 ${isActive ? "text-slate-900" : "text-white"}`} aria-hidden="true" />
