@@ -109,6 +109,78 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
     Icon: techTopicIcons[index % techTopicIcons.length],
   }));
 
+  const iconStyles = [
+    {
+      iconWrapper:
+        "border border-white/5 bg-[hsl(var(--glow-accent))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-accent)/0.9)]",
+      title: "text-[hsl(var(--glow-accent))]",
+      hoverGlow:
+        "hover:border-accent/60 hover:shadow-[0_30px_72px_-30px_hsl(var(--glow-accent)/0.6)]",
+    },
+    {
+      iconWrapper:
+        "border border-white/5 bg-[hsl(var(--glow-secondary))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-secondary)/0.85)]",
+      title: "text-[hsl(var(--glow-secondary))]",
+      hoverGlow:
+        "hover:border-secondary/60 hover:shadow-[0_30px_72px_-30px_hsl(var(--glow-secondary)/0.6)]",
+    },
+    {
+      iconWrapper:
+        "border border-white/5 bg-[hsl(var(--glow-primary))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-primary)/0.85)]",
+      title: "text-[hsl(var(--glow-primary))]",
+      hoverGlow:
+        "hover:border-primary/60 hover:shadow-[0_30px_72px_-30px_hsl(var(--glow-primary)/0.6)]",
+    },
+  ] as const;
+
+  const featureHoverEffects = {
+    primary:
+      "hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.2)]",
+    accent:
+      "hover:border-accent/50 hover:shadow-[0_0_30px_hsl(var(--glow-accent)/0.2)]",
+    secondary:
+      "hover:border-secondary/50 hover:shadow-[0_0_30px_hsl(var(--glow-secondary)/0.2)]",
+  } as const;
+
+  const featureCards = [
+    {
+      icon: NotebookPen,
+      title: t.features.feature1.title,
+      description: t.features.feature1.description,
+      color: "primary" as const,
+    },
+    {
+      icon: FileSpreadsheet,
+      title: t.features.feature2.title,
+      description: t.features.feature2.description,
+      color: "accent" as const,
+    },
+    {
+      icon: BarChart3,
+      title: t.features.feature3.title,
+      description: t.features.feature3.description,
+      color: "secondary" as const,
+    },
+    {
+      icon: ActivitySquare,
+      title: t.features.feature4.title,
+      description: t.features.feature4.description,
+      color: "primary" as const,
+    },
+    {
+      icon: BrainCircuit,
+      title: t.features.feature5.title,
+      description: t.features.feature5.description,
+      color: "accent" as const,
+    },
+    {
+      icon: LifeBuoy,
+      title: t.features.feature6.title,
+      description: t.features.feature6.description,
+      color: "secondary" as const,
+    },
+  ] as const;
+
   const socialLinks = [
     {
       href: "https://www.facebook.com/share/g/1NukWcXVpp/",
@@ -268,46 +340,11 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: NotebookPen,
-                title: t.features.feature1.title,
-                description: t.features.feature1.description,
-                color: "primary",
-              },
-              {
-                icon: FileSpreadsheet,
-                title: t.features.feature2.title,
-                description: t.features.feature2.description,
-                color: "accent",
-              },
-              {
-                icon: BarChart3,
-                title: t.features.feature3.title,
-                description: t.features.feature3.description,
-                color: "secondary",
-              },
-              {
-                icon: ActivitySquare,
-                title: t.features.feature4.title,
-                description: t.features.feature4.description,
-                color: "primary",
-              },
-              {
-                icon: BrainCircuit,
-                title: t.features.feature5.title,
-                description: t.features.feature5.description,
-                color: "accent",
-              },
-              {
-                icon: LifeBuoy,
-                title: t.features.feature6.title,
-                description: t.features.feature6.description,
-                color: "secondary",
-              },
-            ].map((feature, index) => (
+            {featureCards.map((feature, index) => (
               <Link to={getLocalizedPath("/services", language)} key={index} className="block">
-                <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--glow-primary)/0.2)] cursor-pointer h-full">
+                <Card
+                  className={`group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 cursor-pointer h-full ${featureHoverEffects[feature.color]}`}
+                >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="relative p-6">
                     <feature.icon className={`mb-4 h-12 w-12 text-${feature.color} animate-pulse-glow`} />
@@ -341,16 +378,19 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {workflowItems.map((item, index) => (
-              <Card
-                key={`${item.badge}-${index}`}
-                className="group relative h-full overflow-hidden border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_35px_hsl(var(--glow-primary)/0.25)]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                <div className="relative flex h-full flex-col p-6">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                      {item.badge}
+            {workflowItems.map((item, index) => {
+              const { hoverGlow } = iconStyles[index % iconStyles.length];
+
+              return (
+                <Card
+                  key={`${item.badge}-${index}`}
+                  className={`group relative h-full overflow-hidden border-border/50 bg-card/60 backdrop-blur-sm transition-all duration-300 ${hoverGlow}`}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  <div className="relative flex h-full flex-col p-6">
+                    <div className="mb-6 flex items-center justify-between">
+                      <span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+                        {item.badge}
                     </span>
                     <item.Icon className="h-10 w-10 text-primary animate-pulse-glow" />
                   </div>
@@ -361,8 +401,9 @@ export const HomeLanding = ({ embedded = false, canonicalUrl = "https://schoolte
                     {item.description}
                   </p>
                 </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
