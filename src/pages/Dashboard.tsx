@@ -158,12 +158,12 @@ export default function DashboardPage() {
   const [activeCurriculumId, setActiveCurriculumId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
-  const prototypeLockedToast = useMemo(
+  const prototypeAccessToast = useMemo(
     () => ({
-      title: t.dashboard.toasts.prototypeLocked,
-      description: t.dashboard.toasts.prototypeLockedDescription,
+      title: t.dashboard.toasts.prototypeUnlocked,
+      description: t.dashboard.toasts.prototypeUnlockedDescription,
     }),
-    [t.dashboard.toasts.prototypeLocked, t.dashboard.toasts.prototypeLockedDescription],
+    [t.dashboard.toasts.prototypeUnlocked, t.dashboard.toasts.prototypeUnlockedDescription],
   );
   const journeyContentRef = useRef<HTMLDivElement | null>(null);
 
@@ -182,13 +182,13 @@ export default function DashboardPage() {
   }, [hasEnteredPrototype, user]);
 
   const handleEnterPrototype = useCallback(() => {
-    if (!user) {
-      toast(prototypeLockedToast);
+    if (hasEnteredPrototype) {
       return;
     }
 
     setHasEnteredPrototype(true);
-  }, [prototypeLockedToast, toast, user]);
+    toast(prototypeAccessToast);
+  }, [hasEnteredPrototype, prototypeAccessToast, toast]);
 
   const updateSearchParams = useCallback(
     (mutator: (params: URLSearchParams) => void, options: { replace?: boolean } = {}) => {

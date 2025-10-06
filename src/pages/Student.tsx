@@ -58,10 +58,9 @@ const observationCheckIns = exampleStudentSkills.reduce((max, skill) => Math.max
 const observationLabel = observationCheckIns > 0 ? `${observationCheckIns} check-ins` : "recent updates";
 const emptySkillChartLabel = "Skill trend data will appear once your teacher shares updates.";
 
-const STUDENT_LOCKED_TOAST = {
-  title: "Student login coming soon",
-  description:
-    "We're still building secure student authentication, so the dashboard preview stays locked for now.",
+const STUDENT_UNLOCKED_TOAST = {
+  title: "Prototype login successful",
+  description: "Explore the student journey preview—no real credentials required.",
 } as const;
 
 const fallbackStudentName = "Jordan Martinez";
@@ -234,7 +233,12 @@ export default function StudentPage() {
   const handleEnterJourney = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    toast(STUDENT_LOCKED_TOAST);
+    if (hasEntered) {
+      return;
+    }
+
+    setHasEntered(true);
+    toast(STUDENT_UNLOCKED_TOAST);
   };
 
   return (
