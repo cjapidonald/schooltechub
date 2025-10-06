@@ -99,7 +99,7 @@ const schoolSolutions: Feature[] = [
 ];
 
 const compactCardBaseClass =
-  "group relative overflow-hidden rounded-[1.5rem] border border-white/15 bg-[hsla(222,47%,14%,0.68)] p-5 shadow-[0_22px_48px_-28px_rgba(10,18,55,0.65)] transition-all duration-300 hover:-translate-y-1 hover:border-primary/60 hover:shadow-[0_30px_72px_-30px_rgba(35,78,182,0.6)] backdrop-blur-xl";
+  "group relative overflow-hidden rounded-[1.5rem] border border-white/15 bg-[hsla(222,47%,14%,0.68)] p-5 shadow-[0_22px_48px_-28px_rgba(10,18,55,0.65)] transition-all duration-300 hover:-translate-y-1 backdrop-blur-xl";
 
 const compactCardGradients = [
   "bg-[linear-gradient(145deg,hsla(var(--glow-primary)/0.22),hsla(222,47%,12%,0.55))]",
@@ -222,16 +222,22 @@ const iconStyles = [
     iconWrapper:
       "border border-white/5 bg-[hsl(var(--glow-accent))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-accent)/0.9)]",
     title: "text-[hsl(var(--glow-accent))]",
+    hoverGlow:
+      "hover:border-accent/60 hover:shadow-[0_30px_72px_-30px_hsl(var(--glow-accent)/0.6)]",
   },
   {
     iconWrapper:
       "border border-white/5 bg-[hsl(var(--glow-secondary))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-secondary)/0.85)]",
     title: "text-[hsl(var(--glow-secondary))]",
+    hoverGlow:
+      "hover:border-secondary/60 hover:shadow-[0_30px_72px_-30px_hsl(var(--glow-secondary)/0.6)]",
   },
   {
     iconWrapper:
       "border border-white/5 bg-[hsl(var(--glow-primary))] text-white shadow-[0_12px_28px_-12px_hsla(var(--glow-primary)/0.85)]",
     title: "text-[hsl(var(--glow-primary))]",
+    hoverGlow:
+      "hover:border-primary/60 hover:shadow-[0_30px_72px_-30px_hsl(var(--glow-primary)/0.6)]",
   },
 ];
 
@@ -385,7 +391,7 @@ const Index = () => {
             </div>
             <div className="mt-12 grid gap-[15px] sm:grid-cols-2 xl:grid-cols-4">
               {workflowTools.map(({ title, description, icon: Icon }, index) => {
-                const { iconWrapper, title: titleColor } = iconStyles[index % iconStyles.length];
+                const { iconWrapper, title: titleColor, hoverGlow } = iconStyles[index % iconStyles.length];
 
                 return (
                   <Reveal key={title} delay={index * 120}>
@@ -394,6 +400,7 @@ const Index = () => {
                         "h-full",
                         compactCardBaseClass,
                         compactCardGradients[index % compactCardGradients.length],
+                        hoverGlow,
                       )}
                     >
                       <span className={cn(convexOverlayClass, "convex-panel-sheen--compact")} aria-hidden />
@@ -471,11 +478,11 @@ const Index = () => {
           <div className="mt-14 grid gap-[15px] sm:grid-cols-2 lg:grid-cols-4">
             {schoolSolutions.map(({ title, description, icon: Icon }, index) => {
               const gradientClass = compactCardGradients[index % compactCardGradients.length];
-              const { iconWrapper, title: titleColor } = iconStyles[index % iconStyles.length];
+              const { iconWrapper, title: titleColor, hoverGlow } = iconStyles[index % iconStyles.length];
 
               return (
                 <Reveal key={title} delay={index * 120}>
-                  <Card className={cn("h-full", compactCardBaseClass, gradientClass)}>
+                  <Card className={cn("h-full", compactCardBaseClass, gradientClass, hoverGlow)}>
                     <span
                       className={cn(convexOverlayClass, "convex-panel-sheen--compact")}
                       aria-hidden
