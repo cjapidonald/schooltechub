@@ -17,6 +17,7 @@ export type StudentRecord = {
   classId: string;
   fullName: string;
   preferredName?: string;
+  email?: string;
   guardianName?: string;
   guardianContact?: string;
   avatarUrl?: string;

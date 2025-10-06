@@ -23,9 +23,11 @@ interface AuthorInfo {
 type BlogPostRow = Database["public"]["Tables"]["blogs"]["Row"] & {
   subtitle?: string | null;
   author_name?: string | null;
+  author_job_title?: string | null;
   time_required?: string | null;
   language?: string | null;
   is_pinned?: boolean | null;
+  featured_image_caption?: string | null;
 };
 
 export type SampleBlogPost = BlogPostRow & {
@@ -46,6 +48,7 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
     keywords: ["secondary", "science", "ai"],
     featured_image:
       "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    featured_image_caption: "Ms. Rivera reviewing AI-generated lesson pathways with her Year 5 class team",
     content: [
       {
         type: "heading",
@@ -94,14 +97,16 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
         ],
       },
     ],
-    author: { name: "Amelia Saunders", job_title: "Instructional Technologist" },
-    author_name: "Amelia Saunders",
-    author_image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80",
+    author: { name: "Ms. Taylor Rivera", job_title: "Lead Literacy Teacher" },
+    author_name: "Ms. Taylor Rivera",
+    author_job_title: "Lead Literacy Teacher",
+    author_image: "https://i.pravatar.cc/150?img=47",
     created_at: "2024-02-12T09:30:00Z",
     published_at: "2024-02-12T09:30:00Z",
     updated_at: "2024-02-12T09:30:00Z",
     is_published: true,
     read_time: 8,
+    time_required: "10 minutes",
     view_count: 1430,
     language: null,
   },
@@ -117,6 +122,7 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
     keywords: ["primary", "steam", "virtual reality"],
     featured_image:
       "https://images.unsplash.com/photo-1580894908361-967195033215?auto=format&fit=crop&w=1200&q=80",
+    featured_image_caption: "Ms. Rivera coaching students through a VR exploration reflection circle",
     content: [
       {
         type: "heading",
@@ -169,14 +175,16 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
         ],
       },
     ],
-    author: { name: "Ritika Menon", job_title: "Primary Innovation Coach" },
-    author_name: "Ritika Menon",
-    author_image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+    author: { name: "Ms. Taylor Rivera", job_title: "Lead Literacy Teacher" },
+    author_name: "Ms. Taylor Rivera",
+    author_job_title: "Lead Literacy Teacher",
+    author_image: "https://i.pravatar.cc/150?img=47",
     created_at: "2024-01-22T14:10:00Z",
     published_at: "2024-01-22T14:10:00Z",
     updated_at: "2024-01-22T14:10:00Z",
     is_published: true,
     read_time: 6,
+    time_required: "9 minutes",
     is_pinned: true,
     view_count: 980,
     language: null,
@@ -193,6 +201,7 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
     keywords: ["secondary", "english", "project based"],
     featured_image:
       "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+    featured_image_caption: "Ms. Rivera hosting a family workshop on the classroom portfolio portal",
     content: [
       {
         type: "heading",
@@ -241,14 +250,16 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
         ],
       },
     ],
-    author: { name: "Jordan Ellis", job_title: "Community Partnerships Lead" },
-    author_name: "Jordan Ellis",
-    author_image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80",
+    author: { name: "Ms. Taylor Rivera", job_title: "Lead Literacy Teacher" },
+    author_name: "Ms. Taylor Rivera",
+    author_job_title: "Lead Literacy Teacher",
+    author_image: "https://i.pravatar.cc/150?img=47",
     created_at: "2023-12-05T17:45:00Z",
     published_at: "2023-12-05T17:45:00Z",
     updated_at: "2023-12-05T17:45:00Z",
     is_published: true,
     read_time: 9,
+    time_required: "12 minutes",
     view_count: 2110,
     language: null,
   },
@@ -264,6 +275,7 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
     keywords: ["primary", "science", "design"],
     featured_image:
       "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=1200&q=80",
+    featured_image_caption: "Ms. Rivera guiding a recycled-materials lab alongside student leaders",
     content: [
       {
         type: "heading",
@@ -303,14 +315,16 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
         ],
       },
     ],
-    author: { name: "Luis Ortega", job_title: "STEM Integration Coach" },
-    author_name: "Luis Ortega",
-    author_image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80",
+    author: { name: "Ms. Taylor Rivera", job_title: "Lead Literacy Teacher" },
+    author_name: "Ms. Taylor Rivera",
+    author_job_title: "Lead Literacy Teacher",
+    author_image: "https://i.pravatar.cc/150?img=47",
     created_at: "2023-11-10T11:20:00Z",
     published_at: "2023-11-10T11:20:00Z",
     updated_at: "2023-11-10T11:20:00Z",
     is_published: true,
     read_time: 5,
+    time_required: "8 minutes",
     is_pinned: true,
     view_count: 1675,
     language: null,
@@ -327,6 +341,7 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
     keywords: ["secondary", "ethics", "debate"],
     featured_image:
       "https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1200&q=80",
+    featured_image_caption: "Ms. Rivera facilitating an AI ethics dialogue with her secondary students",
     content: [
       {
         type: "heading",
@@ -361,14 +376,16 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
         ],
       },
     ],
-    author: { name: "Maya Thompson", job_title: "Digital Citizenship Lead" },
-    author_name: "Maya Thompson",
-    author_image: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=400&q=80",
+    author: { name: "Ms. Taylor Rivera", job_title: "Lead Literacy Teacher" },
+    author_name: "Ms. Taylor Rivera",
+    author_job_title: "Lead Literacy Teacher",
+    author_image: "https://i.pravatar.cc/150?img=47",
     created_at: "2023-10-02T08:40:00Z",
     published_at: "2023-10-02T08:40:00Z",
     updated_at: "2023-10-02T08:40:00Z",
     is_published: true,
     read_time: 7,
+    time_required: "11 minutes",
     is_pinned: false,
     view_count: 1892,
     language: null,
