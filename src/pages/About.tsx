@@ -15,7 +15,7 @@ const About = () => {
   const storyParagraphs = t.about.story.paragraphs ?? [];
 
   const accentCardClass =
-    "border-2 border-primary/35 shadow-[0_0_20px_hsl(var(--glow-primary)/0.08)] transition-colors duration-300 hover:border-primary/75";
+    "relative overflow-hidden border border-white/20 bg-white/[0.08] shadow-[0_20px_60px_-25px_rgba(15,23,42,0.9)] backdrop-blur-xl transition-all duration-300 hover:border-white/40 hover:bg-white/[0.12]";
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
@@ -77,12 +77,15 @@ const About = () => {
 
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {mission.map((item, index) => (
-              <Card key={index} className={cn("space-y-4 p-6 text-center", accentCardClass)}>
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
-                  <item.icon className="h-6 w-6 text-emerald-200" />
+              <Card key={index} className={cn("p-6 text-center", accentCardClass)}>
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.25)_0%,_rgba(15,23,42,0)_70%)] opacity-70" />
+                <div className="relative z-10 space-y-4">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15 shadow-[0_10px_30px_-15px_rgba(15,23,42,0.9)]">
+                    <item.icon className="h-6 w-6 text-emerald-200" />
+                  </div>
+                  <h3 className="text-lg font-medium text-white">{item.title}</h3>
+                  <p className="text-sm text-white/70">{item.description}</p>
                 </div>
-                <h3 className="text-lg font-medium text-white">{item.title}</h3>
-                <p className="text-sm text-white/70">{item.description}</p>
               </Card>
             ))}
           </div>
