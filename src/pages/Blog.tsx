@@ -701,7 +701,7 @@ const Blog = () => {
                 <p className="text-lg text-white/70 md:max-w-2xl">{t.blog.subtitle}</p>
               </div>
               <Card className="border-white/20 bg-white/10 text-white shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl">
-                <CardContent className="flex flex-col gap-0 p-2">
+                <CardContent className="flex flex-col gap-0 p-1">
                   <div className="relative w-full">
                     <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
                     <Input
