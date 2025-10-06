@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Award,
   BarChart3,
@@ -10,7 +11,6 @@ import {
   LayoutDashboard,
   MessageSquare,
   Sparkles,
-  TrendingUp,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -23,6 +23,7 @@ import { StructuredData } from "@/components/StructuredData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import RoleAuthDialog, { type AuthRole } from "@/components/auth/RoleAuthDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedPath } from "@/hooks/useLocalizedNavigate";
 import { useCountUp } from "@/hooks/useCountUp";
@@ -286,7 +287,23 @@ const StatCard = ({ stat, index, shouldAnimate }: StatCardProps) => {
 
 const Index = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
+  const [authRole, setAuthRole] = useState<AuthRole | null>(null);
+  const isAuthDialogOpen = authRole !== null;
   const { ref: statsRef, isInView: statsInView } = useInView<HTMLDivElement>({ threshold: 0.3 });
+
+  const handleAuthSuccess = (role: AuthRole) => {
+    const targetPath = role === "teacher" ? "/teacher" : "/student";
+    const localizedTarget = getLocalizedPath(targetPath, language);
+    setAuthRole(null);
+    navigate(localizedTarget);
+  };
+
+  const handleAuthDialogChange = (open: boolean) => {
+    if (!open) {
+      setAuthRole(null);
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
@@ -348,17 +365,18 @@ const Index = () => {
                       Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
                     </p>
                     <div className="mt-2 flex flex-col items-center gap-4 sm:flex-row">
-                      <Link to={getLocalizedPath("/contact", language)}>
-                        <Button size="lg" className="neon-pulse">
-                          Talk with our team
-                        </Button>
-                      </Link>
-                      <Link to={getLocalizedPath("/services", language)}>
-                        <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                          <Sparkles className="mr-2 h-5 w-5" />
-                          Explore our playbooks
-                        </Button>
-                      </Link>
+                      <Button size="lg" className="neon-pulse" onClick={() => setAuthRole("teacher")}>
+                        Talk with our team
+                      </Button>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        className="border-white/30 bg-white/10 backdrop-blur"
+                        onClick={() => setAuthRole("student")}
+                      >
+                        <Sparkles className="mr-2 h-5 w-5" />
+                        Explore our playbooks
+                      </Button>
                     </div>
                   </div>
                   <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
@@ -595,23 +613,29 @@ const Index = () => {
                   Join SchoolTech Hub to connect planning, communication, analytics, and professional development for your entire staff.
                 </p>
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                  <Link to={getLocalizedPath("/auth", language)}>
-                    <Button size="lg" className="neon-pulse">
-                      Get started free
-                    </Button>
-                  </Link>
-                  <Link to={getLocalizedPath("/services", language)}>
-                    <Button size="lg" variant="outline" className="border-white/30 bg-white/10 backdrop-blur">
-                      <TrendingUp className="mr-2 h-5 w-5" />
-                      View implementation roadmap
-                    </Button>
-                  </Link>
+                  <Button size="lg" className="neon-pulse" onClick={() => setAuthRole("teacher")}>
+                    I am a teacher
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 bg-white/10 backdrop-blur"
+                    onClick={() => setAuthRole("student")}
+                  >
+                    I am a student
+                  </Button>
                 </div>
               </Card>
             </Reveal>
           </div>
         </div>
       </section>
+      <RoleAuthDialog
+        open={isAuthDialogOpen}
+        role={authRole ?? "teacher"}
+        onOpenChange={handleAuthDialogChange}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 };
