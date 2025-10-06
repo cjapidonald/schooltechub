@@ -136,17 +136,6 @@ export function ClassDashboard() {
                   </div>
                   <div className="space-y-2 rounded-lg border bg-muted/40 p-4">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {t.account.classes.dashboard.overviewCurriculumLabel}
-                    </p>
-                    <p className="text-sm font-semibold text-foreground">
-                      {t.account.classes.dashboard.overviewCurriculumValue}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t.account.classes.dashboard.overviewCurriculumDescription}
-                    </p>
-                  </div>
-                  <div className="space-y-2 rounded-lg border bg-muted/40 p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
                       {t.account.classes.dashboard.overviewReportsLabel}
                     </p>
                     <p className="text-sm font-semibold text-foreground">

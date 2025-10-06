@@ -23,8 +23,6 @@ import AdminLoginPrototype from '@/pages/admin/AdminLoginPrototype';
 import TeacherPage from '@/pages/TeacherPage';
 import StudentPage from '@/pages/Student';
 import StudentDashboardPage from '@/pages/StudentDashboard';
-import CurriculumPage from '@/pages/Curriculum';
-import TeacherCurriculumManagement from '@/pages/TeacherCurriculumManagement';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>
@@ -52,7 +50,6 @@ const LegacyAccountRedirect: React.FC = () => {
   const tabMap: Record<string, string> = {
     classes: 'classes',
     students: 'students',
-    curriculum: 'curriculum',
     builder: 'lessonBuilder',
     assessments: 'assessments',
   };
@@ -92,7 +89,6 @@ export const LocalizedRoutes = () => {
       <Route path="/blog/:slug" element={<Navigate to="/blog" replace />} />
       <Route path="/builder/lesson-plans" element={<Navigate to="/lesson-builder" replace />} />
       <Route path="/builder/lesson-plans/:id" element={<LegacyBuilderRedirect />} />
-      <Route path="/curriculum" element={<Navigate to="/teacher?tab=curriculum" replace />} />
       <Route path="/lesson-plans/builder" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-plans/builder/:id" element={<LegacyBuilderRedirect />} />
       <Route path="/lesson-builder" element={<RouteWrapper><LessonBuilderPage /></RouteWrapper>} />
@@ -105,8 +101,6 @@ export const LocalizedRoutes = () => {
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<LegacyAccountRedirect />} />
       <Route path="/teacher" element={<RouteWrapper><TeacherPage /></RouteWrapper>} />
-      <Route path="/teacher/curriculum/manage" element={<RouteWrapper><TeacherCurriculumManagement /></RouteWrapper>} />
-      <Route path="/teacher/curriculum/:id" element={<RouteWrapper><CurriculumPage /></RouteWrapper>} />
       <Route path="/teacher/classes/:id" element={<LegacyClassDashboardRedirect />} />
       <Route path="/dashboard" element={<Navigate to="/teacher" replace />} />
       <Route path="/student" element={<RouteWrapper><StudentPage /></RouteWrapper>} />

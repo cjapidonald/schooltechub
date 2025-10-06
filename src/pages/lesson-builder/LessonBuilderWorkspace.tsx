@@ -295,8 +295,8 @@ export default function LessonBuilderWorkspace() {
     }
 
     const className = planQuery.data.class?.title ?? t.lessonBuilder.editor.unknownClass;
-    const stage = planQuery.data.stage ?? planQuery.data.curriculum_item?.stage ?? null;
-    const date = planQuery.data.planned_date ?? planQuery.data.curriculum_item?.scheduled_on ?? null;
+    const stage = planQuery.data.stage ?? null;
+    const date = planQuery.data.planned_date ?? null;
 
     return {
       title: planQuery.data.title,

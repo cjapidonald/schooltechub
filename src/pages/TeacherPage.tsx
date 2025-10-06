@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,29 +11,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useOptionalUser } from "@/hooks/useOptionalUser";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { DashboardHeader, DashboardQuickAction } from "@/components/dashboard/DashboardHeader";
 import { ClassesTable } from "@/components/dashboard/ClassesTable";
-import { CurriculaList } from "@/components/dashboard/CurriculaList";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
-import {
-  createClass,
-  createCurriculum,
-  fetchCurricula,
-  fetchMyClasses,
-  seedExampleDashboardData,
-} from "@/features/dashboard/api";
-import { DASHBOARD_EXAMPLE_CLASS, type DashboardCurriculumSummary } from "@/features/dashboard/examples";
+import { createClass, fetchMyClasses } from "@/features/dashboard/api";
+import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
 import { BarChart3, ClipboardList, LogIn, Sparkles, Users } from "lucide-react";
@@ -80,22 +71,7 @@ const classSchema = z.object({
   end_date: z.string().optional(),
 });
 
-const curriculumSchema = z.object({
-  title: z.string().min(3),
-  class_id: z.string().uuid(),
-  subject: z.string().min(2),
-  academic_year: z.string().optional(),
-  lesson_titles: z.string().min(3),
-});
-
 type ClassFormValues = z.infer<typeof classSchema>;
-type CurriculumFormValues = z.infer<typeof curriculumSchema>;
-
-const splitLessonTitles = (input: string) =>
-  input
-    .split("\n")
-    .map(line => line.trim())
-    .filter(Boolean);
 
 type LessonBuilderRouteContext = {
   title: string;
@@ -104,7 +80,6 @@ type LessonBuilderRouteContext = {
   stage: string | null;
   date: string | null;
   sequence: number | null;
-  curriculumId: string | null;
 };
 
 const formatLessonContextDate = (value: string | null) => {
@@ -119,7 +94,7 @@ const formatLessonContextDate = (value: string | null) => {
   }
 };
 
-const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "assessments"] as const;
+const DASHBOARD_TABS = ["classes", "lessonBuilder", "students", "assessments"] as const;
 type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 const isDashboardTab = (value: string | null): value is DashboardTab =>
@@ -134,7 +109,6 @@ const GLASS_TAB_TRIGGER_CLASS =
 export default function TeacherPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useOptionalUser();
   const {
@@ -147,7 +121,6 @@ export default function TeacherPage() {
   } = useMyProfile();
 
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
-  const [isCurriculumDialogOpen, setCurriculumDialogOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
   const prototypeAccessToast = useMemo(
@@ -200,15 +173,7 @@ export default function TeacherPage() {
     (context: LessonBuilderRouteContext | null) => {
       updateSearchParams(params => {
         params.set("tab", "lessonBuilder");
-        const keys = [
-          "lessonTitle",
-          "lessonClassId",
-          "lessonClassTitle",
-          "lessonStage",
-          "lessonDate",
-          "lessonSeq",
-          "lessonCurriculumId",
-        ];
+        const keys = ["lessonTitle", "lessonClassId", "lessonClassTitle", "lessonStage", "lessonDate", "lessonSeq"];
         keys.forEach(key => params.delete(key));
 
         if (!context) {
@@ -231,16 +196,13 @@ export default function TeacherPage() {
         if (context.sequence !== null && context.sequence !== undefined) {
           params.set("lessonSeq", String(context.sequence));
         }
-        if (context.curriculumId) {
-          params.set("lessonCurriculumId", context.curriculumId);
-        }
       });
     },
     [updateSearchParams],
   );
 
   const requestedTab = searchParams.get("tab");
-  const activeTab: DashboardTab = isDashboardTab(requestedTab) ? requestedTab : "curriculum";
+  const activeTab: DashboardTab = isDashboardTab(requestedTab) ? requestedTab : "classes";
 
   const lessonBuilderContext = useMemo<LessonBuilderRouteContext | null>(() => {
     const getParam = (key: string) => {
@@ -263,7 +225,6 @@ export default function TeacherPage() {
       stage: getParam("lessonStage"),
       date: getParam("lessonDate"),
       sequence: Number.isFinite(sequenceNumber) ? sequenceNumber : null,
-      curriculumId: getParam("lessonCurriculumId"),
     };
   }, [searchParams]);
 
@@ -295,9 +256,7 @@ export default function TeacherPage() {
               key: "sequence",
               label: t.dashboard.lessonBuilder.labels.sequence,
               value:
-                lessonBuilderContext.sequence !== null
-                  ? `#${lessonBuilderContext.sequence}`
-                  : null,
+                lessonBuilderContext.sequence !== null ? `#${lessonBuilderContext.sequence}` : null,
             },
           ]
         : [],
@@ -306,7 +265,7 @@ export default function TeacherPage() {
 
   const handleTabChange = useCallback(
     (value: string) => {
-      const next: DashboardTab = isDashboardTab(value) ? value : "curriculum";
+      const next: DashboardTab = isDashboardTab(value) ? value : "classes";
       updateSearchParams(params => {
         params.set("tab", next);
       });
@@ -318,20 +277,10 @@ export default function TeacherPage() {
     resolver: zodResolver(classSchema),
     defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "" },
   });
-  const curriculumForm = useForm<CurriculumFormValues>({
-    resolver: zodResolver(curriculumSchema),
-    defaultValues: { title: "", class_id: "", subject: "", academic_year: "", lesson_titles: "" },
-  });
 
   const classesQuery = useQuery<Class[]>({
     queryKey: ["dashboard-classes", user?.id],
     queryFn: () => fetchMyClasses(user!.id),
-    enabled: Boolean(user?.id),
-  });
-
-  const curriculaQuery = useQuery<DashboardCurriculumSummary[]>({
-    queryKey: ["dashboard-curricula", user?.id],
-    queryFn: () => fetchCurricula(user!.id),
     enabled: Boolean(user?.id),
   });
 
@@ -346,72 +295,35 @@ export default function TeacherPage() {
         end_date: values.end_date,
       }),
     onSuccess: () => {
-      toast({ description: t.dashboard.toasts.classCreated });
-      void queryClient.invalidateQueries({ queryKey: ["dashboard-classes", user?.id] });
       setClassDialogOpen(false);
       classForm.reset();
+      void classesQuery.refetch();
+      toast({ description: t.dashboard.toasts.classCreated });
     },
-    onError: () => {
-      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    onError: error => {
+      const description = error instanceof Error ? error.message : t.dashboard.toasts.classError;
+      toast({ description, variant: "destructive" });
     },
   });
 
-  const createCurriculumMutation = useMutation({
-    mutationFn: async (values: CurriculumFormValues) => {
-      const lessonTitles = splitLessonTitles(values.lesson_titles);
-      if (lessonTitles.length === 0) {
-        throw new Error("No lessons provided");
+  const handleQuickAction = useCallback(
+    (action: DashboardQuickAction) => {
+      switch (action) {
+        case "ask-question":
+          toast({ description: t.dashboard.toasts.communityUnavailable, variant: "destructive" });
+          return;
+        case "post-blog":
+          toast({ description: t.dashboard.toasts.blogUnavailable, variant: "destructive" });
+          return;
+        case "open-profile":
+          navigate("/my-profile");
+          return;
+        default:
+          return;
       }
-      const result = await createCurriculum({
-        ownerId: user!.id,
-        classId: values.class_id,
-        subject: values.subject,
-        title: values.title,
-        academicYear: values.academic_year,
-        lessonTitles,
-      });
-      return result;
     },
-    onSuccess: result => {
-      toast({ description: t.dashboard.toasts.curriculumCreated });
-      void queryClient.invalidateQueries({ queryKey: ["dashboard-curricula", user?.id] });
-      setCurriculumDialogOpen(false);
-      curriculumForm.reset();
-      navigate(`/teacher/curriculum/${result.curriculum.id}`);
-    },
-    onError: () => {
-      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
-    },
-  });
-
-  const seedExampleDataMutation = useMutation({
-    mutationFn: () => seedExampleDashboardData({ ownerId: user!.id }),
-    onSuccess: result => {
-      toast({ description: t.dashboard.toasts.exampleDataCreated });
-      void queryClient.invalidateQueries({ queryKey: ["dashboard-classes", user?.id] });
-      void queryClient.invalidateQueries({ queryKey: ["dashboard-curricula", user?.id] });
-      void queryClient.invalidateQueries({ queryKey: ["dashboard-curriculum-items"], exact: false });
-    },
-    onError: () => {
-      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
-    },
-  });
-
-  const handleQuickAction = (action: DashboardQuickAction) => {
-    switch (action) {
-      case "ask-question":
-        navigate("/forum/new");
-        return;
-      case "post-blog":
-        toast({ description: t.dashboard.toasts.blogUnavailable, variant: "destructive" });
-        return;
-      case "open-profile":
-        navigate("/my-profile");
-        return;
-      default:
-        return;
-    }
-  };
+    [navigate, t.dashboard.toasts.blogUnavailable, t.dashboard.toasts.communityUnavailable, toast],
+  );
 
   const classes = useMemo<Array<Class & { isExample?: boolean }>>(() => {
     if (classesQuery.data && classesQuery.data.length > 0) {
@@ -419,24 +331,6 @@ export default function TeacherPage() {
     }
     return [DASHBOARD_EXAMPLE_CLASS];
   }, [classesQuery.data]);
-
-  const curricula = useMemo(() => {
-    return curriculaQuery.data ?? [];
-  }, [curriculaQuery.data]);
-
-  const showingExampleData = useMemo(() => {
-    if (classesQuery.isLoading || curriculaQuery.isLoading) {
-      return false;
-    }
-    return classes.some(item => item.isExample) || curricula.some(item => item.isExample);
-  }, [classes, curricula, classesQuery.isLoading, curriculaQuery.isLoading]);
-
-  const hasCurriculumContext = useMemo(() => {
-    if (!curriculaQuery.data || curriculaQuery.data.length === 0) {
-      return false;
-    }
-    return curriculaQuery.data.some(item => !item.isExample);
-  }, [curriculaQuery.data]);
 
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
@@ -447,8 +341,7 @@ export default function TeacherPage() {
     };
   }, [displayName, firstName, fullName, honorific, lastName]);
 
-  const teacherPreviewName =
-    normalizeName(displayName) ?? normalizeName(fullName) ?? "Morgan Patel";
+  const teacherPreviewName = normalizeName(displayName) ?? normalizeName(fullName) ?? "Morgan Patel";
   const teacherPreviewClassLabel = `${DASHBOARD_EXAMPLE_CLASS.title} • ${DASHBOARD_EXAMPLE_CLASS.stage}`;
 
   if (!hasEnteredPrototype) {
@@ -546,24 +439,6 @@ export default function TeacherPage() {
         ref={journeyContentRef}
         className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-24 pt-2.5 md:px-8"
       >
-        {showingExampleData ? (
-          <Alert className="border-white/20 bg-white/10 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
-            <AlertTitle className="text-lg font-semibold text-white">
-              {t.dashboard.common.exampleActionsTitle}
-            </AlertTitle>
-            <AlertDescription className="flex flex-col gap-3 text-white/75 sm:flex-row sm:items-center sm:justify-between">
-              <span>{t.dashboard.common.exampleActionsDescription}</span>
-              <Button
-                onClick={() => seedExampleDataMutation.mutate()}
-                disabled={seedExampleDataMutation.isPending}
-                aria-label={t.dashboard.common.exampleActionsCta}
-                className="rounded-xl border-white/40 bg-white/90 text-slate-900 hover:bg-white"
-              >
-                {seedExampleDataMutation.isPending ? t.common.loading : t.dashboard.common.exampleActionsCta}
-              </Button>
-            </AlertDescription>
-          </Alert>
-        ) : null}
         <DashboardHeader
           nameParts={derivedNameParts}
           displayName={normalizeName(displayName) ?? normalizeName(fullName)}
@@ -573,47 +448,19 @@ export default function TeacherPage() {
         <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_25px_90px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl md:p-10">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
             <TabsList className="mx-auto grid w-full gap-2 border-0 px-2 text-white/70 sm:w-auto sm:auto-cols-max sm:grid-flow-col sm:px-4">
-              <TabsTrigger
-                value="curriculum"
-                className={GLASS_TAB_TRIGGER_CLASS}
-              >
-                {t.dashboard.tabs.curriculum}
-              </TabsTrigger>
-              <TabsTrigger
-                value="classes"
-                className={GLASS_TAB_TRIGGER_CLASS}
-              >
+              <TabsTrigger value="classes" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.classes}
               </TabsTrigger>
-              <TabsTrigger
-                value="lessonBuilder"
-                className={GLASS_TAB_TRIGGER_CLASS}
-              >
+              <TabsTrigger value="lessonBuilder" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.lessonBuilder}
               </TabsTrigger>
-              <TabsTrigger
-                value="students"
-                className={GLASS_TAB_TRIGGER_CLASS}
-              >
+              <TabsTrigger value="students" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.students}
               </TabsTrigger>
-              <TabsTrigger
-                value="assessments"
-                className={GLASS_TAB_TRIGGER_CLASS}
-              >
+              <TabsTrigger value="assessments" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.assessments ?? "Assessments"}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="curriculum" className="space-y-6">
-              <CurriculaList
-                className={cn(GLASS_PANEL_CLASS, "space-y-6")}
-                curricula={curricula}
-                loading={curriculaQuery.isLoading}
-                onNewCurriculum={() => setCurriculumDialogOpen(true)}
-                onOpenCurriculum={id => navigate(`/teacher/curriculum/${id}`)}
-                onExportCurriculum={id => toast({ description: t.dashboard.toasts.exportUnavailable })}
-              />
-            </TabsContent>
             <TabsContent value="classes" className="space-y-6">
               <ClassesTable
                 className={cn(GLASS_PANEL_CLASS, "space-y-6")}
@@ -631,217 +478,109 @@ export default function TeacherPage() {
             <TabsContent value="lessonBuilder" className="space-y-6">
               {lessonBuilderContext ? (
                 <div className="space-y-6">
-                  <div className={cn(GLASS_PANEL_CLASS, "space-y-6")}>
+                  <div className={cn(GLASS_PANEL_CLASS, "space-y-6")}> 
                     <h3 className="text-lg font-semibold">
                       {t.dashboard.lessonBuilder.contextTitle}
                     </h3>
                     <dl className="mt-4 grid gap-4 text-sm text-white/70 sm:grid-cols-2">
-                      {lessonBuilderSummaryItems.map(item => (
-                        <div key={item.key} className="space-y-1 text-left">
-                          <dt className="text-xs font-medium uppercase tracking-wide text-white/60">
-                            {item.label}
-                          </dt>
-                          <dd className="text-base font-semibold text-white">
-                            {item.value ?? t.dashboard.lessonBuilder.fallback}
-                          </dd>
-                        </div>
-                      ))}
+                      {lessonBuilderSummaryItems.map(item =>
+                        item.value ? (
+                          <div key={item.key}>
+                            <dt className="text-xs uppercase tracking-wide text-white/60">{item.label}</dt>
+                            <dd className="text-sm text-white">{item.value}</dd>
+                          </div>
+                        ) : null,
+                      )}
                     </dl>
+                    <Button
+                      className="mt-2 rounded-xl bg-white/90 text-slate-900 hover:bg-white"
+                      onClick={() => setLessonBuilderContext(null)}
+                    >
+                      {t.dashboard.lessonBuilder.clearContext}
+                    </Button>
                   </div>
-                  <div className={cn(GLASS_PANEL_CLASS, "overflow-hidden p-0 md:p-0")}>
-                    <LessonBuilderPage
-                      layoutMode="embedded"
-                      initialMeta={{
-                        title: lessonBuilderContext.title,
-                        date: lessonBuilderContext.date ?? null,
-                      }}
-                      initialClassId={lessonBuilderContext.classId ?? null}
-                    />
+                  <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 text-slate-900 shadow-[0_30px_120px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+                    <LessonBuilderPage />
                   </div>
                 </div>
               ) : (
-                <div
-                  className={cn(
-                    GLASS_PANEL_CLASS,
-                    "border-dashed border-white/25 bg-white/5 text-center shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)]",
-                  )}
-                >
-                  <h3 className="text-lg font-semibold">
-                    {t.dashboard.lessonBuilder.intercept.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-white/70">
-                    {t.dashboard.lessonBuilder.intercept.description}
-                  </p>
+                <Alert className={cn(GLASS_PANEL_CLASS, "space-y-4 text-white")}> 
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">
+                      {t.dashboard.lessonBuilder.emptyStateTitle}
+                    </h3>
+                    <p className="text-sm text-white/70">
+                      {t.dashboard.lessonBuilder.emptyStateDescription}
+                    </p>
+                  </div>
                   <Button
-                    className="mt-6 rounded-xl border-white/40 bg-white/90 text-slate-900 hover:bg-white"
-                    variant="outline"
-                    onClick={() => handleTabChange("curriculum")}
+                    className="rounded-xl border border-white/40 bg-white/90 text-slate-900 hover:bg-white"
+                    onClick={() => setLessonBuilderContext({
+                      title: t.dashboard.lessonBuilder.sampleLesson,
+                      classId: null,
+                      classTitle: null,
+                      stage: null,
+                      date: null,
+                      sequence: null,
+                    })}
                   >
-                    {t.dashboard.lessonBuilder.intercept.cta}
+                    {t.dashboard.lessonBuilder.launchBlank}
                   </Button>
-                </div>
+                </Alert>
               )}
             </TabsContent>
             <TabsContent value="students" className="space-y-6">
-              <StudentsSection
-                className={GLASS_PANEL_CLASS}
-                classes={classes}
-                onOpenStudent={studentId => navigate(`/teacher/students/${studentId}`)}
-              />
+              <StudentsSection className={cn(GLASS_PANEL_CLASS, "space-y-6")} />
             </TabsContent>
             <TabsContent value="assessments" className="space-y-6">
-              <AssessmentsSection className={GLASS_PANEL_CLASS} />
+              <AssessmentsSection className={cn(GLASS_PANEL_CLASS, "space-y-6")} />
             </TabsContent>
           </Tabs>
         </section>
-
-        <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{t.dashboard.dialogs.newClass.title}</DialogTitle>
-            </DialogHeader>
-            <form
-              onSubmit={classForm.handleSubmit(values => createClassMutation.mutate(values))}
-              className="space-y-4"
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="class-title">{t.dashboard.dialogs.newClass.fields.title}</Label>
-                <Input id="class-title" {...classForm.register("title")} required />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="class-stage">{t.dashboard.dialogs.newClass.fields.stage}</Label>
-                <Input id="class-stage" {...classForm.register("stage")} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="class-subject">{t.dashboard.dialogs.newClass.fields.subject}</Label>
-                <Input id="class-subject" {...classForm.register("subject")} />
-              </div>
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="class-start">{t.dashboard.dialogs.newClass.fields.startDate}</Label>
-                  <Input id="class-start" type="date" {...classForm.register("start_date")} />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
-                  <Input id="class-end" type="date" {...classForm.register("end_date")} />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setClassDialogOpen(false)}>
-                  {t.common.cancel}
-                </Button>
-                <Button type="submit" disabled={createClassMutation.isPending}>
-                  {t.dashboard.dialogs.newClass.submit}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog open={isCurriculumDialogOpen} onOpenChange={setCurriculumDialogOpen}>
-          <DialogContent className="sm:max-w-xl border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
-            <DialogHeader className="space-y-2">
-              <DialogTitle className="text-2xl font-semibold text-white">
-                {t.dashboard.dialogs.newCurriculum.title}
-              </DialogTitle>
-              <p className="text-sm text-white/70">
-                {t.dashboard.curriculum.empty.description}
-              </p>
-            </DialogHeader>
-            <form
-              onSubmit={curriculumForm.handleSubmit(values => createCurriculumMutation.mutate(values))}
-              className="space-y-4"
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="curriculum-title" className="text-sm font-medium text-white/80">
-                  {t.dashboard.dialogs.newCurriculum.fields.title}
-                </Label>
-                <Input
-                  id="curriculum-title"
-                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus:border-white/70 focus-visible:ring-white/40"
-                  {...curriculumForm.register("title")}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label className="text-sm font-medium text-white/80">
-                  {t.dashboard.dialogs.newCurriculum.fields.class}
-                </Label>
-                <Select
-                  value={curriculumForm.watch("class_id")}
-                  onValueChange={value => curriculumForm.setValue("class_id", value)}
-                >
-                  <SelectTrigger className="rounded-xl border-white/30 bg-white/10 text-white focus:ring-white/40">
-                    <SelectValue
-                      placeholder={t.dashboard.dialogs.newCurriculum.fields.classPlaceholder}
-                    />
-                  </SelectTrigger>
-                  <SelectContent className="border border-white/20 bg-slate-900/90 text-white backdrop-blur-xl">
-                    {(classesQuery.data ?? []).map(item => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="curriculum-subject" className="text-sm font-medium text-white/80">
-                  {t.dashboard.dialogs.newCurriculum.fields.subject}
-                </Label>
-                <Input
-                  id="curriculum-subject"
-                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus:border-white/70 focus-visible:ring-white/40"
-                  {...curriculumForm.register("subject")}
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="curriculum-year" className="text-sm font-medium text-white/80">
-                  {t.dashboard.dialogs.newCurriculum.fields.academicYear}
-                </Label>
-                <Input
-                  id="curriculum-year"
-                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus:border-white/70 focus-visible:ring-white/40"
-                  {...curriculumForm.register("academic_year")}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="curriculum-lessons" className="text-sm font-medium text-white/80">
-                  {t.dashboard.dialogs.newCurriculum.fields.lessonTitles}
-                </Label>
-                <Textarea
-                  id="curriculum-lessons"
-                  rows={6}
-                  placeholder={t.dashboard.dialogs.newCurriculum.fields.lessonTitlesPlaceholder}
-                  className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus-visible:ring-white/40"
-                  {...curriculumForm.register("lesson_titles")}
-                />
-                <p className="text-xs text-white/60">
-                  {t.dashboard.dialogs.newCurriculum.helper}
-                </p>
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-white/40 bg-transparent text-white hover:bg-white/10"
-                  onClick={() => setCurriculumDialogOpen(false)}
-                >
-                  {t.common.cancel}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={createCurriculumMutation.isPending}
-                  className="border-white/60 bg-white/90 text-slate-900 hover:bg-white"
-                >
-                  {t.dashboard.dialogs.newCurriculum.submit}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
+
+      <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
+        <DialogContent className="sm:max-w-lg border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
+          <DialogHeader>
+            <DialogTitle>{t.dashboard.dialogs.newClass.title}</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={classForm.handleSubmit(values => createClassMutation.mutate(values))}
+            className="space-y-4"
+          >
+            <div className="grid gap-2">
+              <Label htmlFor="class-title">{t.dashboard.dialogs.newClass.fields.title}</Label>
+              <Input id="class-title" {...classForm.register("title")} required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="class-stage">{t.dashboard.dialogs.newClass.fields.stage}</Label>
+              <Input id="class-stage" {...classForm.register("stage")} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="class-subject">{t.dashboard.dialogs.newClass.fields.subject}</Label>
+              <Input id="class-subject" {...classForm.register("subject")} />
+            </div>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="class-start">{t.dashboard.dialogs.newClass.fields.startDate}</Label>
+                <Input id="class-start" type="date" {...classForm.register("start_date")} />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
+                <Input id="class-end" type="date" {...classForm.register("end_date")} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setClassDialogOpen(false)}>
+                {t.common.cancel}
+              </Button>
+              <Button type="submit" disabled={createClassMutation.isPending}>
+                {t.dashboard.dialogs.newClass.submit}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
