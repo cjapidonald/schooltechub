@@ -339,7 +339,7 @@ const Index = () => {
                 </Card>
               </Reveal>
             </div>
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-12 grid gap-[15px] sm:grid-cols-2 xl:grid-cols-4">
               {workflowTools.map(({ title, description, icon: Icon }, index) => {
                 const { iconWrapper, title: titleColor } = iconStyles[index % iconStyles.length];
 
@@ -424,7 +424,7 @@ const Index = () => {
               </Card>
             </Reveal>
           </div>
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-14 grid gap-[15px] sm:grid-cols-2 lg:grid-cols-4">
             {schoolSolutions.map(({ title, description, icon: Icon }, index) => {
               const gradientClass = compactCardGradients[index % compactCardGradients.length];
               const { iconWrapper, title: titleColor } = iconStyles[index % iconStyles.length];
@@ -498,7 +498,7 @@ const Index = () => {
         </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/15 via-background to-secondary/15" />
         <div className="container mx-auto px-4">
-          <div ref={statsRef} className="grid gap-8 text-center md:grid-cols-4">
+          <div ref={statsRef} className="grid gap-[15px] text-center md:grid-cols-4">
             {stats.map((stat, index) => (
               <StatCard key={stat.label} stat={stat} index={index} shouldAnimate={statsInView} />
             ))}
@@ -529,7 +529,7 @@ const Index = () => {
               </p>
             </Reveal>
           </div>
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-[15px] md:grid-cols-3">
             {testimonials.map(({ quote, name, role, image }, index) => (
               <Reveal key={name} delay={index * 150}>
                 <Card
