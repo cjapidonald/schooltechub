@@ -916,8 +916,8 @@ const Blog = () => {
                             >
                               <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
                                 <figure className="flex flex-col items-center gap-4 p-6">
-                                  <div className="relative aspect-[4/3] w-full max-w-[18rem] overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 p-1.5 shadow-[0_30px_90px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
-                                    <div className="relative h-full w-full overflow-hidden rounded-[1.6rem]">
+                                  <div className="relative aspect-[4/3] w-full max-w-[20rem] overflow-hidden rounded-[2rem] border-2 border-white/30 bg-white/10 p-2 shadow-[0_30px_90px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                                    <div className="relative h-full w-full overflow-hidden rounded-[1.55rem]">
                                       <img
                                         src={imageSrc}
                                         alt={post.title}
@@ -927,23 +927,18 @@ const Blog = () => {
                                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-60" />
                                     </div>
                                   </div>
-                                  {post.featured_image_caption ? (
-                                    <figcaption className="text-xs uppercase tracking-wide text-white/70">
-                                      {post.featured_image_caption}
-                                    </figcaption>
-                                  ) : null}
                                 </figure>
                                 <CardHeader className="space-y-3 text-center">
-                                  <div className="flex items-center justify-center gap-2 text-sm text-white/70">
-                                    <User className="h-4 w-4" aria-hidden="true" />
-                                    <span className="font-medium">{authorLabel}</span>
-                                  </div>
                                   <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
                                     {post.title}
                                   </h2>
                                   {post.subtitle ? (
                                     <p className="text-base text-white/70">{post.subtitle}</p>
                                   ) : null}
+                                  <div className="mt-4 flex items-center justify-center gap-2 text-sm text-white/70">
+                                    <User className="h-4 w-4" aria-hidden="true" />
+                                    <span className="font-medium">{authorLabel}</span>
+                                  </div>
                                 </CardHeader>
                               </Card>
                             </Link>
@@ -977,8 +972,8 @@ const Blog = () => {
                             >
                               <Card className="flex h-full flex-col items-center overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
                                 <figure className="flex w-full flex-col items-center gap-4 p-5">
-                                  <div className="relative aspect-[4/3] w-full max-w-[16rem] overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-1.5 shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
-                                    <div className="relative h-full w-full overflow-hidden rounded-[1.4rem]">
+                                  <div className="relative aspect-[4/3] w-full max-w-[18rem] overflow-hidden rounded-[1.75rem] border-2 border-white/25 bg-white/10 p-2 shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                                    <div className="relative h-full w-full overflow-hidden rounded-[1.45rem]">
                                       <img
                                         src={imageSrc}
                                         alt={post.title}
@@ -988,23 +983,18 @@ const Blog = () => {
                                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-50" />
                                     </div>
                                   </div>
-                                  {post.featured_image_caption ? (
-                                    <figcaption className="text-xs text-white/70">
-                                      {post.featured_image_caption}
-                                    </figcaption>
-                                  ) : null}
                                 </figure>
                                 <CardHeader className="space-y-2 text-center">
-                                  <div className="flex items-center justify-center gap-2 text-xs text-white/60">
-                                    <User className="h-3.5 w-3.5" aria-hidden="true" />
-                                    <span className="font-medium tracking-wide">{authorLabel}</span>
-                                  </div>
                                   <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
                                     {post.title}
                                   </h3>
                                   {post.subtitle ? (
                                     <p className="text-sm text-white/70">{post.subtitle}</p>
                                   ) : null}
+                                  <div className="mt-3 flex items-center justify-center gap-2 text-xs text-white/60">
+                                    <User className="h-3.5 w-3.5" aria-hidden="true" />
+                                    <span className="font-medium tracking-wide">{authorLabel}</span>
+                                  </div>
                                 </CardHeader>
                               </Card>
                             </Link>
