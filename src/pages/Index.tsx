@@ -328,7 +328,31 @@ const Index = () => {
                     <div className="flex flex-col items-center text-center">
                       <div className="text-sm uppercase tracking-[0.28em] text-white/60">Workflow brilliance</div>
                       <h2 className="mt-5 text-4xl font-semibold text-white md:text-5xl">
-                        Power every lesson with organised workflows and luminous insights
+                        {"Power every lesson with "}
+                        <span className="relative inline-flex flex-col items-center">
+                          <span>organised</span>
+                          <span className="pointer-events-none mt-3 inline-block w-24 max-w-[40vw] -rotate-2 sm:w-28 md:mt-4 md:w-32">
+                            <img
+                              src="/chatgpt-sticker.svg"
+                              alt="ChatGPT sticker"
+                              className="w-full drop-shadow-[0_10px_25px_rgba(15,23,42,0.35)]"
+                              loading="lazy"
+                            />
+                          </span>
+                        </span>
+                        {" workflows and "}
+                        <span className="relative inline-flex flex-col items-center">
+                          <span>luminous</span>
+                          <span className="pointer-events-none mt-3 inline-block w-24 max-w-[40vw] rotate-3 sm:w-28 md:mt-4 md:w-32">
+                            <img
+                              src="/wordwall-sticker.svg"
+                              alt="Wordwall sticker"
+                              className="w-full drop-shadow-[0_10px_25px_rgba(15,23,42,0.35)]"
+                              loading="lazy"
+                            />
+                          </span>
+                        </span>
+                        {" insights"}
                       </h2>
                       <p className="mt-6 max-w-xl text-base text-white/60 md:text-lg">
                         SchoolTech Hub helps teachers orchestrate their workflow, collaborate with colleagues, and weave technology into every learning moment. Plan lessons, track progress, and publish AI-guided reports without leaving your digital staffroom.

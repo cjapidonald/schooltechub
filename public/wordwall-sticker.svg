@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="230" height="96" viewBox="0 0 230 96" role="img" aria-labelledby="title">
+  <title id="title">Wordwall sticker</title>
+  <defs>
+    <filter id="shadow" x="-12%" y="-25%" width="124%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#101020" flood-opacity="0.3" />
+    </filter>
+    <linearGradient id="blue-grid" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#36a8ff" />
+      <stop offset="1" stop-color="#1c7cd6" />
+    </linearGradient>
+  </defs>
+  <g filter="url(#shadow)">
+    <path
+      d="M30 8h170c11.046 0 20 8.954 20 20v40c0 11.046-8.954 20-20 20H30c-11.046 0-20-8.954-20-20V28C10 16.954 18.954 8 30 8z"
+      fill="#fff"
+    />
+    <path
+      d="M31 9h168c11.046 0 20 8.954 20 20v38c0 11.046-8.954 20-20 20H31c-11.046 0-20-8.954-20-20V29C11 17.954 19.954 9 31 9z"
+      fill="none"
+      stroke="#d9d9e0"
+      stroke-width="2"
+    />
+    <g transform="translate(38 20)">
+      <rect x="0" y="0" width="44" height="44" rx="10" fill="#e7f5ff" />
+      <g fill="url(#blue-grid)">
+        <rect x="6" y="6" width="13" height="13" rx="2.5" />
+        <rect x="25" y="6" width="13" height="13" rx="2.5" />
+        <rect x="6" y="25" width="13" height="13" rx="2.5" />
+        <rect x="25" y="25" width="13" height="13" rx="2.5" />
+      </g>
+      <rect x="18" y="18" width="8" height="8" rx="1.5" fill="#fff" opacity="0.8" />
+    </g>
+    <text x="110" y="58" font-family="'Inter', 'Segoe UI', sans-serif" font-size="28" font-weight="600" fill="#0f172a">
+      Wordwall
+    </text>
+  </g>
+</svg>
