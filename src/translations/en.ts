@@ -752,10 +752,12 @@ export const en = {
     },
     states: {
       loading: "Loading blog posts...",
-      empty: "No blog posts found matching your criteria."
+      empty: "No blog posts found matching your criteria.",
+      moreComing: "Check back soon for more posts."
     },
     badges: {
-      featured: "Featured"
+      featured: "Featured",
+      latest: "Latest"
     },
     readTime: {
       minutes: "{minutes} min read"

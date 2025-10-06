@@ -252,5 +252,129 @@ export const SAMPLE_BLOG_POSTS: SampleBlogPost[] = [
     view_count: 2110,
     language: null,
   },
+  {
+    id: "sample-ai-feedback-loops",
+    title: "Guiding Students Through AI Feedback Loops",
+    subtitle: "Practical routines that keep automated coaching transparent and human-centered.",
+    slug: "guiding-ai-feedback-loops",
+    excerpt:
+      "See how one high school writing team uses AI-generated drafts, conferencing protocols, and student reflection cycles to keep learning ownership clear.",
+    category: "teacherReflection",
+    tags: ["Spotlight", "Assessment", "Writing"],
+    keywords: ["secondary", "english", "feedback"],
+    featured_image:
+      "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80",
+    content: [
+      {
+        type: "heading",
+        level: 2,
+        children: [{ text: "Coaching That Puts Students First" }],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            text:
+              "Instead of letting the AI grade in isolation, teachers invite students to preview draft suggestions together. Learners highlight which lines feel on target, flag anything that sounds off, and write a quick note back to the AI explaining what help they still need.",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            text:
+              "Weekly conferencing notebooks track how the AI feedback changed each revision. Students choose one glow and one grow to discuss with their teacher, keeping the final judgment rooted in human conversation rather than a mysterious score.",
+          },
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        children: [{ text: "Building Trust with Families" }],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            text:
+              "Families can open the shared workspace to see the exact prompts and responses students received. A monthly open house lets caregivers try the same revision routines so everyone understands what “AI-assisted writing” actually looks like in practice.",
+          },
+        ],
+      },
+    ],
+    author: { name: "Marcos Nguyen", job_title: "High School Humanities Lead" },
+    author_name: "Marcos Nguyen",
+    author_image: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=400&q=80",
+    created_at: "2023-10-18T12:20:00Z",
+    published_at: "2023-10-18T12:20:00Z",
+    updated_at: "2023-10-18T12:20:00Z",
+    is_published: true,
+    read_time: 7,
+    view_count: 1865,
+    language: null,
+  },
+  {
+    id: "sample-podcast-lab",
+    title: "Launching a Podcast Lab with Middle School Students",
+    subtitle: "From planning rubrics to audio booths—everything you need for student storytellers.",
+    slug: "podcast-lab-middle-school",
+    excerpt:
+      "A humanities team maps out equipment checklists, production calendars, and authentic audiences to help students publish podcasts with confidence.",
+    category: "classActivity",
+    tags: ["Media", "Project-Based", "Creativity"],
+    keywords: ["middle school", "podcast", "storytelling"],
+    featured_image:
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80",
+    content: [
+      {
+        type: "heading",
+        level: 2,
+        children: [{ text: "Planning the Production Sprint" }],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            text:
+              "Students begin with a storyboard template that keeps episodes tight and purposeful. Teachers rotate mini-lessons on interviewing, narrative hooks, and audio editing so each crew can specialize while still understanding the full production flow.",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            text:
+              "The class uses a shared Kanban board to track research, recording, and revision tasks. Peer producers leave time-stamped comments directly in the editing app, making feedback faster than trading long email threads.",
+          },
+        ],
+      },
+      {
+        type: "heading",
+        level: 3,
+        children: [{ text: "Publishing to Real Audiences" }],
+      },
+      {
+        type: "paragraph",
+        children: [
+          {
+            text:
+              "On launch day, students host a listening party complete with QR codes to follow-up surveys. The marketing crew schedules social posts and writes a community newsletter highlight celebrating behind-the-scenes roles.",
+          },
+        ],
+      },
+    ],
+    author: { name: "Priya Acharya", job_title: "Digital Media Coach" },
+    author_name: "Priya Acharya",
+    author_image: "https://images.unsplash.com/photo-1531891437562-4301cf35b7e4?auto=format&fit=crop&w=400&q=80",
+    created_at: "2023-09-07T16:00:00Z",
+    published_at: "2023-09-07T16:00:00Z",
+    updated_at: "2023-09-07T16:00:00Z",
+    is_published: true,
+    read_time: 5,
+    view_count: 1540,
+    language: null,
+  },
 ];
 
