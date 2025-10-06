@@ -27,7 +27,6 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { SEO } from "@/components/SEO";
 import { StructuredData } from "@/components/StructuredData";
-import { FilterSection } from "@/components/filters/FilterSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -828,7 +827,7 @@ const Blog = () => {
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-8">
                 {(["stage", "subject", "delivery", "payment", "platform"] as Array<Exclude<BlogFilterKey, "category">>)
                   .map(key => {
                     const options = optionEntries[key] ?? [];
@@ -838,35 +837,28 @@ const Blog = () => {
 
                     const Icon = filterSectionIcons[key];
                     return (
-                      <FilterSection
-                        key={key}
-                        title={
-                          <>
-                            <Icon className="h-4 w-4 text-white" aria-hidden="true" />
-                            <span>{t.blog.filters[key]}</span>
-                          </>
-                        }
-                        defaultOpen={false}
-                        contentClassName="grid w-full gap-2 sm:grid-cols-2 lg:grid-cols-3"
-                      >
-                        {options.map(([value, label]) => {
-                          const isActive = filters[key].includes(value);
-                          return (
-                            <Button
-                              key={value}
-                              type="button"
-                              size="sm"
-                              variant={isActive ? "default" : "outline"}
-                              className={`w-full rounded-full border-white/20 bg-white/10 px-3 py-2 text-[0.7rem] font-medium leading-tight text-white/80 transition hover:text-white ${
-                                isActive ? "border-transparent bg-white/90 text-slate-900 hover:bg-white" : "hover:bg-white/20"
-                              }`}
-                              onClick={() => handleFilterToggle(key, value)}
-                            >
-                              <span className="block whitespace-normal break-words text-center">{label}</span>
-                            </Button>
-                          );
-                        })}
-                      </FilterSection>
+                      <div key={key} className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-white/70">
+                          <Icon className="h-4 w-4 text-white/80" aria-hidden="true" />
+                          <span>{t.blog.filters[key]}</span>
+                        </div>
+                        <div className="space-y-2 text-sm text-white/70">
+                          {options.map(([value, label]) => {
+                            const isActive = filters[key].includes(value);
+                            return (
+                              <label key={value} className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={isActive}
+                                  onChange={() => handleFilterToggle(key, value)}
+                                  className="h-4 w-4 rounded border-white/30 bg-white/10 text-sky-300 focus:ring-white/50"
+                                />
+                                <span>{label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
                     );
                   })}
               </CardContent>
