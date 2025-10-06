@@ -148,7 +148,10 @@ const Events = () => {
         <div className="absolute top-1/4 right-1/4 h-[20rem] w-[20rem] rounded-full bg-emerald-500/20 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-24 md:px-8">
+      <div
+        id="main-content"
+        className="relative mx-auto mt-2.5 flex w-full max-w-6xl flex-col gap-10 px-4 pb-24 md:px-8"
+      >
         <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-10 shadow-[0_25px_80px_-20px_rgba(15,23,42,0.65)] backdrop-blur-2xl md:p-16">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
           <div className="relative z-10 flex flex-col gap-6 text-center md:text-left">
