@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ export function CurriculaList({
   className,
 }: CurriculaListProps) {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   return (
     <section
@@ -94,7 +96,8 @@ export function CurriculaList({
           {curricula.map(item => (
             <Card
               key={item.id}
-              className="flex flex-col justify-between rounded-3xl border border-white/20 bg-white/10 text-white/80 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] transition hover:border-white/40 hover:bg-white/15"
+              className="flex flex-col justify-between rounded-3xl border border-white/20 bg-white/10 text-white/80 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] transition hover:border-white/40 hover:bg-white/15 cursor-pointer"
+              onClick={() => navigate(`/teacher/curriculum/${item.id}`)}
             >
               <CardHeader className="space-y-3 p-6 pb-4">
                 <div className="flex items-start justify-between gap-3">
