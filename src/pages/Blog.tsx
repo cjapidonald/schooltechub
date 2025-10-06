@@ -689,7 +689,7 @@ const Blog = () => {
         <div className="absolute top-1/3 left-[-10rem] h-[18rem] w-[18rem] rounded-full bg-emerald-500/20 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-24 pt-[18px] md:px-8 md:pt-[18px]">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-24 pt-[1344px] md:px-8 md:pt-[1344px]">
         <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-6 shadow-[0_25px_80px_-20px_rgba(15,23,42,0.65)] backdrop-blur-2xl transition-colors duration-500 md:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
           <div className="absolute inset-y-0 right-[-20%] hidden w-[50%] rounded-full bg-gradient-to-br from-cyan-400/30 via-transparent to-transparent blur-3xl md:block" />
