@@ -29,7 +29,7 @@ import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
 import { bulkAddStudents } from "@/features/students/api";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
-import { BarChart3, ClipboardList, LogIn, Plus, Save, Sparkles, Trash2, Users } from "lucide-react";
+import { BarChart3, ClipboardList, LogIn, Sparkles, Users } from "lucide-react";
 
 const normalizeName = (value: string | null | undefined) => {
   if (!value) {
@@ -115,54 +115,8 @@ const splitStudentNames = (input: string | undefined) =>
     .map(name => name.trim())
     .filter(Boolean);
 
-type CurriculumLessonDraft = {
-  id: string;
-  title: string;
-  focus: string;
-  resources: string;
-};
-
-type CurriculumDraft = {
-  unitTitle: string;
-  vision: string;
-  essentialQuestions: string;
-  knowledgeSkills: string;
-  assessments: string;
-  pacing: string;
-  notes: string;
-  lessons: CurriculumLessonDraft[];
-};
-
-type CurriculumDraftField = keyof CurriculumDraft;
-type CurriculumLessonField = keyof CurriculumLessonDraft;
-type CurriculumTextField = Exclude<CurriculumDraftField, "lessons">;
-
 const GLASS_SELECT_CARD_CLASS =
   "w-full rounded-2xl border border-white/15 bg-white/10 p-5 text-left text-white/75 transition hover:border-white/40 hover:bg-white/15 hover:text-white";
-
-const CURRICULUM_INPUT_CLASS =
-  "border-white/20 bg-white/90 text-slate-900 placeholder:text-slate-500 focus-visible:ring-white/60 focus-visible:ring-offset-0";
-
-const generateLessonId = () => {
-  if (typeof globalThis !== "undefined") {
-    const maybeCrypto = globalThis.crypto as { randomUUID?: () => string } | undefined;
-    if (maybeCrypto?.randomUUID) {
-      return maybeCrypto.randomUUID();
-    }
-  }
-  return `lesson-${Math.random().toString(36).slice(2, 11)}`;
-};
-
-const createEmptyCurriculumDraft = (cls: Class): CurriculumDraft => ({
-  unitTitle: `${cls.title} overview`,
-  vision: "",
-  essentialQuestions: "",
-  knowledgeSkills: "",
-  assessments: "",
-  pacing: "",
-  notes: "",
-  lessons: [],
-});
 
 export default function TeacherPage() {
   const { t } = useLanguage();
@@ -181,7 +135,6 @@ export default function TeacherPage() {
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
-  const [curriculumDrafts, setCurriculumDrafts] = useState<Record<string, CurriculumDraft>>({});
   const [selectedCurriculumClassId, setSelectedCurriculumClassId] = useState<string | null>(null);
   const prototypeAccessToast = useMemo(
     () => ({
@@ -428,32 +381,6 @@ export default function TeacherPage() {
 
   useEffect(() => {
     if (curriculumClasses.length === 0) {
-      setCurriculumDrafts(prev => (Object.keys(prev).length > 0 ? {} : prev));
-      return;
-    }
-
-    setCurriculumDrafts(prev => {
-      let changed = false;
-      const next: Record<string, CurriculumDraft> = {};
-
-      curriculumClasses.forEach(cls => {
-        const existing = prev[cls.id];
-        next[cls.id] = existing ?? createEmptyCurriculumDraft(cls);
-        if (!existing) {
-          changed = true;
-        }
-      });
-
-      if (Object.keys(prev).length !== Object.keys(next).length) {
-        changed = true;
-      }
-
-      return changed ? next : prev;
-    });
-  }, [curriculumClasses]);
-
-  useEffect(() => {
-    if (curriculumClasses.length === 0) {
       setSelectedCurriculumClassId(null);
       return;
     }
@@ -476,102 +403,29 @@ export default function TeacherPage() {
     [curriculumClasses, selectedCurriculumClassId],
   );
 
-  const selectedCurriculumDraft = useMemo(() => {
+  const selectedCurriculumClassDetails = useMemo(() => {
     if (!selectedCurriculumClass) {
       return null;
     }
 
-    return curriculumDrafts[selectedCurriculumClass.id] ?? null;
-  }, [curriculumDrafts, selectedCurriculumClass]);
+    const parts = [selectedCurriculumClass.stage, selectedCurriculumClass.subject].filter(Boolean);
+    return parts.length > 0 ? parts.join(" • ") : null;
+  }, [selectedCurriculumClass]);
 
-  const updateCurriculumDraft = useCallback((classId: string, updater: (draft: CurriculumDraft) => CurriculumDraft) => {
-    setCurriculumDrafts(prev => {
-      const current = prev[classId];
-      if (!current) {
-        return prev;
-      }
-
-      const updated = updater(current);
-      if (updated === current) {
-        return prev;
-      }
-
-      return { ...prev, [classId]: updated };
-    });
-  }, []);
-
-  const handleCurriculumFieldChange = useCallback(
-    (field: CurriculumTextField, value: string) => {
-      if (!selectedCurriculumClass) {
-        return;
-      }
-
-      updateCurriculumDraft(selectedCurriculumClass.id, draft => ({ ...draft, [field]: value }));
-    },
-    [selectedCurriculumClass, updateCurriculumDraft],
-  );
-
-  const handleLessonFieldChange = useCallback(
-    (lessonId: string, field: CurriculumLessonField, value: string) => {
-      if (!selectedCurriculumClass) {
-        return;
-      }
-
-      updateCurriculumDraft(selectedCurriculumClass.id, draft => ({
-        ...draft,
-        lessons: draft.lessons.map(lesson => (lesson.id === lessonId ? { ...lesson, [field]: value } : lesson)),
-      }));
-    },
-    [selectedCurriculumClass, updateCurriculumDraft],
-  );
-
-  const handleAddLesson = useCallback(() => {
+  const selectedCurriculumDateRange = useMemo(() => {
     if (!selectedCurriculumClass) {
-      return;
+      return null;
     }
 
-    const newLesson: CurriculumLessonDraft = {
-      id: generateLessonId(),
-      title: "Untitled lesson",
-      focus: "",
-      resources: "",
-    };
+    const start = formatLessonContextDate(selectedCurriculumClass.start_date ?? null);
+    const end = formatLessonContextDate(selectedCurriculumClass.end_date ?? null);
 
-    updateCurriculumDraft(selectedCurriculumClass.id, draft => ({
-      ...draft,
-      lessons: [...draft.lessons, newLesson],
-    }));
-  }, [selectedCurriculumClass, updateCurriculumDraft]);
-
-  const handleRemoveLesson = useCallback(
-    (lessonId: string) => {
-      if (!selectedCurriculumClass) {
-        return;
-      }
-
-      updateCurriculumDraft(selectedCurriculumClass.id, draft => ({
-        ...draft,
-        lessons: draft.lessons.filter(lesson => lesson.id !== lessonId),
-      }));
-    },
-    [selectedCurriculumClass, updateCurriculumDraft],
-  );
-
-  const handleCurriculumSave = useCallback(() => {
-    if (!selectedCurriculumClass) {
-      return;
+    if (start && end) {
+      return `${start} – ${end}`;
     }
 
-    toast({
-      title: "Curriculum saved",
-      description: `Updates for ${selectedCurriculumClass.title} are stored locally in this preview experience.`,
-    });
-  }, [selectedCurriculumClass, toast]);
-
-  const curriculumFieldId = useCallback(
-    (name: string) => (selectedCurriculumClass ? `${selectedCurriculumClass.id}-${name}` : `curriculum-${name}`),
-    [selectedCurriculumClass],
-  );
+    return start ?? end ?? null;
+  }, [selectedCurriculumClass]);
 
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
@@ -758,208 +612,34 @@ export default function TeacherPage() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {selectedCurriculumClass && selectedCurriculumDraft ? (
+                  {selectedCurriculumClass ? (
                     <div className={cn(GLASS_PANEL_CLASS, "space-y-6")}> 
                       <div className="space-y-2">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div className="space-y-1">
-                            <h3 className="text-2xl font-semibold text-white">{selectedCurriculumClass.title}</h3>
-                            <p className="text-sm text-white/70">
-                              Sequence lessons, capture essential questions, and monitor pacing in one workspace.
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="border-white/50 bg-white/10 text-white hover:border-white/70 hover:bg-white/20"
-                            onClick={handleCurriculumSave}
-                          >
-                            <Save className="h-4 w-4" />
-                            Save outline
-                          </Button>
-                        </div>
-                        {selectedCurriculumClass.stage || selectedCurriculumClass.subject ? (
-                          <p className="text-xs uppercase tracking-wide text-white/50">
-                            {[selectedCurriculumClass.stage, selectedCurriculumClass.subject].filter(Boolean).join(" • ")}
+                        <h3 className="text-2xl font-semibold text-white">{selectedCurriculumClass.title}</h3>
+                        {selectedCurriculumClassDetails ? (
+                          <p className="text-xs uppercase tracking-wide text-white/60">
+                            {selectedCurriculumClassDetails}
                           </p>
                         ) : null}
                       </div>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-3">
-                          <Label
-                            htmlFor={curriculumFieldId("unitTitle")}
-                            className="text-xs font-semibold uppercase tracking-wide text-white/60"
-                          >
-                            Unit or theme
-                          </Label>
-                          <Input
-                            id={curriculumFieldId("unitTitle")}
-                            value={selectedCurriculumDraft.unitTitle}
-                            onChange={event => handleCurriculumFieldChange("unitTitle", event.target.value)}
-                            className={cn(CURRICULUM_INPUT_CLASS, "h-12 rounded-xl")}
-                          />
-                        </div>
-                        <div className="space-y-3">
-                          <Label
-                            htmlFor={curriculumFieldId("pacing")}
-                            className="text-xs font-semibold uppercase tracking-wide text-white/60"
-                          >
-                            Weekly pacing
-                          </Label>
-                          <Textarea
-                            id={curriculumFieldId("pacing")}
-                            value={selectedCurriculumDraft.pacing}
-                            onChange={event => handleCurriculumFieldChange("pacing", event.target.value)}
-                            className={cn(CURRICULUM_INPUT_CLASS, "min-h-[120px] rounded-xl bg-white/85")}
-                          />
-                        </div>
+                      <div className="space-y-3 text-sm text-white/70">
+                        <p>This curriculum overview is automatically created when you add a class.</p>
+                        <p>
+                          Use the lesson builder or classes tabs to continue planning while we prepare additional curriculum
+                          tools for this space.
+                        </p>
                       </div>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-3">
-                          <Label
-                            htmlFor={curriculumFieldId("vision")}
-                            className="text-xs font-semibold uppercase tracking-wide text-white/60"
-                          >
-                            Unit vision
-                          </Label>
-                          <Textarea
-                            id={curriculumFieldId("vision")}
-                            value={selectedCurriculumDraft.vision}
-                            onChange={event => handleCurriculumFieldChange("vision", event.target.value)}
-                            className={cn(CURRICULUM_INPUT_CLASS, "min-h-[140px] rounded-xl bg-white/85")}
-                          />
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2 rounded-2xl border border-white/15 bg-white/5 p-5">
+                          <p className="text-xs uppercase tracking-wide text-white/60">Overview card</p>
+                          <p className="text-base font-semibold text-white">{`${selectedCurriculumClass.title} overview`}</p>
                         </div>
-                        <div className="space-y-3">
-                          <Label
-                            htmlFor={curriculumFieldId("essentialQuestions")}
-                            className="text-xs font-semibold uppercase tracking-wide text-white/60"
-                          >
-                            Essential questions
-                          </Label>
-                          <Textarea
-                            id={curriculumFieldId("essentialQuestions")}
-                            value={selectedCurriculumDraft.essentialQuestions}
-                            onChange={event => handleCurriculumFieldChange("essentialQuestions", event.target.value)}
-                            className={cn(CURRICULUM_INPUT_CLASS, "min-h-[140px] rounded-xl bg-white/85")}
-                          />
-                        </div>
-                      </div>
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-3">
-                          <Label
-                            htmlFor={curriculumFieldId("knowledgeSkills")}
-                            className="text-xs font-semibold uppercase tracking-wide text-white/60"
-                          >
-                            Knowledge &amp; skills
-                          </Label>
-                          <Textarea
-                            id={curriculumFieldId("knowledgeSkills")}
-                            value={selectedCurriculumDraft.knowledgeSkills}
-                            onChange={event => handleCurriculumFieldChange("knowledgeSkills", event.target.value)}
-                            className={cn(CURRICULUM_INPUT_CLASS, "min-h-[140px] rounded-xl bg-white/85")}
-                          />
-                        </div>
-                        <div className="space-y-3">
-                          <Label
-                            htmlFor={curriculumFieldId("assessments")}
-                            className="text-xs font-semibold uppercase tracking-wide text-white/60"
-                          >
-                            Assessments &amp; evidence
-                          </Label>
-                          <Textarea
-                            id={curriculumFieldId("assessments")}
-                            value={selectedCurriculumDraft.assessments}
-                            onChange={event => handleCurriculumFieldChange("assessments", event.target.value)}
-                            className={cn(CURRICULUM_INPUT_CLASS, "min-h-[140px] rounded-xl bg-white/85")}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <Label
-                          htmlFor={curriculumFieldId("notes")}
-                          className="text-xs font-semibold uppercase tracking-wide text-white/60"
-                        >
-                          Next steps &amp; notes
-                        </Label>
-                        <Textarea
-                          id={curriculumFieldId("notes")}
-                          value={selectedCurriculumDraft.notes}
-                          onChange={event => handleCurriculumFieldChange("notes", event.target.value)}
-                          className={cn(CURRICULUM_INPUT_CLASS, "min-h-[120px] rounded-xl bg-white/85")}
-                        />
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <h4 className="text-lg font-semibold text-white">Lesson sequence</h4>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleAddLesson}
-                            className="border-white/40 bg-white/10 text-white hover:border-white/60 hover:bg-white/20"
-                          >
-                            <Plus className="h-4 w-4" />
-                            Add lesson
-                          </Button>
-                        </div>
-                        <div className="space-y-4">
-                          {selectedCurriculumDraft.lessons.length > 0 ? (
-                            selectedCurriculumDraft.lessons.map((lesson, index) => (
-                              <div
-                                key={lesson.id}
-                                className="rounded-2xl border border-white/15 bg-white/10 p-4 text-white/80 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.75)]"
-                              >
-                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                  <div className="flex-1 space-y-2">
-                                    <p className="text-xs uppercase tracking-wide text-white/60">Lesson {index + 1}</p>
-                                    <Input
-                                      value={lesson.title}
-                                      onChange={event => handleLessonFieldChange(lesson.id, "title", event.target.value)}
-                                      className={cn(CURRICULUM_INPUT_CLASS, "h-11 rounded-xl")}
-                                    />
-                                  </div>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    className="text-white/70 hover:bg-white/10 hover:text-white"
-                                    onClick={() => handleRemoveLesson(lesson.id)}
-                                    aria-label={`Remove lesson ${index + 1}`}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                <div className="mt-4 space-y-3">
-                                  <div className="space-y-2">
-                                    <Label className="text-xs font-semibold uppercase tracking-wide text-white/60">
-                                      Learning focus
-                                    </Label>
-                                    <Textarea
-                                      value={lesson.focus}
-                                      onChange={event => handleLessonFieldChange(lesson.id, "focus", event.target.value)}
-                                      className={cn(CURRICULUM_INPUT_CLASS, "min-h-[120px] rounded-xl bg-white/85")}
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label className="text-xs font-semibold uppercase tracking-wide text-white/60">
-                                      Key resources
-                                    </Label>
-                                    <Input
-                                      value={lesson.resources}
-                                      onChange={event => handleLessonFieldChange(lesson.id, "resources", event.target.value)}
-                                      className={cn(CURRICULUM_INPUT_CLASS, "h-11 rounded-xl")}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            ))
-                          ) : (
-                            <Alert className="rounded-2xl border border-white/20 bg-white/10 text-white">
-                              <AlertTitle className="text-base font-semibold text-white">No lessons added yet</AlertTitle>
-                              <AlertDescription className="text-sm text-white/70">
-                                Start mapping your lesson sequence by selecting “Add lesson”.
-                              </AlertDescription>
-                            </Alert>
-                          )}
-                        </div>
+                        {selectedCurriculumDateRange ? (
+                          <div className="space-y-2 rounded-2xl border border-white/15 bg-white/5 p-5">
+                            <p className="text-xs uppercase tracking-wide text-white/60">Schedule</p>
+                            <p className="text-base font-semibold text-white">{selectedCurriculumDateRange}</p>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   ) : curriculumClasses.length === 0 ? (
