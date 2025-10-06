@@ -298,49 +298,49 @@ export default function StudentPage() {
               </Card>
             </div>
           ) : (
-            <div className="relative z-10 mx-auto max-w-xl">
+            <div className="relative z-10 mx-auto max-w-md">
               <Card className="border-white/20 bg-white/10 text-white shadow-[0_20px_70px_-25px_rgba(15,23,42,0.85)] backdrop-blur-xl">
-                <CardHeader className="space-y-4 text-center">
-                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white/80 backdrop-blur">
+                <CardHeader className="space-y-3 text-center">
+                  <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/80 backdrop-blur">
                     <Sparkles className="h-4 w-4" />
                     Student journey portal
                   </div>
-                  <CardTitle className="text-3xl font-semibold text-white">Log in to your journey</CardTitle>
-                  <CardDescription className="text-white/70">
+                  <CardTitle className="text-2xl font-semibold text-white">Log in to your journey</CardTitle>
+                  <CardDescription className="text-sm text-white/70">
                     Access assignments, celebrate streaks, and follow teacher guidance the moment you sign in.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-8">
-                  <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-white/5 p-4">
-                    <Avatar className="h-12 w-12 border border-white/30">
+                <CardContent className="space-y-6">
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 p-3">
+                    <Avatar className="h-11 w-11 border border-white/30">
                       <AvatarFallback className="bg-white/10 text-lg text-white">{exampleStudentInitials}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm text-white/70">Previewing as</p>
-                      <p className="text-lg font-medium text-white">{exampleStudentFullName}</p>
+                      <p className="text-xs uppercase tracking-wide text-white/60">Previewing as</p>
+                      <p className="text-base font-medium text-white">{exampleStudentFullName}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div className="space-y-2">
-                      <Label htmlFor="student-email" className="text-xs uppercase tracking-wide text-white/60">
+                      <Label htmlFor="student-email" className="text-[0.65rem] uppercase tracking-wide text-white/60">
                         School email
                       </Label>
                       <Input
                         id="student-email"
                         type="email"
                         placeholder="you@studenthub.com"
-                        className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                        className="h-11 rounded-2xl border-white/20 bg-white/10 text-sm text-white placeholder:text-white/40 focus-visible:ring-white/40"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="student-code" className="text-xs uppercase tracking-wide text-white/60">
+                      <Label htmlFor="student-code" className="text-[0.65rem] uppercase tracking-wide text-white/60">
                         Access code
                       </Label>
                       <Input
                         id="student-code"
                         type="text"
                         placeholder="6-digit code"
-                        className="h-12 rounded-2xl border-white/20 bg-white/10 text-base text-white placeholder:text-white/40 focus-visible:ring-white/40"
+                        className="h-11 rounded-2xl border-white/20 bg-white/10 text-sm text-white placeholder:text-white/40 focus-visible:ring-white/40"
                       />
                     </div>
                   </div>
@@ -367,7 +367,7 @@ export default function StudentPage() {
                   </div>
                   <Button
                     type="button"
-                    className="h-12 w-full rounded-2xl bg-white/90 text-base font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white disabled:cursor-default disabled:bg-white/70"
+                    className="h-11 w-full rounded-2xl bg-white/90 text-sm font-semibold text-slate-900 shadow-[0_10px_40px_-20px_rgba(226,232,240,0.95)] hover:bg-white disabled:cursor-default disabled:bg-white/70"
                     size="lg"
                     onClick={handleEnterJourney}
                     disabled={hasEntered}
