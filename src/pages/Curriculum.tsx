@@ -1,11 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { format, isValid, parse } from "date-fns";
+import { format, formatDistanceToNow, isValid, parse } from "date-fns";
+import {
+  DndContext,
+  type DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   CalendarIcon,
   ClipboardList,
   ExternalLink,
+  ArrowUpDown,
+  GripVertical,
   Loader2,
   PlusCircle,
   Trash2,
@@ -42,6 +55,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useMyClasses } from "@/hooks/useMyClasses";
 import {
@@ -78,6 +99,317 @@ interface CreateCurriculumPayload {
 }
 
 const DATE_FORMATS = ["yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy", "MMM d, yyyy"] as const;
+const ORDER_STORAGE_KEY = "curriculum-board-order";
+type StatusOptionValue = "needs-plan" | CurriculumLessonLink["status"];
+
+const STATUS_OPTIONS: Array<{
+  value: StatusOptionValue;
+  label: string;
+  helper: string;
+}> = [
+  {
+    value: "needs-plan",
+    label: "Needs plan",
+    helper: "Start a lesson plan to begin planning.",
+  },
+  {
+    value: "draft",
+    label: "Drafting",
+    helper: "Lesson plan is in progress.",
+  },
+  {
+    value: "published",
+    label: "Ready to teach",
+    helper: "Lesson is published and ready.",
+  },
+  {
+    value: "archived",
+    label: "Archived",
+    helper: "Lesson kept for reference.",
+  },
+];
+
+const getStatusMeta = (row: CurriculumRow) => {
+  const hasPlan = Boolean(row.lessonPlanId);
+  const hasPresentation = Boolean(row.presentationUrl);
+  const hasDate = Boolean(row.date);
+
+  if (!hasPlan) {
+    const base = 15 + (hasDate ? 10 : 0) + (hasPresentation ? 5 : 0);
+    return {
+      value: "needs-plan" as const,
+      label: "Needs lesson plan",
+      description: "Create a lesson plan draft to unlock more actions.",
+      progress: Math.min(base, 40),
+      badgeVariant: "outline" as const,
+    };
+  }
+
+  switch (row.lessonStatus) {
+    case "published":
+      return {
+        value: "published" as const,
+        label: "Ready to teach",
+        description: hasPresentation ? "Slides are attached and ready." : "Consider attaching your slides.",
+        progress: 100,
+        badgeVariant: "default" as const,
+      };
+    case "archived":
+      return {
+        value: "archived" as const,
+        label: "Archived",
+        description: "Stored for reference.",
+        progress: 25,
+        badgeVariant: "secondary" as const,
+      };
+    case "draft":
+    default:
+      return {
+        value: "draft" as const,
+        label: "Draft in progress",
+        description: hasPresentation ? "Slides attached—finish the plan when ready." : "Add resources and publish when finished.",
+        progress: Math.min(70 + (hasPresentation ? 10 : 0) + (hasDate ? 5 : 0), 95),
+        badgeVariant: "secondary" as const,
+      };
+  }
+};
+
+interface SortableCurriculumTableRowProps {
+  row: CurriculumRow;
+  classesById: Map<string, string>;
+  onFieldChange: (
+    row: CurriculumRow,
+    patch: Partial<Pick<CurriculumRow, "classId" | "title" | "stage" | "subject" | "date">>,
+  ) => void;
+  onStatusChange: (value: StatusOptionValue) => void;
+  onPlanLesson: () => void;
+  onPresentation: () => void;
+  onOpenPresentationLink: () => void;
+  onDelete: () => void;
+  statusMeta: ReturnType<typeof getStatusMeta>;
+  statusUpdating: boolean;
+  isCreatingLessonPlan: boolean;
+  isDeleting: boolean;
+}
+
+const SortableCurriculumTableRow = ({
+  row,
+  classesById,
+  onFieldChange,
+  onStatusChange,
+  onPlanLesson,
+  onPresentation,
+  onOpenPresentationLink,
+  onDelete,
+  statusMeta,
+  statusUpdating,
+  isCreatingLessonPlan,
+  isDeleting,
+}: SortableCurriculumTableRowProps) => {
+  const { setNodeRef, setActivatorNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+    id: row.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const relativeDate = row.date ? formatDistanceToNow(new Date(row.date), { addSuffix: true }) : null;
+
+  return (
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      data-state={isDragging ? "dragging" : undefined}
+      className={cn(isDragging ? "bg-muted/60 shadow-sm" : undefined)}
+    >
+      <TableCell className="align-top">
+        <button
+          type="button"
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          className="flex h-9 w-9 items-center justify-center rounded-md border bg-background text-muted-foreground transition hover:text-foreground"
+          aria-label={`Reorder ${row.title}`}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      </TableCell>
+      <TableCell className="align-top">
+        <Input
+          key={`${row.id}-class-${row.classId}`}
+          defaultValue={row.classId}
+          onBlur={event => onFieldChange(row, { classId: event.target.value })}
+          onKeyDown={event => {
+            if (event.key === "Enter") {
+              event.currentTarget.blur();
+            }
+          }}
+          placeholder="Class name"
+        />
+        {classesById.has(row.classId) && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Linked to class: {classesById.get(row.classId)}
+          </p>
+        )}
+      </TableCell>
+      <TableCell className="align-top">
+        <Input
+          key={`${row.id}-stage-${row.stage ?? ""}`}
+          defaultValue={row.stage ?? ""}
+          placeholder="Stage"
+          onBlur={event => onFieldChange(row, { stage: event.target.value })}
+          onKeyDown={event => {
+            if (event.key === "Enter") {
+              event.currentTarget.blur();
+            }
+          }}
+        />
+      </TableCell>
+      <TableCell className="align-top">
+        <Input
+          key={`${row.id}-subject-${row.subject ?? ""}`}
+          defaultValue={row.subject ?? ""}
+          placeholder="Subject"
+          onBlur={event => onFieldChange(row, { subject: event.target.value })}
+          onKeyDown={event => {
+            if (event.key === "Enter") {
+              event.currentTarget.blur();
+            }
+          }}
+        />
+      </TableCell>
+      <TableCell className="align-top">
+        <Input
+          key={`${row.id}-title-${row.title}`}
+          defaultValue={row.title}
+          placeholder="Lesson title"
+          onBlur={event => onFieldChange(row, { title: event.target.value })}
+          onKeyDown={event => {
+            if (event.key === "Enter") {
+              event.currentTarget.blur();
+            }
+          }}
+        />
+      </TableCell>
+      <TableCell className="align-top">
+        <div className="space-y-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn("w-full justify-start text-left font-normal", !row.date && "text-muted-foreground")}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {row.date ? format(new Date(row.date), "PPP") : "Set date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={row.date ? new Date(row.date) : undefined}
+                onSelect={date => onFieldChange(row, { date: date ? date.toISOString() : null })}
+              />
+            </PopoverContent>
+          </Popover>
+          <p className="text-xs text-muted-foreground">{relativeDate ?? "No date assigned"}</p>
+        </div>
+      </TableCell>
+      <TableCell className="align-top">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm font-medium">
+            <span>{statusMeta.label}</span>
+            <span>{statusMeta.progress}%</span>
+          </div>
+          <Progress value={statusMeta.progress} className="h-2" />
+          <p className="text-xs text-muted-foreground">{statusMeta.description}</p>
+        </div>
+      </TableCell>
+      <TableCell className="align-top">
+        <Select value={statusMeta.value} onValueChange={onStatusChange} disabled={statusUpdating}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map(option => (
+              <SelectItem
+                key={option.value}
+                value={option.value}
+                disabled={option.value === "needs-plan" && !row.lessonPlanId && !row.lessonLinkId}
+              >
+                <div className="flex flex-col text-left">
+                  <span className="font-medium">{option.label}</span>
+                  <span className="text-xs text-muted-foreground">{option.helper}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Badge variant={statusMeta.badgeVariant} className="mt-2 w-max">
+          {statusMeta.label}
+        </Badge>
+      </TableCell>
+      <TableCell className="align-top">
+        <div className="flex flex-col gap-2">
+          <Button variant={row.lessonPlanId ? "outline" : "default"} onClick={onPlanLesson} disabled={isCreatingLessonPlan}>
+            {isCreatingLessonPlan ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Opening builder
+              </>
+            ) : row.lessonPlanId ? (
+              <>Open lesson plan</>
+            ) : (
+              <>Create lesson plan</>
+            )}
+          </Button>
+          {row.lessonStatus ? (
+            <Badge variant="secondary" className="w-max">
+              {row.lessonStatus === "draft" ? "Draft" : row.lessonStatus}
+            </Badge>
+          ) : null}
+        </div>
+      </TableCell>
+      <TableCell className="align-top">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={onPresentation}>
+            {row.presentationUrl ? "View presentation" : "Add presentation"}
+          </Button>
+          {row.presentationUrl ? (
+            <Button variant="ghost" size="icon" onClick={onOpenPresentationLink}>
+              <ExternalLink className="h-4 w-4" />
+              <span className="sr-only">Open presentation link</span>
+            </Button>
+          ) : null}
+        </div>
+      </TableCell>
+      <TableCell className="text-right align-top">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Delete row</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete this curriculum row?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone and will remove the lesson from your planning board.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={onDelete} disabled={isDeleting}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 const parsePossibleDate = (value: string | null | undefined): string | null => {
   const trimmed = value?.trim();
@@ -199,6 +531,99 @@ const CurriculumPage = () => {
     });
   }, [curriculumItemsQuery.data, curriculumLinksQuery.data]);
 
+  const [rowOrder, setRowOrder] = useState<string[]>([]);
+  const [orderedRows, setOrderedRows] = useState<CurriculumRow[]>([]);
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor),
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const stored = window.localStorage.getItem(ORDER_STORAGE_KEY);
+    if (!stored) {
+      return;
+    }
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        setRowOrder(parsed.filter((value): value is string => typeof value === "string"));
+      }
+    } catch (error) {
+      console.warn("Unable to read stored curriculum order", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    setRowOrder(prev => {
+      if (rows.length === 0) {
+        return [];
+      }
+
+      const idsInRows = new Set(rows.map(row => row.id));
+      const filtered = prev.filter(id => idsInRows.has(id));
+      const missing = rows
+        .map(row => row.id)
+        .filter(id => !filtered.includes(id));
+
+      if (filtered.length === 0 && missing.length === 0) {
+        return rows.map(row => row.id);
+      }
+
+      return [...filtered, ...missing];
+    });
+  }, [rows]);
+
+  useEffect(() => {
+    if (rows.length === 0) {
+      setOrderedRows([]);
+      return;
+    }
+
+    if (rowOrder.length === 0) {
+      setOrderedRows(rows);
+      return;
+    }
+
+    const rowMap = new Map(rows.map(row => [row.id, row] as const));
+    const next: CurriculumRow[] = [];
+
+    for (const id of rowOrder) {
+      const match = rowMap.get(id);
+      if (match) {
+        next.push(match);
+        rowMap.delete(id);
+      }
+    }
+
+    for (const remaining of rowMap.values()) {
+      next.push(remaining);
+    }
+
+    setOrderedRows(next);
+  }, [rowOrder, rows]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (rowOrder.length === 0) {
+      window.localStorage.removeItem(ORDER_STORAGE_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(rowOrder));
+  }, [rowOrder]);
+
+  const updateLocalRow = (id: string, patch: Partial<CurriculumRow>) => {
+    setOrderedRows(prev => prev.map(row => (row.id === id ? { ...row, ...patch } : row)));
+  };
+
   const createItemsMutation = useMutation({
     mutationFn: async (items: CreateCurriculumPayload[]) => {
       const results: CurriculumItem[] = [];
@@ -277,7 +702,7 @@ const CurriculumPage = () => {
         subjects: row.subject ? [row.subject] : undefined,
       });
 
-      await upsertCurriculumLessonLink({
+      const link = await upsertCurriculumLessonLink({
         id: row.lessonLinkId ?? undefined,
         curriculumItemId: row.id,
         lessonPlanId: plan.id,
@@ -285,13 +710,18 @@ const CurriculumPage = () => {
         status: "draft",
       });
 
-      return plan;
+      return { plan, link, rowId: row.id };
     },
-    onSuccess: (plan) => {
+    onSuccess: ({ plan, link, rowId }) => {
       void queryClient.invalidateQueries({ queryKey: ["curriculum-lesson-links"] });
       toast({
         title: "Lesson plan created",
         description: "Opening the lesson builder so you can finish planning.",
+      });
+      updateLocalRow(rowId, {
+        lessonPlanId: link.lessonPlanId,
+        lessonLinkId: link.id,
+        lessonStatus: link.status,
       });
       navigate(`/lesson-builder?id=${encodeURIComponent(plan.id)}`);
     },
@@ -323,9 +753,15 @@ const CurriculumPage = () => {
         viewUrl: sanitizedUrl,
       });
     },
-    onSuccess: () => {
+    onSuccess: (link, variables) => {
       void queryClient.invalidateQueries({ queryKey: ["curriculum-lesson-links"] });
       toast({ title: "Presentation link saved" });
+      updateLocalRow(variables.curriculumItemId, {
+        presentationUrl: variables.url,
+        lessonLinkId: link.id,
+        lessonPlanId: link.lessonPlanId,
+        lessonStatus: link.status ?? null,
+      });
       setPresentationEditor({ open: false, item: null, value: "", linkId: null, lessonPlanId: null });
     },
     onError: (error) => {
@@ -339,6 +775,68 @@ const CurriculumPage = () => {
     },
   });
 
+  const statusMutation = useMutation({
+    mutationFn: async (input: { row: CurriculumRow; status: StatusOptionValue }) => {
+      if (input.status === "needs-plan") {
+        if (input.row.lessonLinkId) {
+          await deleteCurriculumLessonLink(input.row.lessonLinkId);
+        }
+
+        return {
+          lessonLinkId: null,
+          lessonPlanId: null,
+          lessonStatus: null,
+          presentationUrl: null,
+        } satisfies Partial<CurriculumRow>;
+      }
+
+      const link = await upsertCurriculumLessonLink({
+        id: input.row.lessonLinkId ?? undefined,
+        curriculumItemId: input.row.id,
+        lessonPlanId: input.row.lessonPlanId ?? `plan-${input.row.id}`,
+        status: input.status,
+        viewUrl: input.row.presentationUrl ?? undefined,
+      });
+
+      return {
+        lessonLinkId: link.id,
+        lessonPlanId: link.lessonPlanId,
+        lessonStatus: link.status,
+        presentationUrl: link.viewUrl ?? input.row.presentationUrl ?? null,
+      } satisfies Partial<CurriculumRow>;
+    },
+    onMutate: input => {
+      setStatusUpdatingId(input.row.id);
+      if (input.status === "needs-plan") {
+        updateLocalRow(input.row.id, {
+          lessonLinkId: null,
+          lessonPlanId: null,
+          lessonStatus: null,
+          presentationUrl: null,
+        });
+      }
+    },
+    onSuccess: (patch, variables) => {
+      updateLocalRow(variables.row.id, patch);
+      toast({
+        title: "Status updated",
+        description: `Marked "${STATUS_OPTIONS.find(option => option.value === variables.status)?.label ?? variables.status}" for this lesson.`,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["curriculum-lesson-links"] });
+    },
+    onError: (error) => {
+      const description = error instanceof Error ? error.message : "Unable to update the curriculum status.";
+      toast({
+        title: "Could not update status",
+        description,
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setStatusUpdatingId(null);
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (input: { itemId: string; linkId: string | null }) => {
       await deleteCurriculumItem(input.itemId);
@@ -346,10 +844,12 @@ const CurriculumPage = () => {
         await deleteCurriculumLessonLink(input.linkId);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: ["curriculum-items"] });
       void queryClient.invalidateQueries({ queryKey: ["curriculum-lesson-links"] });
       toast({ title: "Curriculum entry removed" });
+      setOrderedRows(prev => prev.filter(item => item.id !== variables.itemId));
+      setRowOrder(prev => prev.filter(id => id !== variables.itemId));
     },
     onError: (error) => {
       const description =
@@ -380,6 +880,8 @@ const CurriculumPage = () => {
     curriculumItemsQuery.isLoading ||
     curriculumLinksQuery.isLoading ||
     (isLoadingClasses && classes.length === 0);
+
+  const hasRows = orderedRows.length > 0;
 
   const handleAddCurriculum = () => {
     const parsedRows = parsePastedCurriculum(pastedTitles);
@@ -479,6 +981,13 @@ const CurriculumPage = () => {
       subject: nextSubject ?? null,
       date: nextDate ?? null,
     });
+    updateLocalRow(row.id, {
+      classId: nextClassId,
+      title: nextTitle,
+      stage: nextStage ?? null,
+      subject: nextSubject ?? null,
+      date: nextDate ?? null,
+    });
   };
 
   const openPresentationEditor = (row: CurriculumRow) => {
@@ -507,6 +1016,107 @@ const CurriculumPage = () => {
   const handleDelete = (row: CurriculumRow) => {
     deleteMutation.mutate({ itemId: row.id, linkId: row.lessonLinkId });
   };
+
+  const handleStatusChange = (row: CurriculumRow, value: StatusOptionValue) => {
+    if (statusMutation.isPending && statusUpdatingId === row.id) {
+      return;
+    }
+
+    const current = getStatusMeta(row).value;
+    if (value === current && !(value === "needs-plan" && (row.lessonPlanId || row.lessonLinkId))) {
+      return;
+    }
+
+    statusMutation.mutate({ row, status: value });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = orderedRows.findIndex(row => row.id === active.id);
+    const newIndex = orderedRows.findIndex(row => row.id === over.id);
+
+    if (oldIndex < 0 || newIndex < 0) {
+      return;
+    }
+
+    const next = arrayMove(orderedRows, oldIndex, newIndex);
+    setOrderedRows(next);
+    setRowOrder(next.map(item => item.id));
+  };
+
+  const handleResetOrder = () => {
+    if (rows.length === 0) {
+      return;
+    }
+
+    const sorted = [...rows].sort((a, b) => {
+      if (a.date && b.date) {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      }
+      if (a.date) {
+        return -1;
+      }
+      if (b.date) {
+        return 1;
+      }
+      return a.title.localeCompare(b.title);
+    });
+
+    setOrderedRows(sorted);
+    setRowOrder(sorted.map(item => item.id));
+  };
+
+  const planningSummary = useMemo(() => {
+    const total = orderedRows.length;
+    let needsPlan = 0;
+    let drafting = 0;
+    let ready = 0;
+    let archived = 0;
+
+    for (const row of orderedRows) {
+      const meta = getStatusMeta(row);
+      switch (meta.value) {
+        case "needs-plan":
+          needsPlan += 1;
+          break;
+        case "published":
+          ready += 1;
+          break;
+        case "archived":
+          archived += 1;
+          break;
+        case "draft":
+        default:
+          drafting += 1;
+          break;
+      }
+    }
+
+    const readyPercent = total === 0 ? 0 : Math.round((ready / total) * 100);
+    const draftingPercent = total === 0 ? 0 : Math.round((drafting / total) * 100);
+
+    return { total, needsPlan, drafting, ready, archived, readyPercent, draftingPercent };
+  }, [orderedRows]);
+
+  const nextUpcoming = useMemo(() => {
+    const upcoming = orderedRows
+      .filter(row => Boolean(row.date))
+      .map(row => {
+        const date = row.date ? new Date(row.date) : null;
+        return { row, date };
+      })
+      .filter(
+        (item): item is { row: CurriculumRow; date: Date } =>
+          Boolean(item.date) && !Number.isNaN(item.date.getTime()),
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    return upcoming[0] ?? null;
+  }, [orderedRows]);
 
   return (
     <div className="container py-10 space-y-8">
@@ -629,13 +1239,113 @@ const CurriculumPage = () => {
         </Alert>
       ) : null}
 
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="md:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl">Curriculum readiness</CardTitle>
+            <CardDescription>
+              Track lesson plan progress and spot lessons that still need attention.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between text-sm font-medium">
+              <span>{planningSummary.readyPercent}% ready</span>
+              <span>
+                {planningSummary.ready} of {planningSummary.total} lessons ready
+              </span>
+            </div>
+            <Progress value={planningSummary.readyPercent} className="h-2" />
+            <div className="grid gap-3 text-sm sm:grid-cols-2">
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase text-muted-foreground">Needs plan</p>
+                <p className="mt-1 text-lg font-semibold">{planningSummary.needsPlan}</p>
+                <p className="text-xs text-muted-foreground">
+                  Drag rows to prioritize and convert them into lesson plans.
+                </p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase text-muted-foreground">Drafting</p>
+                <p className="mt-1 text-lg font-semibold">{planningSummary.drafting}</p>
+                <p className="text-xs text-muted-foreground">
+                  {planningSummary.draftingPercent}% of your curriculum is currently being authored.
+                </p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase text-muted-foreground">Ready to teach</p>
+                <p className="mt-1 text-lg font-semibold">{planningSummary.ready}</p>
+                <p className="text-xs text-muted-foreground">
+                  Publish lesson plans once resources and slides are attached.
+                </p>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-3">
+                <p className="text-xs uppercase text-muted-foreground">Archived</p>
+                <p className="mt-1 text-lg font-semibold">{planningSummary.archived}</p>
+                <p className="text-xs text-muted-foreground">
+                  Keep a record of lessons that are no longer active this term.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-xl">Upcoming lesson</CardTitle>
+            <CardDescription>
+              {nextUpcoming
+                ? "Stay ahead by reviewing the next scheduled lesson."
+                : "Assign dates to see what is coming up next."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {nextUpcoming ? (
+              <>
+                <div className="space-y-1">
+                  <p className="text-lg font-semibold">{nextUpcoming.row.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {nextUpcoming.row.classId ? classesById.get(nextUpcoming.row.classId) ?? "" : "Unassigned class"}
+                  </p>
+                </div>
+                <Badge variant="secondary" className="w-max">
+                  {format(new Date(nextUpcoming.date), "PPP")} • {formatDistanceToNow(nextUpcoming.date, { addSuffix: true })}
+                </Badge>
+                <p className="text-sm text-muted-foreground">
+                  {getStatusMeta(nextUpcoming.row).label}. Use the quick actions in the table to finish preparations.
+                </p>
+              </>
+            ) : (
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>No lessons have a scheduled date yet.</p>
+                <p>Add a date to any row to see it highlighted here.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle>Curriculum board</CardTitle>
             <CardDescription>
               Edit directly in the table. Changes save automatically when you leave a field.
             </CardDescription>
+          </div>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            {hasRows ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <GripVertical className="h-4 w-4" />
+                Drag lessons to reshape your scope and sequence
+              </div>
+            ) : null}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetOrder}
+              disabled={!hasRows}
+              className="sm:w-auto"
+            >
+              <ArrowUpDown className="mr-2 h-4 w-4" /> Reset order
+            </Button>
           </div>
           {(curriculumItemsQuery.isFetching || curriculumLinksQuery.isFetching) && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -648,7 +1358,7 @@ const CurriculumPage = () => {
             <div className="flex min-h-[240px] items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
-          ) : rows.length === 0 ? (
+          ) : !hasRows ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 p-10 text-center">
               <ClipboardList className="h-10 w-10 text-muted-foreground" />
               <div className="space-y-1">
@@ -663,179 +1373,60 @@ const CurriculumPage = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[180px]">Class</TableHead>
-                    <TableHead className="min-w-[140px]">Stage</TableHead>
-                    <TableHead className="min-w-[140px]">Subject</TableHead>
-                    <TableHead className="min-w-[220px]">Lesson title</TableHead>
-                    <TableHead className="min-w-[160px]">Date</TableHead>
-                    <TableHead className="min-w-[200px]">Lesson plan</TableHead>
-                    <TableHead className="min-w-[200px]">Presentation</TableHead>
-                    <TableHead className="w-[60px] text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rows.map(row => (
-                    <TableRow key={row.id}>
-                      <TableCell>
-                        <Input
-                          key={`${row.id}-class-${row.classId}`}
-                          defaultValue={row.classId}
-                          onBlur={event => handleFieldChange(row, { classId: event.target.value })}
-                          onKeyDown={event => {
-                            if (event.key === "Enter") {
-                              event.currentTarget.blur();
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={orderedRows.map(row => row.id)} strategy={verticalListSortingStrategy}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[52px]">
+                          <span className="sr-only">Reorder</span>
+                        </TableHead>
+                        <TableHead className="min-w-[160px]">Class</TableHead>
+                        <TableHead className="min-w-[120px]">Stage</TableHead>
+                        <TableHead className="min-w-[140px]">Subject</TableHead>
+                        <TableHead className="min-w-[240px]">Lesson title</TableHead>
+                        <TableHead className="min-w-[180px]">Date</TableHead>
+                        <TableHead className="min-w-[220px]">Progress</TableHead>
+                        <TableHead className="min-w-[200px]">Status</TableHead>
+                        <TableHead className="min-w-[200px]">Lesson plan</TableHead>
+                        <TableHead className="min-w-[200px]">Presentation</TableHead>
+                        <TableHead className="w-[60px] text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orderedRows.map(row => {
+                        const statusMeta = getStatusMeta(row);
+                        const isStatusUpdating = statusUpdatingId === row.id && statusMutation.isPending;
+                        const isCreatingLesson =
+                          createLessonPlanMutation.isPending &&
+                          createLessonPlanMutation.variables?.id === row.id;
+                        const isDeleting =
+                          deleteMutation.isPending && deleteMutation.variables?.itemId === row.id;
+
+                        return (
+                          <SortableCurriculumTableRow
+                            key={row.id}
+                            row={row}
+                            classesById={classesById}
+                            onFieldChange={handleFieldChange}
+                            onStatusChange={value => handleStatusChange(row, value)}
+                            onPlanLesson={() => createLessonPlanMutation.mutate(row)}
+                            onPresentation={() => openPresentationEditor(row)}
+                            onOpenPresentationLink={() =>
+                              row.presentationUrl ? window.open(row.presentationUrl, "_blank") : undefined
                             }
-                          }}
-                          placeholder="Class name"
-                        />
-                        {classesById.has(row.classId) && (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            Linked to class: {classesById.get(row.classId)}
-                          </p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          key={`${row.id}-stage-${row.stage ?? ""}`}
-                          defaultValue={row.stage ?? ""}
-                          placeholder="Stage"
-                          onBlur={event => handleFieldChange(row, { stage: event.target.value })}
-                          onKeyDown={event => {
-                            if (event.key === "Enter") {
-                              event.currentTarget.blur();
-                            }
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          key={`${row.id}-subject-${row.subject ?? ""}`}
-                          defaultValue={row.subject ?? ""}
-                          placeholder="Subject"
-                          onBlur={event => handleFieldChange(row, { subject: event.target.value })}
-                          onKeyDown={event => {
-                            if (event.key === "Enter") {
-                              event.currentTarget.blur();
-                            }
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          key={`${row.id}-title-${row.title}`}
-                          defaultValue={row.title}
-                          placeholder="Lesson title"
-                          onBlur={event => handleFieldChange(row, { title: event.target.value })}
-                          onKeyDown={event => {
-                            if (event.key === "Enter") {
-                              event.currentTarget.blur();
-                            }
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !row.date && "text-muted-foreground",
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {row.date ? format(new Date(row.date), "PPP") : "Set date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={row.date ? new Date(row.date) : undefined}
-                              onSelect={date =>
-                                handleFieldChange(row, {
-                                  date: date ? date.toISOString() : null,
-                                })
-                              }
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            variant={row.lessonPlanId ? "outline" : "default"}
-                            onClick={() => createLessonPlanMutation.mutate(row)}
-                            disabled={createLessonPlanMutation.isPending}
-                          >
-                            {createLessonPlanMutation.isPending ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Opening builder
-                              </>
-                            ) : row.lessonPlanId ? (
-                              <>Open lesson plan</>
-                            ) : (
-                              <>Create lesson plan</>
-                            )}
-                          </Button>
-                          {row.lessonStatus ? (
-                            <Badge variant="secondary" className="w-max">
-                              {row.lessonStatus === "draft" ? "Draft" : row.lessonStatus}
-                            </Badge>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" onClick={() => openPresentationEditor(row)}>
-                            {row.presentationUrl ? "View presentation" : "Add presentation"}
-                          </Button>
-                          {row.presentationUrl ? (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => window.open(row.presentationUrl ?? "", "_blank")}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              <span className="sr-only">Open presentation link</span>
-                            </Button>
-                          ) : null}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete row</span>
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete this curriculum row?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone and will remove the lesson from your planning board.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(row)}
-                                disabled={deleteMutation.isPending}
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                            onDelete={() => handleDelete(row)}
+                            statusMeta={statusMeta}
+                            statusUpdating={isStatusUpdating}
+                            isCreatingLessonPlan={isCreatingLesson}
+                            isDeleting={Boolean(isDeleting)}
+                          />
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </SortableContext>
+              </DndContext>
             </div>
           )}
         </CardContent>
