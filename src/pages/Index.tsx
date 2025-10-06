@@ -295,7 +295,7 @@ const Index = () => {
       />
       <StructuredData type="Organization" data={structuredData} />
 
-      <section className="relative overflow-hidden pt-3 pb-28 md:pt-3">
+      <section className="relative overflow-hidden pt-3 pb-2.5 md:pt-3">
         <MouseGlowEffect />
         <SparklesBackground />
         <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -498,7 +498,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative overflow-hidden py-24">
+      <section className="relative overflow-hidden pt-2.5 pb-16">
         <div className="absolute inset-0 -z-20">
           <img
             src={classroomTechnologyBackgrounds.stats}
