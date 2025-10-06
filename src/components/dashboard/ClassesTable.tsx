@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -57,100 +56,82 @@ export function ClassesTable({
           {t.dashboard.quickActions.newClass}
         </Button>
       </div>
-      <div className="overflow-hidden rounded-3xl border border-white/20 bg-white/5 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl">
-        <Table className="text-white/80">
-          <TableHeader className="bg-white/5 text-white/70 [&_tr]:border-white/10 [&_th]:text-white/70 [&_th]:font-semibold">
-            <TableRow className="border-white/10">
-              <TableHead>{t.dashboard.classes.columns.title}</TableHead>
-              <TableHead>{t.dashboard.classes.columns.stage}</TableHead>
-              <TableHead>{t.dashboard.classes.columns.subject}</TableHead>
-              <TableHead>{t.dashboard.classes.columns.dates}</TableHead>
-              <TableHead className="text-right">{t.dashboard.classes.columns.actions}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="[&_tr]:border-white/10">
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center text-white/70">
-                  {t.dashboard.common.loading}
-                </TableCell>
-              </TableRow>
-            ) : classes.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-10 text-center text-white/70">
-                  {t.dashboard.classes.empty}
-                </TableCell>
-              </TableRow>
-            ) : (
-              classes.map(item => (
-                <TableRow key={item.id} className="border-white/10 transition hover:bg-white/15">
-                  <TableCell className="align-top">
-                    <div className="flex items-center gap-2">
-                      <div className="font-semibold text-white">{item.title}</div>
+      <div className="rounded-3xl border border-white/20 bg-white/5 p-6 text-white/80 shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)] backdrop-blur-xl">
+        {loading ? (
+          <div className="py-10 text-center text-white/70">{t.dashboard.common.loading}</div>
+        ) : classes.length === 0 ? (
+          <div className="py-10 text-center text-white/70">{t.dashboard.classes.empty}</div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {classes.map(item => (
+              <div
+                key={item.id}
+                className="group flex h-full flex-col gap-4 rounded-3xl border border-white/15 bg-white/10 p-6 text-white/80 shadow-[0_35px_120px_-60px_rgba(15,23,42,0.95)] backdrop-blur-2xl transition duration-300 hover:border-white/30 hover:bg-white/15 hover:shadow-[0_45px_140px_-60px_rgba(15,23,42,0.95)]"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">{item.title}</h3>
                       {item.isExample ? (
-                        <Badge variant="outline" className="border-white/40 bg-white/10 text-xs font-normal uppercase tracking-wide text-white/80">
-                          {t.dashboard.common.exampleTag}
-                        </Badge>
+                        <p className="mt-1 text-xs text-white/60">{t.dashboard.common.exampleDescription}</p>
                       ) : null}
                     </div>
-                    {item.isExample ? (
-                      <p className="mt-1 text-xs text-white/60">{t.dashboard.common.exampleDescription}</p>
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="align-top">
                     {item.stage ? (
-                      <Badge variant="secondary" className="border-white/30 bg-white/15 text-white">
+                      <Badge variant="secondary" className="border-white/30 bg-white/15 text-xs uppercase text-white">
                         {item.stage}
                       </Badge>
                     ) : (
-                      <span className="text-white/50">—</span>
+                      <span className="rounded-full border border-white/15 px-3 py-1 text-xs uppercase tracking-wide text-white/50">
+                        {t.dashboard.classes.columns.stage}: —
+                      </span>
                     )}
-                  </TableCell>
-                  <TableCell className="align-top text-white">
-                    {item.subject || "—"}
-                  </TableCell>
-                  <TableCell className="align-top">
-                    <div className="flex flex-col text-sm text-white/70">
-                      <span>
-                        {t.dashboard.classes.labels.start}: {formatDate(item.start_date)}
-                      </span>
-                      <span>
-                        {t.dashboard.classes.labels.end}: {formatDate(item.end_date)}
-                      </span>
+                  </div>
+                  {item.isExample ? (
+                    <Badge variant="outline" className="w-fit border-white/40 bg-white/10 text-[11px] font-medium uppercase tracking-wide text-white/80">
+                      {t.dashboard.common.exampleTag}
+                    </Badge>
+                  ) : null}
+                  <div className="space-y-2 text-sm">
+                    <div className="text-white">{item.subject || "—"}</div>
+                    <div className="space-y-1 text-white/70">
+                      <p>
+                        <span className="font-medium text-white/80">{t.dashboard.classes.labels.start}:</span> {formatDate(item.start_date)}
+                      </p>
+                      <p>
+                        <span className="font-medium text-white/80">{t.dashboard.classes.labels.end}:</span> {formatDate(item.end_date)}
+                      </p>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={item.isExample}
-                        onClick={() => onViewClass?.(item.id)}
-                        aria-label={t.dashboard.classes.actions.view}
-                        className="text-white transition hover:bg-white/15 disabled:text-white/40"
-                      >
-                        {t.dashboard.classes.actions.view}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={item.isExample}
-                        onClick={() => onEditClass?.(item.id)}
-                        aria-label={t.dashboard.classes.actions.edit}
-                        className="text-white transition hover:bg-white/15 disabled:text-white/40"
-                      >
-                        {t.dashboard.classes.actions.edit}
-                      </Button>
-                    </div>
-                    {item.isExample ? (
-                      <p className="mt-2 text-xs text-white/60">{t.dashboard.common.exampleActionsDisabled}</p>
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </div>
+                </div>
+                <div className="mt-auto flex flex-wrap justify-end gap-2 pt-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={item.isExample}
+                    onClick={() => onViewClass?.(item.id)}
+                    aria-label={t.dashboard.classes.actions.view}
+                    className="text-white transition hover:bg-white/15 disabled:text-white/40"
+                  >
+                    {t.dashboard.classes.actions.view}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={item.isExample}
+                    onClick={() => onEditClass?.(item.id)}
+                    aria-label={t.dashboard.classes.actions.edit}
+                    className="text-white transition hover:bg-white/15 disabled:text-white/40"
+                  >
+                    {t.dashboard.classes.actions.edit}
+                  </Button>
+                </div>
+                {item.isExample ? (
+                  <p className="text-xs text-white/60">{t.dashboard.common.exampleActionsDisabled}</p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
