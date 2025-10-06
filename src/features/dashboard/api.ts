@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Class, LessonPlan, Resource } from "../../../types/supabase-tables";
+import type { Class, Curriculum, LessonPlan, Resource } from "../../../types/supabase-tables";
 
 export type LessonPlanWithRelations = LessonPlan & {
   class?: Class | null;
@@ -47,6 +47,141 @@ export async function createClass(input: {
   }
 
   return data;
+}
+
+export async function updateClass(input: {
+  ownerId: string;
+  classId: string;
+  title: string;
+  stage?: string;
+  subject?: string;
+  start_date?: string;
+  end_date?: string;
+}): Promise<Class> {
+  const { data, error } = await supabase
+    .from("classes")
+    .update({
+      title: input.title,
+      stage: input.stage ?? null,
+      subject: input.subject ?? null,
+      start_date: input.start_date ?? null,
+      end_date: input.end_date ?? null,
+    })
+    .eq("id", input.classId)
+    .eq("owner_id", input.ownerId)
+    .select("id,title,stage,subject,start_date,end_date")
+    .single();
+
+  if (error) {
+    console.error("Failed to update class", error);
+    throw error;
+  }
+
+  return data;
+}
+
+export async function fetchCurriculumForClass(input: {
+  ownerId: string;
+  classId: string;
+}): Promise<Curriculum | null> {
+  const { data, error } = await supabase
+    .from("curricula")
+    .select("id,class_id,title,subject,academic_year")
+    .eq("class_id", input.classId)
+    .eq("owner_id", input.ownerId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to fetch curriculum", error);
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    class_id: data.class_id,
+    title: data.title,
+    subject: data.subject,
+    academic_year: data.academic_year ?? undefined,
+  } satisfies Curriculum;
+}
+
+export async function upsertCurriculum(input: {
+  ownerId: string;
+  classId: string;
+  title: string;
+  subject: string;
+  academic_year?: string | null;
+  curriculumId?: string | null;
+}): Promise<Curriculum> {
+  const payload = {
+    owner_id: input.ownerId,
+    class_id: input.classId,
+    title: input.title,
+    subject: input.subject,
+    academic_year: input.academic_year ?? null,
+  };
+
+  if (input.curriculumId) {
+    const { data, error } = await supabase
+      .from("curricula")
+      .update(payload)
+      .eq("id", input.curriculumId)
+      .eq("owner_id", input.ownerId)
+      .select("id,class_id,title,subject,academic_year")
+      .single();
+
+    if (error) {
+      console.error("Failed to update curriculum", error);
+      throw error;
+    }
+
+    return {
+      id: data.id,
+      class_id: data.class_id,
+      title: data.title,
+      subject: data.subject,
+      academic_year: data.academic_year ?? undefined,
+    } satisfies Curriculum;
+  }
+
+  const { data, error } = await supabase
+    .from("curricula")
+    .insert(payload)
+    .select("id,class_id,title,subject,academic_year")
+    .single();
+
+  if (error) {
+    console.error("Failed to create curriculum", error);
+    throw error;
+  }
+
+  return {
+    id: data.id,
+    class_id: data.class_id,
+    title: data.title,
+    subject: data.subject,
+    academic_year: data.academic_year ?? undefined,
+  } satisfies Curriculum;
+}
+
+export async function deleteCurriculum(input: {
+  ownerId: string;
+  curriculumId: string;
+}): Promise<void> {
+  const { error } = await supabase
+    .from("curricula")
+    .delete()
+    .eq("id", input.curriculumId)
+    .eq("owner_id", input.ownerId);
+
+  if (error) {
+    console.error("Failed to delete curriculum", error);
+    throw error;
+  }
 }
 
 export async function fetchLessonPlan(id: string): Promise<LessonPlanWithRelations | null> {

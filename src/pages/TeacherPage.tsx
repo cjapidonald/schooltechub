@@ -24,9 +24,16 @@ import { ClassesTable } from "@/components/dashboard/ClassesTable";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
-import { createClass, fetchMyClasses } from "@/features/dashboard/api";
+import {
+  createClass,
+  deleteCurriculum,
+  fetchCurriculumForClass,
+  fetchMyClasses,
+  updateClass,
+  upsertCurriculum,
+} from "@/features/dashboard/api";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
-import { bulkAddStudents } from "@/features/students/api";
+import { bulkAddStudents, fetchClassRoster, replaceClassRoster } from "@/features/students/api";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
 import { BarChart3, ClipboardList, LogIn, Sparkles, Users } from "lucide-react";
@@ -75,6 +82,14 @@ const classSchema = z.object({
 });
 
 type ClassFormValues = z.infer<typeof classSchema>;
+
+const editClassSchema = classSchema.extend({
+  curriculumTitle: z.string().optional(),
+  curriculumSubject: z.string().optional(),
+  curriculumYear: z.string().optional(),
+});
+
+type EditClassFormValues = z.infer<typeof editClassSchema>;
 
 type LessonBuilderRouteContext = {
   title: string;
@@ -133,6 +148,8 @@ export default function TeacherPage() {
   } = useMyProfile();
 
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingClassId, setEditingClassId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
   const [selectedCurriculumClassId, setSelectedCurriculumClassId] = useState<string | null>(null);
@@ -291,6 +308,21 @@ export default function TeacherPage() {
     defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "", studentNames: "" },
   });
 
+  const editClassForm = useForm<EditClassFormValues>({
+    resolver: zodResolver(editClassSchema),
+    defaultValues: {
+      title: "",
+      stage: "",
+      subject: "",
+      start_date: "",
+      end_date: "",
+      studentNames: "",
+      curriculumTitle: "",
+      curriculumSubject: "",
+      curriculumYear: "",
+    },
+  });
+
   const classesQuery = useQuery<Class[]>({
     queryKey: ["dashboard-classes", user?.id],
     queryFn: () => fetchMyClasses(user!.id),
@@ -342,6 +374,91 @@ export default function TeacherPage() {
     },
   });
 
+  const editClassMutation = useMutation({
+    mutationFn: async (values: EditClassFormValues) => {
+      if (!editingClassId || !editingClass) {
+        throw new Error("No class selected");
+      }
+
+      if (!user?.id) {
+        throw new Error("You must be signed in to update a class.");
+      }
+
+      const trimmedStage = values.stage?.trim() ?? "";
+      const trimmedSubject = values.subject?.trim() ?? "";
+      const trimmedStart = values.start_date?.trim() ?? "";
+      const trimmedEnd = values.end_date?.trim() ?? "";
+
+      const updatedClass = await updateClass({
+        ownerId: user.id,
+        classId: editingClassId,
+        title: values.title,
+        stage: trimmedStage.length > 0 ? trimmedStage : undefined,
+        subject: trimmedSubject.length > 0 ? trimmedSubject : undefined,
+        start_date: trimmedStart.length > 0 ? trimmedStart : undefined,
+        end_date: trimmedEnd.length > 0 ? trimmedEnd : undefined,
+      });
+
+      const rosterNames = splitStudentNames(values.studentNames);
+      await replaceClassRoster({ ownerId: user.id, classId: editingClassId, names: rosterNames });
+
+      const trimmedCurriculumTitle = values.curriculumTitle?.trim() ?? "";
+      const trimmedCurriculumSubject = values.curriculumSubject?.trim() ?? "";
+      const trimmedCurriculumYear = values.curriculumYear?.trim() ?? "";
+      const existingCurriculum = classCurriculumQuery.data ?? null;
+
+      if (
+        !trimmedCurriculumTitle &&
+        !trimmedCurriculumSubject &&
+        !trimmedCurriculumYear &&
+        existingCurriculum
+      ) {
+        await deleteCurriculum({ ownerId: user.id, curriculumId: existingCurriculum.id });
+        return { classTitle: updatedClass.title };
+      }
+
+      if (trimmedCurriculumTitle || trimmedCurriculumSubject || trimmedCurriculumYear || existingCurriculum) {
+        const curriculum = await upsertCurriculum({
+          ownerId: user.id,
+          classId: editingClassId,
+          curriculumId: existingCurriculum?.id,
+          title: trimmedCurriculumTitle || existingCurriculum?.title || updatedClass.title,
+          subject:
+            trimmedCurriculumSubject ||
+            existingCurriculum?.subject ||
+            trimmedSubject ||
+            editingClass.subject ||
+            "General",
+          academic_year: trimmedCurriculumYear || existingCurriculum?.academic_year || null,
+        });
+
+        return { classTitle: updatedClass.title, curriculumTitle: curriculum.title };
+      }
+
+      return { classTitle: updatedClass.title };
+    },
+    onSuccess: result => {
+      const title = result.classTitle ?? editingClass?.title ?? "";
+      toast({
+        title: t.dashboard.toasts.classUpdated,
+        description: t.dashboard.toasts.classUpdatedDescription.replace("{title}", title),
+      });
+
+      void classesQuery.refetch();
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-students"] });
+      void classRosterQuery.refetch();
+      if (user?.id) {
+        void classCurriculumQuery.refetch();
+      }
+
+      handleCloseEditDialog();
+    },
+    onError: error => {
+      const description = error instanceof Error ? error.message : t.dashboard.toasts.error;
+      toast({ description, variant: "destructive" });
+    },
+  });
+
   const handleQuickAction = useCallback(
     (action: DashboardQuickAction) => {
       switch (action) {
@@ -361,12 +478,85 @@ export default function TeacherPage() {
     [navigate, t.dashboard.toasts.blogUnavailable, t.dashboard.toasts.communityUnavailable, toast],
   );
 
+  const handleCloseEditDialog = useCallback(() => {
+    setEditDialogOpen(false);
+    setEditingClassId(null);
+    editClassForm.reset();
+  }, [editClassForm]);
+
   const classes = useMemo<Array<Class & { isExample?: boolean }>>(() => {
     if (classesQuery.data && classesQuery.data.length > 0) {
       return classesQuery.data;
     }
     return [DASHBOARD_EXAMPLE_CLASS];
   }, [classesQuery.data]);
+
+  const editingClass = useMemo(() => {
+    if (!editingClassId) {
+      return null;
+    }
+    return (classesQuery.data ?? []).find(cls => cls.id === editingClassId) ?? null;
+  }, [classesQuery.data, editingClassId]);
+
+  const classRosterQuery = useQuery({
+    queryKey: ["dashboard-class-roster", editingClassId, user?.id],
+    queryFn: () => fetchClassRoster({ ownerId: user?.id, classId: editingClassId! }),
+    enabled: Boolean(editingClassId),
+  });
+
+  const classCurriculumQuery = useQuery({
+    queryKey: ["dashboard-class-curriculum", editingClassId, user?.id],
+    queryFn: () => fetchCurriculumForClass({ ownerId: user!.id, classId: editingClassId! }),
+    enabled: Boolean(editingClassId && user?.id),
+  });
+
+  useEffect(() => {
+    if (!isEditDialogOpen) {
+      editClassForm.reset();
+      return;
+    }
+
+    if (!editingClass || classRosterQuery.isPending || classCurriculumQuery.isPending) {
+      return;
+    }
+
+    editClassForm.reset({
+      title: editingClass.title,
+      stage: editingClass.stage ?? "",
+      subject: editingClass.subject ?? "",
+      start_date: editingClass.start_date ?? "",
+      end_date: editingClass.end_date ?? "",
+      studentNames: (classRosterQuery.data ?? []).map(student => student.fullName).join("\n"),
+      curriculumTitle: classCurriculumQuery.data?.title ?? "",
+      curriculumSubject: classCurriculumQuery.data?.subject ?? "",
+      curriculumYear: classCurriculumQuery.data?.academic_year ?? "",
+    });
+  }, [
+    classCurriculumQuery.data,
+    classCurriculumQuery.isPending,
+    classRosterQuery.data,
+    classRosterQuery.isPending,
+    editClassForm,
+    editingClass,
+    isEditDialogOpen,
+  ]);
+
+  const isRosterLoading = classRosterQuery.isPending;
+  const isCurriculumLoading = user?.id ? classCurriculumQuery.isPending : false;
+  const isEditFormLoading = !editingClass || isRosterLoading || isCurriculumLoading;
+
+  const rosterErrorMessage = classRosterQuery.error
+    ? classRosterQuery.error instanceof Error
+      ? classRosterQuery.error.message
+      : t.dashboard.toasts.error
+    : null;
+
+  const curriculumErrorMessage =
+    user?.id && classCurriculumQuery.error
+      ? classCurriculumQuery.error instanceof Error
+        ? classCurriculumQuery.error.message
+        : t.dashboard.toasts.error
+      : null;
 
   const curriculumClasses = useMemo(
     () =>
@@ -667,9 +857,13 @@ export default function TeacherPage() {
                 onViewClass={classId =>
                   navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
                 }
-                onEditClass={classId =>
-                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
-                }
+                onEditClass={classId => {
+                  updateSearchParams(params => {
+                    params.set("tab", "classes");
+                  });
+                  setEditingClassId(classId);
+                  setEditDialogOpen(true);
+                }}
               />
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">
@@ -739,6 +933,120 @@ export default function TeacherPage() {
           </Tabs>
         </section>
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={open => (open ? setEditDialogOpen(true) : handleCloseEditDialog())}>
+        <DialogContent className="sm:max-w-xl border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
+          <DialogHeader>
+            <DialogTitle>{t.dashboard.dialogs.editClass.title}</DialogTitle>
+          </DialogHeader>
+          {isEditFormLoading ? (
+            <div className="py-6 text-sm text-white/70">{t.dashboard.common.loading}</div>
+          ) : !editingClass ? (
+            <Alert className="rounded-xl border-white/30 bg-white/10 text-white">
+              <AlertTitle>{t.dashboard.toasts.error}</AlertTitle>
+              <AlertDescription>{t.dashboard.classes.empty}</AlertDescription>
+            </Alert>
+          ) : (
+            <form
+              onSubmit={editClassForm.handleSubmit(values => editClassMutation.mutate(values))}
+              className="space-y-6"
+            >
+              <fieldset disabled={editClassMutation.isPending} className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-white/60">
+                    {t.dashboard.dialogs.editClass.sections.details}
+                  </h3>
+                  <div className="grid gap-3">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-class-title">{t.dashboard.dialogs.newClass.fields.title}</Label>
+                      <Input id="edit-class-title" {...editClassForm.register("title")} required />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-class-stage">{t.dashboard.dialogs.newClass.fields.stage}</Label>
+                      <Input id="edit-class-stage" {...editClassForm.register("stage")} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-class-subject">{t.dashboard.dialogs.newClass.fields.subject}</Label>
+                      <Input id="edit-class-subject" {...editClassForm.register("subject")} />
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-class-start">{t.dashboard.dialogs.newClass.fields.startDate}</Label>
+                        <Input id="edit-class-start" type="date" {...editClassForm.register("start_date")} />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
+                        <Input id="edit-class-end" type="date" {...editClassForm.register("end_date")} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-white/60">
+                    {t.dashboard.dialogs.editClass.sections.roster}
+                  </h3>
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-class-roster">{t.dashboard.dialogs.editClass.roster.label}</Label>
+                    <Textarea
+                      id="edit-class-roster"
+                      rows={6}
+                      placeholder={t.dashboard.dialogs.editClass.roster.placeholder}
+                      className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
+                      {...editClassForm.register("studentNames")}
+                    />
+                    <p className="text-xs text-white/70">{t.dashboard.dialogs.editClass.roster.helper}</p>
+                    {rosterErrorMessage ? (
+                      <Alert variant="destructive" className="border-white/40 bg-red-500/10 text-white">
+                        <AlertTitle>{t.dashboard.toasts.error}</AlertTitle>
+                        <AlertDescription className="text-sm">{rosterErrorMessage}</AlertDescription>
+                      </Alert>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-white/60">
+                    {t.dashboard.dialogs.editClass.sections.curriculum}
+                  </h3>
+                  <div className="grid gap-3">
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-class-curriculum-title">
+                        {t.dashboard.dialogs.editClass.curriculum.title}
+                      </Label>
+                      <Input id="edit-class-curriculum-title" {...editClassForm.register("curriculumTitle")} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-class-curriculum-subject">
+                        {t.dashboard.dialogs.editClass.curriculum.subject}
+                      </Label>
+                      <Input id="edit-class-curriculum-subject" {...editClassForm.register("curriculumSubject")} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="edit-class-curriculum-year">
+                        {t.dashboard.dialogs.editClass.curriculum.academicYear}
+                      </Label>
+                      <Input id="edit-class-curriculum-year" {...editClassForm.register("curriculumYear")} />
+                    </div>
+                    <p className="text-xs text-white/70">{t.dashboard.dialogs.editClass.curriculum.helper}</p>
+                    {curriculumErrorMessage ? (
+                      <Alert variant="destructive" className="border-white/40 bg-red-500/10 text-white">
+                        <AlertTitle>{t.dashboard.toasts.error}</AlertTitle>
+                        <AlertDescription className="text-sm">{curriculumErrorMessage}</AlertDescription>
+                      </Alert>
+                    ) : null}
+                  </div>
+                </div>
+              </fieldset>
+              <DialogFooter>
+                <Button type="submit" disabled={editClassMutation.isPending}>
+                  {t.dashboard.dialogs.editClass.submit}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
         <DialogContent className="sm:max-w-lg border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">

@@ -253,6 +253,96 @@ export const getStudentsQueryKey = (ownerId: string | null | undefined, classIds
   [...classIds].sort().join(","),
 ];
 
+export async function fetchClassRoster(input: { ownerId?: string | null; classId: string }) {
+  const students = await fetchStudents({ ownerId: input.ownerId, classIds: [input.classId] });
+  return students.filter(student => student.classId === input.classId);
+}
+
+export async function replaceClassRoster(input: {
+  ownerId?: string | null;
+  classId: string;
+  names: string[];
+}): Promise<void> {
+  const { ownerId, classId } = input;
+  const names = input.names.map(name => name.trim()).filter(Boolean);
+
+  if (shouldUseExamplesInternal(ownerId)) {
+    const classSkills = getExampleSkills([classId]);
+    const month = getCurrentMonth();
+
+    exampleState.students = exampleState.students.filter(student => student.classId !== classId);
+
+    const nextStudents: StudentRecord[] = names.map(name => ({
+      id: nanoid(),
+      classId,
+      fullName: name,
+      skills: classSkills.map(skill => ({
+        skillId: skill.id,
+        skillName: skill.title,
+        scores: [
+          {
+            id: nanoid(),
+            month,
+            score: 0,
+          },
+        ],
+      })),
+    }));
+
+    exampleState.students = [...exampleState.students, ...nextStudents];
+    return;
+  }
+
+  if (!ownerId) {
+    throw new Error("Owner ID is required to update the roster");
+  }
+
+  try {
+    const { data: enrollmentRows, error: enrollmentError } = await supabase
+      .from<SupabaseClassStudentRow>("class_students")
+      .select("id,student_id,students(owner_id)")
+      .eq("class_id", classId);
+
+    if (enrollmentError) {
+      throw enrollmentError;
+    }
+
+    const studentIds = (enrollmentRows ?? [])
+      .filter(row => row.students?.owner_id === ownerId)
+      .map(row => row.student_id)
+      .filter((value): value is string => Boolean(value));
+
+    if (studentIds.length > 0) {
+      const { error: deleteEnrollmentError } = await supabase
+        .from<SupabaseClassStudentRow>("class_students")
+        .delete()
+        .eq("class_id", classId)
+        .in("student_id", studentIds);
+
+      if (deleteEnrollmentError) {
+        throw deleteEnrollmentError;
+      }
+
+      const { error: deleteStudentsError } = await supabase
+        .from<SupabaseStudentRow>("students")
+        .delete()
+        .in("id", studentIds)
+        .eq("owner_id", ownerId);
+
+      if (deleteStudentsError) {
+        throw deleteStudentsError;
+      }
+    }
+
+    if (names.length > 0) {
+      await bulkAddStudents({ ownerId, classId, names });
+    }
+  } catch (error) {
+    console.error("Failed to replace class roster", error);
+    throw error;
+  }
+}
+
 export const getSkillsQueryKey = (ownerId: string | null | undefined, classIds: string[]) => [
   "dashboard-skills",
   ownerId ?? "guest",
@@ -273,7 +363,7 @@ export async function fetchClassSkills(input: { ownerId?: string | null; classId
 
   try {
     const { data, error } = await supabase
-      .from<SupabaseClassSkillRow>("class_skills" as "class_skills")
+      .from<SupabaseClassSkillRow>("class_skills")
       .select("class_id,skill_id,skills(id,title,description)")
       .in("class_id", classIds);
 
@@ -319,7 +409,7 @@ export async function fetchStudents(input: {
 
   try {
     const { data: classStudents, error: classStudentsError } = await supabase
-      .from<SupabaseClassStudentRow>("class_students" as "class_students")
+      .from<SupabaseClassStudentRow>("class_students")
       .select(
         "class_id,student_id,students(id,first_name,last_name,full_name,preferred_name,guardian_name,guardian_contact,behavior_comment,academic_comment,avatar_url)"
       )
@@ -342,7 +432,7 @@ export async function fetchStudents(input: {
 
     const studentIds = Array.from(uniqueStudents.keys());
     const { data: scoreRows, error: scoresError } = await supabase
-      .from<SupabaseStudentSkillScoreRow>("student_skill_scores" as "student_skill_scores")
+      .from<SupabaseStudentSkillScoreRow>("student_skill_scores")
       .select("id,student_id,skill_id,month,score")
       .in("student_id", studentIds);
 
@@ -439,7 +529,7 @@ export async function bulkAddStudents(input: {
     });
 
     const { data: insertedStudents, error: insertError } = await supabase
-      .from<Omit<SupabaseStudentRow, "id"> & { id: string }>("students" as "students")
+      .from<Omit<SupabaseStudentRow, "id"> & { id: string }>("students")
       .insert(studentPayload)
       .select("id");
 
@@ -454,7 +544,7 @@ export async function bulkAddStudents(input: {
 
     if (enrollmentPayload.length > 0) {
       const { error: enrollmentError } = await supabase
-        .from<SupabaseClassStudentRow>("class_students" as "class_students")
+        .from<SupabaseClassStudentRow>("class_students")
         .insert(enrollmentPayload);
 
       if (enrollmentError) {
@@ -496,7 +586,7 @@ export async function createSkillForClass(input: {
 
   try {
     const { data: skillRow, error: skillError } = await supabase
-      .from<SupabaseSkillRow>("skills" as "skills")
+      .from<SupabaseSkillRow>("skills")
       .insert({
         owner_id: ownerId,
         title: title.trim(),
@@ -510,7 +600,7 @@ export async function createSkillForClass(input: {
     }
 
     const { error: linkError } = await supabase
-      .from<SupabaseClassSkillRow>("class_skills" as "class_skills")
+      .from<SupabaseClassSkillRow>("class_skills")
       .insert({ class_id: classId, skill_id: skillRow.id });
 
     if (linkError) {
@@ -567,7 +657,7 @@ export async function updateStudentComments(input: {
     }
 
     const { error } = await supabase
-      .from("students" as "students")
+      .from("students")
       .update(updates)
       .eq("id", studentId);
 
@@ -603,7 +693,7 @@ export async function upsertStudentSkillScore(input: {
     };
 
     const { error } = await supabase
-      .from("student_skill_scores" as "student_skill_scores")
+      .from("student_skill_scores")
       .upsert(payload, { onConflict: "student_id,skill_id,month" });
 
     if (error) {
