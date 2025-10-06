@@ -97,7 +97,7 @@ const formatLessonContextDate = (value: string | null) => {
   }
 };
 
-const DASHBOARD_TABS = ["classes", "curriculum", "lessonBuilder", "students", "assessments"] as const;
+const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "assessments"] as const;
 type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 const isDashboardTab = (value: string | null): value is DashboardTab =>
@@ -304,7 +304,7 @@ export default function TeacherPage() {
   );
 
   const requestedTab = searchParams.get("tab");
-  const activeTab: DashboardTab = isDashboardTab(requestedTab) ? requestedTab : "classes";
+  const activeTab: DashboardTab = isDashboardTab(requestedTab) ? requestedTab : "curriculum";
 
   const lessonBuilderContext = useMemo<LessonBuilderRouteContext | null>(() => {
     const getParam = (key: string) => {
@@ -710,11 +710,11 @@ export default function TeacherPage() {
         <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_25px_90px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl md:p-10">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
             <TabsList className="mx-auto grid w-full gap-2 border-0 px-2 text-white/70 sm:w-auto sm:auto-cols-max sm:grid-flow-col sm:px-4">
-              <TabsTrigger value="classes" className={GLASS_TAB_TRIGGER_CLASS}>
-                {t.dashboard.tabs.classes}
-              </TabsTrigger>
               <TabsTrigger value="curriculum" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.curriculum}
+              </TabsTrigger>
+              <TabsTrigger value="classes" className={GLASS_TAB_TRIGGER_CLASS}>
+                {t.dashboard.tabs.classes}
               </TabsTrigger>
               <TabsTrigger value="lessonBuilder" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.lessonBuilder}
@@ -726,24 +726,10 @@ export default function TeacherPage() {
                 {t.dashboard.tabs.assessments ?? "Assessments"}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="classes" className="space-y-6">
-              <ClassesTable
-                className={cn(GLASS_PANEL_CLASS, "space-y-6")}
-                classes={classes}
-                loading={classesQuery.isLoading}
-                onNewClass={() => setClassDialogOpen(true)}
-                onViewClass={classId =>
-                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
-                }
-                onEditClass={classId =>
-                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
-                }
-              />
-            </TabsContent>
             <TabsContent value="curriculum" className="space-y-6">
               <div className="grid gap-6 lg:grid-cols-[minmax(260px,320px)_1fr]">
                 <div className="space-y-4">
-                  <div className={cn(GLASS_PANEL_CLASS, "space-y-4")}> 
+                  <div className={cn(GLASS_PANEL_CLASS, "space-y-4")}>
                     <div className="space-y-1">
                       <h3 className="text-lg font-semibold">Curriculum boards</h3>
                       <p className="text-sm text-white/70">
@@ -1008,6 +994,20 @@ export default function TeacherPage() {
                   )}
                 </div>
               </div>
+            </TabsContent>
+            <TabsContent value="classes" className="space-y-6">
+              <ClassesTable
+                className={cn(GLASS_PANEL_CLASS, "space-y-6")}
+                classes={classes}
+                loading={classesQuery.isLoading}
+                onNewClass={() => setClassDialogOpen(true)}
+                onViewClass={classId =>
+                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
+                }
+                onEditClass={classId =>
+                  navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
+                }
+              />
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">
               {lessonBuilderContext ? (
