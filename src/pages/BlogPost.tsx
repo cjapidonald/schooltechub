@@ -461,7 +461,7 @@ export default function BlogPost() {
   if (!post) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="p-8 text-center">
+        <Card className="border-white/10 bg-white/5 p-8 text-center text-white shadow-[0_30px_90px_-45px_rgba(15,23,42,1)] backdrop-blur-2xl">
           <h1 className="text-2xl font-bold mb-4">{t.blogPost.notFound.title}</h1>
           <p className="text-white mb-6">{t.blogPost.notFound.description}</p>
           <Button onClick={() => navigate(getLocalizedPath("/blog", language))}>
@@ -499,7 +499,7 @@ export default function BlogPost() {
     
     return (
       <div key={comment.id} className={`${depth > 0 ? "ml-8 mt-4" : "mb-4"}`}>
-        <Card className="p-4">
+        <Card className="border-white/10 bg-white/5 p-4 text-white shadow-[0_20px_60px_-40px_rgba(15,23,42,1)] backdrop-blur-xl">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
@@ -595,180 +595,201 @@ export default function BlogPost() {
         }}
       />
 
-      <article className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          {/* Back Button */}
-          <Button
-            variant="ghost"
-            onClick={() => navigate(getLocalizedPath("/blog", language))}
-            className="mb-6"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {t.blogPost.backToBlog}
-          </Button>
+      <article className="relative min-h-screen overflow-hidden bg-background">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_60%)]" />
+          <div className="absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 bg-[conic-gradient(from_180deg_at_50%_50%,rgba(59,130,246,0.2),transparent_65%)] opacity-70 blur-3xl" />
+          <div className="absolute inset-x-0 bottom-0 h-[420px] bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+        </div>
 
-          {/* Featured Image */}
-          {post.featured_image && (
-            <figure className="mb-8">
-              <div className="aspect-video w-full overflow-hidden rounded-lg">
-                <img
-                  src={post.featured_image}
-                  alt={post.title}
-                  className="h-full w-full object-cover"
-                />
+        <div className="container relative mx-auto px-4 py-16">
+          <div className="mx-auto flex max-w-5xl flex-col gap-10">
+            {/* Back Button */}
+            <Button
+              variant="ghost"
+              onClick={() => navigate(getLocalizedPath("/blog", language))}
+              className="mb-4 w-fit rounded-full border border-white/10 bg-white/5 px-4 text-white shadow-[0_30px_90px_-45px_rgba(15,23,42,1)] backdrop-blur-2xl transition hover:border-white/30 hover:bg-white/10"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {t.blogPost.backToBlog}
+            </Button>
+
+            <div className="relative overflow-hidden rounded-[2.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_45px_120px_-50px_rgba(15,23,42,1)] backdrop-blur-3xl sm:p-10 lg:p-14">
+              <div className="pointer-events-none absolute inset-0 -z-10">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/10 opacity-80" />
+                <div className="absolute -inset-20 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.25),transparent_65%)] opacity-60" />
               </div>
-              {post.featured_image_caption ? (
-                <figcaption className="mt-3 text-sm text-white/70">
-                  {post.featured_image_caption}
-                </figcaption>
-              ) : null}
-            </figure>
-          )}
 
-          {/* Article Header */}
-          <header className="mb-8">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {post.category && (
-                <Badge variant="default">
-                  {post.category.replace("_", " ").charAt(0).toUpperCase() +
-                   post.category.slice(1).replace("_", " ")}
-                </Badge>
-              )}
-              {tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                  <Tag className="h-3 w-3" />
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-            
-            <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-            
-            {post.subtitle && (
-              <p className="text-xl text-white mb-4">{post.subtitle}</p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-4 text-sm text-white">
-              {(post.author || post.author_image || post.author_job_title) && (
-                <div className="flex items-center gap-2">
-                  {post.author_image ? (
-                    <img 
-                      src={post.author_image} 
-                      alt={typeof post.author === 'object' ? (post.author as any).name : "Author"} 
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <User className="h-4 w-4 text-primary" />
+              <div className="relative z-10 flex flex-col gap-12">
+                {post.featured_image && (
+                  <figure className="mx-auto flex max-w-2xl flex-col items-center gap-4 text-center">
+                    <div className="relative w-full overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/10 p-1.5 shadow-[0_35px_120px_-55px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                      <div className="relative overflow-hidden rounded-[1.5rem]">
+                        <img
+                          src={post.featured_image}
+                          alt={post.title}
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-60 mix-blend-screen" />
+                      </div>
                     </div>
-                  )}
-                  <div>
-                    <span className="font-medium">
-                      {typeof post.author === 'object' ? (post.author as any).name ?? "Ms. Taylor Rivera" : post.author ?? "Ms. Taylor Rivera"}
-                    </span>
-                    {post.author_job_title && (
-                      <span className="text-xs text-white ml-2">• {post.author_job_title}</span>
+                    {post.featured_image_caption ? (
+                      <figcaption className="text-sm text-white/70">
+                        {post.featured_image_caption}
+                      </figcaption>
+                    ) : null}
+                  </figure>
+                )}
+
+                {/* Article Header */}
+                <header className="flex flex-col gap-6 text-center">
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {post.category && (
+                      <Badge variant="default" className="border border-white/20 bg-white/10 px-3 py-1 text-white">
+                        {post.category.replace("_", " ").charAt(0).toUpperCase() +
+                         post.category.slice(1).replace("_", " ")}
+                      </Badge>
+                    )}
+                    {tags.map(tag => (
+                      <Badge key={tag} variant="secondary" className="flex items-center gap-1 border border-white/10 bg-white/10 px-3 py-1 text-white/80">
+                        <Tag className="h-3 w-3" />
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  <div className="space-y-4">
+                    <h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">{post.title}</h1>
+
+                    {post.subtitle && (
+                      <p className="text-xl text-white/80">{post.subtitle}</p>
                     )}
                   </div>
-                </div>
-              )}
-              {post.published_at && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  <span>{format(new Date(post.published_at), "MMMM d, yyyy")}</span>
-                </div>
-              )}
-              {readTimeLabel && (
-                <div className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  <span>{readTimeLabel}</span>
-                </div>
-              )}
-            </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                variant={isPostSaved ? "secondary" : "outline"}
-                onClick={handleToggleSave}
-                disabled={!canInteractWithPost || savedPostQuery.isLoading || toggleSaveMutation.isPending}
-                aria-pressed={isPostSaved}
-                className="gap-2"
-              >
-                {isPostSaved ? (
-                  <BookmarkCheck className="h-4 w-4" />
-                ) : (
-                  <Bookmark className="h-4 w-4" />
-                )}
-                {isPostSaved ? t.blogPost.saved : t.blogPost.save}
-              </Button>
-              <ShareButton
-                url={canonicalUrl}
-                title={post.title}
-                buttonLabel={t.blogPost.share}
-              />
-            </div>
-          </header>
+                  <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-white/80">
+                    {(post.author || post.author_image || post.author_job_title) && (
+                      <div className="flex items-center gap-2">
+                        {post.author_image ? (
+                          <img
+                            src={post.author_image}
+                            alt={typeof post.author === "object" ? (post.author as any).name : "Author"}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+                            <User className="h-5 w-5 text-white" />
+                          </div>
+                        )}
+                        <div className="text-left">
+                          <span className="font-medium text-white">
+                            {typeof post.author === "object" ? (post.author as any).name ?? "Ms. Taylor Rivera" : post.author ?? "Ms. Taylor Rivera"}
+                          </span>
+                          {post.author_job_title && (
+                            <span className="ml-2 text-xs text-white/60">• {post.author_job_title}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {post.published_at && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>{format(new Date(post.published_at), "MMMM d, yyyy")}</span>
+                      </div>
+                    )}
+                    {readTimeLabel && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{readTimeLabel}</span>
+                      </div>
+                    )}
+                  </div>
 
-          {/* Article Content */}
-          <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
-            {resolvedContent && <RichContent content={resolvedContent as any} />}
-          </div>
-
-          {/* Comments Section */}
-          <section className="border-t pt-8">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <MessageCircle className="h-6 w-6" />
-              {t.blogPost.comments} ({comments.filter(c => !c.parent_id).length})
-            </h2>
-
-            {canInteractWithPost ? (
-              <>
-                {user ? (
-                  <Card className="p-4 mb-6">
-                    <form onSubmit={handleCommentSubmit}>
-                      <Textarea
-                        placeholder={t.blogPost.commentPlaceholder}
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        className="min-h-[100px] mb-4"
-                      />
-                      <Button type="submit">{t.blogPost.postComment}</Button>
-                    </form>
-                  </Card>
-                ) : (
-                  <Card className="p-4 mb-6 text-center">
-                    <p className="text-white mb-4">
-                      {t.blogPost.loginPrompt}
-                    </p>
-                    <Button onClick={() => navigate(getLocalizedPath("/auth", language))}>
-                      {t.blogPost.loginCta}
+                  <div className="mt-2 flex flex-wrap justify-center gap-3">
+                    <Button
+                      variant={isPostSaved ? "secondary" : "outline"}
+                      onClick={handleToggleSave}
+                      disabled={!canInteractWithPost || savedPostQuery.isLoading || toggleSaveMutation.isPending}
+                      aria-pressed={isPostSaved}
+                      className="gap-2 rounded-full border-white/20 bg-white/10 px-5 text-white shadow-[0_20px_70px_-45px_rgba(15,23,42,1)] backdrop-blur-xl hover:border-white/40 hover:bg-white/20"
+                    >
+                      {isPostSaved ? (
+                        <BookmarkCheck className="h-4 w-4" />
+                      ) : (
+                        <Bookmark className="h-4 w-4" />
+                      )}
+                      {isPostSaved ? t.blogPost.saved : t.blogPost.save}
                     </Button>
-                  </Card>
-                )}
+                    <ShareButton
+                      url={canonicalUrl}
+                      title={post.title}
+                      buttonLabel={t.blogPost.share}
+                    />
+                  </div>
+                </header>
 
-                <div className="space-y-4">
-                  {comments
-                    .filter(c => !c.parent_id)
-                    .map(comment => renderComment(comment))}
+                {/* Article Content */}
+                <div className="prose prose-lg prose-headings:text-white prose-strong:text-white dark:prose-invert mx-auto max-w-3xl text-white/90">
+                  {resolvedContent && <RichContent content={resolvedContent as any} />}
+                </div>
 
-                  {comments.length === 0 && (
-                    <Card className="p-8 text-center">
-                      <MessageCircle className="h-12 w-12 mx-auto mb-4 text-white" />
-                      <p className="text-white">
-                        {t.blogPost.emptyState}
+                {/* Comments Section */}
+                <section className="border-t border-white/10 pt-10">
+                  <h2 className="mb-6 flex items-center justify-center gap-2 text-2xl font-bold text-white">
+                    <MessageCircle className="h-6 w-6" />
+                    {t.blogPost.comments} ({comments.filter(c => !c.parent_id).length})
+                  </h2>
+
+                  {canInteractWithPost ? (
+                    <>
+                      {user ? (
+                        <Card className="mb-6 border-white/10 bg-white/5 p-4 text-white shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                          <form onSubmit={handleCommentSubmit}>
+                            <Textarea
+                              placeholder={t.blogPost.commentPlaceholder}
+                              value={comment}
+                              onChange={(e) => setComment(e.target.value)}
+                              className="mb-4 min-h-[100px]"
+                            />
+                            <Button type="submit">{t.blogPost.postComment}</Button>
+                          </form>
+                        </Card>
+                      ) : (
+                        <Card className="mb-6 border-white/10 bg-white/5 p-4 text-center text-white shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                          <p className="mb-4 text-white/80">
+                            {t.blogPost.loginPrompt}
+                          </p>
+                          <Button onClick={() => navigate(getLocalizedPath("/auth", language))}>
+                            {t.blogPost.loginCta}
+                          </Button>
+                        </Card>
+                      )}
+
+                      <div className="space-y-4">
+                        {comments
+                          .filter(c => !c.parent_id)
+                          .map(comment => renderComment(comment))}
+
+                        {comments.length === 0 && (
+                          <Card className="border-white/10 bg-white/5 p-8 text-center text-white shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                            <MessageCircle className="mx-auto mb-4 h-12 w-12 text-white" />
+                            <p className="text-white/80">
+                              {t.blogPost.emptyState}
+                            </p>
+                          </Card>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <Card className="border-white/10 bg-white/5 p-6 text-center text-white shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                      <p className="text-white/80">
+                        Preview articles are available to read, but saving and comments are reserved for published posts.
                       </p>
                     </Card>
                   )}
-                </div>
-              </>
-            ) : (
-              <Card className="p-6 text-center">
-                <p className="text-white">
-                  Preview articles are available to read, but saving and comments are reserved for published posts.
-                </p>
-              </Card>
-            )}
-          </section>
+                </section>
+              </div>
+            </div>
+          </div>
         </div>
       </article>
     </>
