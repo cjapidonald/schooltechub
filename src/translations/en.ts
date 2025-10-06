@@ -1618,7 +1618,7 @@ export const en = {
       lessonBuilder: "Lesson builder workspace",
       lessonBuilderDetail: "Saved lesson plan workspace",
       teacherDashboard: "Teacher dashboard",
-      teacherCurriculumDetail: "Curriculum detail view",
+      teacherCurriculumManagement: "Curriculum management guide",
       teacherClassDashboard: "Class dashboard",
       teacherStudentDashboard: "Student dashboard",
       studentExperience: "Student landing",
@@ -1668,7 +1668,8 @@ export const en = {
       lessonBuilder: "Open the lesson builder without a preselected curriculum.",
       lessonBuilderDetail: "Continue planning a specific lesson builder workspace (dynamic route).",
       teacherDashboard: "Tab-based workspace for teachers to manage curricula, classes, and lesson planning.",
-      teacherCurriculumDetail: "Deep dive into a single curriculum, including lessons and resources (dynamic route).",
+      teacherCurriculumManagement:
+        "Step-by-step support to organise units, lessons, and materials across the school year.",
       teacherClassDashboard: "Monitor class rosters, schedules, and performance details (dynamic route).",
       teacherStudentDashboard: "View an individual student's progress across skills and assessments (dynamic route).",
       studentExperience: "Student-facing page sharing tools and support for learners.",

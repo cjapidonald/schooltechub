@@ -76,10 +76,10 @@ const createDetailedSections = (dictionary: TranslationDictionary): DetailedSect
           badges: ["requiresAuth"],
         },
         {
-          title: sitemap.linkTitles.teacherCurriculumDetail,
-          url: "/teacher/curriculum/:id",
-          description: sitemap.details.teacherCurriculumDetail,
-          badges: ["requiresAuth", "dynamic"],
+          title: sitemap.linkTitles.teacherCurriculumManagement,
+          url: "/teacher/curriculum/manage",
+          description: sitemap.details.teacherCurriculumManagement,
+          badges: ["requiresAuth"],
         },
         {
           title: sitemap.linkTitles.teacherStudentDashboard,

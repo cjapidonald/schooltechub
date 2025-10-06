@@ -24,6 +24,7 @@ import TeacherPage from '@/pages/TeacherPage';
 import StudentPage from '@/pages/Student';
 import StudentDashboardPage from '@/pages/StudentDashboard';
 import CurriculumPage from '@/pages/Curriculum';
+import TeacherCurriculumManagement from '@/pages/TeacherCurriculumManagement';
 
 const RouteWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <>
@@ -104,6 +105,7 @@ export const LocalizedRoutes = () => {
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<LegacyAccountRedirect />} />
       <Route path="/teacher" element={<RouteWrapper><TeacherPage /></RouteWrapper>} />
+      <Route path="/teacher/curriculum/manage" element={<RouteWrapper><TeacherCurriculumManagement /></RouteWrapper>} />
       <Route path="/teacher/curriculum/:id" element={<RouteWrapper><CurriculumPage /></RouteWrapper>} />
       <Route path="/teacher/classes/:id" element={<LegacyClassDashboardRedirect />} />
       <Route path="/dashboard" element={<Navigate to="/teacher" replace />} />
