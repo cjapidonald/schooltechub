@@ -25,7 +25,7 @@ import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import { createClass, fetchMyClasses } from "@/features/dashboard/api";
-import { DASHBOARD_EXAMPLE_CLASS, DASHBOARD_EXAMPLE_CLASS_ID } from "@/features/dashboard/examples";
+import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
 import { bulkAddStudents } from "@/features/students/api";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
@@ -162,48 +162,6 @@ const createEmptyCurriculumDraft = (cls: Class): CurriculumDraft => ({
   pacing: "",
   notes: "",
   lessons: [],
-});
-
-const createMsRiveraCurriculumDraft = (): CurriculumDraft => ({
-  unitTitle: "Personal Narratives Writing Unit",
-  vision:
-    "Students craft compelling personal narratives that highlight voice, structure, and reflection while developing confidence as writers.",
-  essentialQuestions:
-    "How do writers transform everyday moments into powerful stories? What narrative techniques help readers connect with our experiences?",
-  knowledgeSkills:
-    "Narrative structure, drafting and revision cycles, descriptive language, dialogue, and grammar mini-lessons tailored to workshop needs.",
-  assessments:
-    "Final polished narrative publication, weekly writer's notebook entries, peer feedback rubrics, and teacher conferring notes.",
-  pacing:
-    "Week 1: Generating ideas and planning • Week 2: Drafting with strong leads • Week 3: Revising for voice and detail • Week 4: Editing and celebration showcase.",
-  notes:
-    "Invite families to the publishing celebration. Coordinate with the librarian for mentor text pull-outs. Capture student reflections for portfolios.",
-  lessons: [
-    {
-      id: generateLessonId(),
-      title: "Launching Personal Narratives",
-      focus: "Use mentor texts to identify strong openings and model generating story seeds from lived experiences.",
-      resources: "Mentor text bin, story seed graphic organizer, chart paper",
-    },
-    {
-      id: generateLessonId(),
-      title: "Character Voices and Dialogue",
-      focus: "Mini-lesson on writing believable dialogue with proper punctuation followed by partner rehearsal.",
-      resources: "Dialogue punctuations anchor chart, role-play cards",
-    },
-    {
-      id: generateLessonId(),
-      title: "Building Sensory Details",
-      focus: "Add vivid sensory language to drafts using a five senses revision checklist and gallery walk feedback.",
-      resources: "Five senses checklist, sticky notes for gallery walk",
-    },
-    {
-      id: generateLessonId(),
-      title: "Peer Conferencing Circles",
-      focus: "Structure peer feedback circles that spotlight strengths and next steps using narrative rubric language.",
-      resources: "Peer conference protocol cards, narrative rubric",
-    },
-  ],
 });
 
 export default function TeacherPage() {
@@ -457,44 +415,59 @@ export default function TeacherPage() {
     return [DASHBOARD_EXAMPLE_CLASS];
   }, [classesQuery.data]);
 
+  const curriculumClasses = useMemo(
+    () => classes.filter(cls => !cls.isExample),
+    [classes],
+  );
+
   useEffect(() => {
-    if (classes.length === 0) {
+    if (curriculumClasses.length === 0) {
+      setCurriculumDrafts(prev => (Object.keys(prev).length > 0 ? {} : prev));
       return;
     }
 
     setCurriculumDrafts(prev => {
       let changed = false;
-      const next = { ...prev };
+      const next: Record<string, CurriculumDraft> = {};
 
-      classes.forEach(cls => {
-        if (!next[cls.id]) {
-          next[cls.id] =
-            cls.id === DASHBOARD_EXAMPLE_CLASS_ID ? createMsRiveraCurriculumDraft() : createEmptyCurriculumDraft(cls);
+      curriculumClasses.forEach(cls => {
+        const existing = prev[cls.id];
+        next[cls.id] = existing ?? createEmptyCurriculumDraft(cls);
+        if (!existing) {
           changed = true;
         }
       });
 
+      if (Object.keys(prev).length !== Object.keys(next).length) {
+        changed = true;
+      }
+
       return changed ? next : prev;
     });
-  }, [classes]);
+  }, [curriculumClasses]);
 
   useEffect(() => {
-    if (activeTab !== "curriculum" || classes.length === 0) {
+    if (curriculumClasses.length === 0) {
+      setSelectedCurriculumClassId(null);
+      return;
+    }
+
+    if (activeTab !== "curriculum") {
       return;
     }
 
     setSelectedCurriculumClassId(prev => {
-      if (prev && classes.some(cls => cls.id === prev)) {
+      if (prev && curriculumClasses.some(cls => cls.id === prev)) {
         return prev;
       }
 
-      return classes[0]?.id ?? null;
+      return curriculumClasses[0]?.id ?? null;
     });
-  }, [activeTab, classes]);
+  }, [activeTab, curriculumClasses]);
 
   const selectedCurriculumClass = useMemo(
-    () => classes.find(cls => cls.id === selectedCurriculumClassId) ?? null,
-    [classes, selectedCurriculumClassId],
+    () => curriculumClasses.find(cls => cls.id === selectedCurriculumClassId) ?? null,
+    [curriculumClasses, selectedCurriculumClassId],
   );
 
   const selectedCurriculumDraft = useMemo(() => {
@@ -737,45 +710,44 @@ export default function TeacherPage() {
                       </p>
                     </div>
                     <div className="grid gap-3">
-                      {classes.map(cls => {
-                        const isSelected = selectedCurriculumClass?.id === cls.id;
-                        const details = [cls.stage, cls.subject].filter(Boolean).join(" • ");
+                      {curriculumClasses.length > 0 ? (
+                        curriculumClasses.map(cls => {
+                          const isSelected = selectedCurriculumClass?.id === cls.id;
+                          const details = [cls.stage, cls.subject].filter(Boolean).join(" • ");
 
-                        return (
-                          <button
-                            key={cls.id}
-                            type="button"
-                            onClick={() => setSelectedCurriculumClassId(cls.id)}
-                            className={cn(
-                              GLASS_SELECT_CARD_CLASS,
-                              isSelected
-                                ? "border-white/60 bg-white/25 text-white shadow-[0_18px_45px_-25px_rgba(15,23,42,0.85)]"
-                                : "text-white/75",
-                            )}
-                          >
-                            <div className="space-y-2">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="space-y-1">
-                                  <p className="text-base font-semibold text-white">{cls.title}</p>
-                                  {details ? (
-                                    <p className="text-xs uppercase tracking-wide text-white/60">{details}</p>
+                          return (
+                            <button
+                              key={cls.id}
+                              type="button"
+                              onClick={() => setSelectedCurriculumClassId(cls.id)}
+                              className={cn(
+                                GLASS_SELECT_CARD_CLASS,
+                                isSelected
+                                  ? "border-white/60 bg-white/25 text-white shadow-[0_18px_45px_-25px_rgba(15,23,42,0.85)]"
+                                  : "text-white/75",
+                              )}
+                            >
+                              <div className="space-y-2">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="space-y-1">
+                                    <p className="text-base font-semibold text-white">{cls.title}</p>
+                                    {details ? (
+                                      <p className="text-xs uppercase tracking-wide text-white/60">{details}</p>
+                                    ) : null}
+                                  </div>
+                                  {isSelected ? (
+                                    <span className="inline-flex items-center rounded-full border border-white/40 bg-white/20 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">
+                                      Active
+                                    </span>
                                   ) : null}
                                 </div>
-                                {isSelected ? (
-                                  <span className="inline-flex items-center rounded-full border border-white/40 bg-white/20 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">
-                                    Active
-                                  </span>
-                                ) : null}
                               </div>
-                              {cls.isExample ? (
-                                <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/70">
-                                  {t.dashboard.common.exampleTag}
-                                </span>
-                              ) : null}
-                            </div>
-                          </button>
-                        );
-                      })}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <p className="text-sm text-white/70">{t.dashboard.curriculum.empty.title}</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -984,8 +956,13 @@ export default function TeacherPage() {
                         </div>
                       </div>
                     </div>
+                  ) : curriculumClasses.length === 0 ? (
+                    <div className={cn(GLASS_PANEL_CLASS, "space-y-3 text-center text-white/70")}>
+                      <h3 className="text-lg font-semibold text-white">{t.dashboard.curriculum.empty.title}</h3>
+                      <p className="text-sm text-white/70">{t.dashboard.curriculum.empty.description}</p>
+                    </div>
                   ) : (
-                    <Alert className={cn(GLASS_PANEL_CLASS, "space-y-2 text-white")}> 
+                    <Alert className={cn(GLASS_PANEL_CLASS, "space-y-2 text-white")}>
                       <AlertTitle className="text-lg font-semibold text-white">Select a class</AlertTitle>
                       <AlertDescription className="text-sm text-white/70">
                         Choose a class card to begin building its curriculum outline.
