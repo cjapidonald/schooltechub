@@ -141,7 +141,7 @@ export const RoleAuthDialog = ({ open, role, onOpenChange, onSuccess }: RoleAuth
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white/70 transition hover:text-white"
+          className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white/70 transition hover:text-white"
           aria-label="Close login dialog"
         >
           <X className="h-4 w-4" />
