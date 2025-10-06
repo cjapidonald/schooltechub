@@ -915,21 +915,26 @@ const Blog = () => {
                               aria-label={post.title}
                             >
                               <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
-                                <figure className="relative h-48 overflow-hidden">
-                                  <img
-                                    src={imageSrc}
-                                    alt={post.title}
-                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    loading="lazy"
-                                  />
+                                <figure className="flex flex-col items-center gap-4 p-6">
+                                  <div className="relative aspect-[4/3] w-full max-w-[18rem] overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 p-1.5 shadow-[0_30px_90px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                                    <div className="relative h-full w-full overflow-hidden rounded-[1.6rem]">
+                                      <img
+                                        src={imageSrc}
+                                        alt={post.title}
+                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        loading="lazy"
+                                      />
+                                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-60" />
+                                    </div>
+                                  </div>
                                   {post.featured_image_caption ? (
-                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-2 text-xs uppercase tracking-wide text-white/80">
+                                    <figcaption className="text-xs uppercase tracking-wide text-white/70">
                                       {post.featured_image_caption}
                                     </figcaption>
                                   ) : null}
                                 </figure>
-                                <CardHeader className="space-y-3">
-                                  <div className="flex items-center gap-2 text-sm text-white/70">
+                                <CardHeader className="space-y-3 text-center">
+                                  <div className="flex items-center justify-center gap-2 text-sm text-white/70">
                                     <User className="h-4 w-4" aria-hidden="true" />
                                     <span className="font-medium">{authorLabel}</span>
                                   </div>
@@ -970,22 +975,27 @@ const Blog = () => {
                               className="group block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
                               aria-label={post.title}
                             >
-                              <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
-                                <figure className="relative overflow-hidden">
-                                  <img
-                                    src={imageSrc}
-                                    alt={post.title}
-                                    className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    loading="lazy"
-                                  />
+                              <Card className="flex h-full flex-col items-center overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
+                                <figure className="flex w-full flex-col items-center gap-4 p-5">
+                                  <div className="relative aspect-[4/3] w-full max-w-[16rem] overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-1.5 shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                                    <div className="relative h-full w-full overflow-hidden rounded-[1.4rem]">
+                                      <img
+                                        src={imageSrc}
+                                        alt={post.title}
+                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        loading="lazy"
+                                      />
+                                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-50" />
+                                    </div>
+                                  </div>
                                   {post.featured_image_caption ? (
-                                    <figcaption className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-2 text-[0.7rem] uppercase tracking-wide text-white/80">
+                                    <figcaption className="text-xs text-white/70">
                                       {post.featured_image_caption}
                                     </figcaption>
                                   ) : null}
                                 </figure>
-                                <CardHeader className="space-y-2">
-                                  <div className="flex items-center gap-2 text-xs text-white/60">
+                                <CardHeader className="space-y-2 text-center">
+                                  <div className="flex items-center justify-center gap-2 text-xs text-white/60">
                                     <User className="h-3.5 w-3.5" aria-hidden="true" />
                                     <span className="font-medium tracking-wide">{authorLabel}</span>
                                   </div>
