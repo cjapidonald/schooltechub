@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ArrowLeft, CalendarDays, Layers, NotebookPen } from "lucide-react";
+import { ArrowLeft, BarChart3, CalendarDays, CheckCircle2, Clock3, Layers, NotebookPen } from "lucide-react";
 
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -80,6 +81,32 @@ const TeacherCurriculumDetailPage = () => {
 
   const curriculum = detailQuery.data ?? null;
   const items = useMemo(() => itemsQuery.data ?? [], [itemsQuery.data]);
+  const statusSummary = useMemo(() => {
+    const counts: Record<DashboardCurriculumItem["status"], number> = {
+      planned: 0,
+      in_progress: 0,
+      done: 0,
+    };
+    let nextLesson: DashboardCurriculumItem | null = null;
+    let nextTime = Number.POSITIVE_INFINITY;
+    const now = Date.now();
+
+    for (const item of items) {
+      counts[item.status] += 1;
+      if (item.scheduled_on) {
+        const ts = new Date(item.scheduled_on).getTime();
+        if (!Number.isNaN(ts) && ts >= now && ts < nextTime) {
+          nextLesson = item;
+          nextTime = ts;
+        }
+      }
+    }
+
+    const total = items.length;
+    const completionPercent = total > 0 ? Math.round((counts.done / total) * 100) : 0;
+    const momentumPercent = total > 0 ? Math.round(((counts.done + counts.in_progress) / total) * 100) : 0;
+    return { total, counts, completionPercent, momentumPercent, nextLesson };
+  }, [items]);
 
   useEffect(() => {
     const map: Record<string, ItemDraft> = {};
@@ -307,6 +334,53 @@ const TeacherCurriculumDetailPage = () => {
               </div>
             ))}
           </dl>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-white/70">
+                {t.dashboard.curriculumDetail.header.lessonsLabel}
+                <BarChart3 className="h-4 w-4 text-white/60" />
+              </div>
+              <p className="mt-3 text-3xl font-semibold">{statusSummary.total}</p>
+              <p className="mt-2 text-sm text-white/70">{t.dashboard.curriculumView.summary.totalDescription}</p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-transparent p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-white/70">
+                {t.dashboard.curriculumView.summary.completion}
+                <CheckCircle2 className="h-4 w-4 text-emerald-200" />
+              </div>
+              <p className="mt-3 text-3xl font-semibold">{statusSummary.completionPercent}%</p>
+              <Progress value={statusSummary.completionPercent} className="mt-4 h-2 rounded-full border border-white/20 bg-white/10" />
+              <p className="mt-3 text-xs text-white/60">{t.dashboard.curriculumView.summary.completionDescription}</p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-sky-500/20 via-sky-500/10 to-transparent p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-white/70">
+                {t.dashboard.curriculumView.summary.progress}
+                <Layers className="h-4 w-4 text-sky-200" />
+              </div>
+              <p className="mt-3 text-3xl font-semibold">{statusSummary.momentumPercent}%</p>
+              <Progress value={statusSummary.momentumPercent} className="mt-4 h-2 rounded-full border border-white/20 bg-white/10" />
+              <p className="mt-3 text-xs text-white/60">
+                {t.dashboard.curriculumView.summary.statusBreakdown
+                  .replace("{planned}", String(statusSummary.counts.planned))
+                  .replace("{inProgress}", String(statusSummary.counts.in_progress))
+                  .replace("{complete}", String(statusSummary.counts.done))}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-white/70">
+                {t.dashboard.curriculumView.summary.nextLesson}
+                <Clock3 className="h-4 w-4 text-white/60" />
+              </div>
+              {statusSummary.nextLesson ? (
+                <>
+                  <p className="mt-3 text-lg font-semibold">{statusSummary.nextLesson.lesson_title}</p>
+                  <p className="mt-1 text-sm text-white/70">{formatDate(statusSummary.nextLesson.scheduled_on)}</p>
+                </>
+              ) : (
+                <p className="mt-3 text-sm text-white/60">{t.dashboard.curriculumView.summary.noUpcoming}</p>
+              )}
+            </div>
+          </div>
         </div>
 
         <section className="mt-10 space-y-6">
@@ -567,14 +641,14 @@ const TeacherCurriculumDetailPage = () => {
             <Button
               type="button"
               variant="outline"
-              className="border-white/40 bg-transparent text-white hover:bg-white/10"
+              className="rounded-xl border-white/40 bg-transparent text-white hover:bg-white/10"
               onClick={() => setAddDialogOpen(false)}
             >
               {t.common.cancel}
             </Button>
             <Button
               type="button"
-              className="border-white/60 bg-white/90 text-slate-900 hover:bg-white"
+              className="rounded-xl border-white/60 bg-white/90 text-slate-900 hover:bg-white"
               onClick={handleAddLessons}
               disabled={appendMutation.isPending}
             >

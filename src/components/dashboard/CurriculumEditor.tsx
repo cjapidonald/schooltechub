@@ -16,7 +16,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ExternalLink, GripVertical, X } from "lucide-react";
+import { ExternalLink, GripVertical, Sparkles, X } from "lucide-react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
@@ -83,6 +83,12 @@ interface RowContentProps {
   dragHandle?: DragHandleProps;
 }
 
+const STATUS_BADGE_STYLES: Record<DashboardCurriculumItem["status"], string> = {
+  planned: "border-sky-400/40 bg-sky-500/15 text-sky-100",
+  in_progress: "border-amber-400/40 bg-amber-500/15 text-amber-100",
+  done: "border-emerald-400/40 bg-emerald-500/15 text-emerald-100",
+};
+
 const RowContent = ({
   item,
   index,
@@ -107,14 +113,16 @@ const RowContent = ({
 
   return (
     <>
-      <TableCell className="font-semibold">
+      <TableCell className="font-semibold text-white">
         <div className="flex items-center gap-2">
           <button
             type="button"
             ref={dragHandle?.ref}
             className={cn(
-              "flex h-6 w-6 items-center justify-center rounded border bg-background text-muted-foreground transition",
-              handleDisabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing",
+              "flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition",
+              handleDisabled
+                ? "cursor-not-allowed opacity-40"
+                : "cursor-grab text-white/90 shadow-[0_10px_35px_-20px_rgba(15,23,42,0.8)] active:cursor-grabbing",
             )}
             disabled={handleDisabled}
             aria-label={t.dashboard.curriculumView.actions.reorder}
@@ -124,35 +132,50 @@ const RowContent = ({
           >
             <GripVertical className="h-3.5 w-3.5" />
           </button>
-          <span>{displayOrder}</span>
+          <span className="text-sm text-white/70">{displayOrder}</span>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <div className="font-medium">{item.lesson_title}</div>
+      <TableCell className="text-white/80">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <div className="text-base font-semibold text-white">{item.lesson_title}</div>
+            {isExample ? (
+              <Badge
+                variant="outline"
+                className="rounded-full border-white/40 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80"
+              >
+                {t.dashboard.common.exampleTag}
+              </Badge>
+            ) : null}
+          </div>
           {isExample ? (
-            <Badge variant="outline" className="text-xs font-normal uppercase tracking-wide">
-              {t.dashboard.common.exampleTag}
-            </Badge>
+            <p className="text-xs text-white/60">{t.dashboard.common.exampleDescription}</p>
           ) : null}
         </div>
-        {isExample ? (
-          <p className="mt-1 text-xs text-muted-foreground">{t.dashboard.common.exampleDescription}</p>
-        ) : null}
       </TableCell>
-      <TableCell>{item.stage ? <Badge variant="secondary">{item.stage}</Badge> : "—"}</TableCell>
-      <TableCell>{formatDate(item.scheduled_on)}</TableCell>
-      <TableCell>
-        <Badge>{t.dashboard.curriculumView.status[item.status]}</Badge>
+      <TableCell className="text-white/80">
+        {item.stage ? (
+          <Badge className="border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
+            {item.stage}
+          </Badge>
+        ) : (
+          <span className="text-white/50">—</span>
+        )}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-white/80">{formatDate(item.scheduled_on)}</TableCell>
+      <TableCell className="text-white">
+        <Badge className={cn("px-3 py-1 text-xs font-semibold uppercase tracking-wide", STATUS_BADGE_STYLES[item.status])}>
+          {t.dashboard.curriculumView.status[item.status]}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right text-white">
         <div className="flex flex-col items-end gap-3">
           <div className="flex flex-wrap items-center justify-end gap-2">
             {presentations.length > 0 ? (
               presentations.map((url, linkIndex) => (
                 <div
                   key={`${item.id}-presentation-${linkIndex}`}
-                  className="flex items-center gap-1 rounded-md border px-2 py-1 text-sm"
+                  className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/80 backdrop-blur"
                 >
                   <span className="max-w-[10rem] truncate" title={url}>
                     {t.dashboard.curriculumView.presentations.linkLabel.replace(
@@ -163,7 +186,7 @@ const RowContent = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-7 w-7 rounded-full border border-white/10 bg-white/5 text-white/80 hover:bg-white/20"
                     type="button"
                     onClick={() => window.open(url, "_blank", "noopener")}
                     aria-label={t.dashboard.curriculumView.presentations.open}
@@ -173,7 +196,7 @@ const RowContent = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-7 w-7 rounded-full border border-white/10 bg-white/5 text-white/80 hover:bg-white/20"
                     type="button"
                     onClick={() => onRemovePresentation(item.id, linkIndex)}
                     aria-label={t.dashboard.curriculumView.presentations.removeLabel.replace(
@@ -187,7 +210,7 @@ const RowContent = ({
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-white/60">
                 {t.dashboard.curriculumView.presentations.empty}
               </p>
             )}
@@ -197,6 +220,7 @@ const RowContent = ({
             size="sm"
             type="button"
             disabled={createDisabled}
+            className="rounded-xl border-white/40 bg-white/10 text-white transition hover:border-white/70 hover:bg-white/20"
             onClick={() => onPlanLesson(item)}
             aria-label={t.dashboard.curriculumView.actions.createLessonPlan}
           >
@@ -207,6 +231,7 @@ const RowContent = ({
             size="sm"
             type="button"
             disabled={openDisabled}
+            className="rounded-xl border-white/20 bg-white/90 text-slate-900 transition hover:bg-white"
             onClick={() => onOpenLessonPlan?.(item)}
             aria-label={t.dashboard.curriculumView.actions.openLessonPlan}
           >
@@ -219,12 +244,13 @@ const RowContent = ({
             onClick={() => onManagePresentations(item)}
             aria-label={t.dashboard.curriculumView.actions.addPresentation}
             disabled={isExample}
+            className="rounded-xl border border-white/20 bg-white/5 text-white transition hover:border-white/40 hover:bg-white/10"
           >
             {t.dashboard.curriculumView.actions.addPresentation}
           </Button>
         </div>
         {isExample ? (
-          <p className="mt-2 text-xs text-muted-foreground">{t.dashboard.common.exampleActionsDisabled}</p>
+          <p className="mt-2 text-xs text-white/60">{t.dashboard.common.exampleActionsDisabled}</p>
         ) : null}
       </TableCell>
     </>
@@ -284,7 +310,10 @@ const SortableCurriculumRow = ({
       ref={setNodeRef}
       style={style}
       data-state={isDragging ? "dragging" : undefined}
-      className={cn(isDragging ? "bg-muted/60" : undefined)}
+      className={cn(
+        "border-white/10 bg-white/5 text-white transition hover:bg-white/10",
+        isDragging ? "border-white/40 bg-white/20" : undefined,
+      )}
     >
       <RowContent
         item={item}
@@ -304,7 +333,7 @@ const SortableCurriculumRow = ({
 const StaticCurriculumRow = (props: RowProps) => {
   const { item, index, t, onPlanLesson, onOpenLessonPlan, presentations, onManagePresentations, onRemovePresentation } = props;
   return (
-    <TableRow>
+    <TableRow className="border-white/10 bg-white/5 text-white transition hover:bg-white/10">
       <RowContent
         item={item}
         index={index}
@@ -438,29 +467,97 @@ export function CurriculumEditor({
     ? presentationsByItem[presentationDialog.item.id] ?? []
     : [];
 
+  const totals = useMemo(() => {
+    const counts: Record<DashboardCurriculumItem["status"], number> = {
+      planned: 0,
+      in_progress: 0,
+      done: 0,
+    };
+    let nearest: { item: DashboardCurriculumItem; time: number } | null = null;
+    const now = Date.now();
+    for (const item of items) {
+      counts[item.status] += 1;
+      if (item.scheduled_on) {
+        const ts = new Date(item.scheduled_on).getTime();
+        if (!Number.isNaN(ts) && ts >= now) {
+          if (!nearest || ts < nearest.time) {
+            nearest = { item, time: ts };
+          }
+        }
+      }
+    }
+    const total = items.length;
+    const completePercent = total > 0 ? Math.round((counts.done / total) * 100) : 0;
+    const inFlightPercent = total > 0 ? Math.round(((counts.done + counts.in_progress) / total) * 100) : 0;
+    return { counts, total, completePercent, inFlightPercent, nearest };
+  }, [items]);
+
   return (
-    <div className="rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-16">#</TableHead>
-            <TableHead>{t.dashboard.curriculumView.columns.lessonTitle}</TableHead>
-            <TableHead>{t.dashboard.curriculumView.columns.stage}</TableHead>
-            <TableHead>{t.dashboard.curriculumView.columns.date}</TableHead>
-            <TableHead>{t.dashboard.curriculumView.columns.status}</TableHead>
-            <TableHead className="text-right">{t.dashboard.curriculumView.columns.actions}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-white/15 bg-white/10 p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+          <div className="flex items-center justify-between text-xs uppercase tracking-wide text-white/60">
+            {t.dashboard.curriculumDetail.header.lessonsLabel}
+            <Sparkles className="h-4 w-4 text-white/50" />
+          </div>
+          <p className="mt-3 text-3xl font-semibold">{totals.total}</p>
+          <p className="mt-2 text-sm text-white/70">{t.dashboard.curriculumView.summary.totalDescription}</p>
+        </div>
+        <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-transparent p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+          <div className="text-xs uppercase tracking-wide text-white/70">
+            {t.dashboard.curriculumView.summary.completion}
+          </div>
+          <p className="mt-3 text-3xl font-semibold">{totals.completePercent}%</p>
+          <p className="mt-2 text-sm text-white/70">{t.dashboard.curriculumView.summary.completionDescription}</p>
+        </div>
+        <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-sky-500/20 via-sky-500/10 to-transparent p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+          <div className="text-xs uppercase tracking-wide text-white/70">
+            {t.dashboard.curriculumView.summary.progress}
+          </div>
+          <p className="mt-3 text-3xl font-semibold">{totals.inFlightPercent}%</p>
+          <div className="mt-2 text-xs text-white/60">
+            {t.dashboard.curriculumView.summary.statusBreakdown
+              .replace("{planned}", String(totals.counts.planned))
+              .replace("{inProgress}", String(totals.counts.in_progress))
+              .replace("{complete}", String(totals.counts.done))}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-white/15 bg-white/10 p-5 text-white shadow-[0_30px_100px_-45px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+          <div className="text-xs uppercase tracking-wide text-white/70">
+            {t.dashboard.curriculumView.summary.nextLesson}
+          </div>
+          {totals.nearest ? (
+            <>
+              <p className="mt-3 text-lg font-semibold">{totals.nearest.item.lesson_title}</p>
+              <p className="mt-1 text-sm text-white/70">{formatDate(totals.nearest.item.scheduled_on)}</p>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-white/60">{t.dashboard.curriculumView.summary.noUpcoming}</p>
+          )}
+        </div>
+      </div>
+      <div className="overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 shadow-[0_35px_120px_-55px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
+        <Table className="min-w-full divide-y divide-white/10 text-sm text-white/80">
+          <TableHeader className="bg-white/5 text-xs uppercase tracking-wide text-white/60">
+            <TableRow className="border-white/10">
+              <TableHead className="w-16 text-white/70">#</TableHead>
+              <TableHead className="text-white/70">{t.dashboard.curriculumView.columns.lessonTitle}</TableHead>
+              <TableHead className="text-white/70">{t.dashboard.curriculumView.columns.stage}</TableHead>
+              <TableHead className="text-white/70">{t.dashboard.curriculumView.columns.date}</TableHead>
+              <TableHead className="text-white/70">{t.dashboard.curriculumView.columns.status}</TableHead>
+              <TableHead className="text-right text-white/70">{t.dashboard.curriculumView.columns.actions}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-white/10">
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8 text-center text-white/60">
                 {t.dashboard.common.loading}
               </TableCell>
             </TableRow>
           ) : orderedItems.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+              <TableCell colSpan={6} className="py-8 text-center text-white/60">
                 {t.dashboard.curriculumView.empty}
               </TableCell>
             </TableRow>
@@ -505,8 +602,9 @@ export function CurriculumEditor({
               />
             ))
           )}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
+      </div>
 
       <Dialog
         open={presentationDialog.open}
@@ -516,19 +614,23 @@ export function CurriculumEditor({
           }
         }}
       >
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="sm:max-w-lg border border-white/20 bg-slate-950/80 text-white shadow-[0_35px_120px_-45px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-white">
               {t.dashboard.curriculumView.presentations.dialogTitle.replace(
                 "{lesson}",
                 presentationDialog.item?.lesson_title ?? t.dashboard.curriculumView.presentations.untitled,
               )}
             </DialogTitle>
-            <DialogDescription>{t.dashboard.curriculumView.presentations.dialogDescription}</DialogDescription>
+            <DialogDescription className="text-sm text-white/70">
+              {t.dashboard.curriculumView.presentations.dialogDescription}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="presentation-url">{t.dashboard.curriculumView.presentations.urlLabel}</Label>
+              <Label htmlFor="presentation-url" className="text-sm font-medium text-white/80">
+                {t.dashboard.curriculumView.presentations.urlLabel}
+              </Label>
               <Input
                 id="presentation-url"
                 placeholder="https://"
@@ -536,13 +638,14 @@ export function CurriculumEditor({
                 onChange={event =>
                   setPresentationDialog(prev => ({ ...prev, value: event.target.value, error: "" }))
                 }
+                className="rounded-xl border-white/30 bg-white/10 text-white placeholder:text-white/50 focus:border-white/60 focus-visible:ring-white/40"
               />
               {presentationDialog.error ? (
-                <p className="text-sm text-destructive">{presentationDialog.error}</p>
+                <p className="text-sm text-rose-300">{presentationDialog.error}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-medium">
+              <p className="text-sm font-medium text-white/80">
                 {t.dashboard.curriculumView.presentations.listTitle}
               </p>
               {activePresentations.length > 0 ? (
@@ -550,7 +653,7 @@ export function CurriculumEditor({
                   {activePresentations.map((url, index) => (
                     <li
                       key={`${presentationDialog.item?.id ?? "item"}-presentation-${index}`}
-                      className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+                      className="flex items-center justify-between gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/80 backdrop-blur"
                     >
                       <span className="max-w-[16rem] truncate" title={url}>
                         {url}
@@ -559,7 +662,7 @@ export function CurriculumEditor({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 rounded-full border border-white/10 bg-white/5 text-white/80 hover:bg-white/15"
                           type="button"
                           onClick={() => window.open(url, "_blank", "noopener")}
                           aria-label={t.dashboard.curriculumView.presentations.open}
@@ -569,7 +672,7 @@ export function CurriculumEditor({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 rounded-full border border-white/10 bg-white/5 text-white/80 hover:bg-white/15"
                           type="button"
                           onClick={() =>
                             presentationDialog.item
@@ -588,17 +691,26 @@ export function CurriculumEditor({
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-white/60">
                   {t.dashboard.curriculumView.presentations.empty}
                 </p>
               )}
             </div>
           </div>
           <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-end">
-            <Button variant="outline" onClick={handleClosePresentationDialog}>
+            <Button
+              variant="outline"
+              onClick={handleClosePresentationDialog}
+              className="rounded-xl border-white/40 bg-white/10 text-white hover:border-white/70 hover:bg-white/20"
+            >
               {t.common.cancel}
             </Button>
-            <Button onClick={handleSavePresentation}>{t.dashboard.curriculumView.presentations.save}</Button>
+            <Button
+              onClick={handleSavePresentation}
+              className="rounded-xl border-white/20 bg-white/90 text-slate-900 hover:bg-white"
+            >
+              {t.dashboard.curriculumView.presentations.save}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
