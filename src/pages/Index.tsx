@@ -197,6 +197,9 @@ const neonCardGradients = [
 
 const convexOverlayClass = "convex-panel-sheen";
 
+const convexBevelClass =
+  "border-[3px] border-white/20 shadow-[inset_0_3px_12px_rgba(255,255,255,0.18),inset_0_-3px_18px_rgba(15,23,42,0.55)]";
+
 const glassBoardClass =
   "relative overflow-hidden rounded-[2.25rem] border border-white/12 bg-white/10 p-8 text-white shadow-[0_30px_80px_-32px_rgba(15,23,42,0.82)] backdrop-blur-2xl sm:p-12";
 
@@ -498,7 +501,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative overflow-hidden pt-2.5 pb-16">
+      <section className="relative overflow-hidden pt-2.5 pb-[10px]">
         <div className="absolute inset-0 -z-20">
           <img
             src={classroomTechnologyBackgrounds.stats}
@@ -516,7 +519,7 @@ const Index = () => {
           </div>
           <div className="mt-[10px] flex justify-center">
             <Reveal>
-              <Card className={cn(neonCardClass, glassBoardClass)}>
+              <Card className={cn(neonCardClass, glassBoardClass, convexBevelClass)}>
                 <span className={convexOverlayClass} aria-hidden />
                 <div
                   className="relative z-10 space-y-5 rounded-[1.75rem] border border-white/15 bg-white/10 p-8 shadow-[0_18px_48px_-24px_rgba(15,23,42,0.65)] backdrop-blur-2xl sm:p-10"
@@ -536,7 +539,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative overflow-hidden py-24">
+      <section className="relative overflow-hidden pt-0 pb-24">
         <div className="absolute inset-0 -z-20">
           <img
             src={classroomTechnologyBackgrounds.testimonials}
