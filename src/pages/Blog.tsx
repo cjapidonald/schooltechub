@@ -947,19 +947,23 @@ const Blog = () => {
                         {regularPosts.length} {regularPosts.length === 1 ? "post" : "posts"}
                       </span>
                     </div>
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <div className="columns-1 md:columns-2 xl:columns-3 [column-gap:1.25rem]">
                       {regularPosts.map(post => {
                         const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
                         const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
 
                         return (
-                          <article key={post.id} id={anchorId} className="group block h-full">
+                          <article
+                            key={post.id}
+                            id={anchorId}
+                            className="group mb-5 block break-inside-avoid"
+                          >
                             <Card className="flex h-full flex-col overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
-                              <figure className="relative h-40 overflow-hidden">
+                              <figure className="relative overflow-hidden">
                                 <img
                                   src={imageSrc}
                                   alt={post.title}
-                                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                  className="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                   loading="lazy"
                                 />
                               </figure>
