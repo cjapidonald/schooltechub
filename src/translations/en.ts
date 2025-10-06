@@ -110,6 +110,10 @@ export const en = {
     classes: {
       title: "My Classes",
       subtitle: "Track the classes you own and jump into their dashboards.",
+      cta: {
+        title: "Add a class",
+        description: "Paste your class details, curriculum outline, and roster to sync every workspace tab.",
+      },
       columns: {
         title: "Class",
         stage: "Stage",
@@ -363,6 +367,11 @@ export const en = {
           label: "Student roster (optional)",
           placeholder: "Paste student names here, one per line",
           helper: "We'll add these students to the class as soon as it's created.",
+        },
+        curriculum: {
+          label: "Curriculum outline (optional)",
+          placeholder: "Paste the unit overview, essential questions, or pacing guide for this class",
+          helper: "We'll surface this outline on the Curriculum tab so you can start planning lessons immediately.",
         },
         submit: "Create class",
       },

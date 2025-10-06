@@ -88,9 +88,10 @@ type StudentsSectionProps = {
   classes: Class[];
   onOpenStudent: (studentId: string) => void;
   className?: string;
+  prototypeStudents?: StudentRecord[];
 };
 
-export function StudentsSection({ classes, onOpenStudent, className }: StudentsSectionProps) {
+export function StudentsSection({ classes, onOpenStudent, className, prototypeStudents }: StudentsSectionProps) {
   const { t } = useLanguage();
   const { toast } = useToast();
   const { user } = useOptionalUser();
@@ -141,7 +142,30 @@ export function StudentsSection({ classes, onOpenStudent, className }: StudentsS
     },
   });
 
-  const students = useMemo(() => studentsQuery.data ?? [], [studentsQuery.data]);
+  const fetchedStudents = useMemo(() => studentsQuery.data ?? [], [studentsQuery.data]);
+
+  const students = useMemo(() => {
+    if (!prototypeStudents || prototypeStudents.length === 0) {
+      return fetchedStudents;
+    }
+
+    const base = fetchedStudents ?? [];
+    const existingKeys = new Set(
+      base.map(student => `${student.classId}:${student.fullName.toLowerCase()}`),
+    );
+    const extras = prototypeStudents.filter(student => {
+      const key = `${student.classId}:${student.fullName.toLowerCase()}`;
+      if (existingKeys.has(key)) {
+        return false;
+      }
+      existingKeys.add(key);
+      return true;
+    });
+    if (extras.length === 0) {
+      return base;
+    }
+    return [...base, ...extras];
+  }, [fetchedStudents, prototypeStudents]);
 
   const classLookup = useMemo(() => {
     const map = new Map<string, Class>();

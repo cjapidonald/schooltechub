@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
+import { nanoid } from "nanoid";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -27,6 +28,7 @@ import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
 import { createClass, fetchMyClasses } from "@/features/dashboard/api";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
 import { bulkAddStudents } from "@/features/students/api";
+import type { StudentRecord } from "@/features/students/types";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
 import { BarChart3, ClipboardList, LogIn, Plus, Save, Sparkles, Trash2, Users } from "lucide-react";
@@ -72,6 +74,7 @@ const classSchema = z.object({
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   studentNames: z.string().optional(),
+  curriculumOutline: z.string().optional(),
 });
 
 type ClassFormValues = z.infer<typeof classSchema>;
@@ -164,6 +167,69 @@ const createEmptyCurriculumDraft = (cls: Class): CurriculumDraft => ({
   lessons: [],
 });
 
+const EXAMPLE_CURRICULUM_OUTLINE = [
+  "Unit focus: Launching narrative writing workshop",
+  "Vision: Students will craft personal narratives that highlight strong voice, descriptive detail, and purposeful revision.",
+  "Essential questions:",
+  "- How do writers build believable characters readers care about?",
+  "- What choices help a narrative show rather than tell?",
+  "Weekly pacing:",
+  "Week 1 – Explore mentor texts and story arcs",
+  "Week 2 – Draft scenes with dialogue and sensory language",
+  "Week 3 – Peer feedback conferences and revision strategies",
+  "Assessments: Published narrative portfolio with reflection journal.",
+].join("\n");
+
+const EXAMPLE_CLASS_ROSTER = [
+  "Aisha Khan",
+  "Mateo Hernández",
+  "Lina Chen",
+  "Owen Patel",
+  "Sofia Martins",
+];
+
+type PrototypeCurriculumEntry = {
+  outline: string;
+  importedAt: string;
+};
+
+const createPrototypeRoster = (classId: string, names: string[], markExample = false): StudentRecord[] => {
+  const seen = new Set<string>();
+  return names
+    .map(name => name.trim())
+    .filter(name => {
+      const key = name.toLowerCase();
+      if (!name || seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    })
+    .map(name => ({
+      id: `proto-${classId}-${nanoid()}`,
+      classId,
+      fullName: name,
+      skills: [],
+      isExample: markExample,
+    }));
+};
+
+const createCurriculumDraftFromOutline = (cls: Class, outline: string): CurriculumDraft => {
+  const trimmed = outline.trim();
+  if (!trimmed) {
+    return createEmptyCurriculumDraft(cls);
+  }
+
+  const lines = trimmed.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const firstMeaningfulLine = lines[0] ?? `${cls.title} overview`;
+
+  return {
+    ...createEmptyCurriculumDraft(cls),
+    unitTitle: firstMeaningfulLine,
+    notes: trimmed,
+  };
+};
+
 export default function TeacherPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -183,6 +249,25 @@ export default function TeacherPage() {
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
   const [curriculumDrafts, setCurriculumDrafts] = useState<Record<string, CurriculumDraft>>({});
   const [selectedCurriculumClassId, setSelectedCurriculumClassId] = useState<string | null>(null);
+  const [prototypeCurriculumEntries, setPrototypeCurriculumEntries] = useState<
+    Record<string, PrototypeCurriculumEntry>
+  >(() => ({
+    [DASHBOARD_EXAMPLE_CLASS.id]: {
+      outline: EXAMPLE_CURRICULUM_OUTLINE,
+      importedAt: new Date().toISOString(),
+    },
+  }));
+  const [prototypeRosters, setPrototypeRosters] = useState<Record<string, StudentRecord[]>>(() => ({
+    [DASHBOARD_EXAMPLE_CLASS.id]: createPrototypeRoster(
+      DASHBOARD_EXAMPLE_CLASS.id,
+      EXAMPLE_CLASS_ROSTER,
+      true,
+    ),
+  }));
+  const prototypeStudents = useMemo(
+    () => Object.values(prototypeRosters).flat(),
+    [prototypeRosters],
+  );
   const prototypeAccessToast = useMemo(
     () => ({
       title: t.dashboard.toasts.prototypeUnlocked,
@@ -335,7 +420,15 @@ export default function TeacherPage() {
 
   const classForm = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
-    defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "", studentNames: "" },
+    defaultValues: {
+      title: "",
+      stage: "",
+      subject: "",
+      start_date: "",
+      end_date: "",
+      studentNames: "",
+      curriculumOutline: "",
+    },
   });
 
   const classesQuery = useQuery<Class[]>({
@@ -363,9 +456,47 @@ export default function TeacherPage() {
         await bulkAddStudents({ ownerId: user?.id, classId: createdClass.id, names: rosterNames });
       }
 
-      return { rosterCount: rosterNames.length };
+      const curriculumOutline = (values.curriculumOutline ?? "").trim();
+
+      return {
+        createdClass,
+        rosterNames,
+        rosterCount: rosterNames.length,
+        curriculumOutline,
+      };
     },
-    onSuccess: ({ rosterCount }, variables) => {
+    onSuccess: ({ rosterCount, createdClass, rosterNames, curriculumOutline }, variables) => {
+      if (curriculumOutline) {
+        setPrototypeCurriculumEntries(prev => ({
+          ...prev,
+          [createdClass.id]: {
+            outline: curriculumOutline,
+            importedAt: new Date().toISOString(),
+          },
+        }));
+      }
+
+      if (rosterNames.length > 0) {
+        setPrototypeRosters(prev => {
+          const existing = prev[createdClass.id] ?? [];
+          const existingNames = new Set(existing.map(student => student.fullName.toLowerCase()));
+          const additions = createPrototypeRoster(createdClass.id, rosterNames).filter(student => {
+            const key = student.fullName.toLowerCase();
+            if (existingNames.has(key)) {
+              return false;
+            }
+            existingNames.add(key);
+            return true;
+          });
+          if (additions.length === 0) {
+            return prev;
+          }
+          return { ...prev, [createdClass.id]: [...existing, ...additions] };
+        });
+      }
+
+      setSelectedCurriculumClassId(createdClass.id);
+
       setClassDialogOpen(false);
       classForm.reset();
       void classesQuery.refetch();
@@ -417,13 +548,13 @@ export default function TeacherPage() {
 
   const curriculumClasses = useMemo(
     () =>
-      classes.filter(
-        cls =>
-          !cls.isExample &&
-          cls.id !== DASHBOARD_EXAMPLE_CLASS.id &&
-          cls.title !== DASHBOARD_EXAMPLE_CLASS.title,
-      ),
-    [classes],
+      classes.filter(cls => {
+        if (cls.isExample || cls.id === DASHBOARD_EXAMPLE_CLASS.id) {
+          return Boolean(prototypeCurriculumEntries[cls.id]?.outline);
+        }
+        return true;
+      }),
+    [classes, prototypeCurriculumEntries],
   );
 
   useEffect(() => {
@@ -438,10 +569,24 @@ export default function TeacherPage() {
 
       curriculumClasses.forEach(cls => {
         const existing = prev[cls.id];
-        next[cls.id] = existing ?? createEmptyCurriculumDraft(cls);
-        if (!existing) {
-          changed = true;
+        const importedOutline = prototypeCurriculumEntries[cls.id]?.outline?.trim();
+
+        if (existing) {
+          if (importedOutline && existing.notes.trim().length === 0) {
+            next[cls.id] = { ...existing, notes: importedOutline };
+            changed = true;
+          } else {
+            next[cls.id] = existing;
+          }
+          return;
         }
+
+        if (importedOutline) {
+          next[cls.id] = createCurriculumDraftFromOutline(cls, importedOutline);
+        } else {
+          next[cls.id] = createEmptyCurriculumDraft(cls);
+        }
+        changed = true;
       });
 
       if (Object.keys(prev).length !== Object.keys(next).length) {
@@ -450,7 +595,7 @@ export default function TeacherPage() {
 
       return changed ? next : prev;
     });
-  }, [curriculumClasses]);
+  }, [curriculumClasses, prototypeCurriculumEntries]);
 
   useEffect(() => {
     if (curriculumClasses.length === 0) {
@@ -720,6 +865,13 @@ export default function TeacherPage() {
                         curriculumClasses.map(cls => {
                           const isSelected = selectedCurriculumClass?.id === cls.id;
                           const details = [cls.stage, cls.subject].filter(Boolean).join(" • ");
+                          const outline = prototypeCurriculumEntries[cls.id]?.outline;
+                          const outlinePreview = outline
+                            ?.split(/\r?\n/)
+                            .map(line => line.trim())
+                            .filter(Boolean)
+                            .slice(0, 3)
+                            .join(" • ");
 
                           return (
                             <button
@@ -733,7 +885,7 @@ export default function TeacherPage() {
                                   : "text-white/75",
                               )}
                             >
-                              <div className="space-y-2">
+                              <div className="space-y-3">
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="space-y-1">
                                     <p className="text-base font-semibold text-white">{cls.title}</p>
@@ -747,6 +899,18 @@ export default function TeacherPage() {
                                     </span>
                                   ) : null}
                                 </div>
+                                {outlinePreview ? (
+                                  <div className="rounded-xl border border-white/15 bg-white/10 p-3 text-left text-white/70">
+                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-white/60">
+                                      Curriculum outline synced
+                                    </p>
+                                    <p className="mt-1 text-xs text-white/70">
+                                      {outlinePreview.length > 180
+                                        ? `${outlinePreview.slice(0, 177)}…`
+                                        : outlinePreview}
+                                    </p>
+                                  </div>
+                                ) : null}
                               </div>
                             </button>
                           );
@@ -782,6 +946,16 @@ export default function TeacherPage() {
                           <p className="text-xs uppercase tracking-wide text-white/50">
                             {[selectedCurriculumClass.stage, selectedCurriculumClass.subject].filter(Boolean).join(" • ")}
                           </p>
+                        ) : null}
+                        {prototypeCurriculumEntries[selectedCurriculumClass.id]?.outline ? (
+                          <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-sm text-white/80 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.75)]">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-white/60">
+                              Outline imported from class setup
+                            </p>
+                            <p className="mt-2 max-h-48 overflow-y-auto whitespace-pre-line text-white/80">
+                              {prototypeCurriculumEntries[selectedCurriculumClass.id]?.outline}
+                            </p>
+                          </div>
                         ) : null}
                       </div>
                       <div className="grid gap-6 md:grid-cols-2">
@@ -1049,6 +1223,7 @@ export default function TeacherPage() {
             <TabsContent value="students" className="space-y-6">
               <StudentsSection
                 classes={classes}
+                prototypeStudents={prototypeStudents}
                 onOpenStudent={studentId => navigate(`/teacher/students/${encodeURIComponent(studentId)}`)}
                 className={cn(GLASS_PANEL_CLASS, "space-y-6")}
               />
@@ -1090,6 +1265,17 @@ export default function TeacherPage() {
                 <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
                 <Input id="class-end" type="date" {...classForm.register("end_date")} />
               </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="class-curriculum">{t.dashboard.dialogs.newClass.curriculum.label}</Label>
+              <Textarea
+                id="class-curriculum"
+                rows={5}
+                placeholder={t.dashboard.dialogs.newClass.curriculum.placeholder}
+                className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
+                {...classForm.register("curriculumOutline")}
+              />
+              <p className="text-xs text-white/60">{t.dashboard.dialogs.newClass.curriculum.helper}</p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="class-roster">{t.dashboard.dialogs.newClass.roster.label}</Label>
