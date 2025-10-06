@@ -416,7 +416,13 @@ export default function TeacherPage() {
   }, [classesQuery.data]);
 
   const curriculumClasses = useMemo(
-    () => classes.filter(cls => !cls.isExample),
+    () =>
+      classes.filter(
+        cls =>
+          !cls.isExample &&
+          cls.id !== DASHBOARD_EXAMPLE_CLASS.id &&
+          cls.title !== DASHBOARD_EXAMPLE_CLASS.title,
+      ),
     [classes],
   );
 
