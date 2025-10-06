@@ -16,9 +16,7 @@ export type MobileNavSheetProps = {
   isAuthDialogOpen: boolean;
   user: SupabaseUser | null;
   authPath: string;
-  profilePath: string;
   authLabel: string;
-  myProfileLabel: string;
   signOutLabel: string;
   onSignOut: () => Promise<void> | void;
 };
@@ -32,9 +30,7 @@ const MobileNavSheet = ({
   isAuthDialogOpen,
   user,
   authPath,
-  profilePath,
   authLabel,
-  myProfileLabel,
   signOutLabel,
   onSignOut,
 }: MobileNavSheetProps) => {
@@ -95,11 +91,6 @@ const MobileNavSheet = ({
           {user ? (
             <div className="border-t pt-4 space-y-3">
               <p className="px-2 text-sm text-muted-foreground">{user.email}</p>
-              <Link to={profilePath} onClick={handleClose}>
-                <Button className="w-full" variant="secondary">
-                  {myProfileLabel}
-                </Button>
-              </Link>
               <Button onClick={handleSignOut} className="w-full" variant="outline">
                 <LogOut className="mr-2 h-4 w-4" />
                 {signOutLabel}
