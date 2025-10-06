@@ -283,9 +283,13 @@ const Profile = () => {
           </div>
         </section>
 
-        <div className="grid gap-8 lg:grid-cols-[360px,1fr]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr),360px]">
+          <div id="profile-settings" className="space-y-6">
+            <SettingsPanel user={user} variant="glass" className="space-y-6" />
+          </div>
+
           <div className="space-y-6">
-            <Card className={cn(glassCardClass, "p-6 sm:p-8")}>
+            <Card className={cn(glassCardClass, "p-6 sm:p-8")}> 
               <CardHeader className="space-y-4 border-none p-0">
                 <CardTitle className="text-2xl font-semibold text-white">
                   {t.profilePage.info.title}
@@ -347,10 +351,6 @@ const Profile = () => {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-
-          <div id="profile-settings" className="space-y-6">
-            <SettingsPanel user={user} variant="glass" className="space-y-6" />
           </div>
         </div>
       </div>
