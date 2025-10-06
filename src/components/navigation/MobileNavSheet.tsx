@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Menu, LogOut } from "lucide-react";
 import type { SupabaseUser } from "@supabase/supabase-js";
 import type { AuthRole } from "@/components/auth/RoleAuthDialog";
-import type { LocalizedNavItem } from "./types";
+import useNavItemActiveState from "./useNavItemActiveState";
+import type { NavItem } from "./types";
 
 export type MobileNavSheetProps = {
-  items: LocalizedNavItem[];
+  items: NavItem[];
+  getLocalizedNavPath: (path: string) => string;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onAuthRoleSelect: (role: AuthRole) => void;
@@ -23,6 +25,7 @@ export type MobileNavSheetProps = {
 
 const MobileNavSheet = ({
   items,
+  getLocalizedNavPath,
   isOpen,
   onOpenChange,
   onAuthRoleSelect,
@@ -36,6 +39,7 @@ const MobileNavSheet = ({
   onSignOut,
 }: MobileNavSheetProps) => {
   const handleClose = () => onOpenChange(false);
+  const getNavItemState = useNavItemActiveState(getLocalizedNavPath);
 
   const handleSignOut = async () => {
     await onSignOut();
@@ -53,35 +57,37 @@ const MobileNavSheet = ({
       <SheetContent side="right" className="w-[300px] sm:w-[380px]">
         <div className="mt-8 flex flex-col space-y-4">
           {items.map(item => {
-            if (item.type === "teacher-auth" || item.type === "student-auth") {
+            const localizedItem = getNavItemState(item);
+
+            if (localizedItem.type === "teacher-auth" || localizedItem.type === "student-auth") {
               return (
                 <button
-                  key={item.path}
+                  key={localizedItem.path}
                   type="button"
                   onClick={() => {
-                    onAuthRoleSelect(item.type === "student-auth" ? "student" : "teacher");
+                    onAuthRoleSelect(localizedItem.type === "student-auth" ? "student" : "teacher");
                     handleClose();
                   }}
-                  aria-current={item.isActive ? "page" : undefined}
+                  aria-current={localizedItem.isActive ? "page" : undefined}
                   aria-haspopup="dialog"
                   aria-expanded={isAuthDialogOpen}
                   aria-controls="role-auth-dialog"
                   className="py-2 text-left text-lg font-medium transition-colors text-muted-foreground hover:text-primary"
                 >
-                  {item.name}
+                  {localizedItem.name}
                 </button>
               );
             }
 
             return (
               <Link
-                key={item.path}
-                to={item.localizedPath}
-                aria-current={item.isActive ? "page" : undefined}
+                key={localizedItem.path}
+                to={localizedItem.localizedPath}
+                aria-current={localizedItem.isActive ? "page" : undefined}
                 onClick={handleClose}
                 className="py-2 text-lg font-medium transition-colors text-muted-foreground hover:text-primary"
               >
-                {item.name}
+                {localizedItem.name}
               </Link>
             );
           })}
