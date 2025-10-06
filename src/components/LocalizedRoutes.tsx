@@ -20,7 +20,7 @@ import Footer from '@/components/Footer';
 import AdminLayout from '@/pages/admin/AdminLayout';
 import AdminPage from '@/pages/admin/AdminPage';
 import AdminLoginPrototype from '@/pages/admin/AdminLoginPrototype';
-import DashboardPage from '@/pages/Dashboard';
+import TeacherPage from '@/pages/TeacherPage';
 import StudentPage from '@/pages/Student';
 import StudentDashboardPage from '@/pages/StudentDashboard';
 import TeacherCurriculumDetailPage from '@/pages/TeacherCurriculumDetail';
@@ -103,7 +103,7 @@ export const LocalizedRoutes = () => {
       <Route path="/faq" element={<RouteWrapper><FAQ /></RouteWrapper>} />
       <Route path="/auth" element={<RouteWrapper><Auth /></RouteWrapper>} />
       <Route path="/account" element={<LegacyAccountRedirect />} />
-      <Route path="/teacher" element={<RouteWrapper><DashboardPage /></RouteWrapper>} />
+      <Route path="/teacher" element={<RouteWrapper><TeacherPage /></RouteWrapper>} />
       <Route path="/teacher/curriculum/:id" element={<RouteWrapper><TeacherCurriculumDetailPage /></RouteWrapper>} />
       <Route path="/teacher/classes/:id" element={<LegacyClassDashboardRedirect />} />
       <Route path="/dashboard" element={<Navigate to="/teacher" replace />} />

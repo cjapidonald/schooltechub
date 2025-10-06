@@ -138,7 +138,7 @@ const GLASS_PANEL_CLASS =
 const GLASS_TAB_TRIGGER_CLASS =
   "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/70 transition backdrop-blur-xl hover:border-white/40 hover:bg-white/15 hover:text-white data-[state=active]:border-white/60 data-[state=active]:bg-white/25 data-[state=active]:text-white data-[state=active]:shadow-[0_15px_45px_-25px_rgba(15,23,42,0.85)]";
 
-export default function DashboardPage() {
+export default function TeacherPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
