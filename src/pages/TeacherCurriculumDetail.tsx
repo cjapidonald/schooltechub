@@ -80,6 +80,13 @@ const TeacherCurriculumDetailPage = () => {
 
   const curriculum = detailQuery.data ?? null;
   const items = useMemo(() => itemsQuery.data ?? [], [itemsQuery.data]);
+  const hasError = detailQuery.isError || itemsQuery.isError;
+  const errorMessage =
+    detailQuery.error instanceof Error
+      ? detailQuery.error.message
+      : itemsQuery.error instanceof Error
+        ? itemsQuery.error.message
+        : null;
 
   useEffect(() => {
     const map: Record<string, ItemDraft> = {};
@@ -111,6 +118,12 @@ const TeacherCurriculumDetailPage = () => {
       navigate("/teacher?tab=curriculum", { replace: true });
     }
   }, [curriculumId, detailQuery.data, detailQuery.isLoading, navigate, t, toast]);
+
+  useEffect(() => {
+    if (hasError) {
+      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
+    }
+  }, [hasError, t, toast]);
 
   const updateMutation = useMutation({
     mutationFn: (input: {
@@ -280,6 +293,41 @@ const TeacherCurriculumDetailPage = () => {
       return (
         <div className="rounded-3xl border border-white/15 bg-white/5 p-8 text-center text-white/70 backdrop-blur-xl">
           {t.dashboard.common.loading}
+        </div>
+      );
+    }
+
+    if (hasError) {
+      return (
+        <div className="rounded-3xl border border-white/15 bg-white/5 p-10 text-white shadow-[0_25px_80px_-40px_rgba(15,23,42,0.9)]">
+          <h2 className="text-2xl font-semibold text-white">{t.dashboard.curriculumDetail.error.title}</h2>
+          <p className="mt-2 text-sm text-white/70">{t.dashboard.curriculumDetail.error.description}</p>
+          {errorMessage ? (
+            <div className="mt-4 rounded-2xl border border-white/20 bg-white/5 p-4 text-sm text-white/70">
+              <span className="block text-xs font-semibold uppercase tracking-wide text-white/50">
+                {t.dashboard.curriculumDetail.error.detailsLabel}
+              </span>
+              <span className="mt-1 block text-white/80">{errorMessage}</span>
+            </div>
+          ) : null}
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Button
+              className="rounded-xl border-white/60 bg-white/90 text-slate-900 hover:bg-white"
+              onClick={() => {
+                void detailQuery.refetch();
+                void itemsQuery.refetch();
+              }}
+            >
+              {t.dashboard.curriculumDetail.error.retry}
+            </Button>
+            <Button
+              variant="ghost"
+              className="rounded-xl border border-white/20 bg-transparent text-white hover:bg-white/10"
+              onClick={() => navigate("/teacher?tab=curriculum")}
+            >
+              {t.dashboard.curriculumDetail.back}
+            </Button>
+          </div>
         </div>
       );
     }

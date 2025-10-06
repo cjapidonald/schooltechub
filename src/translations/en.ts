@@ -309,6 +309,12 @@ export const en = {
         added: "Lessons added to curriculum",
         notFound: "We couldn't find that curriculum.",
       },
+      error: {
+        title: "Unable to load curriculum",
+        description: "We ran into a problem loading this curriculum board. Try again or return to the overview.",
+        retry: "Try again",
+        detailsLabel: "Error details",
+      },
       validation: {
         titleRequired: "Add a lesson title before saving.",
       },
