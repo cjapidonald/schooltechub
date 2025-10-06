@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { DashboardHeader, DashboardQuickAction } from "@/components/dashboard/DashboardHeader";
 import { ClassesTable } from "@/components/dashboard/ClassesTable";
 import { CurriculaList } from "@/components/dashboard/CurriculaList";
-import { CurriculumEditor } from "@/components/dashboard/CurriculumEditor";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
@@ -31,16 +30,10 @@ import {
   createClass,
   createCurriculum,
   fetchCurricula,
-  fetchCurriculumItems,
   fetchMyClasses,
-  reorderCurriculumItems,
   seedExampleDashboardData,
 } from "@/features/dashboard/api";
-import {
-  DASHBOARD_EXAMPLE_CLASS,
-  type DashboardCurriculumItem,
-  type DashboardCurriculumSummary,
-} from "@/features/dashboard/examples";
+import { DASHBOARD_EXAMPLE_CLASS, type DashboardCurriculumSummary } from "@/features/dashboard/examples";
 import { useMyProfile } from "@/hooks/useMyProfile";
 import type { Class } from "../../types/supabase-tables";
 import { BarChart3, ClipboardList, LogIn, Sparkles, Users } from "lucide-react";
@@ -155,7 +148,6 @@ export default function TeacherPage() {
 
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
   const [isCurriculumDialogOpen, setCurriculumDialogOpen] = useState(false);
-  const [activeCurriculumId, setActiveCurriculumId] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
   const prototypeAccessToast = useMemo(
@@ -322,19 +314,6 @@ export default function TeacherPage() {
     [updateSearchParams],
   );
 
-  useEffect(() => {
-    if (!lessonBuilderContext?.curriculumId) {
-      return;
-    }
-
-    setActiveCurriculumId(current => {
-      if (current === lessonBuilderContext.curriculumId) {
-        return current;
-      }
-      return lessonBuilderContext.curriculumId;
-    });
-  }, [lessonBuilderContext?.curriculumId]);
-
   const classForm = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
     defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "" },
@@ -398,8 +377,6 @@ export default function TeacherPage() {
       void queryClient.invalidateQueries({ queryKey: ["dashboard-curricula", user?.id] });
       setCurriculumDialogOpen(false);
       curriculumForm.reset();
-      setActiveCurriculumId(result.curriculum.id);
-      queryClient.setQueryData(["dashboard-curriculum-items", result.curriculum.id], result.items);
       navigate(`/teacher/curriculum/${result.curriculum.id}`);
     },
     onError: () => {
@@ -411,8 +388,6 @@ export default function TeacherPage() {
     mutationFn: () => seedExampleDashboardData({ ownerId: user!.id }),
     onSuccess: result => {
       toast({ description: t.dashboard.toasts.exampleDataCreated });
-      setActiveCurriculumId(result.curriculum.id);
-      queryClient.setQueryData(["dashboard-curriculum-items", result.curriculum.id], result.items);
       void queryClient.invalidateQueries({ queryKey: ["dashboard-classes", user?.id] });
       void queryClient.invalidateQueries({ queryKey: ["dashboard-curricula", user?.id] });
       void queryClient.invalidateQueries({ queryKey: ["dashboard-curriculum-items"], exact: false });
@@ -462,94 +437,6 @@ export default function TeacherPage() {
     }
     return curriculaQuery.data.some(item => !item.isExample);
   }, [curriculaQuery.data]);
-
-  const fallbackCurriculumId = curricula[0]?.id ?? null;
-  const effectiveCurriculumId = activeCurriculumId ?? fallbackCurriculumId;
-
-  const shouldFetchCurriculumItems = Boolean(effectiveCurriculumId);
-
-  const curriculumItemsQuery = useQuery<DashboardCurriculumItem[]>({
-    queryKey: ["dashboard-curriculum-items", effectiveCurriculumId],
-    queryFn: () => fetchCurriculumItems(effectiveCurriculumId!),
-    enabled: shouldFetchCurriculumItems,
-  });
-
-  const selectedCurriculum = useMemo(
-    () => (effectiveCurriculumId ? curricula.find(curriculum => curriculum.id === effectiveCurriculumId) ?? null : null),
-    [curricula, effectiveCurriculumId],
-  );
-
-  const curriculumItems = useMemo<DashboardCurriculumItem[]>(() => {
-    if (!effectiveCurriculumId) {
-      return [];
-    }
-    return curriculumItemsQuery.data ?? [];
-  }, [effectiveCurriculumId, curriculumItemsQuery.data]);
-
-  const curriculumItemsLoading = shouldFetchCurriculumItems ? curriculumItemsQuery.isLoading : false;
-
-  const reorderCurriculumItemsMutation = useMutation({
-    mutationFn: ({ curriculumId, itemIds }: { curriculumId: string; itemIds: string[] }) =>
-      reorderCurriculumItems({ curriculumId, itemIds }),
-    onSuccess: (_result, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["dashboard-curriculum-items", variables.curriculumId] });
-    },
-    onError: (error: unknown, variables) => {
-      console.error("Failed to reorder curriculum items", error);
-      toast({ description: t.dashboard.toasts.error, variant: "destructive" });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-curriculum-items", variables.curriculumId] });
-    },
-  });
-
-  const handlePlanCurriculumLesson = useCallback(
-    (item: DashboardCurriculumItem) => {
-      if (!item || item.isExample) {
-        return;
-      }
-
-      const classFromCurriculum = selectedCurriculum?.class ?? null;
-      const context: LessonBuilderRouteContext = {
-        title: item.lesson_title,
-        classId: classFromCurriculum?.id ?? null,
-        classTitle: classFromCurriculum?.title ?? null,
-        stage: item.stage ?? classFromCurriculum?.stage ?? null,
-        date: item.scheduled_on ?? null,
-        sequence: Number.isFinite(item.seq_index) ? item.seq_index : Number.isFinite(item.position) ? item.position : null,
-        curriculumId: item.curriculum_id,
-      };
-
-      setActiveCurriculumId(item.curriculum_id);
-      setLessonBuilderContext(context);
-    },
-    [selectedCurriculum, setLessonBuilderContext],
-  );
-
-  const handleOpenLessonPlan = useCallback(
-    (item: DashboardCurriculumItem) => {
-      if (!item || item.isExample) {
-        return;
-      }
-
-      if (!item.lesson_plan_id) {
-        toast({ description: t.dashboard.toasts.lessonPlanMissing });
-        return;
-      }
-
-      navigate(`/lesson-builder?id=${encodeURIComponent(item.lesson_plan_id)}`);
-    },
-    [navigate, t.dashboard.toasts.lessonPlanMissing, toast],
-  );
-
-  const handleReorderCurriculumItems = useCallback(
-    (itemIds: string[]) => {
-      if (!effectiveCurriculumId || itemIds.length === 0 || selectedCurriculum?.isExample) {
-        return;
-      }
-
-      reorderCurriculumItemsMutation.mutate({ curriculumId: effectiveCurriculumId, itemIds });
-    },
-    [effectiveCurriculumId, reorderCurriculumItemsMutation, selectedCurriculum?.isExample],
-  );
 
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
@@ -723,27 +610,9 @@ export default function TeacherPage() {
                 curricula={curricula}
                 loading={curriculaQuery.isLoading}
                 onNewCurriculum={() => setCurriculumDialogOpen(true)}
-                onOpenCurriculum={id => {
-                  setActiveCurriculumId(id);
-                  navigate(`/teacher/curriculum/${id}`);
-                }}
+                onOpenCurriculum={id => navigate(`/teacher/curriculum/${id}`)}
                 onExportCurriculum={id => toast({ description: t.dashboard.toasts.exportUnavailable })}
               />
-              {selectedCurriculum ? (
-                <div className={cn(GLASS_PANEL_CLASS, "space-y-4")}>
-                  <h3 className="text-lg font-semibold">
-                    {t.dashboard.curriculumView.title.replace("{title}", selectedCurriculum.title)}
-                  </h3>
-                  <CurriculumEditor
-                    items={curriculumItems}
-                    loading={curriculumItemsLoading}
-                    reordering={reorderCurriculumItemsMutation.isPending}
-                    onPlanLesson={handlePlanCurriculumLesson}
-                    onOpenLessonPlan={handleOpenLessonPlan}
-                    onReorder={selectedCurriculum.isExample ? undefined : handleReorderCurriculumItems}
-                  />
-                </div>
-              ) : null}
             </TabsContent>
             <TabsContent value="classes" className="space-y-6">
               <ClassesTable
