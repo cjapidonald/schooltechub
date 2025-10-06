@@ -712,21 +712,6 @@ const Blog = () => {
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{t.blog.title}</h1>
                 <p className="text-lg text-white/70 md:max-w-2xl">{t.blog.subtitle}</p>
               </div>
-              <Card className="border-white/20 bg-white/10 text-white shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl">
-                <CardContent className="flex flex-col gap-0 p-1">
-                  <div className="relative w-full">
-                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-                    <Input
-                      id="blog-search"
-                      value={searchValue}
-                      onChange={(event) => handleSearchChange(event.target.value)}
-                      placeholder={t.blog.searchPlaceholder}
-                      className="h-12 rounded-2xl border-white/20 bg-white/10 pl-11 text-base text-white placeholder:text-white/50 focus-visible:ring-white/40"
-                      aria-label={t.blog.searchPlaceholder}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
               {categoryTabs.length > 0 ? (
                 <div className="flex w-full flex-wrap items-center gap-3 overflow-x-auto pb-2">
                   <Button
@@ -767,6 +752,21 @@ const Blog = () => {
                   })}
                 </div>
               ) : null}
+              <Card className="border-white/20 bg-white/10 text-white shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl">
+                <CardContent className="flex flex-col gap-0 p-1">
+                  <div className="relative w-full">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
+                    <Input
+                      id="blog-search"
+                      value={searchValue}
+                      onChange={(event) => handleSearchChange(event.target.value)}
+                      placeholder={t.blog.searchPlaceholder}
+                      className="h-12 rounded-2xl border-white/20 bg-white/10 pl-11 text-base text-white placeholder:text-white/50 focus-visible:ring-white/40"
+                      aria-label={t.blog.searchPlaceholder}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
           </div>
