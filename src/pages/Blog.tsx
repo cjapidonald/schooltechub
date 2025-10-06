@@ -689,25 +689,19 @@ const Blog = () => {
         <div className="absolute top-1/3 left-[-10rem] h-[18rem] w-[18rem] rounded-full bg-emerald-500/20 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-24 pt-[10px] md:px-8 md:pt-[10px]">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 pb-24 pt-[18px] md:px-8 md:pt-[18px]">
         <section className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-8 shadow-[0_25px_80px_-20px_rgba(15,23,42,0.65)] backdrop-blur-2xl transition-colors duration-500 md:p-12">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35)_0%,_rgba(15,23,42,0)_70%)] opacity-80" />
           <div className="absolute inset-y-0 right-[-20%] hidden w-[50%] rounded-full bg-gradient-to-br from-cyan-400/30 via-transparent to-transparent blur-3xl md:block" />
 
-          <div className="relative z-10 space-y-10">
-            <div className="space-y-6">
+          <div className="relative z-10 space-y-8">
+            <div className="space-y-5">
               <div className="space-y-4">
                 <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">{t.blog.title}</h1>
                 <p className="text-lg text-white/70 md:max-w-2xl">{t.blog.subtitle}</p>
               </div>
               <Card className="border-white/20 bg-white/10 text-white shadow-[0_10px_40px_-20px_rgba(15,23,42,0.7)] backdrop-blur-xl">
-                <CardContent className="flex flex-col gap-3 p-6">
-                  <label
-                    htmlFor="blog-search"
-                    className="text-sm font-medium uppercase tracking-wide text-white/60"
-                  >
-                    {t.blog.searchPlaceholder}
-                  </label>
+                <CardContent className="flex flex-col gap-0 p-5">
                   <div className="relative w-full">
                     <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
                     <Input
