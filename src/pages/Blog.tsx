@@ -15,6 +15,7 @@ import {
   HelpCircle,
   MessageSquare,
   Filter,
+  Menu,
   BookOpen,
   Layers,
   MonitorSmartphone,
@@ -314,6 +315,7 @@ const Blog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BlogFilterState>(() => createEmptyFilters());
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
     setSearchValue(searchParamValue);
@@ -556,6 +558,23 @@ const Blog = () => {
       .map(item => item.post);
   }, [filters, postsWithMetadata, searchValue]);
 
+  const sortedPosts = useMemo(() => {
+    const getTimestamp = (post: BlogPost) => {
+      const fallbackDate = post.updated_at ?? post.created_at;
+      const dateString = post.published_at ?? fallbackDate ?? "";
+      const timestamp = Date.parse(dateString);
+      return Number.isNaN(timestamp) ? 0 : timestamp;
+    };
+
+    const postsToSort = [...filteredPosts];
+    postsToSort.sort((a, b) => {
+      const diff = getTimestamp(b) - getTimestamp(a);
+      return sortOrder === "newest" ? diff : -diff;
+    });
+
+    return postsToSort;
+  }, [filteredPosts, sortOrder]);
+
   const handleCategoryButtonClick = useCallback((value: string) => {
     setFilters(prev => ({
       ...prev,
@@ -573,10 +592,6 @@ const Blog = () => {
       };
     });
   }, []);
-
-  const pinnedPosts = filteredPosts.filter(post => post.is_pinned);
-
-  const regularPosts = filteredPosts.filter(post => !pinnedPosts.includes(post));
 
   const buildPostUrl = useCallback(
     (post: BlogPost) => {
@@ -622,13 +637,13 @@ const Blog = () => {
   const isAnyFilterActive = selectedFilters.length > 0;
 
   const structuredData = useMemo(() => {
-    if (filteredPosts.length === 0) {
+    if (sortedPosts.length === 0) {
       return null;
     }
 
     const baseBlogUrl = `https://schooltechub.com${getLocalizedPath("/blog", language)}`;
 
-    const items = filteredPosts.map((post, index) => {
+    const items = sortedPosts.map((post, index) => {
       const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
 
       return {
@@ -653,9 +668,14 @@ const Blog = () => {
     return {
       "@context": "https://schema.org",
       "@type": "ItemList",
+      name: t.blog.title,
       itemListElement: items,
     };
-  }, [filteredPosts, language]);
+  }, [language, sortedPosts, t.blog.title]);
+
+  const toggleSortOrder = useCallback(() => {
+    setSortOrder(prev => (prev === "newest" ? "oldest" : "newest"));
+  }, []);
 
   const getCategoryLabel = (value?: string | null) => {
     if (!value) {
@@ -884,7 +904,7 @@ const Blog = () => {
                   </Card>
                 ))}
               </div>
-            ) : filteredPosts.length === 0 ? (
+            ) : sortedPosts.length === 0 ? (
               <Card className="border-dashed border-white/30 bg-white/5 text-white">
                 <CardContent className="py-16 text-center">
                   <h2 className="text-2xl font-semibold">{t.blog.states.empty}</h2>
@@ -892,128 +912,75 @@ const Blog = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-10">
-                {pinnedPosts.length > 0 ? (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="h-1 w-12 rounded-full bg-white/70" />
-                      <span className="text-sm font-semibold uppercase tracking-widest text-white/80">
-                        {t.blog.badges.pinned}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-semibold text-white">{t.blog.title}</h2>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-white/60">
+                      {sortedPosts.length} {sortedPosts.length === 1 ? "post" : "posts"}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleSortOrder}
+                      className="h-9 w-9 rounded-full border border-white/20 bg-white/5 text-white transition hover:border-white/40 hover:bg-white/10"
+                      title={sortOrder === "newest" ? t.blog.sort.newestFirst : t.blog.sort.oldestFirst}
+                      aria-pressed={sortOrder === "oldest"}
+                    >
+                      <Menu className="h-4 w-4" aria-hidden="true" />
+                      <span className="sr-only">
+                        {sortOrder === "newest" ? t.blog.sort.toggleToOldest : t.blog.sort.toggleToNewest}
                       </span>
-                    </div>
-                    <div className="grid gap-5 md:grid-cols-2">
-                      {pinnedPosts.map(post => {
-                        const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
-                        const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
-                        const authorLabel = getAuthorName(post);
-
-                        return (
-                          <article key={post.id} id={anchorId}>
-                            <Link
-                              to={buildPostUrl(post)}
-                              className="group block rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-                              aria-label={post.title}
-                            >
-                              <Card className="overflow-hidden border-white/20 bg-white/10 text-white shadow-[0_25px_80px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/40">
-                                <figure className="flex flex-col items-center gap-4 p-6">
-                                  <div className="relative aspect-[4/3] w-full max-w-[18rem] overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 p-1.5 shadow-[0_30px_90px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
-                                    <div className="relative h-full w-full overflow-hidden rounded-[1.6rem]">
-                                      <img
-                                        src={imageSrc}
-                                        alt={post.title}
-                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        loading="lazy"
-                                      />
-                                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-60" />
-                                    </div>
-                                  </div>
-                                  {post.featured_image_caption ? (
-                                    <figcaption className="text-xs uppercase tracking-wide text-white/70">
-                                      {post.featured_image_caption}
-                                    </figcaption>
-                                  ) : null}
-                                </figure>
-                                <CardHeader className="space-y-3 text-center">
-                                  <div className="flex items-center justify-center gap-2 text-sm text-white/70">
-                                    <User className="h-4 w-4" aria-hidden="true" />
-                                    <span className="font-medium">{authorLabel}</span>
-                                  </div>
-                                  <h2 className="text-2xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
-                                    {post.title}
-                                  </h2>
-                                  {post.subtitle ? (
-                                    <p className="text-base text-white/70">{post.subtitle}</p>
-                                  ) : null}
-                                </CardHeader>
-                              </Card>
-                            </Link>
-                          </article>
-                        );
-                      })}
-                    </div>
+                    </Button>
                   </div>
-                ) : null}
+                </div>
+                <div className="columns-1 md:columns-2 xl:columns-3 [column-gap:1.25rem]">
+                  {sortedPosts.map(post => {
+                    const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
+                    const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
+                    const authorLabel = getAuthorName(post);
 
-                {regularPosts.length > 0 ? (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-2xl font-semibold text-white">{t.blog.title}</h2>
-                      <span className="text-sm text-white/60">
-                        {regularPosts.length} {regularPosts.length === 1 ? "post" : "posts"}
-                      </span>
-                    </div>
-                    <div className="columns-1 md:columns-2 xl:columns-3 [column-gap:1.25rem]">
-                      {regularPosts.map(post => {
-                        const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
-                        const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
-                        const authorLabel = getAuthorName(post);
-
-                        return (
-                          <article key={post.id} id={anchorId} className="mb-5 break-inside-avoid">
-                            <Link
-                              to={buildPostUrl(post)}
-                              className="group block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-                              aria-label={post.title}
-                            >
-                              <Card className="flex h-full flex-col items-center overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
-                                <figure className="flex w-full flex-col items-center gap-4 p-5">
-                                  <div className="relative aspect-[4/3] w-full max-w-[16rem] overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-1.5 shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
-                                    <div className="relative h-full w-full overflow-hidden rounded-[1.4rem]">
-                                      <img
-                                        src={imageSrc}
-                                        alt={post.title}
-                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        loading="lazy"
-                                      />
-                                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-50" />
-                                    </div>
-                                  </div>
-                                  {post.featured_image_caption ? (
-                                    <figcaption className="text-xs text-white/70">
-                                      {post.featured_image_caption}
-                                    </figcaption>
-                                  ) : null}
-                                </figure>
-                                <CardHeader className="space-y-2 text-center">
-                                  <div className="flex items-center justify-center gap-2 text-xs text-white/60">
-                                    <User className="h-3.5 w-3.5" aria-hidden="true" />
-                                    <span className="font-medium tracking-wide">{authorLabel}</span>
-                                  </div>
-                                  <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
-                                    {post.title}
-                                  </h3>
-                                  {post.subtitle ? (
-                                    <p className="text-sm text-white/70">{post.subtitle}</p>
-                                  ) : null}
-                                </CardHeader>
-                              </Card>
-                            </Link>
-                          </article>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null}
+                    return (
+                      <article key={post.id} id={anchorId} className="mb-5 break-inside-avoid">
+                        <Link
+                          to={buildPostUrl(post)}
+                          className="group block rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                          aria-label={post.title}
+                        >
+                          <Card className="flex h-full flex-col items-center overflow-hidden border-white/15 bg-white/5 text-white shadow-[0_20px_60px_-30px_rgba(15,23,42,1)] transition-transform hover:-translate-y-1 hover:border-white/30">
+                            <figure className="flex w-full flex-col items-center gap-4 p-5">
+                              <div className="relative aspect-[4/3] w-full max-w-[16rem] overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/10 p-1.5 shadow-[0_25px_80px_-40px_rgba(15,23,42,1)] backdrop-blur-2xl">
+                                <div className="relative h-full w-full overflow-hidden rounded-[1.4rem]">
+                                  <img
+                                    src={imageSrc}
+                                    alt={post.title}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                  />
+                                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.35),rgba(255,255,255,0.05))] opacity-50" />
+                                </div>
+                              </div>
+                              {post.featured_image_caption ? (
+                                <figcaption className="text-xs text-white/70">{post.featured_image_caption}</figcaption>
+                              ) : null}
+                            </figure>
+                            <CardHeader className="space-y-2 text-center">
+                              <div className="flex items-center justify-center gap-2 text-xs text-white/60">
+                                <User className="h-3.5 w-3.5" aria-hidden="true" />
+                                <span className="font-medium tracking-wide">{authorLabel}</span>
+                              </div>
+                              <h3 className="text-xl font-semibold leading-tight text-white transition-colors group-hover:text-white">
+                                {post.title}
+                              </h3>
+                              {post.subtitle ? <p className="text-sm text-white/70">{post.subtitle}</p> : null}
+                            </CardHeader>
+                          </Card>
+                        </Link>
+                      </article>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
