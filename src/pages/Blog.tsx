@@ -50,7 +50,7 @@ type BlogPostRow = Database["public"]["Tables"]["blogs"]["Row"] & {
   author_name?: string | null;
   time_required?: string | null;
   language?: string | null;
-  is_featured?: boolean | null;
+  is_pinned?: boolean | null;
 };
 
 type BlogPost = BlogPostRow & {
@@ -299,8 +299,6 @@ const normalizeText = (input: string | string[] | null | undefined) => {
 
   return input.toLowerCase();
 };
-
-const FEATURED_TAGS = new Set(["featured", "spotlight"]);
 
 const SAMPLE_POSTS: BlogPost[] = SAMPLE_BLOG_POSTS;
 
@@ -573,19 +571,9 @@ const Blog = () => {
     });
   }, []);
 
-  const featuredPosts = filteredPosts.filter(post => {
-    if (post.is_featured) {
-      return true;
-    }
+  const pinnedPosts = filteredPosts.filter(post => post.is_pinned);
 
-    if (Array.isArray(post.tags)) {
-      return post.tags.some(tag => FEATURED_TAGS.has(tag.toLowerCase()));
-    }
-
-    return false;
-  });
-
-  const regularPosts = filteredPosts.filter(post => !featuredPosts.includes(post));
+  const regularPosts = filteredPosts.filter(post => !pinnedPosts.includes(post));
 
   const clearAllFilters = useCallback(() => {
     setFilters(createEmptyFilters());
@@ -899,16 +887,16 @@ const Blog = () => {
               </Card>
             ) : (
               <div className="space-y-10">
-                {featuredPosts.length > 0 ? (
+                {pinnedPosts.length > 0 ? (
                   <div className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="h-1 w-12 rounded-full bg-white/70" />
                       <span className="text-sm font-semibold uppercase tracking-widest text-white/80">
-                        {t.blog.badges.featured}
+                        {t.blog.badges.pinned}
                       </span>
                     </div>
                     <div className="grid gap-5 md:grid-cols-2">
-                      {featuredPosts.map(post => {
+                      {pinnedPosts.map(post => {
                         const imageSrc = post.featured_image?.trim() ? post.featured_image : FALLBACK_BLOG_IMAGE;
                         const anchorId = post.slug ? `post-${post.slug}` : `post-${post.id}`;
 

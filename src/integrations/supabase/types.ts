@@ -85,6 +85,7 @@ export type Database = {
           featured_image: string | null
           id: string
           is_published: boolean | null
+          is_pinned: boolean | null
           keywords: string[] | null
           meta_description: string | null
           meta_title: string | null
@@ -106,6 +107,7 @@ export type Database = {
           featured_image?: string | null
           id?: string
           is_published?: boolean | null
+          is_pinned?: boolean | null
           keywords?: string[] | null
           meta_description?: string | null
           meta_title?: string | null
@@ -127,6 +129,7 @@ export type Database = {
           featured_image?: string | null
           id?: string
           is_published?: boolean | null
+          is_pinned?: boolean | null
           keywords?: string[] | null
           meta_description?: string | null
           meta_title?: string | null

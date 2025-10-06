@@ -758,7 +758,7 @@ export const en = {
       empty: "No blog posts found matching your criteria."
     },
     badges: {
-      featured: "Featured"
+      pinned: "Pinned"
     },
     readTime: {
       minutes: "{minutes} min read"

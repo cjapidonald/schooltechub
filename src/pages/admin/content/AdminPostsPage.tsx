@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 
 type AdminPostStatus = "draft" | "pending" | "approved" | "published";
@@ -53,6 +54,7 @@ interface AdminPostRecord {
   created_at: string | null;
   published_at: string | null;
   is_published: boolean | null;
+  is_pinned: boolean | null;
   deleted_at: string | null;
   subtitle: string | null;
   excerpt: string | null;
@@ -64,6 +66,7 @@ interface AdminPostRecord {
 interface AdminPost extends Omit<AdminPostRecord, "author" | "content"> {
   authorName: string | null;
   contentBody: string;
+  isPinned: boolean;
 }
 
 interface PostFormValues {
@@ -77,6 +80,7 @@ interface PostFormValues {
   excerpt: string;
   body: string;
   tags: string;
+  isPinned: boolean;
 }
 
 function extractAuthorName(author: Record<string, unknown> | null): string | null {
@@ -197,12 +201,14 @@ async function fetchAdminPosts(): Promise<AdminPost[]> {
     created_at: record.created_at,
     published_at: record.published_at,
     is_published: record.is_published,
+    is_pinned: record.is_pinned ?? null,
     deleted_at: null,
     subtitle: null,
     excerpt: record.excerpt,
     tags: record.tags,
     authorName: extractAuthorName(record.author as any),
     contentBody: extractBodyFromContent(record.content),
+    isPinned: Boolean(record.is_pinned),
   }));
 }
 
@@ -220,6 +226,7 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
     content: buildContentPayload(values.body),
     deleted_at: existing?.deleted_at ?? null,
     content_type: "blog",
+    is_pinned: values.isPinned,
   };
 
   const now = new Date().toISOString();
@@ -240,6 +247,7 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
         tags: payload.tags,
         content: payload.content,
         is_published: shouldPublish,
+        is_pinned: payload.is_pinned,
         ...publishPatch,
       })
       .select("*")
@@ -260,12 +268,14 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
       created_at: data.created_at,
       published_at: data.published_at,
       is_published: data.is_published,
+      is_pinned: data.is_pinned ?? null,
       deleted_at: null,
       subtitle: null,
       excerpt: data.excerpt,
       tags: data.tags,
       authorName: extractAuthorName(data.author as any),
       contentBody: extractBodyFromContent(data.content),
+      isPinned: Boolean(data.is_pinned),
     };
   }
 
@@ -280,6 +290,7 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
       tags: payload.tags,
       content: payload.content,
       is_published: shouldPublish,
+      is_pinned: payload.is_pinned,
       ...publishPatch,
     })
     .eq("id", existing.id)
@@ -301,12 +312,14 @@ async function savePost(values: PostFormValues, existing?: AdminPost): Promise<A
     created_at: data.created_at,
     published_at: data.published_at,
     is_published: data.is_published,
+    is_pinned: data.is_pinned ?? null,
     deleted_at: null,
     subtitle: null,
     excerpt: data.excerpt,
     tags: data.tags,
     authorName: extractAuthorName(data.author as any),
     contentBody: extractBodyFromContent(data.content),
+    isPinned: Boolean(data.is_pinned),
   };
 }
 
@@ -353,6 +366,7 @@ export function AdminPostsPage() {
         excerpt: "",
         body: "",
         tags: "",
+        isPinned: false,
       };
     }
 
@@ -367,10 +381,12 @@ export function AdminPostsPage() {
       excerpt: editingPost.excerpt ?? "",
       body: editingPost.contentBody ?? "",
       tags: (editingPost.tags ?? []).join(", "),
+      isPinned: editingPost.isPinned ?? false,
     };
   }, [editingPost]);
 
   const form = useForm<PostFormValues>({ defaultValues });
+  const isPinnedValue = form.watch("isPinned");
 
   useEffect(() => {
     form.reset(defaultValues);
@@ -426,6 +442,10 @@ export function AdminPostsPage() {
 
   const handleRestore = (post: AdminPost) =>
     performUpdate(post.id, { deleted_at: null }, "Post restored");
+
+  const handlePin = (post: AdminPost) => performUpdate(post.id, { is_pinned: true }, "Post pinned");
+
+  const handleUnpin = (post: AdminPost) => performUpdate(post.id, { is_pinned: false }, "Pin removed");
 
   const onSubmit = form.handleSubmit(values => {
     mutation.mutate({ values, existing: editingPost ?? undefined });
@@ -520,6 +540,22 @@ export function AdminPostsPage() {
                 </div>
               </div>
 
+              <div className="flex items-center justify-between gap-4 rounded-md border p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="post-pinned" className="text-sm font-medium">
+                    Pinned post
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Pin this article to keep it highlighted at the top of the blog.
+                  </p>
+                </div>
+                <Switch
+                  id="post-pinned"
+                  checked={isPinnedValue}
+                  onCheckedChange={checked => form.setValue("isPinned", checked)}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="post-subtitle">Subtitle</Label>
                 <Input id="post-subtitle" {...form.register("subtitle")} />
@@ -564,6 +600,7 @@ export function AdminPostsPage() {
                   <TableHead>Title</TableHead>
                   <TableHead>Section</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Pinned</TableHead>
                   <TableHead>Updated</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -583,10 +620,25 @@ export function AdminPostsPage() {
                       <Badge variant={post.status === "published" ? "default" : "secondary"}>{STATUS_LABELS[post.status]}</Badge>
                     </TableCell>
                     <TableCell>
+                      {post.isPinned ? (
+                        <Badge variant="outline">Pinned</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       {post.updated_at ? format(new Date(post.updated_at), "dd MMM yyyy") : post.created_at ? format(new Date(post.created_at), "dd MMM yyyy") : "—"}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button variant="ghost" size="sm" onClick={() => handleOpenEdit(post)}>Edit</Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={actionPostId === post.id}
+                        onClick={() => (post.isPinned ? handleUnpin(post) : handlePin(post))}
+                      >
+                        {actionPostId === post.id ? "…" : post.isPinned ? "Unpin" : "Pin"}
+                      </Button>
                       {post.status === "published" ? (
                         <Button
                           variant="ghost"
