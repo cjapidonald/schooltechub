@@ -378,8 +378,6 @@ const Index = () => {
                       Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
                     </p>
                   </div>
-                  <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
-                  <div className="pointer-events-none absolute -right-20 top-1/2 hidden h-56 w-56 -translate-y-1/2 rounded-full bg-secondary/25 blur-3xl md:block" />
                 </Card>
               </Reveal>
             </div>
