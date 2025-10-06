@@ -358,22 +358,14 @@ const Index = () => {
                   <span className="bolt-fastener absolute left-8 bottom-6 z-20 md:left-12 md:bottom-8" aria-hidden />
                   <span className="bolt-fastener absolute right-8 bottom-6 z-20 md:right-12 md:bottom-8" aria-hidden />
                   <div className="relative z-10 flex flex-col items-start gap-8 text-left">
-                    <div className="flex flex-col gap-3 self-center sm:flex-row sm:justify-center">
+                    <div className="flex flex-col items-center gap-3 self-center sm:flex-row sm:justify-center">
                       <Button
                         type="button"
                         variant="outline"
                         className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:border-white/40 hover:bg-white/10 hover:text-white/70"
                         onClick={() => setAuthRole("teacher")}
                       >
-                        I am a teacher
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="border-white/40 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:border-white/40 hover:bg-white/10 hover:text-white/70"
-                        onClick={() => setAuthRole("student")}
-                      >
-                        I am a student
+                        Teacher workplace
                       </Button>
                     </div>
                     <h1 className="text-4xl font-semibold text-white md:text-5xl">
@@ -618,15 +610,7 @@ const Index = () => {
                 </p>
                 <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Button size="lg" className="neon-pulse" onClick={() => setAuthRole("teacher")}>
-                    I am a teacher
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/30 bg-white/10 backdrop-blur"
-                    onClick={() => setAuthRole("student")}
-                  >
-                    I am a student
+                    Teacher workplace
                   </Button>
                 </div>
               </Card>
