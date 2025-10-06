@@ -195,9 +195,6 @@ const neonCardGradients = [
   "bg-gradient-to-br from-accent/25 via-background/75 to-background/95",
 ];
 
-const glassBoardClass =
-  "relative isolate overflow-hidden rounded-[2rem] border border-white/15 bg-white/10 p-10 text-center shadow-[0_28px_60px_-20px_rgba(54,20,130,0.55)] backdrop-blur-xl transition-shadow duration-500 hover:shadow-[0_36px_72px_-18px_rgba(76,32,176,0.65)] md:p-12";
-
 const convexOverlayClass = "convex-panel-sheen";
 
 const glassBoardClass =
