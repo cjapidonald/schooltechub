@@ -255,6 +255,15 @@ export const en = {
         required: "Enter a presentation link before saving.",
         untitled: "this lesson",
       },
+      summary: {
+        totalDescription: "Lessons sequenced in this workspace.",
+        completion: "Completed",
+        completionDescription: "Lessons that are fully delivered.",
+        progress: "On track",
+        statusBreakdown: "{planned} planned • {inProgress} in progress • {complete} done",
+        nextLesson: "Next lesson",
+        noUpcoming: "No upcoming lessons scheduled",
+      },
     },
     curriculumDetail: {
       pageTitle: "Curriculum workspace",
