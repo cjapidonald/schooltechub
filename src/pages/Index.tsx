@@ -364,20 +364,6 @@ const Index = () => {
                       From interactive lessons to AI readiness, SchoolTech Hub brings every initiative under one collaborative roof.
                       Partner with us to coach staff, embed digital citizenship, and track impact across campuses.
                     </p>
-                    <div className="mt-2 flex flex-col items-center gap-4 sm:flex-row">
-                      <Button size="lg" className="neon-pulse" onClick={() => setAuthRole("teacher")}>
-                        Talk with our team
-                      </Button>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        className="border-white/30 bg-white/10 backdrop-blur"
-                        onClick={() => setAuthRole("student")}
-                      >
-                        <Sparkles className="mr-2 h-5 w-5" />
-                        Explore our playbooks
-                      </Button>
-                    </div>
                   </div>
                   <div className="pointer-events-none absolute -left-20 top-1/2 h-56 w-56 -translate-y-1/2 rounded-full bg-primary/25 blur-3xl" />
                   <div className="pointer-events-none absolute -right-20 top-1/2 hidden h-56 w-56 -translate-y-1/2 rounded-full bg-secondary/25 blur-3xl md:block" />
