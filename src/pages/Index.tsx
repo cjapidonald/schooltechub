@@ -515,7 +515,7 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="relative overflow-hidden pt-[10px] pb-[10px]">
+      <section className="relative overflow-hidden pt-[20px] pb-[10px]">
         <div className="absolute inset-0 -z-20">
           <img
             src={classroomTechnologyBackgrounds.stats}
