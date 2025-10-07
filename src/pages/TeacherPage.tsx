@@ -97,7 +97,7 @@ const formatLessonContextDate = (value: string | null) => {
   }
 };
 
-const DASHBOARD_TABS = ["curriculum", "classes", "lessonBuilder", "students", "assessments"] as const;
+const DASHBOARD_TABS = ["classes", "lessonBuilder", "students", "assessments"] as const;
 type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 const isDashboardTab = (value: string | null): value is DashboardTab =>
@@ -114,9 +114,6 @@ const splitStudentNames = (input: string | undefined) =>
     .split(/\r?\n/)
     .map(name => name.trim())
     .filter(Boolean);
-
-const GLASS_SELECT_CARD_CLASS =
-  "w-full rounded-2xl border border-white/15 bg-white/10 p-5 text-left text-white/75 transition hover:border-white/40 hover:bg-white/15 hover:text-white";
 
 export default function TeacherPage() {
   const { t } = useLanguage();
@@ -135,7 +132,6 @@ export default function TeacherPage() {
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
-  const [selectedCurriculumClassId, setSelectedCurriculumClassId] = useState<string | null>(null);
   const prototypeAccessToast = useMemo(
     () => ({
       title: t.dashboard.toasts.prototypeUnlocked,
@@ -215,7 +211,7 @@ export default function TeacherPage() {
   );
 
   const requestedTab = searchParams.get("tab");
-  const activeTab: DashboardTab = isDashboardTab(requestedTab) ? requestedTab : "curriculum";
+  const activeTab: DashboardTab = isDashboardTab(requestedTab) ? requestedTab : "classes";
 
   const lessonBuilderContext = useMemo<LessonBuilderRouteContext | null>(() => {
     const getParam = (key: string) => {
@@ -368,65 +364,6 @@ export default function TeacherPage() {
     return [DASHBOARD_EXAMPLE_CLASS];
   }, [classesQuery.data]);
 
-  const curriculumClasses = useMemo(
-    () =>
-      classes.filter(
-        cls =>
-          !cls.isExample &&
-          cls.id !== DASHBOARD_EXAMPLE_CLASS.id &&
-          cls.title !== DASHBOARD_EXAMPLE_CLASS.title,
-      ),
-    [classes],
-  );
-
-  useEffect(() => {
-    if (curriculumClasses.length === 0) {
-      setSelectedCurriculumClassId(null);
-      return;
-    }
-
-    if (activeTab !== "curriculum") {
-      return;
-    }
-
-    setSelectedCurriculumClassId(prev => {
-      if (prev && curriculumClasses.some(cls => cls.id === prev)) {
-        return prev;
-      }
-
-      return curriculumClasses[0]?.id ?? null;
-    });
-  }, [activeTab, curriculumClasses]);
-
-  const selectedCurriculumClass = useMemo(
-    () => curriculumClasses.find(cls => cls.id === selectedCurriculumClassId) ?? null,
-    [curriculumClasses, selectedCurriculumClassId],
-  );
-
-  const selectedCurriculumClassDetails = useMemo(() => {
-    if (!selectedCurriculumClass) {
-      return null;
-    }
-
-    const parts = [selectedCurriculumClass.stage, selectedCurriculumClass.subject].filter(Boolean);
-    return parts.length > 0 ? parts.join(" • ") : null;
-  }, [selectedCurriculumClass]);
-
-  const selectedCurriculumDateRange = useMemo(() => {
-    if (!selectedCurriculumClass) {
-      return null;
-    }
-
-    const start = formatLessonContextDate(selectedCurriculumClass.start_date ?? null);
-    const end = formatLessonContextDate(selectedCurriculumClass.end_date ?? null);
-
-    if (start && end) {
-      return `${start} – ${end}`;
-    }
-
-    return start ?? end ?? null;
-  }, [selectedCurriculumClass]);
-
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
     return {
@@ -543,9 +480,6 @@ export default function TeacherPage() {
         <section className="rounded-[2.5rem] border border-white/10 bg-white/5 p-6 shadow-[0_25px_90px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl md:p-10">
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
             <TabsList className="mx-auto grid w-full gap-2 border-0 px-2 text-white/70 sm:w-auto sm:auto-cols-max sm:grid-flow-col sm:px-4">
-              <TabsTrigger value="curriculum" className={GLASS_TAB_TRIGGER_CLASS}>
-                {t.dashboard.tabs.curriculum}
-              </TabsTrigger>
               <TabsTrigger value="classes" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.classes}
               </TabsTrigger>
@@ -559,105 +493,6 @@ export default function TeacherPage() {
                 {t.dashboard.tabs.assessments ?? "Assessments"}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="curriculum" className="space-y-6">
-              <div className="grid gap-6 lg:grid-cols-[minmax(260px,320px)_1fr]">
-                <div className="space-y-4">
-                  <div className={cn(GLASS_PANEL_CLASS, "space-y-4")}>
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-semibold">Curriculum boards</h3>
-                      <p className="text-sm text-white/70">
-                        Choose a class to outline units, essential questions, and lesson sequences.
-                      </p>
-                    </div>
-                    <div className="grid gap-3">
-                      {curriculumClasses.length > 0 ? (
-                        curriculumClasses.map(cls => {
-                          const isSelected = selectedCurriculumClass?.id === cls.id;
-                          const details = [cls.stage, cls.subject].filter(Boolean).join(" • ");
-
-                          return (
-                            <button
-                              key={cls.id}
-                              type="button"
-                              onClick={() => setSelectedCurriculumClassId(cls.id)}
-                              className={cn(
-                                GLASS_SELECT_CARD_CLASS,
-                                isSelected
-                                  ? "border-white/60 bg-white/25 text-white shadow-[0_18px_45px_-25px_rgba(15,23,42,0.85)]"
-                                  : "text-white/75",
-                              )}
-                            >
-                              <div className="space-y-2">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="space-y-1">
-                                    <p className="text-base font-semibold text-white">{cls.title}</p>
-                                    {details ? (
-                                      <p className="text-xs uppercase tracking-wide text-white/60">{details}</p>
-                                    ) : null}
-                                  </div>
-                                  {isSelected ? (
-                                    <span className="inline-flex items-center rounded-full border border-white/40 bg-white/20 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-white">
-                                      Active
-                                    </span>
-                                  ) : null}
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })
-                      ) : (
-                        <p className="text-sm text-white/70">{t.dashboard.curriculum.empty.title}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  {selectedCurriculumClass ? (
-                    <div className={cn(GLASS_PANEL_CLASS, "space-y-6")}> 
-                      <div className="space-y-2">
-                        <h3 className="text-2xl font-semibold text-white">{selectedCurriculumClass.title}</h3>
-                        {selectedCurriculumClassDetails ? (
-                          <p className="text-xs uppercase tracking-wide text-white/60">
-                            {selectedCurriculumClassDetails}
-                          </p>
-                        ) : null}
-                      </div>
-                      <div className="space-y-3 text-sm text-white/70">
-                        <p>This curriculum overview is automatically created when you add a class.</p>
-                        <p>
-                          Use the lesson builder or classes tabs to continue planning while we prepare additional curriculum
-                          tools for this space.
-                        </p>
-                      </div>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2 rounded-2xl border border-white/15 bg-white/5 p-5">
-                          <p className="text-xs uppercase tracking-wide text-white/60">Overview card</p>
-                          <p className="text-base font-semibold text-white">{`${selectedCurriculumClass.title} overview`}</p>
-                        </div>
-                        {selectedCurriculumDateRange ? (
-                          <div className="space-y-2 rounded-2xl border border-white/15 bg-white/5 p-5">
-                            <p className="text-xs uppercase tracking-wide text-white/60">Schedule</p>
-                            <p className="text-base font-semibold text-white">{selectedCurriculumDateRange}</p>
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-                  ) : curriculumClasses.length === 0 ? (
-                    <div className={cn(GLASS_PANEL_CLASS, "space-y-3 text-center text-white/70")}>
-                      <h3 className="text-lg font-semibold text-white">{t.dashboard.curriculum.empty.title}</h3>
-                      <p className="text-sm text-white/70">{t.dashboard.curriculum.empty.description}</p>
-                    </div>
-                  ) : (
-                    <Alert className={cn(GLASS_PANEL_CLASS, "space-y-2 text-white")}>
-                      <AlertTitle className="text-lg font-semibold text-white">Select a class</AlertTitle>
-                      <AlertDescription className="text-sm text-white/70">
-                        Choose a class card to begin building its curriculum outline.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
             <TabsContent value="classes" className="space-y-6">
               <ClassesTable
                 className={cn(GLASS_PANEL_CLASS, "space-y-6")}
