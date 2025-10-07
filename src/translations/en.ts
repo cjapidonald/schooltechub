@@ -356,13 +356,16 @@ export const en = {
           title: "Class title",
           stage: "Stage",
           subject: "Subject",
-          startDate: "Start date",
-          endDate: "End date",
         },
         roster: {
           label: "Student roster (optional)",
           placeholder: "Paste student names here, one per line",
           helper: "We'll add these students to the class as soon as it's created.",
+        },
+        curriculum: {
+          label: "Curriculum outline (optional)",
+          placeholder: "List lesson titles here, one per line",
+          helper: "We'll surface these lessons in the curriculum tab for quick planning.",
         },
         submit: "Create class",
       },

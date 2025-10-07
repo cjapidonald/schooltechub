@@ -65,13 +65,32 @@ const TEACHER_PORTAL_FEATURES = [
   { id: "reports", icon: BarChart3, label: "Assemble reports in seconds" },
 ] as const;
 
+const EXAMPLE_CLASS_STUDENTS = [
+  "Aaliyah Chen",
+  "Mateo Alvarez",
+  "Priya Desai",
+  "Noah Williams",
+  "Sofia Rossi",
+];
+
+const EXAMPLE_CLASS_CURRICULUM = [
+  "Igniting narrative hooks with sensory details",
+  "Designing character mood boards in Canva",
+  "Collaborative story outlining in Google Docs",
+  "Peer-feedback protocols for revision day",
+];
+
+type ClassEnrichment = {
+  students: string[];
+  curriculum: string[];
+};
+
 const classSchema = z.object({
   title: z.string().min(2),
   stage: z.string().optional(),
   subject: z.string().optional(),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
   studentNames: z.string().optional(),
+  curriculumTitles: z.string().optional(),
 });
 
 type ClassFormValues = z.infer<typeof classSchema>;
@@ -97,7 +116,7 @@ const formatLessonContextDate = (value: string | null) => {
   }
 };
 
-const DASHBOARD_TABS = ["classes", "lessonBuilder", "students", "assessments"] as const;
+const DASHBOARD_TABS = ["classes", "curriculum", "lessonBuilder", "students", "assessments"] as const;
 type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 const isDashboardTab = (value: string | null): value is DashboardTab =>
@@ -109,11 +128,14 @@ const GLASS_PANEL_CLASS =
 const GLASS_TAB_TRIGGER_CLASS =
   "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/70 transition backdrop-blur-xl hover:border-white/40 hover:bg-white/15 hover:text-white data-[state=active]:border-white/60 data-[state=active]:bg-white/25 data-[state=active]:text-white data-[state=active]:shadow-[0_15px_45px_-25px_rgba(15,23,42,0.85)]";
 
-const splitStudentNames = (input: string | undefined) =>
+const splitMultilineValues = (input: string | undefined) =>
   (input ?? "")
     .split(/\r?\n/)
-    .map(name => name.trim())
+    .map(value => value.trim())
     .filter(Boolean);
+
+const splitStudentNames = splitMultilineValues;
+const splitCurriculumTitles = splitMultilineValues;
 
 export default function TeacherPage() {
   const { t } = useLanguage();
@@ -132,6 +154,13 @@ export default function TeacherPage() {
   const [isClassDialogOpen, setClassDialogOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [hasEnteredPrototype, setHasEnteredPrototype] = useState(() => Boolean(user));
+  const [classEnrichments, setClassEnrichments] = useState<Record<string, ClassEnrichment>>(() => ({
+    [DASHBOARD_EXAMPLE_CLASS.id]: {
+      students: EXAMPLE_CLASS_STUDENTS,
+      curriculum: EXAMPLE_CLASS_CURRICULUM,
+    },
+  }));
+  const [curriculumDialogClassId, setCurriculumDialogClassId] = useState<string | null>(null);
   const prototypeAccessToast = useMemo(
     () => ({
       title: t.dashboard.toasts.prototypeUnlocked,
@@ -284,7 +313,7 @@ export default function TeacherPage() {
 
   const classForm = useForm<ClassFormValues>({
     resolver: zodResolver(classSchema),
-    defaultValues: { title: "", stage: "", subject: "", start_date: "", end_date: "", studentNames: "" },
+    defaultValues: { title: "", stage: "", subject: "", studentNames: "", curriculumTitles: "" },
   });
 
   const classesQuery = useQuery<Class[]>({
@@ -302,30 +331,47 @@ export default function TeacherPage() {
         title: values.title,
         stage: values.stage,
         subject: values.subject,
-        start_date: values.start_date,
-        end_date: values.end_date,
       });
 
       const rosterNames = splitStudentNames(values.studentNames);
+      const curriculumLessons = splitCurriculumTitles(values.curriculumTitles);
 
       if (rosterNames.length > 0) {
         await bulkAddStudents({ ownerId: user?.id, classId: createdClass.id, names: rosterNames });
       }
 
-      return { rosterCount: rosterNames.length };
+      return {
+        createdClass,
+        rosterCount: rosterNames.length,
+        curriculumCount: curriculumLessons.length,
+        students: rosterNames,
+        curriculum: curriculumLessons,
+      };
     },
-    onSuccess: ({ rosterCount }, variables) => {
+    onSuccess: ({ rosterCount, curriculumCount, createdClass, students, curriculum }, variables) => {
       setClassDialogOpen(false);
       classForm.reset();
+      setClassEnrichments(prev => ({
+        ...prev,
+        [createdClass.id]: {
+          students,
+          curriculum,
+        },
+      }));
       void classesQuery.refetch();
       void queryClient.invalidateQueries({ queryKey: ["dashboard-students"] });
 
-      const toastDescription =
+      let toastDescription =
         rosterCount > 0
           ? t.dashboard.toasts.classCreatedWithStudents
               .replace("{title}", variables.title)
               .replace("{count}", rosterCount.toLocaleString())
           : t.dashboard.toasts.classCreatedNoStudents.replace("{title}", variables.title);
+
+      if (curriculumCount > 0) {
+        const lessonLabel = curriculumCount === 1 ? "lesson" : "lessons";
+        toastDescription = `${toastDescription} ${curriculumCount.toLocaleString()} ${lessonLabel} added to the curriculum tab.`;
+      }
 
       toast({
         title: t.dashboard.toasts.classCreated,
@@ -337,6 +383,26 @@ export default function TeacherPage() {
       toast({ description, variant: "destructive" });
     },
   });
+
+  useEffect(() => {
+    if (!classesQuery.data) {
+      return;
+    }
+
+    setClassEnrichments(prev => {
+      const next = { ...prev };
+      let hasUpdates = false;
+
+      classesQuery.data?.forEach(item => {
+        if (!next[item.id]) {
+          next[item.id] = { students: [], curriculum: [] };
+          hasUpdates = true;
+        }
+      });
+
+      return hasUpdates ? next : prev;
+    });
+  }, [classesQuery.data]);
 
   const handleQuickAction = useCallback(
     (action: DashboardQuickAction) => {
@@ -363,6 +429,38 @@ export default function TeacherPage() {
     }
     return [DASHBOARD_EXAMPLE_CLASS];
   }, [classesQuery.data]);
+
+  const curriculumSummaries = useMemo(
+    () =>
+      classes
+        .map(item => ({ classItem: item, enrichment: classEnrichments[item.id] }))
+        .filter(entry => entry.enrichment && entry.enrichment.curriculum.length > 0),
+    [classes, classEnrichments],
+  );
+
+  const activeCurriculum = useMemo(() => {
+    if (!curriculumDialogClassId) {
+      return null;
+    }
+
+    const classItem = classes.find(item => item.id === curriculumDialogClassId);
+    if (!classItem) {
+      return null;
+    }
+
+    const enrichment = classEnrichments[curriculumDialogClassId];
+    if (!enrichment || enrichment.curriculum.length === 0) {
+      return null;
+    }
+
+    return { classItem, enrichment };
+  }, [classEnrichments, classes, curriculumDialogClassId]);
+
+  useEffect(() => {
+    if (curriculumDialogClassId && !activeCurriculum) {
+      setCurriculumDialogClassId(null);
+    }
+  }, [activeCurriculum, curriculumDialogClassId]);
 
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
@@ -483,6 +581,9 @@ export default function TeacherPage() {
               <TabsTrigger value="classes" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.classes}
               </TabsTrigger>
+              <TabsTrigger value="curriculum" className={GLASS_TAB_TRIGGER_CLASS}>
+                {t.dashboard.tabs.curriculum}
+              </TabsTrigger>
               <TabsTrigger value="lessonBuilder" className={GLASS_TAB_TRIGGER_CLASS}>
                 {t.dashboard.tabs.lessonBuilder}
               </TabsTrigger>
@@ -505,7 +606,100 @@ export default function TeacherPage() {
                 onEditClass={classId =>
                   navigate(`/teacher?tab=classes&classId=${encodeURIComponent(classId)}`)
                 }
+                enrichments={classEnrichments}
               />
+            </TabsContent>
+            <TabsContent value="curriculum" className="space-y-6">
+              <section className={cn(GLASS_PANEL_CLASS, "space-y-6")}>
+                <div className="space-y-1">
+                  <h2 className="text-2xl font-semibold leading-tight text-white md:text-3xl">
+                    {t.dashboard.tabs.curriculum}
+                  </h2>
+                  <p className="text-sm text-white/70">
+                    Build curriculum outlines that stay in sync with each class roster.
+                  </p>
+                </div>
+                <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  {curriculumSummaries.length === 0 ? (
+                    <div className="col-span-full flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-3xl border border-white/15 bg-white/5 p-6 text-center text-sm text-white/70">
+                      <p>Add lesson titles to a class to see the curriculum appear here.</p>
+                      <Button
+                        variant="outline"
+                        className="rounded-xl border-white/40 bg-white/10 text-white hover:bg-white/20"
+                        onClick={() => setClassDialogOpen(true)}
+                      >
+                        {t.dashboard.quickActions.newClass}
+                      </Button>
+                    </div>
+                  ) : (
+                    curriculumSummaries.map(({ classItem, enrichment }) => {
+                      const lessonPreview = enrichment.curriculum.slice(0, 3);
+                      const extraLessons = Math.max(enrichment.curriculum.length - lessonPreview.length, 0);
+                      const studentPreview = enrichment.students.slice(0, 4);
+                      const extraStudents = Math.max(enrichment.students.length - studentPreview.length, 0);
+
+                      return (
+                        <button
+                          key={classItem.id}
+                          type="button"
+                          onClick={() => setCurriculumDialogClassId(classItem.id)}
+                          className="group flex h-full min-h-[240px] flex-col gap-5 rounded-3xl border border-white/15 bg-white/10 p-6 text-left text-white/80 shadow-[0_35px_120px_-60px_rgba(15,23,42,0.95)] backdrop-blur-2xl transition duration-300 hover:border-white/30 hover:bg-white/15 hover:text-white"
+                        >
+                          <div className="space-y-2">
+                            <p className="text-xs uppercase tracking-wide text-white/60">
+                              {classItem.stage || t.dashboard.classes.columns.stage + ": —"}
+                            </p>
+                            <h3 className="text-lg font-semibold text-white">{classItem.title}</h3>
+                            <p className="text-sm text-white/70">{classItem.subject || "Subject not set yet"}</p>
+                          </div>
+                          <div className="space-y-4 text-sm">
+                            <div>
+                              <p className="text-xs uppercase tracking-wide text-white/60">Lessons ready</p>
+                              <ul className="mt-2 space-y-2 text-white/80">
+                                {lessonPreview.map((lesson, index) => (
+                                  <li key={`${classItem.id}-curriculum-lesson-${index}`} className="flex items-start gap-3">
+                                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white/80">
+                                      {index + 1}
+                                    </span>
+                                    <span className="text-sm leading-snug">{lesson}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                              {extraLessons > 0 ? (
+                                <p className="mt-2 text-xs text-white/60">
+                                  + {extraLessons} more lesson{extraLessons === 1 ? "" : "s"}
+                                </p>
+                              ) : null}
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase tracking-wide text-white/60">Students linked</p>
+                              <div className="mt-2 flex flex-wrap gap-2 text-xs text-white/80">
+                                {studentPreview.map((name, index) => (
+                                  <span
+                                    key={`${classItem.id}-curriculum-student-${index}`}
+                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1"
+                                  >
+                                    {name}
+                                  </span>
+                                ))}
+                                {extraStudents > 0 ? (
+                                  <span className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-white/60">
+                                    + {extraStudents} more
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-auto flex items-center justify-between pt-2 text-sm font-semibold text-white">
+                            <span>Open curriculum</span>
+                            <span aria-hidden>&rarr;</span>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </section>
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">
               {lessonBuilderContext ? (
@@ -575,6 +769,67 @@ export default function TeacherPage() {
         </section>
       </div>
 
+      <Dialog open={Boolean(curriculumDialogClassId)} onOpenChange={open => !open && setCurriculumDialogClassId(null)}>
+        <DialogContent className="sm:max-w-2xl border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
+          {activeCurriculum ? (
+            <div className="space-y-6">
+              <DialogHeader className="space-y-2 text-left">
+                <DialogTitle className="text-2xl font-semibold text-white">
+                  {activeCurriculum.classItem.title}
+                </DialogTitle>
+                <p className="text-sm text-white/70">
+                  {(activeCurriculum.classItem.stage ?? t.dashboard.classes.columns.stage + ": —")}
+                  {" • "}
+                  {activeCurriculum.classItem.subject || "Subject not set yet"}
+                  {" • "}
+                  {activeCurriculum.enrichment.students.length} student
+                  {activeCurriculum.enrichment.students.length === 1 ? "" : "s"}
+                </p>
+              </DialogHeader>
+              <div className="space-y-5 text-sm text-white/80">
+                <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-wide text-white/60">Student roster</p>
+                  {activeCurriculum.enrichment.students.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2 text-sm text-white/80">
+                      {activeCurriculum.enrichment.students.map((name, index) => (
+                        <span
+                          key={`${activeCurriculum.classItem.id}-dialog-student-${index}`}
+                          className="rounded-full border border-white/20 bg-white/10 px-3 py-1"
+                        >
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-white/60">No students added yet.</p>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs uppercase tracking-wide text-white/60">Lesson titles</p>
+                  <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/5">
+                    <ul className="divide-y divide-white/10 text-white/80">
+                      {activeCurriculum.enrichment.curriculum.map((lesson, index) => (
+                        <li
+                          key={`${activeCurriculum.classItem.id}-dialog-lesson-${index}`}
+                          className="flex items-center gap-4 px-4 py-3"
+                        >
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs font-semibold text-white/80">
+                            {index + 1}
+                          </span>
+                          <span className="flex-1 text-sm leading-snug">{lesson}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-white/70">Select a curriculum card to view lesson details.</div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
         <DialogContent className="sm:max-w-lg border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
           <DialogHeader>
@@ -596,16 +851,6 @@ export default function TeacherPage() {
               <Label htmlFor="class-subject">{t.dashboard.dialogs.newClass.fields.subject}</Label>
               <Input id="class-subject" {...classForm.register("subject")} />
             </div>
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="class-start">{t.dashboard.dialogs.newClass.fields.startDate}</Label>
-                <Input id="class-start" type="date" {...classForm.register("start_date")} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="class-end">{t.dashboard.dialogs.newClass.fields.endDate}</Label>
-                <Input id="class-end" type="date" {...classForm.register("end_date")} />
-              </div>
-            </div>
             <div className="grid gap-2">
               <Label htmlFor="class-roster">{t.dashboard.dialogs.newClass.roster.label}</Label>
               <Textarea
@@ -616,6 +861,17 @@ export default function TeacherPage() {
                 {...classForm.register("studentNames")}
               />
               <p className="text-xs text-white/60">{t.dashboard.dialogs.newClass.roster.helper}</p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="class-curriculum">{t.dashboard.dialogs.newClass.curriculum.label}</Label>
+              <Textarea
+                id="class-curriculum"
+                rows={5}
+                placeholder={t.dashboard.dialogs.newClass.curriculum.placeholder}
+                className="rounded-xl border border-white/30 bg-white/10 text-white placeholder:text-white/60 focus:border-white/60 focus:ring-white/40"
+                {...classForm.register("curriculumTitles")}
+              />
+              <p className="text-xs text-white/60">{t.dashboard.dialogs.newClass.curriculum.helper}</p>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setClassDialogOpen(false)}>
