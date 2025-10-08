@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { format, isValid, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { DndContext, DragOverlay, type DragCancelEvent, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 
 import { SEO } from "@/components/SEO";
 import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
@@ -32,9 +33,10 @@ import { LessonPreviewPane } from "./components/LessonPreviewPane";
 import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import { LessonDocEditor } from "@/pages/account/LessonDocEditor";
 import type { LessonPlanMetaDraft } from "./types";
-import type { ResourceDetail } from "@/types/resources";
+import type { Resource, ResourceDetail } from "@/types/resources";
 import { createLessonPlan, getLessonPlan, updateLessonPlan } from "./api";
 import { LessonResourceSidebar } from "./components/LessonResourceSidebar";
+import { ResourceCard } from "@/components/lesson-draft/ResourceCard";
 
 const AUTOSAVE_DELAY = 800;
 
@@ -253,6 +255,7 @@ const LessonBuilderPage = ({
   const attachResource = useLessonDraftStore(state => state.attachResource);
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
   const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
+  const [activeDragResource, setActiveDragResource] = useState<Resource | null>(null);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
   const [isLinkingClass, setIsLinkingClass] = useState(false);
@@ -920,6 +923,27 @@ const LessonBuilderPage = ({
     }
   }, []);
 
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const data = event.active.data.current as { resource?: Resource | null } | null;
+    if (data && data.resource) {
+      setActiveDragResource(data.resource);
+    } else {
+      setActiveDragResource(null);
+    }
+  }, []);
+
+  const clearActiveDrag = useCallback(() => {
+    setActiveDragResource(null);
+  }, []);
+
+  const handleDragEnd = useCallback((_: DragEndEvent) => {
+    clearActiveDrag();
+  }, [clearActiveDrag]);
+
+  const handleDragCancel = useCallback((_: DragCancelEvent) => {
+    clearActiveDrag();
+  }, [clearActiveDrag]);
+
   const savingCopy = t.lessonBuilder.toolbar;
   const lastSavedLabel = useMemo(() => {
     if (!lastSavedAt) {
@@ -1006,7 +1030,8 @@ const LessonBuilderPage = ({
       : "container mx-auto space-y-10 px-4";
 
   return (
-    <div className={containerClasses}>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
+      <div className={containerClasses}>
       {layoutMode === "standalone" ? (
         <SEO
           title="Lesson Builder"
@@ -1261,7 +1286,15 @@ const LessonBuilderPage = ({
         onOpenChange={handleResourceDialogChange}
         activeStepId={resourceSearchStepId}
       />
-    </div>
+      </div>
+      <DragOverlay>
+        {activeDragResource ? (
+          <div className="w-72 max-w-full">
+            <ResourceCard resource={activeDragResource} layout="vertical" />
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 

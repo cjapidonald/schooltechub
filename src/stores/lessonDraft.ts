@@ -37,6 +37,9 @@ type LessonDraftStore = {
   setStepNotes: (stepId: string, notes: string) => void;
   attachResource: (stepId: string, resourceId: string) => void;
   detachResource: (stepId: string, resourceId: string) => void;
+  insertStepResource: (stepId: string, resourceId: string, index?: number) => void;
+  reorderStepResources: (stepId: string, resourceIds: string[]) => void;
+  moveStepResource: (stepId: string, resourceId: string, direction: "up" | "down") => void;
   resetDraft: () => void;
 };
 
@@ -209,25 +212,7 @@ export const useLessonDraftStore = create<LessonDraftStore>()((set, get) => ({
     }));
   },
   attachResource: (stepId, resourceId) => {
-    set((state) => ({
-      draft: {
-        ...state.draft,
-        steps: state.draft.steps.map((step) => {
-          if (step.id !== stepId) {
-            return step;
-          }
-
-          if (step.resourceIds.includes(resourceId)) {
-            return step;
-          }
-
-          return {
-            ...step,
-            resourceIds: [...step.resourceIds, resourceId],
-          };
-        }),
-      },
-    }));
+    useLessonDraftStore.getState().insertStepResource(stepId, resourceId);
   },
   detachResource: (stepId, resourceId) => {
     set((state) => ({
@@ -243,6 +228,69 @@ export const useLessonDraftStore = create<LessonDraftStore>()((set, get) => ({
         ),
       },
     }));
+  },
+  insertStepResource: (stepId, resourceId, index) => {
+    set((state) => ({
+      draft: {
+        ...state.draft,
+        steps: state.draft.steps.map((step) => {
+          if (step.id !== stepId) {
+            return step;
+          }
+
+          if (step.resourceIds.includes(resourceId)) {
+            return step;
+          }
+
+          const next = [...step.resourceIds];
+          const safeIndex = typeof index === "number" && index >= 0 && index <= next.length ? index : next.length;
+          next.splice(safeIndex, 0, resourceId);
+
+          return {
+            ...step,
+            resourceIds: next,
+          };
+        }),
+      },
+    }));
+  },
+  reorderStepResources: (stepId, resourceIds) => {
+    set((state) => ({
+      draft: {
+        ...state.draft,
+        steps: state.draft.steps.map((step) =>
+          step.id === stepId
+            ? {
+                ...step,
+                resourceIds,
+              }
+            : step,
+        ),
+      },
+    }));
+  },
+  moveStepResource: (stepId, resourceId, direction) => {
+    const { draft, reorderStepResources } = useLessonDraftStore.getState();
+    const step = draft.steps.find((item) => item.id === stepId);
+    if (!step) {
+      return;
+    }
+
+    const currentIndex = step.resourceIds.indexOf(resourceId);
+    if (currentIndex === -1) {
+      return;
+    }
+
+    const nextIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (nextIndex < 0 || nextIndex >= step.resourceIds.length) {
+      return;
+    }
+
+    const next = [...step.resourceIds];
+    const [moved] = next.splice(currentIndex, 1);
+    next.splice(nextIndex, 0, moved);
+
+    reorderStepResources(stepId, next);
   },
   resetDraft: () => {
     set({

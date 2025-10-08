@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { useDroppable, useDndMonitor } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +31,8 @@ import type { LessonStep } from "@/stores/lessonDraft";
 import { useLessonDraftStore } from "@/stores/lessonDraft";
 import { getResourcesByIds } from "@/lib/resources";
 import type { Resource } from "@/types/resources";
+import { ResourceCard } from "@/components/lesson-draft/ResourceCard";
+import { cn } from "@/lib/utils";
 
 interface StepEditorProps {
   onRequestResourceSearch: (stepId: string) => void;
@@ -42,12 +47,117 @@ interface StepFormProps {
   onRequestResources: (stepId: string) => void;
   isResourceSearchOpen: boolean;
   isResourceSearchOpenForStep: boolean;
-  resources: Resource[];
+  resourceEntries: { id: string; resource: Resource | null }[];
   pendingResourceIds: string[];
   missingResourceIds: string[];
   onTitleChange: (stepId: string, title: string) => void;
   onNotesChange: (stepId: string, notes: string) => void;
+  onRemoveResource: (stepId: string, resourceId: string) => void;
+  onMoveResource: (stepId: string, resourceId: string, direction: "up" | "down") => void;
 }
+
+type LibraryResourceDragData = {
+  type: "library-resource";
+  resource: Resource;
+  resourceId: string;
+  source: "sidebar";
+};
+
+type StepResourceDragData = {
+  type: "step-resource";
+  stepId: string;
+  resourceId: string;
+  resource: Resource | null;
+};
+
+type StepDropData = {
+  type: "step-dropzone";
+  stepId: string;
+};
+
+interface SortableStepResourceCardProps {
+  stepId: string;
+  resourceId: string;
+  resource: Resource;
+  index: number;
+  total: number;
+  onRemove: (resourceId: string) => void;
+  onMove: (resourceId: string, direction: "up" | "down") => void;
+}
+
+const SortableStepResourceCard = ({
+  stepId,
+  resourceId,
+  resource,
+  index,
+  total,
+  onRemove,
+  onMove,
+}: SortableStepResourceCardProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable<StepResourceDragData>({
+      id: resourceId,
+      data: {
+        type: "step-resource",
+        stepId,
+        resourceId,
+        resource,
+      },
+    });
+
+  const style = {
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
+    transition,
+  } as CSSProperties;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "rounded-lg border border-border/70 bg-background/80 p-3 shadow-sm",
+        isDragging && "opacity-70",
+      )}
+      {...attributes}
+      {...listeners}
+    >
+      <div className="flex flex-col gap-3">
+        <ResourceCard resource={resource} layout="horizontal" />
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => onMove(resourceId, "up")}
+            disabled={index === 0}
+            aria-label={`Move ${resource.title} earlier in step`}
+          >
+            <ArrowUp className="mr-1.5 h-4 w-4" aria-hidden /> Move up
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => onMove(resourceId, "down")}
+            disabled={index === total - 1}
+            aria-label={`Move ${resource.title} later in step`}
+          >
+            <ArrowDown className="mr-1.5 h-4 w-4" aria-hidden /> Move down
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => onRemove(resourceId)}
+            aria-label={`Remove ${resource.title} from this step`}
+          >
+            <Trash2 className="mr-1.5 h-4 w-4" aria-hidden /> Remove
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const StepForm = ({
   step,
@@ -56,11 +166,13 @@ const StepForm = ({
   onRequestResources,
   isResourceSearchOpen,
   isResourceSearchOpenForStep,
-  resources,
+  resourceEntries,
   pendingResourceIds,
   missingResourceIds,
   onTitleChange,
   onNotesChange,
+  onRemoveResource,
+  onMoveResource,
 }: StepFormProps) => {
   const titleFieldId = `lesson-step-${step.id}-title`;
   const notesFieldId = `lesson-step-${step.id}-notes`;
@@ -69,6 +181,17 @@ const StepForm = ({
   const isTitleEmpty = trimmedTitle.length === 0;
   const displayTitle = trimmedTitle.length > 0 ? step.title : "New step";
   const notesValue = step.notes ?? "";
+  const dropZone = useDroppable<StepDropData>({
+    id: `lesson-step-${step.id}-dropzone`,
+    data: { type: "step-dropzone", stepId: step.id },
+  });
+
+  const loadedEntries = resourceEntries.filter(
+    (entry): entry is { id: string; resource: Resource } => Boolean(entry.resource),
+  );
+  const dropMessage = resourceEntries.length
+    ? "Drag to reorder cards or drop new ones from the library."
+    : "Drag resource cards here or use the button below to browse the library.";
 
   const handleResourceClick = () => {
     if (!isResourceSearchOpen || !isResourceSearchOpenForStep) {
@@ -178,28 +301,47 @@ const StepForm = ({
             aria-controls="lesson-draft-resource-search"
             aria-label={`Step ${index + 1} resources`}
           >
-            {resourceCount > 0 ? "Add more resources" : "Add resources"}
+            {resourceCount > 0 ? "Add more resource cards" : "Add resource card"}
           </Button>
           <span className="text-sm text-muted-foreground">{resourceSummary}</span>
         </div>
 
-        {resources.length > 0 ? (
-          <ul className="space-y-3">
-            {resources.map(resource => (
-              <li
-                key={resource.id}
-                className="rounded-md border border-border/60 bg-background/60 p-3"
-              >
-                <p className="text-sm font-medium text-foreground">{resource.title}</p>
-                {resource.description ? (
-                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                    {resource.description}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        <div
+          ref={dropZone.setNodeRef}
+          className={cn(
+            "space-y-3 rounded-lg border-2 border-dashed border-border/60 bg-muted/30 p-4",
+            dropZone.isOver && "border-primary bg-primary/10",
+          )}
+          tabIndex={0}
+          role="button"
+          onKeyDown={event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleResourceClick();
+            }
+          }}
+          aria-label={`Resource drop zone for step ${index + 1}`}
+        >
+          <p className="text-sm text-muted-foreground">{dropMessage}</p>
+          {loadedEntries.length > 0 ? (
+            <SortableContext items={loadedEntries.map(entry => entry.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-3">
+                {loadedEntries.map((entry, entryIndex) => (
+                  <SortableStepResourceCard
+                    key={entry.id}
+                    stepId={step.id}
+                    resourceId={entry.id}
+                    resource={entry.resource}
+                    index={entryIndex}
+                    total={loadedEntries.length}
+                    onRemove={resourceId => onRemoveResource(step.id, resourceId)}
+                    onMove={(resourceId, direction) => onMoveResource(step.id, resourceId, direction)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          ) : null}
+        </div>
 
         {pendingResourceIds.length > 0 ? (
           <div className="space-y-2" aria-live="polite">
@@ -219,7 +361,8 @@ const StepForm = ({
 
         {resourceCount === 0 && pendingResourceIds.length === 0 && missingResourceIds.length === 0 ? (
           <p className="rounded-md border border-dashed border-border/60 bg-muted/40 p-3 text-sm text-muted-foreground">
-            Use the button above to attach links, files, or activities for this part of your lesson.
+            Use the drop zone or the “Add resource card” button to attach links, files, or activities for this
+            part of your lesson.
           </p>
         ) : null}
       </div>
@@ -237,6 +380,10 @@ export const StepEditor = ({
   const removeStep = useLessonDraftStore(state => state.removeStep);
   const renameStep = useLessonDraftStore(state => state.renameStep);
   const setStepNotes = useLessonDraftStore(state => state.setStepNotes);
+  const detachResource = useLessonDraftStore(state => state.detachResource);
+  const insertStepResource = useLessonDraftStore(state => state.insertStepResource);
+  const reorderStepResources = useLessonDraftStore(state => state.reorderStepResources);
+  const moveStepResource = useLessonDraftStore(state => state.moveStepResource);
   const [resourcesById, setResourcesById] = useState<Record<string, Resource | null>>({});
 
   const handleAddStep = () => {
@@ -332,6 +479,85 @@ export const StepEditor = ({
     };
   }, [uniqueResourceIds, resourcesById]);
 
+  useDndMonitor({
+    onDragEnd: event => {
+      const activeData = event.active.data.current as LibraryResourceDragData | StepResourceDragData | null;
+      const overData = event.over?.data.current as StepDropData | StepResourceDragData | null;
+
+      if (!activeData || !overData) {
+        return;
+      }
+
+      if (activeData.type === "library-resource" && overData.type === "step-dropzone") {
+        insertStepResource(overData.stepId, activeData.resourceId);
+        return;
+      }
+
+      if (activeData.type !== "step-resource") {
+        return;
+      }
+
+      const state = useLessonDraftStore.getState();
+      const sourceStep = state.draft.steps.find(step => step.id === activeData.stepId);
+      if (!sourceStep) {
+        return;
+      }
+
+      if (overData.type === "step-resource") {
+        const targetStep = state.draft.steps.find(step => step.id === overData.stepId);
+        if (!targetStep) {
+          return;
+        }
+
+        if (targetStep.id === sourceStep.id) {
+          const fromIndex = sourceStep.resourceIds.indexOf(activeData.resourceId);
+          const toIndex = sourceStep.resourceIds.indexOf(overData.resourceId);
+          if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+            return;
+          }
+          reorderStepResources(sourceStep.id, arrayMove(sourceStep.resourceIds, fromIndex, toIndex));
+          return;
+        }
+
+        const fromIndex = sourceStep.resourceIds.indexOf(activeData.resourceId);
+        const targetIndex = targetStep.resourceIds.indexOf(overData.resourceId);
+        if (fromIndex === -1 || targetIndex === -1) {
+          return;
+        }
+
+        const nextSource = [...sourceStep.resourceIds];
+        nextSource.splice(fromIndex, 1);
+        reorderStepResources(sourceStep.id, nextSource);
+        insertStepResource(targetStep.id, activeData.resourceId, targetIndex);
+        return;
+      }
+
+      if (overData.type === "step-dropzone") {
+        if (overData.stepId === sourceStep.id) {
+          const fromIndex = sourceStep.resourceIds.indexOf(activeData.resourceId);
+          if (fromIndex === -1 || fromIndex === sourceStep.resourceIds.length - 1) {
+            return;
+          }
+          reorderStepResources(
+            sourceStep.id,
+            arrayMove(sourceStep.resourceIds, fromIndex, sourceStep.resourceIds.length - 1),
+          );
+          return;
+        }
+
+        const fromIndex = sourceStep.resourceIds.indexOf(activeData.resourceId);
+        if (fromIndex === -1) {
+          return;
+        }
+
+        const nextSource = [...sourceStep.resourceIds];
+        nextSource.splice(fromIndex, 1);
+        reorderStepResources(sourceStep.id, nextSource);
+        insertStepResource(overData.stepId, activeData.resourceId);
+      }
+    },
+  });
+
   return (
     <Card aria-labelledby="lesson-draft-step-editor-heading">
       <CardHeader className="flex flex-col gap-4 border-b border-border/60 pb-4 md:flex-row md:items-center md:justify-between">
@@ -363,13 +589,16 @@ export const StepEditor = ({
                 onRequestResources={onRequestResourceSearch}
                 isResourceSearchOpen={isResourceSearchOpen}
                 isResourceSearchOpenForStep={isResourceSearchOpen && activeResourceStepId === step.id}
-                resources={step.resourceIds
-                  .map(id => resourcesById[id])
-                  .filter((resource): resource is Resource => Boolean(resource))}
+                resourceEntries={step.resourceIds.map(id => ({
+                  id,
+                  resource: resourcesById[id] ?? null,
+                }))}
                 pendingResourceIds={step.resourceIds.filter(id => resourcesById[id] === undefined)}
                 missingResourceIds={step.resourceIds.filter(id => resourcesById[id] === null)}
                 onTitleChange={renameStep}
                 onNotesChange={setStepNotes}
+                onRemoveResource={(stepId, resourceId) => detachResource(stepId, resourceId)}
+                onMoveResource={(stepId, resourceId, direction) => moveStepResource(stepId, resourceId, direction)}
               />
             ))}
           </div>
