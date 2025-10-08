@@ -316,10 +316,13 @@ export default function LessonBuilderWorkspace() {
 
   if (!user) {
     return (
-      <div className="container py-10">
+      <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden py-10">
         <SEO title="Lesson Builder" description="Lesson Builder" />
-        <div className="rounded-lg border bg-muted/20 p-10 text-center text-muted-foreground">
-          {t.dashboard.common.signInPrompt}
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.25),_rgba(15,23,42,0.85))]" />
+        <div className="container">
+          <div className="rounded-3xl border border-white/20 bg-white/10 p-10 text-center text-muted-foreground shadow-[0_20px_45px_-20px_rgba(15,23,42,0.6)] backdrop-blur-xl">
+            {t.dashboard.common.signInPrompt}
+          </div>
         </div>
       </div>
     );
@@ -327,10 +330,13 @@ export default function LessonBuilderWorkspace() {
 
   if (planQuery.isError) {
     return (
-      <div className="container py-10">
+      <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden py-10">
         <SEO title="Lesson Builder" description="Lesson Builder" />
-        <div className="rounded-lg border bg-destructive/10 p-10 text-center text-destructive">
-          {t.lessonBuilder.editor.loadError}
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(248,113,113,0.2),_rgba(15,23,42,0.85))]" />
+        <div className="container">
+          <div className="rounded-3xl border border-destructive/30 bg-destructive/10 p-10 text-center text-destructive shadow-[0_20px_45px_-20px_rgba(127,29,29,0.6)] backdrop-blur-xl">
+            {t.lessonBuilder.editor.loadError}
+          </div>
         </div>
       </div>
     );
@@ -338,37 +344,46 @@ export default function LessonBuilderWorkspace() {
 
   if (!planQuery.data) {
     return (
-      <div className="container py-10">
+      <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden py-10">
         <SEO title="Lesson Builder" description="Lesson Builder" />
-        <div className="rounded-lg border bg-muted/20 p-10 text-center text-muted-foreground">
-          {t.lessonBuilder.editor.loading}
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.35),_rgba(15,23,42,0.85))]" />
+        <div className="container">
+          <div className="rounded-3xl border border-white/20 bg-white/10 p-10 text-center text-muted-foreground shadow-[0_20px_45px_-20px_rgba(15,23,42,0.6)] backdrop-blur-xl">
+            {t.lessonBuilder.editor.loading}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container h-[calc(100vh-8rem)] py-6">
-      <SEO title={t.lessonBuilder.editor.pageTitle.replace("{title}", planQuery.data.title)} description={t.lessonBuilder.editor.pageDescription} />
-      <LessonBuilder
-        metadata={metadata}
-        body={body}
-        onBodyChange={setBody}
-        onSave={handleManualSave}
-        onAddResource={handleAddResourceClick}
-        onExport={handleExport}
-        resourcePanel={
-          <ResourceSearch
-            resources={resourcesQuery.data ?? []}
-            loading={resourcesQuery.isLoading}
-            onFilterChange={handleFiltersChange}
-            onInsert={resource => insertResourceMutation.mutate(resource)}
-            highlighted={highlightResources}
-          />
-        }
-        autosaveState={autosaveState}
-        lastSavedAt={lastSavedAt}
+    <div className="relative min-h-[calc(100vh-6rem)] overflow-hidden py-10">
+      <SEO
+        title={t.lessonBuilder.editor.pageTitle.replace("{title}", planQuery.data.title)}
+        description={t.lessonBuilder.editor.pageDescription}
       />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(96,165,250,0.3),_rgba(15,23,42,0.92))]" />
+      <div className="container h-[calc(100vh-8rem)] py-6">
+        <LessonBuilder
+          metadata={metadata}
+          body={body}
+          onBodyChange={setBody}
+          onSave={handleManualSave}
+          onAddResource={handleAddResourceClick}
+          onExport={handleExport}
+          resourcePanel={
+            <ResourceSearch
+              resources={resourcesQuery.data ?? []}
+              loading={resourcesQuery.isLoading}
+              onFilterChange={handleFiltersChange}
+              onInsert={resource => insertResourceMutation.mutate(resource)}
+              highlighted={highlightResources}
+            />
+          }
+          autosaveState={autosaveState}
+          lastSavedAt={lastSavedAt}
+        />
+      </div>
     </div>
   );
 }

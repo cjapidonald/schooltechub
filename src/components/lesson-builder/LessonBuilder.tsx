@@ -75,9 +75,12 @@ export function LessonBuilder({
   };
 
   return (
-    <PanelGroup direction="horizontal" className="h-full rounded-xl border bg-card">
-      <Panel defaultSize={65} minSize={40} className="flex flex-col">
-        <div className="flex flex-col gap-5 border-b px-6 py-5">
+    <PanelGroup
+      direction="horizontal"
+      className="h-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 shadow-[0_35px_120px_-45px_rgba(15,23,42,0.8)] backdrop-blur-2xl"
+    >
+      <Panel defaultSize={65} minSize={40} className="flex flex-col bg-transparent">
+        <div className="flex flex-col gap-5 border-b border-white/10 bg-white/10 px-6 py-5 backdrop-blur-xl">
           <div className="flex flex-col gap-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {t.lessonBuilder.editor.heading}
@@ -113,13 +116,28 @@ export function LessonBuilder({
             </div>
           </dl>
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={onAddResource} variant="outline" aria-label={t.lessonBuilder.editor.addResource}>
+            <Button
+              onClick={onAddResource}
+              variant="outline"
+              className="border-white/40 bg-white/10 text-foreground shadow-[0_10px_25px_-15px_rgba(15,23,42,0.7)] backdrop-blur"
+              aria-label={t.lessonBuilder.editor.addResource}
+            >
               {t.lessonBuilder.editor.addResource}
             </Button>
-            <Button onClick={() => onExport("pdf")} variant="secondary" aria-label={t.lessonBuilder.editor.exportPdf}>
+            <Button
+              onClick={() => onExport("pdf")}
+              variant="secondary"
+              className="border-white/30 bg-white/20 text-foreground shadow-[0_10px_25px_-15px_rgba(15,23,42,0.7)] backdrop-blur"
+              aria-label={t.lessonBuilder.editor.exportPdf}
+            >
               {t.lessonBuilder.editor.exportPdf}
             </Button>
-            <Button onClick={() => onExport("docx")} variant="secondary" aria-label={t.lessonBuilder.editor.exportDocx}>
+            <Button
+              onClick={() => onExport("docx")}
+              variant="secondary"
+              className="border-white/30 bg-white/20 text-foreground shadow-[0_10px_25px_-15px_rgba(15,23,42,0.7)] backdrop-blur"
+              aria-label={t.lessonBuilder.editor.exportDocx}
+            >
               {t.lessonBuilder.editor.exportDocx}
             </Button>
             <div className="ml-auto text-xs text-muted-foreground">{autosaveLabel}</div>
@@ -133,16 +151,22 @@ export function LessonBuilder({
             id="lesson-body"
             value={body}
             onChange={event => onBodyChange(event.target.value)}
-            className="h-full min-h-[400px] resize-none"
+            className="h-full min-h-[400px] resize-none border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
             placeholder={t.lessonBuilder.editor.bodyPlaceholder}
           />
         </div>
-        <div className="flex justify-end gap-2 border-t bg-muted/30 px-6 py-4">
-          <Button onClick={onSave} aria-label={t.lessonBuilder.editor.save}>{t.lessonBuilder.editor.save}</Button>
+        <div className="flex justify-end gap-2 border-t border-white/10 bg-white/5 px-6 py-4 backdrop-blur-xl">
+          <Button
+            onClick={onSave}
+            className="border-white/30 bg-gradient-to-r from-sky-300/30 via-white/30 to-indigo-300/30 text-foreground shadow-[0_15px_40px_-20px_rgba(56,189,248,0.9)] backdrop-blur"
+            aria-label={t.lessonBuilder.editor.save}
+          >
+            {t.lessonBuilder.editor.save}
+          </Button>
         </div>
       </Panel>
-      <PanelResizeHandle className="w-2 bg-border transition-colors hover:bg-primary" />
-      <Panel defaultSize={35} minSize={25} className="flex flex-col">
+      <PanelResizeHandle className="w-2 bg-white/30 transition-colors hover:bg-white/60" />
+      <Panel defaultSize={35} minSize={25} className="flex flex-col bg-transparent">
         <div className="h-full overflow-hidden px-4 py-5">
           {resourcePanel}
         </div>

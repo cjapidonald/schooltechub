@@ -49,8 +49,8 @@ const SidebarResourceCard = ({ resource, onInsert, disabled, isPending }: Sideba
         ref={setNodeRef}
         style={style}
         className={cn(
-          "group focus-within:ring-2 focus-within:ring-primary",
-          "cursor-grab rounded-xl border border-border/60 bg-background/80 p-3 shadow-sm transition",
+          "group focus-within:ring-2 focus-within:ring-sky-300/80 focus-within:ring-offset-4 focus-within:ring-offset-[rgba(255,255,255,0.08)]",
+          "cursor-grab rounded-2xl border border-white/20 bg-white/10 p-3 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.9)] backdrop-blur transition",
           isDragging && "opacity-70",
         )}
         {...listeners}
@@ -65,6 +65,7 @@ const SidebarResourceCard = ({ resource, onInsert, disabled, isPending }: Sideba
               onClick={() => onInsert(resource.id)}
               disabled={disabled || isPending}
               aria-label={`Insert ${resource.title} into document`}
+              className="border-white/20 bg-white/10 text-foreground shadow-[0_10px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur"
             >
               {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Add resource card
@@ -74,7 +75,7 @@ const SidebarResourceCard = ({ resource, onInsert, disabled, isPending }: Sideba
                 href={resource.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+                className="text-sm font-medium text-sky-200 underline-offset-2 hover:underline"
               >
                 Preview
               </a>
@@ -155,9 +156,9 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
 
   if (!isAuthenticated) {
     return (
-      <aside className="space-y-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 p-4 text-sm">
-        <p className="font-medium text-primary">Add resources</p>
-        <p className="text-muted-foreground">
+      <aside className="space-y-3 rounded-2xl border border-dashed border-white/30 bg-white/5 p-4 text-sm text-slate-100 backdrop-blur">
+        <p className="font-medium text-white">Add resources</p>
+        <p className="text-slate-200/80">
           Sign in and open a lesson workspace to search approved resources and insert them directly into your document.
         </p>
       </aside>
@@ -165,10 +166,10 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
   }
 
   return (
-    <aside className="space-y-4 rounded-xl border border-border/60 bg-background/80 p-4 shadow-sm">
+    <aside className="space-y-4 rounded-2xl border border-white/20 bg-white/10 p-4 shadow-[0_24px_70px_-40px_rgba(15,23,42,0.9)] backdrop-blur">
       <div className="space-y-2">
         <p className="text-sm font-medium text-foreground">Add a resource</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-slate-200/80">
           Search presentations, worksheets, and videos. Click insert to add the resource to your lesson plan table.
         </p>
       </div>
@@ -180,17 +181,23 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
             value={query}
             onChange={event => setQuery(event.target.value)}
             placeholder="Search the resource library"
-            className="pr-10"
+            className="pr-10 border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
             aria-label="Search lesson resources"
           />
           <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
         </div>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            {subject ? <Badge variant="secondary">{subject}</Badge> : null}
+            {subject ? <Badge variant="secondary" className="border-white/20 bg-white/10 backdrop-blur">{subject}</Badge> : null}
             <span>{resourceQuery.data ? `${resources.length} results` : "Ready to search"}</span>
           </div>
-          <Button type="submit" size="sm" variant="outline" disabled={resourceQuery.isFetching}>
+          <Button
+            type="submit"
+            size="sm"
+            variant="outline"
+            disabled={resourceQuery.isFetching}
+            className="border-white/20 bg-white/10 text-foreground shadow-[0_12px_35px_-20px_rgba(15,23,42,0.85)] backdrop-blur"
+          >
             {resourceQuery.isFetching ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : null}
             Search
           </Button>
@@ -198,7 +205,7 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
       </form>
 
       {resourceQuery.isError ? (
-        <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive backdrop-blur">
           Unable to load resources right now. Please try searching again shortly.
         </div>
       ) : null}
@@ -212,7 +219,7 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
         ) : null}
 
         {!resourceQuery.isLoading && resources.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No matching resources yet. Try another search term.</p>
+          <p className="text-sm text-slate-200/80">No matching resources yet. Try another search term.</p>
         ) : null}
 
         <ul className="space-y-3">

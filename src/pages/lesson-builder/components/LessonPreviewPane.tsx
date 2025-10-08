@@ -49,8 +49,8 @@ const renderRow = (label: string, value?: string | null, valueClassName = "") =>
       key={label}
       className="grid grid-cols-[120px_1fr] gap-4 px-4 py-3 text-sm"
     >
-      <dt className="font-medium text-slate-500">{label}</dt>
-      <dd className={`text-slate-900 ${valueClassName}`.trim()}>{trimmedValue}</dd>
+      <dt className="font-medium text-slate-200/80">{label}</dt>
+      <dd className={`text-white ${valueClassName}`.trim()}>{trimmedValue}</dd>
     </div>
   );
 };
@@ -88,26 +88,26 @@ export function LessonPreviewPane({ meta, profile }: LessonPreviewPaneProps) {
       {showSchoolHeader ? (
         <div className="flex items-center gap-4">
           {schoolLogoUrl ? (
-            <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg border border-white/20 bg-white/10 backdrop-blur">
               <img src={schoolLogoUrl} alt="School logo" className="h-full w-full object-contain" />
             </div>
           ) : null}
           {schoolName ? (
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">School</p>
-              <p className="text-lg font-semibold text-slate-900">{schoolName}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-200/80">School</p>
+              <p className="text-lg font-semibold text-white">{schoolName}</p>
             </div>
           ) : null}
         </div>
       ) : null}
 
       {hasSummaryRows ? (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="grid divide-y divide-slate-200/80 md:grid-cols-2 md:divide-x">
-            <dl className="divide-y divide-slate-200/80">
+        <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_25px_70px_-40px_rgba(15,23,42,0.8)] backdrop-blur">
+          <div className="grid divide-y divide-white/10 md:grid-cols-2 md:divide-x">
+            <dl className="divide-y divide-white/10">
               {leftSummaryElements}
             </dl>
-            <dl className="divide-y divide-slate-200/80">
+            <dl className="divide-y divide-white/10">
               {rightSummaryElements}
             </dl>
           </div>
@@ -116,26 +116,26 @@ export function LessonPreviewPane({ meta, profile }: LessonPreviewPaneProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <section>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Success Criteria</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-200/80">Success Criteria</h3>
           {successCriteria ? (
-            <p className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-200 bg-white/80 p-4 text-sm text-slate-800">
+            <p className="mt-2 whitespace-pre-wrap rounded-2xl border border-white/20 bg-white/10 p-4 text-sm text-slate-100 backdrop-blur">
               {successCriteria}
             </p>
           ) : (
-            <p className="mt-2 rounded-lg border border-dashed border-slate-200 bg-white/60 p-4 text-sm text-slate-500">
+            <p className="mt-2 rounded-2xl border border-dashed border-white/20 bg-white/5 p-4 text-sm text-slate-200/70 backdrop-blur">
               Outline how students will demonstrate mastery in this lesson.
             </p>
           )}
         </section>
 
         <section>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Learning Objective</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-200/80">Learning Objective</h3>
           {objective ? (
-            <p className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-200 bg-white/80 p-4 text-sm text-slate-800">
+            <p className="mt-2 whitespace-pre-wrap rounded-2xl border border-white/20 bg-white/10 p-4 text-sm text-slate-100 backdrop-blur">
               {objective}
             </p>
           ) : (
-            <p className="mt-2 rounded-lg border border-dashed border-slate-200 bg-white/60 p-4 text-sm text-slate-500">
+            <p className="mt-2 rounded-2xl border border-dashed border-white/20 bg-white/5 p-4 text-sm text-slate-200/70 backdrop-blur">
               Add a learning objective to highlight what students will achieve.
             </p>
           )}
