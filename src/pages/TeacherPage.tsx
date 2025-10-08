@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useOptionalUser } from "@/hooks/useOptionalUser";
@@ -888,9 +887,9 @@ export default function TeacherPage() {
               </section>
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">
-              {lessonBuilderContext ? (
-                <div className="space-y-6">
-                  <div className={cn(GLASS_PANEL_CLASS, "space-y-6")}> 
+              <div className="space-y-6">
+                {lessonBuilderContext ? (
+                  <div className={cn(GLASS_PANEL_CLASS, "space-y-6")}>
                     <h3 className="text-lg font-semibold">
                       {t.dashboard.lessonBuilder.contextTitle}
                     </h3>
@@ -911,25 +910,8 @@ export default function TeacherPage() {
                       {t.dashboard.lessonBuilder.clearContext}
                     </Button>
                   </div>
-                  <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 text-slate-900 shadow-[0_30px_120px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
-                    <LessonBuilderPage
-                      initialMeta={{
-                        title: lessonBuilderContext.title,
-                        subject: (lessonBuilderContext.subject as Subject | null | undefined) ?? undefined,
-                        date: lessonBuilderContext.date ?? undefined,
-                        classId: lessonBuilderContext.classId ?? undefined,
-                        lessonId: lessonBuilderContext.lessonId ?? undefined,
-                        sequence: lessonBuilderContext.sequence ?? undefined,
-                        stage: lessonBuilderContext.stage ?? undefined,
-                      }}
-                      initialClassId={lessonBuilderContext.classId}
-                      onLessonContextChange={handleEmbeddedLessonContextChange}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <Alert className={cn(GLASS_PANEL_CLASS, "space-y-4 text-white")}> 
-                  <div className="space-y-2">
+                ) : (
+                  <div className={cn(GLASS_PANEL_CLASS, "space-y-4 text-white")}>
                     <h3 className="text-lg font-semibold">
                       {t.dashboard.lessonBuilder.emptyStateTitle}
                     </h3>
@@ -937,23 +919,27 @@ export default function TeacherPage() {
                       {t.dashboard.lessonBuilder.emptyStateDescription}
                     </p>
                   </div>
-                  <Button
-                    className="rounded-xl border border-white/40 bg-white/90 text-slate-900 hover:bg-white"
-                    onClick={() => setLessonBuilderContext({
-                      title: t.dashboard.lessonBuilder.sampleLesson,
-                      classId: null,
-                      classTitle: null,
-                      stage: null,
-                      subject: null,
-                      date: null,
-                      sequence: null,
-                      lessonId: null,
-                    })}
-                  >
-                    {t.dashboard.lessonBuilder.launchBlank}
-                  </Button>
-                </Alert>
-              )}
+                )}
+                <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 text-slate-900 shadow-[0_30px_120px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
+                  <LessonBuilderPage
+                    initialMeta={
+                      lessonBuilderContext
+                        ? {
+                            title: lessonBuilderContext.title,
+                            subject: (lessonBuilderContext.subject as Subject | null | undefined) ?? undefined,
+                            date: lessonBuilderContext.date ?? undefined,
+                            classId: lessonBuilderContext.classId ?? undefined,
+                            lessonId: lessonBuilderContext.lessonId ?? undefined,
+                            sequence: lessonBuilderContext.sequence ?? undefined,
+                            stage: lessonBuilderContext.stage ?? undefined,
+                          }
+                        : undefined
+                    }
+                    initialClassId={lessonBuilderContext?.classId ?? undefined}
+                    onLessonContextChange={handleEmbeddedLessonContextChange}
+                  />
+                </div>
+              </div>
             </TabsContent>
             <TabsContent value="students" className="space-y-6">
               <StudentsSection
