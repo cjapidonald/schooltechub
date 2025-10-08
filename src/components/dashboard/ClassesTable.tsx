@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 
 type ClassHighlight = {
   students: string[];
-  curriculum: string[];
+  curriculum: Array<{ id: string; title: string }>;
 };
 
 interface ClassesTableProps {
@@ -128,11 +128,11 @@ export function ClassesTable({
                             <>
                               <ul className="mt-2 space-y-2 text-white/80">
                                 {lessonPreview.map((lesson, index) => (
-                                  <li key={`${item.id}-lesson-${index}`} className="flex items-start gap-3 text-left">
+                                  <li key={`${item.id}-lesson-${lesson.id}`} className="flex items-start gap-3 text-left">
                                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white/80">
                                       {index + 1}
                                     </span>
-                                    <span className="text-sm leading-snug">{lesson}</span>
+                                    <span className="text-sm leading-snug">{lesson.title}</span>
                                   </li>
                                 ))}
                               </ul>

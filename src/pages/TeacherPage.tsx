@@ -21,6 +21,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { DashboardHeader, DashboardQuickAction } from "@/components/dashboard/DashboardHeader";
 import { ClassesTable } from "@/components/dashboard/ClassesTable";
+import { CurriculumTable, type CurriculumLessonRow } from "@/components/dashboard/CurriculumTable";
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
@@ -73,16 +74,59 @@ const EXAMPLE_CLASS_STUDENTS = [
   "Sofia Rossi",
 ];
 
-const EXAMPLE_CLASS_CURRICULUM = [
-  "Igniting narrative hooks with sensory details",
-  "Designing character mood boards in Canva",
-  "Collaborative story outlining in Google Docs",
-  "Peer-feedback protocols for revision day",
+type ClassCurriculumLesson = {
+  id: string;
+  title: string;
+  sequence: number;
+  subject: string | null;
+  stage: string | null;
+  presentationUrl: string | null;
+  lastUpdatedAt: string | null;
+};
+
+
+const EXAMPLE_CLASS_CURRICULUM: ClassCurriculumLesson[] = [
+  {
+    id: "example-lesson-1",
+    title: "Igniting narrative hooks with sensory details",
+    sequence: 1,
+    subject: DASHBOARD_EXAMPLE_CLASS.subject ?? null,
+    stage: DASHBOARD_EXAMPLE_CLASS.stage ?? null,
+    presentationUrl: "https://example.com/presentations/narrative-hooks",
+    lastUpdatedAt: new Date().toISOString(),
+  },
+  {
+    id: "example-lesson-2",
+    title: "Designing character mood boards in Canva",
+    sequence: 2,
+    subject: DASHBOARD_EXAMPLE_CLASS.subject ?? null,
+    stage: DASHBOARD_EXAMPLE_CLASS.stage ?? null,
+    presentationUrl: "https://example.com/presentations/canva-moodboards",
+    lastUpdatedAt: new Date().toISOString(),
+  },
+  {
+    id: "example-lesson-3",
+    title: "Collaborative story outlining in Google Docs",
+    sequence: 3,
+    subject: DASHBOARD_EXAMPLE_CLASS.subject ?? null,
+    stage: DASHBOARD_EXAMPLE_CLASS.stage ?? null,
+    presentationUrl: null,
+    lastUpdatedAt: null,
+  },
+  {
+    id: "example-lesson-4",
+    title: "Peer-feedback protocols for revision day",
+    sequence: 4,
+    subject: DASHBOARD_EXAMPLE_CLASS.subject ?? null,
+    stage: DASHBOARD_EXAMPLE_CLASS.stage ?? null,
+    presentationUrl: null,
+    lastUpdatedAt: null,
+  },
 ];
 
 type ClassEnrichment = {
   students: string[];
-  curriculum: string[];
+  curriculum: ClassCurriculumLesson[];
 };
 
 const classSchema = z.object({
@@ -100,6 +144,7 @@ type LessonBuilderRouteContext = {
   classId: string | null;
   classTitle: string | null;
   stage: string | null;
+  subject: string | null;
   date: string | null;
   sequence: number | null;
 };
@@ -137,6 +182,25 @@ const splitMultilineValues = (input: string | undefined) =>
 const splitStudentNames = splitMultilineValues;
 const splitCurriculumTitles = splitMultilineValues;
 
+const generateLessonId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `lesson-${Math.random().toString(36).slice(2)}-${Date.now().toString(36)}`;
+
+const createCurriculumLesson = (
+  title: string,
+  index: number,
+  classInfo?: { subject?: string | null; stage?: string | null },
+): ClassCurriculumLesson => ({
+  id: generateLessonId(),
+  title,
+  sequence: index + 1,
+  subject: classInfo?.subject ?? null,
+  stage: classInfo?.stage ?? null,
+  presentationUrl: null,
+  lastUpdatedAt: new Date().toISOString(),
+});
+
 export default function TeacherPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -160,7 +224,11 @@ export default function TeacherPage() {
       curriculum: EXAMPLE_CLASS_CURRICULUM,
     },
   }));
-  const [curriculumDialogClassId, setCurriculumDialogClassId] = useState<string | null>(null);
+  const [assessmentSuggestion, setAssessmentSuggestion] = useState<{
+    classId: string;
+    classTitle: string;
+    lessonTitle: string;
+  } | null>(null);
   const prototypeAccessToast = useMemo(
     () => ({
       title: t.dashboard.toasts.prototypeUnlocked,
@@ -211,7 +279,15 @@ export default function TeacherPage() {
     (context: LessonBuilderRouteContext | null) => {
       updateSearchParams(params => {
         params.set("tab", "lessonBuilder");
-        const keys = ["lessonTitle", "lessonClassId", "lessonClassTitle", "lessonStage", "lessonDate", "lessonSeq"];
+        const keys = [
+          "lessonTitle",
+          "lessonClassId",
+          "lessonClassTitle",
+          "lessonStage",
+          "lessonSubject",
+          "lessonDate",
+          "lessonSeq",
+        ];
         keys.forEach(key => params.delete(key));
 
         if (!context) {
@@ -227,6 +303,9 @@ export default function TeacherPage() {
         }
         if (context.stage) {
           params.set("lessonStage", context.stage);
+        }
+        if (context.subject) {
+          params.set("lessonSubject", context.subject);
         }
         if (context.date) {
           params.set("lessonDate", context.date);
@@ -261,6 +340,7 @@ export default function TeacherPage() {
       classId: getParam("lessonClassId"),
       classTitle: getParam("lessonClassTitle"),
       stage: getParam("lessonStage"),
+      subject: getParam("lessonSubject"),
       date: getParam("lessonDate"),
       sequence: Number.isFinite(sequenceNumber) ? sequenceNumber : null,
     };
@@ -275,20 +355,25 @@ export default function TeacherPage() {
               label: t.dashboard.lessonBuilder.labels.lesson,
               value: lessonBuilderContext.title,
             },
-            {
-              key: "class",
-              label: t.dashboard.lessonBuilder.labels.class,
-              value: lessonBuilderContext.classTitle,
-            },
-            {
-              key: "stage",
-              label: t.dashboard.lessonBuilder.labels.stage,
-              value: lessonBuilderContext.stage,
-            },
-            {
-              key: "date",
-              label: t.dashboard.lessonBuilder.labels.date,
-              value: formatLessonContextDate(lessonBuilderContext.date),
+          {
+            key: "class",
+            label: t.dashboard.lessonBuilder.labels.class,
+            value: lessonBuilderContext.classTitle,
+          },
+          {
+            key: "stage",
+            label: t.dashboard.lessonBuilder.labels.stage,
+            value: lessonBuilderContext.stage,
+          },
+          {
+            key: "subject",
+            label: t.dashboard.classes.columns.subject,
+            value: lessonBuilderContext.subject,
+          },
+          {
+            key: "date",
+            label: t.dashboard.lessonBuilder.labels.date,
+            value: formatLessonContextDate(lessonBuilderContext.date),
             },
             {
               key: "sequence",
@@ -345,7 +430,12 @@ export default function TeacherPage() {
         rosterCount: rosterNames.length,
         curriculumCount: curriculumLessons.length,
         students: rosterNames,
-        curriculum: curriculumLessons,
+        curriculum: curriculumLessons.map((title, index) =>
+          createCurriculumLesson(title, index, {
+            subject: values.subject ?? null,
+            stage: values.stage ?? null,
+          }),
+        ),
       };
     },
     onSuccess: ({ rosterCount, curriculumCount, createdClass, students, curriculum }, variables) => {
@@ -430,37 +520,140 @@ export default function TeacherPage() {
     return [DASHBOARD_EXAMPLE_CLASS];
   }, [classesQuery.data]);
 
-  const curriculumSummaries = useMemo(
+  const curriculumRows = useMemo<CurriculumLessonRow[]>(
     () =>
-      classes
-        .map(item => ({ classItem: item, enrichment: classEnrichments[item.id] }))
-        .filter(entry => entry.enrichment && entry.enrichment.curriculum.length > 0),
+      classes.flatMap(classItem => {
+        const enrichment = classEnrichments[classItem.id];
+        if (!enrichment) {
+          return [];
+        }
+
+        return enrichment.curriculum.map<CurriculumLessonRow>(lesson => ({
+          classId: classItem.id,
+          lessonId: lesson.id,
+          classTitle: classItem.title,
+          classStage: lesson.stage ?? classItem.stage ?? null,
+          classSubject: lesson.subject ?? classItem.subject ?? null,
+          title: lesson.title,
+          sequence: lesson.sequence,
+          presentationUrl: lesson.presentationUrl ?? null,
+          lastUpdatedAt: lesson.lastUpdatedAt ?? null,
+        }));
+      }),
     [classes, classEnrichments],
   );
 
-  const activeCurriculum = useMemo(() => {
-    if (!curriculumDialogClassId) {
-      return null;
-    }
+  const handleUpdatePresentationLink = useCallback(
+    (classId: string, lessonId: string, url: string | null) => {
+      setClassEnrichments(prev => {
+        const existing = prev[classId];
+        if (!existing) {
+          return prev;
+        }
 
-    const classItem = classes.find(item => item.id === curriculumDialogClassId);
-    if (!classItem) {
-      return null;
-    }
+        let hasChanges = false;
+        const updatedLessons = existing.curriculum.map(lesson => {
+          if (lesson.id !== lessonId) {
+            return lesson;
+          }
 
-    const enrichment = classEnrichments[curriculumDialogClassId];
-    if (!enrichment || enrichment.curriculum.length === 0) {
-      return null;
-    }
+          if (lesson.presentationUrl === url) {
+            return lesson;
+          }
 
-    return { classItem, enrichment };
-  }, [classEnrichments, classes, curriculumDialogClassId]);
+          hasChanges = true;
+          return {
+            ...lesson,
+            presentationUrl: url,
+            lastUpdatedAt: new Date().toISOString(),
+          };
+        });
 
-  useEffect(() => {
-    if (curriculumDialogClassId && !activeCurriculum) {
-      setCurriculumDialogClassId(null);
-    }
-  }, [activeCurriculum, curriculumDialogClassId]);
+        if (!hasChanges) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [classId]: {
+            ...existing,
+            curriculum: updatedLessons,
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  const handleLaunchLessonBuilder = useCallback(
+    (row: CurriculumLessonRow) => {
+      setClassEnrichments(prev => {
+        const existing = prev[row.classId];
+        if (!existing) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [row.classId]: {
+            ...existing,
+            curriculum: existing.curriculum.map(lesson =>
+              lesson.id === row.lessonId
+                ? { ...lesson, lastUpdatedAt: new Date().toISOString() }
+                : lesson,
+            ),
+          },
+        };
+      });
+
+      setLessonBuilderContext({
+        title: row.title,
+        classId: row.classId,
+        classTitle: row.classTitle,
+        stage: row.classStage,
+        subject: row.classSubject,
+        date: null,
+        sequence: row.sequence,
+      });
+    },
+    [setLessonBuilderContext],
+  );
+
+  const handleAddAssessmentFromCurriculum = useCallback(
+    (row: CurriculumLessonRow) => {
+      setClassEnrichments(prev => {
+        const existing = prev[row.classId];
+        if (!existing) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [row.classId]: {
+            ...existing,
+            curriculum: existing.curriculum.map(lesson =>
+              lesson.id === row.lessonId
+                ? { ...lesson, lastUpdatedAt: new Date().toISOString() }
+                : lesson,
+            ),
+          },
+        };
+      });
+      setAssessmentSuggestion({
+        classId: row.classId,
+        classTitle: row.classTitle,
+        lessonTitle: row.title,
+      });
+      updateSearchParams(params => {
+        params.set("tab", "assessments");
+      });
+    },
+    [updateSearchParams],
+  );
+
+  const handleAssessmentSuggestionHandled = useCallback(() => {
+    setAssessmentSuggestion(null);
+  }, []);
 
   const derivedNameParts = useMemo(() => {
     const fallback = deriveNamePartsFromFullName(fullName ?? displayName ?? null);
@@ -619,86 +812,15 @@ export default function TeacherPage() {
                     Build curriculum outlines that stay in sync with each class roster.
                   </p>
                 </div>
-                <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {curriculumSummaries.length === 0 ? (
-                    <div className="col-span-full flex min-h-[240px] flex-col items-center justify-center gap-3 rounded-3xl border border-white/15 bg-white/5 p-6 text-center text-sm text-white/70">
-                      <p>Add lesson titles to a class to see the curriculum appear here.</p>
-                      <Button
-                        variant="outline"
-                        className="rounded-xl border-white/40 bg-white/10 text-white hover:bg-white/20"
-                        onClick={() => setClassDialogOpen(true)}
-                      >
-                        {t.dashboard.quickActions.newClass}
-                      </Button>
-                    </div>
-                  ) : (
-                    curriculumSummaries.map(({ classItem, enrichment }) => {
-                      const lessonPreview = enrichment.curriculum.slice(0, 3);
-                      const extraLessons = Math.max(enrichment.curriculum.length - lessonPreview.length, 0);
-                      const studentPreview = enrichment.students.slice(0, 4);
-                      const extraStudents = Math.max(enrichment.students.length - studentPreview.length, 0);
-
-                      return (
-                        <button
-                          key={classItem.id}
-                          type="button"
-                          onClick={() => setCurriculumDialogClassId(classItem.id)}
-                          className="group flex h-full min-h-[240px] flex-col gap-5 rounded-3xl border border-white/15 bg-white/10 p-6 text-left text-white/80 shadow-[0_35px_120px_-60px_rgba(15,23,42,0.95)] backdrop-blur-2xl transition duration-300 hover:border-white/30 hover:bg-white/15 hover:text-white"
-                        >
-                          <div className="space-y-2">
-                            <p className="text-xs uppercase tracking-wide text-white/60">
-                              {classItem.stage || t.dashboard.classes.columns.stage + ": —"}
-                            </p>
-                            <h3 className="text-lg font-semibold text-white">{classItem.title}</h3>
-                            <p className="text-sm text-white/70">{classItem.subject || "Subject not set yet"}</p>
-                          </div>
-                          <div className="space-y-4 text-sm">
-                            <div>
-                              <p className="text-xs uppercase tracking-wide text-white/60">Lessons ready</p>
-                              <ul className="mt-2 space-y-2 text-white/80">
-                                {lessonPreview.map((lesson, index) => (
-                                  <li key={`${classItem.id}-curriculum-lesson-${index}`} className="flex items-start gap-3">
-                                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[11px] font-semibold text-white/80">
-                                      {index + 1}
-                                    </span>
-                                    <span className="text-sm leading-snug">{lesson}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                              {extraLessons > 0 ? (
-                                <p className="mt-2 text-xs text-white/60">
-                                  + {extraLessons} more lesson{extraLessons === 1 ? "" : "s"}
-                                </p>
-                              ) : null}
-                            </div>
-                            <div>
-                              <p className="text-xs uppercase tracking-wide text-white/60">Students linked</p>
-                              <div className="mt-2 flex flex-wrap gap-2 text-xs text-white/80">
-                                {studentPreview.map((name, index) => (
-                                  <span
-                                    key={`${classItem.id}-curriculum-student-${index}`}
-                                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1"
-                                  >
-                                    {name}
-                                  </span>
-                                ))}
-                                {extraStudents > 0 ? (
-                                  <span className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-white/60">
-                                    + {extraStudents} more
-                                  </span>
-                                ) : null}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-auto flex items-center justify-between pt-2 text-sm font-semibold text-white">
-                            <span>Open curriculum</span>
-                            <span aria-hidden>&rarr;</span>
-                          </div>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
+                <CurriculumTable
+                  lessons={curriculumRows}
+                  onLaunchLessonBuilder={handleLaunchLessonBuilder}
+                  onUpdatePresentationLink={(lesson, url) =>
+                    handleUpdatePresentationLink(lesson.classId, lesson.lessonId, url)
+                  }
+                  onAddAssessment={handleAddAssessmentFromCurriculum}
+                  onCreateClass={() => setClassDialogOpen(true)}
+                />
               </section>
             </TabsContent>
             <TabsContent value="lessonBuilder" className="space-y-6">
@@ -726,7 +848,13 @@ export default function TeacherPage() {
                     </Button>
                   </div>
                   <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/10 text-slate-900 shadow-[0_30px_120px_-35px_rgba(15,23,42,0.9)] backdrop-blur-2xl">
-                    <LessonBuilderPage />
+                    <LessonBuilderPage
+                      initialMeta={{
+                        title: lessonBuilderContext.title,
+                        subject: lessonBuilderContext.subject ?? undefined,
+                      }}
+                      initialClassId={lessonBuilderContext.classId}
+                    />
                   </div>
                 </div>
               ) : (
@@ -746,6 +874,7 @@ export default function TeacherPage() {
                       classId: null,
                       classTitle: null,
                       stage: null,
+                      subject: null,
                       date: null,
                       sequence: null,
                     })}
@@ -763,72 +892,23 @@ export default function TeacherPage() {
               />
             </TabsContent>
             <TabsContent value="assessments" className="space-y-6">
-              <AssessmentsSection className={cn(GLASS_PANEL_CLASS, "space-y-6")} />
+              <AssessmentsSection
+                className={cn(GLASS_PANEL_CLASS, "space-y-6")}
+                initialClassId={assessmentSuggestion?.classId ?? null}
+                initialAssessmentSuggestion={
+                  assessmentSuggestion
+                    ? {
+                        title: `${assessmentSuggestion.lessonTitle} assessment`,
+                        description: `Plan how students will demonstrate learning from ${assessmentSuggestion.lessonTitle}.`,
+                      }
+                    : null
+                }
+                onSuggestionHandled={handleAssessmentSuggestionHandled}
+              />
             </TabsContent>
           </Tabs>
         </section>
       </div>
-
-      <Dialog open={Boolean(curriculumDialogClassId)} onOpenChange={open => !open && setCurriculumDialogClassId(null)}>
-        <DialogContent className="sm:max-w-2xl border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
-          {activeCurriculum ? (
-            <div className="space-y-6">
-              <DialogHeader className="space-y-2 text-left">
-                <DialogTitle className="text-2xl font-semibold text-white">
-                  {activeCurriculum.classItem.title}
-                </DialogTitle>
-                <p className="text-sm text-white/70">
-                  {(activeCurriculum.classItem.stage ?? t.dashboard.classes.columns.stage + ": —")}
-                  {" • "}
-                  {activeCurriculum.classItem.subject || "Subject not set yet"}
-                  {" • "}
-                  {activeCurriculum.enrichment.students.length} student
-                  {activeCurriculum.enrichment.students.length === 1 ? "" : "s"}
-                </p>
-              </DialogHeader>
-              <div className="space-y-5 text-sm text-white/80">
-                <div className="rounded-2xl border border-white/15 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-wide text-white/60">Student roster</p>
-                  {activeCurriculum.enrichment.students.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2 text-sm text-white/80">
-                      {activeCurriculum.enrichment.students.map((name, index) => (
-                        <span
-                          key={`${activeCurriculum.classItem.id}-dialog-student-${index}`}
-                          className="rounded-full border border-white/20 bg-white/10 px-3 py-1"
-                        >
-                          {name}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-3 text-sm text-white/60">No students added yet.</p>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  <p className="text-xs uppercase tracking-wide text-white/60">Lesson titles</p>
-                  <div className="overflow-hidden rounded-2xl border border-white/15 bg-white/5">
-                    <ul className="divide-y divide-white/10 text-white/80">
-                      {activeCurriculum.enrichment.curriculum.map((lesson, index) => (
-                        <li
-                          key={`${activeCurriculum.classItem.id}-dialog-lesson-${index}`}
-                          className="flex items-center gap-4 px-4 py-3"
-                        >
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs font-semibold text-white/80">
-                            {index + 1}
-                          </span>
-                          <span className="flex-1 text-sm leading-snug">{lesson}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-sm text-white/70">Select a curriculum card to view lesson details.</div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isClassDialogOpen} onOpenChange={setClassDialogOpen}>
         <DialogContent className="sm:max-w-lg border border-white/30 bg-white/10 text-white shadow-[0_35px_120px_-40px_rgba(15,23,42,0.95)] backdrop-blur-2xl">
