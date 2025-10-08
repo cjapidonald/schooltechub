@@ -26,7 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMyClasses } from "@/hooks/useMyClasses";
-import { linkPlanToClass } from "@/lib/classes";
+import { linkPlanToClass, listClassLessons, type ClassLessonSummary } from "@/lib/classes";
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
 import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
@@ -45,6 +45,10 @@ const createInitialMeta = (): LessonPlanMetaDraft => ({
   date: null,
   objective: "",
   successCriteria: "",
+  classId: null,
+  lessonId: null,
+  sequence: null,
+  stage: null,
 });
 
 const escapeHtml = (value: string): string =>
@@ -185,16 +189,31 @@ function mapSubject(value: string | null): Subject | null {
   return match ?? null;
 }
 
+interface LessonContextChange {
+  classId: string | null;
+  classTitle: string | null;
+  lessonId: string | null;
+  lessonTitle: string;
+  subject: string | null;
+  stage: string | null;
+  date: string | null;
+  sequence: number | null;
+}
+
 interface LessonBuilderPageProps {
   layoutMode?: "standalone" | "embedded";
   initialMeta?: Partial<LessonPlanMetaDraft> | null;
   initialClassId?: string | null;
+  onLessonContextChange?: (context: LessonContextChange) => void;
 }
+
+const NO_LESSON_VALUE = "__no_lesson__";
 
 const LessonBuilderPage = ({
   layoutMode = "standalone",
   initialMeta = null,
   initialClassId = null,
+  onLessonContextChange,
 }: LessonBuilderPageProps = {}) => {
   const [meta, setMeta] = useState<LessonPlanMetaDraft>(() => ({
     ...createInitialMeta(),
@@ -206,8 +225,14 @@ const LessonBuilderPage = ({
   const [searchParams] = useSearchParams();
   const planParam = layoutMode === "standalone" ? searchParams.get("id") : null;
   const searchParamClassId = layoutMode === "standalone" ? searchParams.get("classId") : null;
-  const resolvedInitialClassId = initialClassId ?? searchParamClassId;
+  const metaInitialClassId =
+    typeof initialMeta?.classId === "string" && initialMeta.classId.trim().length > 0
+      ? initialMeta.classId
+      : null;
+  const resolvedInitialClassId = initialClassId ?? metaInitialClassId ?? searchParamClassId;
   const { language, t } = useLanguage();
+  const contextCopy = t.lessonBuilder.contextSelector;
+  const classLinkingCopy = t.lessonBuilder.classLinking;
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
   const { toast } = useToast();
   const docTemplateRef = useRef<string>("");
@@ -237,15 +262,25 @@ const LessonBuilderPage = ({
   const [selectedClassId, setSelectedClassId] = useState<string | undefined>(
     resolvedInitialClassId ?? undefined,
   );
+  const [lessonsByClass, setLessonsByClass] = useState<Record<string, ClassLessonSummary[]>>({});
+  const [isLoadingLessons, setIsLoadingLessons] = useState(false);
+  const [lessonsError, setLessonsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!initialMeta) {
       return;
     }
 
+    const sanitizedEntries = Object.entries(initialMeta).filter(([, value]) => value !== undefined);
+    if (sanitizedEntries.length === 0) {
+      return;
+    }
+
+    const sanitized = Object.fromEntries(sanitizedEntries) as Partial<LessonPlanMetaDraft>;
+
     setMeta(prev => ({
       ...prev,
-      ...initialMeta,
+      ...sanitized,
     }));
   }, [initialMeta]);
 
@@ -266,6 +301,17 @@ const LessonBuilderPage = ({
   useEffect(() => {
     latestMeta.current = meta;
   }, [meta]);
+
+  useEffect(() => {
+    const normalizedClassId = selectedClassId ?? null;
+    setMeta(prev => {
+      if (prev.classId === normalizedClassId) {
+        return prev;
+      }
+
+      return { ...prev, classId: normalizedClassId };
+    });
+  }, [selectedClassId]);
 
   useEffect(() => {
     const trimmedTeacher = meta.teacher?.trim();
@@ -295,16 +341,7 @@ const LessonBuilderPage = ({
     } else {
       docTemplateRef.current = template;
     }
-  }, [
-    fullName,
-    lessonDocHtml,
-    meta.date,
-    meta.objective,
-    meta.subject,
-    meta.successCriteria,
-    meta.teacher,
-    meta.title,
-  ]);
+  }, [fullName, lessonDocHtml, meta]);
 
   useEffect(() => {
     let active = true;
@@ -359,6 +396,89 @@ const LessonBuilderPage = ({
   }, [classesError, isAuthenticated, toast]);
 
   useEffect(() => {
+    if (!selectedClassId) {
+      setIsLoadingLessons(false);
+      setLessonsError(null);
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setLessonsByClass(prev => ({ ...prev, [selectedClassId]: prev[selectedClassId] ?? [] }));
+      setIsLoadingLessons(false);
+      setLessonsError(null);
+      return;
+    }
+
+    let active = true;
+    setIsLoadingLessons(true);
+    setLessonsError(null);
+
+    const loadLessons = async () => {
+      try {
+        const lessons = await listClassLessons(selectedClassId);
+        if (!active || !isMounted.current) {
+          return;
+        }
+
+        setLessonsByClass(prev => ({ ...prev, [selectedClassId]: lessons }));
+
+        const currentLessonId = latestMeta.current.lessonId;
+        if (currentLessonId) {
+          const matchedLesson = lessons.find(lesson => lesson.id === currentLessonId);
+
+          if (!matchedLesson) {
+            setMeta(prev => {
+              if (prev.lessonId === null && prev.sequence === null && prev.stage === null) {
+                return prev;
+              }
+
+              return { ...prev, lessonId: null, sequence: null, stage: null };
+            });
+          } else {
+            setMeta(prev => {
+              const nextSequence = matchedLesson.sequence ?? null;
+              const nextStage = matchedLesson.stage ?? null;
+
+              if (
+                prev.lessonId === matchedLesson.id &&
+                prev.sequence === nextSequence &&
+                prev.stage === nextStage
+              ) {
+                return prev;
+              }
+
+              return {
+                ...prev,
+                lessonId: matchedLesson.id,
+                sequence: nextSequence,
+                stage: nextStage,
+              };
+            });
+          }
+        }
+      } catch (error) {
+        if (!active || !isMounted.current) {
+          return;
+        }
+
+        const message = error instanceof Error ? error.message : "Failed to load lessons.";
+        setLessonsError(message);
+        setLessonsByClass(prev => ({ ...prev, [selectedClassId]: [] }));
+      } finally {
+        if (active && isMounted.current) {
+          setIsLoadingLessons(false);
+        }
+      }
+    };
+
+    void loadLessons();
+
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, selectedClassId, setMeta]);
+
+  useEffect(() => {
     if (!preselectedClassId) {
       return;
     }
@@ -391,13 +511,15 @@ const LessonBuilderPage = ({
           }
 
           setPlanId(record.id);
-          setMeta({
+          setMeta(prev => ({
+            ...prev,
             title: record.title,
             subject: mapSubject(record.subject),
             date: record.date,
             objective: record.objective,
             successCriteria: record.successCriteria,
-          });
+            classId: record.classId ?? prev.classId ?? null,
+          }));
 
           const timestamp = record.lastSavedAt ?? record.updatedAt;
           setLastSavedAt(timestamp ? new Date(timestamp) : null);
@@ -532,12 +654,47 @@ const LessonBuilderPage = ({
 
   const handleClassSelection = useCallback(
     async (classId: string) => {
+      let nextMetaSnapshot: LessonPlanMetaDraft | null = null;
+      setMeta(prev => {
+        if (prev.classId === classId && prev.lessonId === null && prev.sequence === null && prev.stage === null) {
+          nextMetaSnapshot = prev;
+          return prev;
+        }
+
+        const updated: LessonPlanMetaDraft = {
+          ...prev,
+          classId,
+          lessonId: null,
+          sequence: null,
+          stage: null,
+        };
+        nextMetaSnapshot = updated;
+        return updated;
+      });
+
+      setLessonsError(null);
+
+      const selectedClass = classes.find(classItem => classItem.id === classId);
+      const classTitle = selectedClass?.title ?? null;
+
       if (!planId) {
         toast({
           title: "Lesson not ready",
           description: "Save or export your lesson before linking it to a class.",
         });
         setSelectedClassId(classId);
+        if (nextMetaSnapshot && onLessonContextChange) {
+          onLessonContextChange({
+            classId,
+            classTitle,
+            lessonId: null,
+            lessonTitle: nextMetaSnapshot.title,
+            subject: nextMetaSnapshot.subject ?? null,
+            stage: nextMetaSnapshot.stage ?? null,
+            date: nextMetaSnapshot.date ?? null,
+            sequence: null,
+          });
+        }
         return;
       }
 
@@ -559,9 +716,21 @@ const LessonBuilderPage = ({
       } finally {
         setIsLinkingClass(false);
         setSelectedClassId(classId);
+        if (nextMetaSnapshot && onLessonContextChange) {
+          onLessonContextChange({
+            classId,
+            classTitle,
+            lessonId: null,
+            lessonTitle: nextMetaSnapshot.title,
+            subject: nextMetaSnapshot.subject ?? null,
+            stage: nextMetaSnapshot.stage ?? null,
+            date: nextMetaSnapshot.date ?? null,
+            sequence: null,
+          });
+        }
       }
     },
-    [planId, toast],
+    [classes, planId, toast, onLessonContextChange, setMeta],
   );
 
   const handleDownload = async (format: "pdf" | "docx") => {
@@ -610,6 +779,124 @@ const LessonBuilderPage = ({
       setActiveExport(null);
     }
   };
+
+  const handleLessonSelection = useCallback(
+    (lessonId: string | null) => {
+      const classId = selectedClassId ?? null;
+      const selectedClass = classId ? classes.find(classItem => classItem.id === classId) : null;
+      const classTitle = selectedClass?.title ?? null;
+
+      if (!lessonId) {
+        let nextMetaSnapshot: LessonPlanMetaDraft | null = null;
+        setMeta(prev => {
+          const updated: LessonPlanMetaDraft = {
+            ...prev,
+            lessonId: null,
+            sequence: null,
+            stage: null,
+          };
+          nextMetaSnapshot = updated;
+          return updated;
+        });
+
+        if (nextMetaSnapshot && onLessonContextChange) {
+          onLessonContextChange({
+            classId,
+            classTitle,
+            lessonId: null,
+            lessonTitle: nextMetaSnapshot.title,
+            subject: nextMetaSnapshot.subject ?? null,
+            stage: nextMetaSnapshot.stage ?? null,
+            date: nextMetaSnapshot.date ?? null,
+            sequence: null,
+          });
+        }
+        return;
+      }
+
+      const lessons = classId ? lessonsByClass[classId] ?? [] : [];
+      const matchedLesson = lessons.find(lesson => lesson.id === lessonId) ?? null;
+
+      let nextMetaSnapshot: LessonPlanMetaDraft | null = null;
+      setMeta(prev => {
+        if (!matchedLesson) {
+          const updated: LessonPlanMetaDraft = {
+            ...prev,
+            classId,
+            lessonId,
+          };
+          nextMetaSnapshot = updated;
+          return updated;
+        }
+
+        const lessonTitle = matchedLesson.title.trim();
+        const subjectFromLesson = mapSubject(matchedLesson.subject ?? null);
+
+        const updated: LessonPlanMetaDraft = {
+          ...prev,
+          title: lessonTitle.length > 0 ? lessonTitle : prev.title,
+          subject: subjectFromLesson ?? prev.subject,
+          date: matchedLesson.scheduledOn ?? prev.date,
+          lessonId: matchedLesson.id,
+          classId,
+          sequence: matchedLesson.sequence ?? null,
+          stage: matchedLesson.stage ?? prev.stage ?? null,
+        };
+        nextMetaSnapshot = updated;
+        return updated;
+      });
+
+      if (nextMetaSnapshot && onLessonContextChange) {
+        onLessonContextChange({
+          classId,
+          classTitle,
+          lessonId: matchedLesson?.id ?? lessonId,
+          lessonTitle: nextMetaSnapshot.title,
+          subject: nextMetaSnapshot.subject ?? null,
+          stage: nextMetaSnapshot.stage ?? null,
+          date: nextMetaSnapshot.date ?? null,
+          sequence: matchedLesson?.sequence ?? null,
+        });
+      }
+    },
+    [classes, lessonsByClass, onLessonContextChange, selectedClassId, setMeta],
+  );
+
+  const selectedClass = useMemo(
+    () => classes.find(classItem => classItem.id === selectedClassId) ?? null,
+    [classes, selectedClassId],
+  );
+
+  const availableLessons = useMemo(
+    () => (selectedClassId ? lessonsByClass[selectedClassId] ?? [] : []),
+    [lessonsByClass, selectedClassId],
+  );
+
+  const lessonPlaceholder = useMemo(() => {
+    if (!selectedClassId) {
+      return contextCopy.lessonDisabled;
+    }
+    if (isLoadingLessons) {
+      return contextCopy.lessonLoading;
+    }
+    if (lessonsError) {
+      return contextCopy.lessonError;
+    }
+    if (availableLessons.length === 0) {
+      return contextCopy.lessonEmpty;
+    }
+    return contextCopy.lessonPlaceholder;
+  }, [
+    availableLessons.length,
+    contextCopy.lessonDisabled,
+    contextCopy.lessonEmpty,
+    contextCopy.lessonError,
+    contextCopy.lessonLoading,
+    contextCopy.lessonPlaceholder,
+    isLoadingLessons,
+    lessonsError,
+    selectedClassId,
+  ]);
 
   const previewProfile = useMemo(
     () => ({
@@ -744,6 +1031,98 @@ const LessonBuilderPage = ({
           </p>
         </header>
 
+        <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-foreground">{contextCopy.title}</h2>
+            <p className="text-sm text-muted-foreground">{contextCopy.description}</p>
+          </div>
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="lesson-context-class" className="text-sm font-medium text-foreground">
+                {contextCopy.classLabel}
+              </Label>
+              <Select
+                value={selectedClassId}
+                onValueChange={value => {
+                  if (value === selectedClassId) {
+                    return;
+                  }
+                  setSelectedClassId(value);
+                  setLessonsError(null);
+                  void handleClassSelection(value);
+                }}
+                disabled={
+                  !isAuthenticated || isLinkingClass || isLoadingClasses || classes.length === 0
+                }
+              >
+                <SelectTrigger id="lesson-context-class" aria-label={classLinkingCopy.ariaLabel}>
+                  <SelectValue
+                    placeholder={
+                      isLoadingClasses ? classLinkingCopy.loading : classLinkingCopy.placeholder
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.length === 0 ? (
+                    <SelectItem value="no-classes" disabled>
+                      {isLoadingClasses ? classLinkingCopy.loading : classLinkingCopy.noClasses}
+                    </SelectItem>
+                  ) : (
+                    classes.map(classItem => (
+                      <SelectItem key={classItem.id} value={classItem.id}>
+                        {classItem.title}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {isAuthenticated ? classLinkingCopy.signedInHelp : classLinkingCopy.signedOutHelp}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lesson-context-lesson" className="text-sm font-medium text-foreground">
+                {contextCopy.lessonLabel}
+              </Label>
+              <Select
+                value={meta.lessonId ?? undefined}
+                onValueChange={value => {
+                  const normalized = value === NO_LESSON_VALUE ? null : value;
+                  handleLessonSelection(normalized);
+                }}
+                disabled={!selectedClassId || isLoadingLessons}
+              >
+                <SelectTrigger id="lesson-context-lesson">
+                  <SelectValue placeholder={lessonPlaceholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_LESSON_VALUE}>{contextCopy.newLesson}</SelectItem>
+                  {isLoadingLessons ? (
+                    <SelectItem value="__loading" disabled>
+                      {contextCopy.lessonLoading}
+                    </SelectItem>
+                  ) : lessonsError ? (
+                    <SelectItem value="__error" disabled>
+                      {lessonsError}
+                    </SelectItem>
+                  ) : availableLessons.length === 0 ? (
+                    <SelectItem value="__empty" disabled>
+                      {contextCopy.lessonEmpty}
+                    </SelectItem>
+                  ) : (
+                    availableLessons.map(lesson => (
+                      <SelectItem key={lesson.id} value={lesson.id}>
+                        {lesson.sequence ? `#${lesson.sequence} • ${lesson.title}` : lesson.title}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              {lessonsError ? <p className="text-xs text-destructive">{lessonsError}</p> : null}
+            </div>
+          </div>
+        </section>
+
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] xl:items-start">
           <div className="space-y-6">
             <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
@@ -871,57 +1250,9 @@ const LessonBuilderPage = ({
               </Button>
             </div>
           </div>
-          <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div className="md:w-72">
-              <Select
-                value={selectedClassId}
-                onValueChange={value => {
-                  setSelectedClassId(value);
-                  void handleClassSelection(value);
-                }}
-                disabled={
-                  !isAuthenticated ||
-                  !planId ||
-                  isLinkingClass ||
-                  isLoadingClasses ||
-                  classes.length === 0
-                }
-              >
-                <SelectTrigger aria-label={t.lessonBuilder.classLinking.ariaLabel}>
-                  <SelectValue
-                    placeholder={
-                      isLoadingClasses
-                        ? t.lessonBuilder.classLinking.loading
-                        : t.lessonBuilder.classLinking.placeholder
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.length === 0 ? (
-                    <SelectItem value="no-classes" disabled>
-                      {isLoadingClasses
-                        ? t.lessonBuilder.classLinking.loading
-                        : t.lessonBuilder.classLinking.noClasses}
-                    </SelectItem>
-                  ) : (
-                    classes.map(classItem => (
-                      <SelectItem key={classItem.id} value={classItem.id}>
-                        {classItem.title}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {isAuthenticated
-                  ? t.lessonBuilder.classLinking.signedInHelp
-                  : t.lessonBuilder.classLinking.signedOutHelp}
-              </p>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Downloads are not saved to your account. Save or share the file once it finishes downloading.
-            </p>
-          </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Downloads are not saved to your account. Save or share the file once it finishes downloading.
+          </p>
         </section>
       </div>
 

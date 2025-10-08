@@ -1913,6 +1913,18 @@ export const en = {
       signedInHelp: "Linking a class adds this lesson to their schedule.",
       signedOutHelp: "Sign in to link this lesson to one of your classes.",
     },
+    contextSelector: {
+      title: "Lesson context",
+      description: "Choose a class and curriculum lesson to keep this workspace in sync.",
+      classLabel: "Class",
+      lessonLabel: "Lesson",
+      lessonPlaceholder: "Select a lesson",
+      lessonDisabled: "Select a class to load lessons",
+      lessonEmpty: "No lessons available yet",
+      lessonLoading: "Loading lessons...",
+      lessonError: "Unable to load lessons",
+      newLesson: "Start from a blank lesson",
+    },
     activities: {
       title: "Find activities",
       placeholder: "Search by topic, tool, or outcome",

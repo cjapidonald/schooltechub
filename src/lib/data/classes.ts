@@ -595,3 +595,122 @@ export async function listClassLessonPlans(
       return aAdded > bAdded ? -1 : aAdded < bAdded ? 1 : 0;
     });
 }
+
+export interface ClassLessonSummary {
+  id: string;
+  title: string;
+  sequence: number | null;
+  subject: string | null;
+  stage: string | null;
+  scheduledOn: string | null;
+}
+
+function normalizeSequence(record: Record<string, any>): number | null {
+  const seqIndex = record.seq_index;
+  if (typeof seqIndex === "number" && Number.isFinite(seqIndex)) {
+    return seqIndex;
+  }
+
+  const position = record.position;
+  if (typeof position === "number" && Number.isFinite(position)) {
+    return position + 1;
+  }
+
+  return null;
+}
+
+function extractCurriculumSubject(value: unknown): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const records = Array.isArray(value) ? value : [value];
+  for (const item of records) {
+    if (item && typeof item === "object" && typeof (item as { subject?: unknown }).subject === "string") {
+      const subject = (item as { subject?: string }).subject;
+      if (subject && subject.trim().length > 0) {
+        return subject.trim();
+      }
+    }
+  }
+
+  return null;
+}
+
+export async function listClassLessons(
+  classId: string,
+  client: Client = supabase,
+): Promise<ClassLessonSummary[]> {
+  await requireUserId(client, "view class curriculum lessons");
+
+  const { data, error } = await client
+    .from("curriculum_items")
+    .select(
+      `
+        id,
+        lesson_title,
+        stage,
+        scheduled_on,
+        position,
+        seq_index,
+        curriculum:curriculum_id (
+          class_id,
+          subject
+        )
+      `,
+    )
+    .eq("curriculum.class_id", classId)
+    .order("position", { ascending: true });
+
+  if (error) {
+    throw new ClassDataError("Unable to load lessons for the class.", { cause: error });
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .filter(record => {
+      const curriculum = (record as Record<string, any>).curriculum;
+      if (!curriculum) {
+        return true;
+      }
+
+      const curriculumRecords = Array.isArray(curriculum) ? curriculum : [curriculum];
+      return curriculumRecords.some(item => {
+        const classIdValue = (item as Record<string, any>).class_id ?? null;
+        return typeof classIdValue === "string" ? classIdValue === classId : false;
+      });
+    })
+    .map(record => {
+      const idValue = record.id ?? null;
+      const titleValue = record.lesson_title ?? record.title ?? "Untitled lesson";
+      const stageValue = record.stage ?? null;
+      const scheduledValue = record.scheduled_on ?? null;
+      const subjectValue = extractCurriculumSubject((record as Record<string, any>).curriculum);
+
+      return {
+        id: typeof idValue === "string" ? idValue : String(idValue ?? ""),
+        title:
+          typeof titleValue === "string" && titleValue.trim().length > 0
+            ? titleValue.trim()
+            : "Untitled lesson",
+        sequence: normalizeSequence(record as Record<string, any>),
+        subject: subjectValue,
+        stage: typeof stageValue === "string" && stageValue.trim().length > 0 ? stageValue.trim() : null,
+        scheduledOn:
+          typeof scheduledValue === "string" && scheduledValue.trim().length > 0
+            ? scheduledValue.trim()
+            : null,
+      } satisfies ClassLessonSummary;
+    })
+    .sort((a, b) => {
+      const seqA = a.sequence ?? Number.POSITIVE_INFINITY;
+      const seqB = b.sequence ?? Number.POSITIVE_INFINITY;
+      if (seqA !== seqB) {
+        return seqA - seqB;
+      }
+      return a.title.localeCompare(b.title);
+    });
+}
