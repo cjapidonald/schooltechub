@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { format, isValid, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { DndContext, DragOverlay, type DragCancelEvent, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -22,9 +22,8 @@ import { useMyClasses } from "@/hooks/useMyClasses";
 import { linkPlanToClass, listClassLessons, type ClassLessonSummary } from "@/lib/classes";
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
-import { LessonDocEditor } from "@/pages/account/LessonDocEditor";
 import type { LessonPlanMetaDraft } from "./types";
-import type { Resource, ResourceDetail } from "@/types/resources";
+import type { Resource } from "@/types/resources";
 import { createLessonPlan, getLessonPlan, updateLessonPlan } from "./api";
 import { LessonResourceSidebar } from "./components/LessonResourceSidebar";
 import { ResourceCard } from "@/components/lesson-draft/ResourceCard";
@@ -45,135 +44,6 @@ const createInitialMeta = (): LessonPlanMetaDraft => ({
   sequence: null,
   stage: null,
 });
-
-const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-
-const formatMultiline = (value: string): string => escapeHtml(value).replace(/\n/g, "<br />");
-
-const formatDocumentDate = (value: string | null): string => {
-  if (!value) {
-    return "Not set";
-  }
-
-  const parsed = parseISO(value);
-  if (!isValid(parsed)) {
-    return escapeHtml(value);
-  }
-
-  try {
-    return escapeHtml(format(parsed, "PPP"));
-  } catch {
-    return escapeHtml(value);
-  }
-};
-
-const createLessonDocTemplate = (meta: LessonPlanMetaDraft, fallbackTeacher: string | null): string => {
-  const teacherName = meta.teacher?.trim() || fallbackTeacher?.trim() || "";
-  const rows = [
-    { label: "Lesson title", value: meta.title.trim() || "Untitled lesson" },
-    { label: "Teacher", value: teacherName || "Not assigned" },
-    { label: "Subject", value: meta.subject ?? "Not set" },
-    { label: "Lesson date", value: formatDocumentDate(meta.date) },
-  ];
-
-  const renderRows = rows
-    .map(row => {
-      const value = typeof row.value === "string" ? escapeHtml(row.value) : "";
-      return `
-        <tr>
-          <th style="text-align:left;padding:0.5rem;border:1px solid #d8dee6;background:#f1f5f9;font-weight:600;">${escapeHtml(
-            row.label,
-          )}</th>
-          <td style="padding:0.5rem;border:1px solid #d8dee6;background:#f1f5f9;">${value}</td>
-        </tr>
-      `;
-    })
-    .join("");
-
-  const objectiveContent = meta.objective.trim()
-    ? formatMultiline(meta.objective)
-    : "<em>Add your learning objectives here.</em>";
-  const successCriteriaContent = meta.successCriteria.trim()
-    ? formatMultiline(meta.successCriteria)
-    : "<em>Describe how students will demonstrate success.</em>";
-
-  return `
-    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
-      <tbody>
-        ${renderRows}
-      </tbody>
-    </table>
-    <section style="margin-bottom:1.5rem;">
-      <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">Learning objectives</h3>
-      <p>${objectiveContent}</p>
-    </section>
-    <section style="margin-bottom:1.5rem;">
-      <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">Success criteria</h3>
-      <p>${successCriteriaContent}</p>
-    </section>
-    <section style="margin-bottom:1.5rem;">
-      <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.5rem;">Lesson narrative</h3>
-      <p><em>Use this space to outline your teaching sequence, key questions, and differentiation strategies.</em></p>
-    </section>
-  `;
-};
-
-const createResourceTableMarkup = (resource: ResourceDetail): string => {
-  const instructions = resource.instructionalNotes?.trim()
-    ? formatMultiline(resource.instructionalNotes)
-    : "<em>No specific instructions provided.</em>";
-  const description = resource.description?.trim()
-    ? formatMultiline(resource.description)
-    : "<em>No description available.</em>";
-  const details: Array<{ label: string; value: string | null }> = [
-    { label: "Format", value: resource.format },
-    { label: "Stage", value: resource.stage },
-    { label: "Subject", value: resource.subject },
-    { label: "Type", value: resource.type },
-  ];
-
-  const detailRows = details
-    .filter(detail => detail.value && detail.value.trim().length > 0)
-    .map(detail => `
-      <tr>
-        <th style="text-align:left;padding:0.5rem;border:1px solid #d8dee6;background:#f8fafc;">${escapeHtml(detail.label)}</th>
-        <td style="padding:0.5rem;border:1px solid #d8dee6;">${escapeHtml(detail.value ?? "")}</td>
-      </tr>
-    `)
-    .join("");
-
-  const link = resource.url
-    ? `<a href="${escapeHtml(resource.url)}" target="_blank" rel="noopener noreferrer">Open resource</a>`
-    : "<em>Link not available</em>";
-
-  const resourceHeader = escapeHtml(resource.title || "Resource");
-
-  return `
-    <table style="width:100%;border-collapse:collapse;margin:1.5rem 0;">
-      <caption style="caption-side:top;text-align:left;font-weight:600;margin-bottom:0.5rem;">${resourceHeader}</caption>
-      <tbody>
-        <tr>
-          <th style="text-align:left;padding:0.5rem;border:1px solid #d8dee6;background:#f8fafc;">Instructions</th>
-          <td style="padding:0.5rem;border:1px solid #d8dee6;">${instructions}</td>
-        </tr>
-        <tr>
-          <th style="text-align:left;padding:0.5rem;border:1px solid #d8dee6;background:#f8fafc;">Resource</th>
-          <td style="padding:0.5rem;border:1px solid #d8dee6;">${link}</td>
-        </tr>
-        <tr>
-          <th style="text-align:left;padding:0.5rem;border:1px solid #d8dee6;background:#f8fafc;">Summary</th>
-          <td style="padding:0.5rem;border:1px solid #d8dee6;">${description}</td>
-        </tr>
-        ${detailRows}
-      </tbody>
-    </table>
-  `;
-};
 
 const createWorkspaceTextCard = (): LessonWorkspaceTextCard => ({
   id: nanoid(),
@@ -275,17 +145,10 @@ const LessonBuilderPage = ({
   const classLinkingCopy = t.lessonBuilder.classLinking;
   const { fullName, schoolName, schoolLogoUrl } = useMyProfile();
   const { toast } = useToast();
-  const docTemplateRef = useRef<string>("");
-  if (docTemplateRef.current === "") {
-    docTemplateRef.current = createLessonDocTemplate(meta, fullName ?? null);
-  }
-  const [lessonDocHtml, setLessonDocHtml] = useState<string>(docTemplateRef.current);
-  const [lessonDocBackground, setLessonDocBackground] = useState<string>("default");
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestMeta = useRef(meta);
   const skipNextAutosave = useRef(false);
   const isMounted = useRef(true);
-  const isDocDirty = useRef(false);
   const [activeExport, setActiveExport] = useState<"pdf" | "docx" | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [textCards, setTextCards] = useState<LessonWorkspaceTextCard[]>(() => [createWorkspaceTextCard()]);
@@ -362,23 +225,6 @@ const LessonBuilderPage = ({
       });
     }
   }, [fullName, meta.teacher]);
-
-  useEffect(() => {
-    const template = createLessonDocTemplate(meta, fullName ?? null);
-    const currentHtml = lessonDocHtml;
-    const previousTemplate = docTemplateRef.current;
-    const isMatch = currentHtml.trim() === previousTemplate.trim();
-
-    if (!isDocDirty.current || isMatch || currentHtml.trim().length === 0) {
-      docTemplateRef.current = template;
-      if (currentHtml !== template) {
-        setLessonDocHtml(template);
-      }
-      isDocDirty.current = false;
-    } else {
-      docTemplateRef.current = template;
-    }
-  }, [fullName, lessonDocHtml, meta]);
 
   useEffect(() => {
     let active = true;
@@ -659,30 +505,6 @@ const LessonBuilderPage = ({
   const handleSuccessCriteriaChange = (value: string) => {
     setMeta(prev => ({ ...prev, successCriteria: value }));
   };
-
-  const handleLessonDocChange = useCallback((value: string) => {
-    isDocDirty.current = true;
-    setLessonDocHtml(value);
-  }, []);
-
-  const handleResourceInsert = useCallback(
-    (resource: ResourceDetail) => {
-      isDocDirty.current = true;
-      const markup = createResourceTableMarkup(resource);
-      setLessonDocHtml(current => {
-        const trimmed = current.trim();
-        if (!trimmed) {
-          return markup;
-        }
-        return `${current.trimEnd()}\n${markup}`;
-      });
-      toast({
-        title: "Resource added",
-        description: `${resource.title} was inserted into your lesson plan document.`,
-      });
-    },
-    [toast],
-  );
 
   const normalizedTitle = useMemo(() => {
     const trimmed = meta.title.trim();
@@ -1282,44 +1104,32 @@ const LessonBuilderPage = ({
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">Lesson workspace</h2>
                 <p className="text-sm text-muted-foreground">
-                  Arrange text notes and resource cards on the left. Drag items from the shelf to build your lesson wall, then refine the narrative in the document below.
+                  Arrange text notes and resource cards on the left. Drag items from the shelf to shape your lesson wall.
                 </p>
               </div>
 
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-start">
-                <div className="space-y-6">
-                  <LessonWorkspaceBoard
-                    meta={meta}
-                    items={workspaceItems}
-                    textCards={textCards}
-                    onRemoveItem={handleRemoveWorkspaceItem}
-                    onUpdateTextCard={handleUpdateTextCard}
-                  />
-
-                  <div className="space-y-3 rounded-3xl border border-white/15 bg-white/10 p-4 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.85)] backdrop-blur">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-semibold text-foreground">Lesson document</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Capture the full story of your lesson once your wall looks right. Changes stay in sync with the rest of your plan.
-                      </p>
-                    </div>
-                    <LessonDocEditor
-                      value={lessonDocHtml}
-                      onChange={handleLessonDocChange}
-                      background={lessonDocBackground}
-                      onBackgroundChange={setLessonDocBackground}
+                <div className="lg:min-h-[420px] lg:max-h-[calc(100vh-18rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-3 lg:pt-1">
+                  <div className="space-y-6">
+                    <LessonWorkspaceBoard
+                      meta={meta}
+                      items={workspaceItems}
+                      textCards={textCards}
+                      onRemoveItem={handleRemoveWorkspaceItem}
+                      onUpdateTextCard={handleUpdateTextCard}
                     />
                   </div>
                 </div>
 
-                <LessonResourceSidebar
-                  subject={meta.subject}
-                  onInsertResource={handleResourceInsert}
-                  isAuthenticated={isAuthenticated}
-                  textCards={textCards}
-                  onAddTextCard={handleAddTextCard}
-                  onUpdateTextCard={handleUpdateTextCard}
-                />
+                <div className="lg:min-h-[420px] lg:max-h-[calc(100vh-18rem)] lg:overflow-y-auto lg:overscroll-contain lg:pr-2 lg:pt-1">
+                  <LessonResourceSidebar
+                    subject={meta.subject}
+                    isAuthenticated={isAuthenticated}
+                    textCards={textCards}
+                    onAddTextCard={handleAddTextCard}
+                    onUpdateTextCard={handleUpdateTextCard}
+                  />
+                </div>
               </div>
             </section>
 
