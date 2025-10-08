@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { format, isValid, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { DndContext, DragOverlay, type DragCancelEvent, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
+import { nanoid } from "nanoid";
 
 import { SEO } from "@/components/SEO";
 import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
@@ -37,6 +39,8 @@ import type { Resource, ResourceDetail } from "@/types/resources";
 import { createLessonPlan, getLessonPlan, updateLessonPlan } from "./api";
 import { LessonResourceSidebar } from "./components/LessonResourceSidebar";
 import { ResourceCard } from "@/components/lesson-draft/ResourceCard";
+import { LessonWorkspaceBoard } from "./components/LessonWorkspaceBoard";
+import type { LessonWorkspaceItem, LessonWorkspaceTextCard } from "./types";
 
 const AUTOSAVE_DELAY = 800;
 
@@ -182,6 +186,18 @@ const createResourceTableMarkup = (resource: ResourceDetail): string => {
   `;
 };
 
+const createWorkspaceTextCard = (): LessonWorkspaceTextCard => ({
+  id: nanoid(),
+  title: "New text card",
+  content: "",
+});
+
+const createWorkspaceResourceItem = (resource: Resource): LessonWorkspaceItem => ({
+  id: `workspace-resource-${resource.id}-${nanoid(6)}`,
+  type: "resource",
+  resource,
+});
+
 function mapSubject(value: string | null): Subject | null {
   if (!value) {
     return null;
@@ -210,6 +226,39 @@ interface LessonBuilderPageProps {
 }
 
 const NO_LESSON_VALUE = "__no_lesson__";
+
+type LibraryResourceDragData = {
+  type: "library-resource";
+  resource: Resource;
+  resourceId: string;
+};
+
+type TextCardDragData = {
+  type: "text-card";
+  textCardId: string;
+};
+
+type WorkspaceCardDragData =
+  | {
+      type: "workspace-card";
+      workspaceId: string;
+      itemType: "resource";
+      resource: Resource;
+    }
+  | {
+      type: "workspace-card";
+      workspaceId: string;
+      itemType: "text";
+      textCardId: string;
+    };
+
+type WorkspaceDropData =
+  | { type: "workspace-dropzone" }
+  | { type: "workspace-card"; workspaceId: string };
+
+type ActiveDragPreview =
+  | { type: "resource"; resource: Resource }
+  | { type: "text"; card: LessonWorkspaceTextCard };
 
 const LessonBuilderPage = ({
   layoutMode = "standalone",
@@ -255,7 +304,9 @@ const LessonBuilderPage = ({
   const attachResource = useLessonDraftStore(state => state.attachResource);
   const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
   const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
-  const [activeDragResource, setActiveDragResource] = useState<Resource | null>(null);
+  const [textCards, setTextCards] = useState<LessonWorkspaceTextCard[]>(() => [createWorkspaceTextCard()]);
+  const [workspaceItems, setWorkspaceItems] = useState<LessonWorkspaceItem[]>([]);
+  const [activeDragPreview, setActiveDragPreview] = useState<ActiveDragPreview | null>(null);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
   const [isLinkingClass, setIsLinkingClass] = useState(false);
@@ -923,26 +974,151 @@ const LessonBuilderPage = ({
     }
   }, []);
 
-  const handleDragStart = useCallback((event: DragStartEvent) => {
-    const data = event.active.data.current as { resource?: Resource | null } | null;
-    if (data && data.resource) {
-      setActiveDragResource(data.resource);
-    } else {
-      setActiveDragResource(null);
-    }
+  const handleAddTextCard = useCallback(() => {
+    setTextCards(prev => [...prev, createWorkspaceTextCard()]);
   }, []);
+
+  const handleUpdateTextCard = useCallback((id: string, updates: { title?: string; content?: string }) => {
+    setTextCards(prev =>
+      prev.map(card =>
+        card.id === id
+          ? {
+              ...card,
+              ...updates,
+            }
+          : card,
+      ),
+    );
+  }, []);
+
+  const handleRemoveWorkspaceItem = useCallback((workspaceId: string) => {
+    setWorkspaceItems(prev => prev.filter(item => item.id !== workspaceId));
+  }, []);
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const data = event.active.data.current as
+        | LibraryResourceDragData
+        | TextCardDragData
+        | WorkspaceCardDragData
+        | null;
+
+      if (!data) {
+        setActiveDragPreview(null);
+        return;
+      }
+
+      if (data.type === "library-resource") {
+        setActiveDragPreview({ type: "resource", resource: data.resource });
+        return;
+      }
+
+      if (data.type === "text-card") {
+        const card = textCards.find(textCard => textCard.id === data.textCardId) ?? null;
+        setActiveDragPreview(card ? { type: "text", card } : null);
+        return;
+      }
+
+      if (data.type === "workspace-card") {
+        if (data.itemType === "resource") {
+          setActiveDragPreview({ type: "resource", resource: data.resource });
+          return;
+        }
+        const card = textCards.find(textCard => textCard.id === data.textCardId) ?? null;
+        setActiveDragPreview(card ? { type: "text", card } : null);
+        return;
+      }
+
+      setActiveDragPreview(null);
+    },
+    [textCards],
+  );
 
   const clearActiveDrag = useCallback(() => {
-    setActiveDragResource(null);
+    setActiveDragPreview(null);
   }, []);
 
-  const handleDragEnd = useCallback((_: DragEndEvent) => {
-    clearActiveDrag();
-  }, [clearActiveDrag]);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const activeData = event.active.data.current as
+        | LibraryResourceDragData
+        | TextCardDragData
+        | WorkspaceCardDragData
+        | null;
+      const overData = event.over?.data.current as WorkspaceDropData | WorkspaceCardDragData | null;
 
-  const handleDragCancel = useCallback((_: DragCancelEvent) => {
-    clearActiveDrag();
-  }, [clearActiveDrag]);
+      if (activeData && overData && (overData.type === "workspace-dropzone" || overData.type === "workspace-card")) {
+        if (activeData.type === "library-resource") {
+          setWorkspaceItems(prev => {
+            const next = [...prev];
+            const targetIndex =
+              overData.type === "workspace-card"
+                ? Math.max(
+                    0,
+                    prev.findIndex(item => item.id === overData.workspaceId),
+                  )
+                : 0;
+            next.splice(targetIndex, 0, createWorkspaceResourceItem(activeData.resource));
+            return next;
+          });
+        } else if (activeData.type === "text-card") {
+          setWorkspaceItems(prev => {
+            const existingIndex = prev.findIndex(
+              item => item.type === "text" && item.textId === activeData.textCardId,
+            );
+            const targetIndex =
+              overData.type === "workspace-card"
+                ? prev.findIndex(item => item.id === overData.workspaceId)
+                : 0;
+
+            if (existingIndex >= 0) {
+              if (targetIndex < 0 || existingIndex === targetIndex) {
+                return prev;
+              }
+              return arrayMove(prev, existingIndex, Math.max(0, targetIndex));
+            }
+
+            const next = [...prev];
+            const insertionIndex = targetIndex >= 0 ? targetIndex : 0;
+            next.splice(insertionIndex, 0, {
+              id: `workspace-text-${activeData.textCardId}`,
+              type: "text" as const,
+              textId: activeData.textCardId,
+            });
+            return next;
+          });
+        } else if (activeData.type === "workspace-card") {
+          setWorkspaceItems(prev => {
+            const fromIndex = prev.findIndex(item => item.id === activeData.workspaceId);
+            if (fromIndex === -1) {
+              return prev;
+            }
+
+            const targetIndex =
+              overData.type === "workspace-card"
+                ? prev.findIndex(item => item.id === overData.workspaceId)
+                : 0;
+
+            if (targetIndex < 0 || targetIndex === fromIndex) {
+              return prev;
+            }
+
+            return arrayMove(prev, fromIndex, targetIndex);
+          });
+        }
+      }
+
+      clearActiveDrag();
+    },
+    [clearActiveDrag],
+  );
+
+  const handleDragCancel = useCallback(
+    (_: DragCancelEvent) => {
+      clearActiveDrag();
+    },
+    [clearActiveDrag],
+  );
 
   const savingCopy = t.lessonBuilder.toolbar;
   const lastSavedLabel = useMemo(() => {
@@ -1199,27 +1375,45 @@ const LessonBuilderPage = ({
 
             <section className="space-y-6 rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-foreground">Lesson plan document</h2>
+                <h2 className="text-xl font-semibold text-foreground">Lesson workspace</h2>
                 <p className="text-sm text-muted-foreground">
-                  Draft the lesson narrative while exploring resources alongside your document. Fields are prefilled from your
-                  saved context to keep everything aligned.
+                  Arrange text notes and resource cards on the left. Drag items from the shelf to build your lesson wall, then refine the narrative in the document below.
                 </p>
               </div>
 
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start">
-                <div className="space-y-3">
-                  <LessonDocEditor
-                    value={lessonDocHtml}
-                    onChange={handleLessonDocChange}
-                    background={lessonDocBackground}
-                    onBackgroundChange={setLessonDocBackground}
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:items-start">
+                <div className="space-y-6">
+                  <LessonWorkspaceBoard
+                    meta={meta}
+                    items={workspaceItems}
+                    textCards={textCards}
+                    onRemoveItem={handleRemoveWorkspaceItem}
+                    onUpdateTextCard={handleUpdateTextCard}
                   />
+
+                  <div className="space-y-3 rounded-3xl border border-white/15 bg-white/10 p-4 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.85)] backdrop-blur">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-semibold text-foreground">Lesson document</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Capture the full story of your lesson once your wall looks right. Changes stay in sync with the rest of your plan.
+                      </p>
+                    </div>
+                    <LessonDocEditor
+                      value={lessonDocHtml}
+                      onChange={handleLessonDocChange}
+                      background={lessonDocBackground}
+                      onBackgroundChange={setLessonDocBackground}
+                    />
+                  </div>
                 </div>
 
                 <LessonResourceSidebar
                   subject={meta.subject}
                   onInsertResource={handleResourceInsert}
                   isAuthenticated={isAuthenticated}
+                  textCards={textCards}
+                  onAddTextCard={handleAddTextCard}
+                  onUpdateTextCard={handleUpdateTextCard}
                 />
               </div>
             </section>
@@ -1297,10 +1491,21 @@ const LessonBuilderPage = ({
       />
       </div>
       <DragOverlay>
-        {activeDragResource ? (
-          <div className="w-72 max-w-full">
-            <ResourceCard resource={activeDragResource} layout="vertical" />
-          </div>
+        {activeDragPreview ? (
+          activeDragPreview.type === "resource" ? (
+            <div className="w-72 max-w-full">
+              <ResourceCard resource={activeDragPreview.resource} layout="vertical" />
+            </div>
+          ) : (
+            <div className="w-72 max-w-full space-y-2 rounded-2xl border border-white/30 bg-white/90 p-4 text-left shadow-xl">
+              <p className="text-sm font-semibold text-slate-900">
+                {activeDragPreview.card.title.trim() ? activeDragPreview.card.title : "Text card"}
+              </p>
+              <p className="whitespace-pre-wrap text-sm text-slate-700">
+                {activeDragPreview.card.content.trim() ? activeDragPreview.card.content : "Add lesson notes…"}
+              </p>
+            </div>
+          )
         ) : null}
       </DragOverlay>
     </DndContext>
