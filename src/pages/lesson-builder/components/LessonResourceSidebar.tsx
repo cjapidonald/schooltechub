@@ -1,14 +1,90 @@
 import { type FormEvent, useCallback, useMemo, useState } from "react";
+import { CSS } from "@dnd-kit/utilities";
+import { useDraggable } from "@dnd-kit/core";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { searchResources, fetchResourceById } from "@/lib/resources";
 import type { Subject } from "@/lib/constants/subjects";
 import type { Resource, ResourceDetail } from "@/types/resources";
+import { Badge } from "@/components/ui/badge";
+import { ResourceCard } from "@/components/lesson-draft/ResourceCard";
+import { cn } from "@/lib/utils";
+
+const SEARCH_INPUT_ID = "lesson-resource-search-input";
+
+type DraggableResourceData = {
+  type: "library-resource";
+  resource: Resource;
+  resourceId: string;
+  source: "sidebar";
+};
+
+interface SidebarResourceCardProps {
+  resource: Resource;
+  onInsert: (resourceId: string) => void;
+  disabled: boolean;
+  isPending: boolean;
+}
+
+const SidebarResourceCard = ({ resource, onInsert, disabled, isPending }: SidebarResourceCardProps) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable<DraggableResourceData>({
+    id: `lesson-resource-${resource.id}`,
+    data: {
+      type: "library-resource",
+      resource,
+      resourceId: resource.id,
+      source: "sidebar",
+    },
+  });
+
+  const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined;
+
+  return (
+    <li>
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={cn(
+          "group focus-within:ring-2 focus-within:ring-primary",
+          "cursor-grab rounded-xl border border-border/60 bg-background/80 p-3 shadow-sm transition",
+          isDragging && "opacity-70",
+        )}
+        {...listeners}
+        {...attributes}
+      >
+        <div className="flex flex-col gap-3">
+          <ResourceCard resource={resource} layout="horizontal" />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => onInsert(resource.id)}
+              disabled={disabled || isPending}
+              aria-label={`Insert ${resource.title} into document`}
+            >
+              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Add resource card
+            </Button>
+            {resource.url ? (
+              <a
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary underline-offset-2 hover:underline"
+              >
+                Preview
+              </a>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+};
 
 interface LessonResourceSidebarProps {
   subject: Subject | null;
@@ -100,6 +176,7 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="relative">
           <Input
+            id={SEARCH_INPUT_ID}
             value={query}
             onChange={event => setQuery(event.target.value)}
             placeholder="Search the resource library"
@@ -140,40 +217,13 @@ export const LessonResourceSidebar = ({ subject, onInsertResource, isAuthenticat
 
         <ul className="space-y-3">
           {resources.map(resource => (
-            <li key={resource.id} className="space-y-3 rounded-lg border border-border/60 bg-background/60 p-3">
-              <div>
-                <p className="text-sm font-semibold text-foreground">{resource.title}</p>
-                {resource.description ? (
-                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{resource.description}</p>
-                ) : null}
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
-                {resource.type ? <span>{resource.type}</span> : null}
-                {resource.stage ? <span>{resource.stage}</span> : null}
-                {resource.subject ? <span>{resource.subject}</span> : null}
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => void handleInsert(resource.id)}
-                  disabled={pendingResourceId === resource.id || resourceQuery.isFetching}
-                >
-                  {pendingResourceId === resource.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Insert into document
-                </Button>
-                {resource.url ? (
-                  <a
-                    href={resource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-primary underline-offset-2 hover:underline"
-                  >
-                    Preview
-                  </a>
-                ) : null}
-              </div>
-            </li>
+            <SidebarResourceCard
+              key={resource.id}
+              resource={resource}
+              onInsert={resourceId => void handleInsert(resourceId)}
+              disabled={resourceQuery.isFetching}
+              isPending={pendingResourceId === resource.id}
+            />
           ))}
         </ul>
       </div>
