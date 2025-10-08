@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
@@ -67,7 +67,24 @@ const formatDate = (value: string | null | undefined) => {
   return format(parsed, "PPP");
 };
 
-export const AssessmentsSection = ({ className }: { className?: string }) => {
+type AssessmentSuggestion = {
+  title: string;
+  description?: string;
+};
+
+type AssessmentsSectionProps = {
+  className?: string;
+  initialClassId?: string | null;
+  initialAssessmentSuggestion?: AssessmentSuggestion | null;
+  onSuggestionHandled?: () => void;
+};
+
+export const AssessmentsSection = ({
+  className,
+  initialClassId = null,
+  initialAssessmentSuggestion = null,
+  onSuggestionHandled,
+}: AssessmentsSectionProps) => {
   const { user } = useOptionalUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -201,6 +218,9 @@ export const AssessmentsSection = ({ className }: { className?: string }) => {
         }}
         canManage={canManage}
         className={className}
+        initialClassId={initialClassId}
+        initialAssessmentSuggestion={initialAssessmentSuggestion}
+        onSuggestionHandled={onSuggestionHandled}
       />
       <GradingDialog
         open={gradingDialogOpen}
@@ -234,6 +254,9 @@ interface AssessmentsPanelProps {
   onOpenGrades: (assessment: AssessmentTemplate) => void;
   canManage: boolean;
   className?: string;
+  initialClassId?: string | null;
+  initialAssessmentSuggestion?: AssessmentSuggestion | null;
+  onSuggestionHandled?: () => void;
 }
 
 const AssessmentsPanel = ({
@@ -246,8 +269,11 @@ const AssessmentsPanel = ({
   onOpenGrades,
   canManage,
   className,
+  initialClassId = null,
+  initialAssessmentSuggestion = null,
+  onSuggestionHandled,
 }: AssessmentsPanelProps) => {
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(initialClassId);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -256,6 +282,7 @@ const AssessmentsPanel = ({
   });
   const { toast } = useToast();
   const readOnly = !canManage;
+  const suggestionRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (selectedClassId && !classes.some(cls => cls.id === selectedClassId)) {
@@ -266,6 +293,47 @@ const AssessmentsPanel = ({
   useEffect(() => {
     setForm({ title: "", description: "", dueDate: "", scale: "letter" });
   }, [selectedClassId]);
+
+  const suggestionKey = `${initialClassId ?? ""}|${initialAssessmentSuggestion?.title ?? ""}`;
+
+  useEffect(() => {
+    if (!initialClassId && !initialAssessmentSuggestion) {
+      suggestionRef.current = null;
+    }
+  }, [initialAssessmentSuggestion, initialClassId]);
+
+  useEffect(() => {
+    if (!initialClassId && !initialAssessmentSuggestion) {
+      return;
+    }
+
+    if (suggestionRef.current === suggestionKey) {
+      return;
+    }
+
+    if (initialClassId && !classes.some(cls => cls.id === initialClassId)) {
+      return;
+    }
+
+    setSelectedClassId(initialClassId ?? null);
+    setForm(prev => ({
+      ...prev,
+      title: initialAssessmentSuggestion?.title ?? prev.title,
+      description:
+        initialAssessmentSuggestion?.description !== undefined
+          ? initialAssessmentSuggestion.description ?? ""
+          : prev.description,
+    }));
+
+    suggestionRef.current = suggestionKey;
+    onSuggestionHandled?.();
+  }, [
+    classes,
+    initialAssessmentSuggestion,
+    initialClassId,
+    onSuggestionHandled,
+    suggestionKey,
+  ]);
 
   const assessmentCounts = useMemo(() => {
     const map = new Map<string, number>();
