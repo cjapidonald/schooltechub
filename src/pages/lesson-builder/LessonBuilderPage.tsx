@@ -7,8 +7,6 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { nanoid } from "nanoid";
 
 import { SEO } from "@/components/SEO";
-import { ResourceSearchModal } from "@/components/lesson-draft/ResourceSearchModal";
-import { StepEditor } from "@/components/lesson-draft/StepEditor";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -17,14 +15,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { SUBJECTS, type Subject } from "@/lib/constants/subjects";
 import { useToast } from "@/hooks/use-toast";
 import { downloadPlanExport } from "@/lib/downloadPlanExport";
-import { useLessonDraftStore } from "@/stores/lessonDraft";
-import {
-  clearLessonDraftContext,
-  getStoredActiveStepId,
-  persistActiveStepId,
-  setActiveLessonDraftId,
-  subscribeToResourceAttachments,
-} from "@/lib/lesson-draft-bridge";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,7 +22,6 @@ import { useMyClasses } from "@/hooks/useMyClasses";
 import { linkPlanToClass, listClassLessons, type ClassLessonSummary } from "@/lib/classes";
 import { LessonMetaForm, type LessonMetaFormValue } from "./components/LessonMetaForm";
 import { LessonPreviewPane } from "./components/LessonPreviewPane";
-import { LessonPreview } from "@/components/lesson-draft/LessonPreview";
 import { LessonDocEditor } from "@/pages/account/LessonDocEditor";
 import type { LessonPlanMetaDraft } from "./types";
 import type { Resource, ResourceDetail } from "@/types/resources";
@@ -299,15 +288,9 @@ const LessonBuilderPage = ({
   const isDocDirty = useRef(false);
   const [activeExport, setActiveExport] = useState<"pdf" | "docx" | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const draftId = useLessonDraftStore(state => state.draft.id);
-  const steps = useLessonDraftStore(state => state.draft.steps);
-  const attachResource = useLessonDraftStore(state => state.attachResource);
-  const [isResourceSearchOpen, setIsResourceSearchOpen] = useState(false);
-  const [resourceSearchStepId, setResourceSearchStepId] = useState<string | null>(null);
   const [textCards, setTextCards] = useState<LessonWorkspaceTextCard[]>(() => [createWorkspaceTextCard()]);
   const [workspaceItems, setWorkspaceItems] = useState<LessonWorkspaceItem[]>([]);
   const [activeDragPreview, setActiveDragPreview] = useState<ActiveDragPreview | null>(null);
-  const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const { classes, isLoading: isLoadingClasses, error: classesError } = useMyClasses();
   const [isLinkingClass, setIsLinkingClass] = useState(false);
   const [preselectedClassId, setPreselectedClassId] = useState<string | undefined>(
@@ -961,19 +944,6 @@ const LessonBuilderPage = ({
     [fullName, schoolName, schoolLogoUrl],
   );
 
-  const handleRequestResourceSearch = useCallback((stepId: string) => {
-    setActiveStepId(stepId);
-    setResourceSearchStepId(stepId);
-    setIsResourceSearchOpen(true);
-  }, []);
-
-  const handleResourceDialogChange = useCallback((open: boolean) => {
-    setIsResourceSearchOpen(open);
-    if (!open) {
-      setResourceSearchStepId(null);
-    }
-  }, []);
-
   const handleAddTextCard = useCallback(() => {
     setTextCards(prev => [...prev, createWorkspaceTextCard()]);
   }, []);
@@ -1132,71 +1102,6 @@ const LessonBuilderPage = ({
       return `${savingCopy.lastSavedPrefix}`;
     }
   }, [lastSavedAt, savingCopy.lastSavedPrefix]);
-
-  useEffect(() => {
-    if (!draftId) {
-      return;
-    }
-
-    setActiveLessonDraftId(draftId);
-    return () => {
-      clearLessonDraftContext(draftId);
-    };
-  }, [draftId]);
-
-  useEffect(() => {
-    if (!draftId) {
-      return;
-    }
-
-    setActiveStepId(prev => {
-      if (steps.length === 0) {
-        return prev === null ? prev : null;
-      }
-
-      if (prev && steps.some(step => step.id === prev)) {
-        return prev;
-      }
-
-      const stored = getStoredActiveStepId(draftId);
-      if (stored && steps.some(step => step.id === stored)) {
-        return stored;
-      }
-
-      return steps[0].id;
-    });
-  }, [draftId, steps]);
-
-  useEffect(() => {
-    if (!draftId) {
-      return;
-    }
-
-    persistActiveStepId(draftId, activeStepId);
-  }, [draftId, activeStepId]);
-
-  useEffect(() => {
-    if (!draftId) {
-      return;
-    }
-
-    const unsubscribe = subscribeToResourceAttachments(({ draftId: targetDraftId, stepId, resourceId }) => {
-      if (targetDraftId !== draftId) {
-        return;
-      }
-
-      const state = useLessonDraftStore.getState();
-      const stepExists = state.draft.steps.some(step => step.id === stepId);
-      if (!stepExists) {
-        return;
-      }
-
-      attachResource(stepId, resourceId);
-      setActiveStepId(stepId);
-    });
-
-    return unsubscribe;
-  }, [attachResource, draftId]);
 
   const containerClasses =
     layoutMode === "embedded"
@@ -1418,19 +1323,6 @@ const LessonBuilderPage = ({
               </div>
             </section>
 
-            <section className="space-y-6 rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
-              <div className="space-y-2">
-                <h2 className="text-xl font-semibold text-foreground">Lesson steps</h2>
-                <p className="text-sm text-muted-foreground">
-                  Add learning resources to each step so everything you need for class is in one place.
-                </p>
-              </div>
-              <StepEditor
-                onRequestResourceSearch={handleRequestResourceSearch}
-                activeResourceStepId={resourceSearchStepId}
-                isResourceSearchOpen={isResourceSearchOpen}
-              />
-            </section>
           </div>
 
           <div className="space-y-6 xl:sticky xl:top-6">
@@ -1441,7 +1333,6 @@ const LessonBuilderPage = ({
               </p>
               <div className="mt-6 space-y-6">
                 <LessonPreviewPane meta={meta} profile={previewProfile} />
-                <LessonPreview />
               </div>
             </aside>
           </div>
@@ -1484,11 +1375,6 @@ const LessonBuilderPage = ({
         </section>
       </div>
 
-      <ResourceSearchModal
-        open={isResourceSearchOpen}
-        onOpenChange={handleResourceDialogChange}
-        activeStepId={resourceSearchStepId}
-      />
       </div>
       <DragOverlay>
         {activeDragPreview ? (
