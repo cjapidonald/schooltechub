@@ -25,6 +25,7 @@ import { CurriculumTable, type CurriculumLessonRow } from "@/components/dashboar
 import { StudentsSection } from "@/components/dashboard/StudentsSection";
 import { AssessmentsSection } from "@/components/dashboard/AssessmentsSection";
 import LessonBuilderPage from "@/pages/lesson-builder/LessonBuilderPage";
+import type { Subject } from "@/lib/constants/subjects";
 import { createClass, fetchMyClasses } from "@/features/dashboard/api";
 import { DASHBOARD_EXAMPLE_CLASS } from "@/features/dashboard/examples";
 import { bulkAddStudents } from "@/features/students/api";
@@ -147,6 +148,7 @@ type LessonBuilderRouteContext = {
   subject: string | null;
   date: string | null;
   sequence: number | null;
+  lessonId: string | null;
 };
 
 const formatLessonContextDate = (value: string | null) => {
@@ -200,6 +202,30 @@ const createCurriculumLesson = (
   presentationUrl: null,
   lastUpdatedAt: new Date().toISOString(),
 });
+
+const areLessonBuilderContextsEqual = (
+  a: LessonBuilderRouteContext | null,
+  b: LessonBuilderRouteContext | null,
+) => {
+  if (a === b) {
+    return true;
+  }
+
+  if (!a || !b) {
+    return false;
+  }
+
+  return (
+    a.title === b.title &&
+    a.classId === b.classId &&
+    a.classTitle === b.classTitle &&
+    a.stage === b.stage &&
+    a.subject === b.subject &&
+    a.date === b.date &&
+    a.sequence === b.sequence &&
+    a.lessonId === b.lessonId
+  );
+};
 
 export default function TeacherPage() {
   const { t } = useLanguage();
@@ -287,6 +313,7 @@ export default function TeacherPage() {
           "lessonSubject",
           "lessonDate",
           "lessonSeq",
+          "lessonId",
         ];
         keys.forEach(key => params.delete(key));
 
@@ -312,6 +339,9 @@ export default function TeacherPage() {
         }
         if (context.sequence !== null && context.sequence !== undefined) {
           params.set("lessonSeq", String(context.sequence));
+        }
+        if (context.lessonId) {
+          params.set("lessonId", context.lessonId);
         }
       });
     },
@@ -343,6 +373,7 @@ export default function TeacherPage() {
       subject: getParam("lessonSubject"),
       date: getParam("lessonDate"),
       sequence: Number.isFinite(sequenceNumber) ? sequenceNumber : null,
+      lessonId: getParam("lessonId"),
     };
   }, [searchParams]);
 
@@ -384,6 +415,38 @@ export default function TeacherPage() {
           ]
         : [],
     [lessonBuilderContext, t],
+  );
+
+  const handleEmbeddedLessonContextChange = useCallback(
+    (context: {
+      classId: string | null;
+      classTitle: string | null;
+      lessonId: string | null;
+      lessonTitle: string;
+      subject: string | null;
+      stage: string | null;
+      date: string | null;
+      sequence: number | null;
+    }) => {
+      const trimmedTitle = context.lessonTitle.trim();
+      const nextContext: LessonBuilderRouteContext = {
+        title: trimmedTitle.length > 0 ? trimmedTitle : lessonBuilderContext?.title ?? context.lessonTitle,
+        classId: context.classId,
+        classTitle: context.classTitle,
+        stage: context.stage,
+        subject: context.subject,
+        date: context.date,
+        sequence: context.sequence,
+        lessonId: context.lessonId,
+      };
+
+      if (areLessonBuilderContextsEqual(lessonBuilderContext, nextContext)) {
+        return;
+      }
+
+      setLessonBuilderContext(nextContext);
+    },
+    [lessonBuilderContext, setLessonBuilderContext],
   );
 
   const handleTabChange = useCallback(
@@ -614,6 +677,7 @@ export default function TeacherPage() {
         subject: row.classSubject,
         date: null,
         sequence: row.sequence,
+        lessonId: row.lessonId,
       });
     },
     [setLessonBuilderContext],
@@ -851,9 +915,15 @@ export default function TeacherPage() {
                     <LessonBuilderPage
                       initialMeta={{
                         title: lessonBuilderContext.title,
-                        subject: lessonBuilderContext.subject ?? undefined,
+                        subject: (lessonBuilderContext.subject as Subject | null | undefined) ?? undefined,
+                        date: lessonBuilderContext.date ?? undefined,
+                        classId: lessonBuilderContext.classId ?? undefined,
+                        lessonId: lessonBuilderContext.lessonId ?? undefined,
+                        sequence: lessonBuilderContext.sequence ?? undefined,
+                        stage: lessonBuilderContext.stage ?? undefined,
                       }}
                       initialClassId={lessonBuilderContext.classId}
+                      onLessonContextChange={handleEmbeddedLessonContextChange}
                     />
                   </div>
                 </div>
@@ -877,6 +947,7 @@ export default function TeacherPage() {
                       subject: null,
                       date: null,
                       sequence: null,
+                      lessonId: null,
                     })}
                   >
                     {t.dashboard.lessonBuilder.launchBlank}

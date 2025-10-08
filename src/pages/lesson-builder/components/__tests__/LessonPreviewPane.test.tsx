@@ -12,6 +12,11 @@ const baseMeta: LessonPlanMetaDraft = {
   date: null,
   objective: "",
   successCriteria: "",
+  teacher: null,
+  classId: null,
+  lessonId: null,
+  sequence: null,
+  stage: null,
 };
 
 const baseProfile = {
