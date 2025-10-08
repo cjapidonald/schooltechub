@@ -444,7 +444,7 @@ const Index = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-background/85 to-background" />
           </div>
           <div className="mx-auto max-w-4xl">
-            <Reveal>
+            <Reveal className="mt-[10px]">
               <Card
                 className={cn(
                   neonCardClass,
