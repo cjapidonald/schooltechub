@@ -1023,22 +1023,27 @@ const LessonBuilderPage = ({
   }, [attachResource, draftId]);
 
   const containerClasses =
-    layoutMode === "embedded" ? "space-y-10" : "min-h-screen bg-muted/20 py-10";
+    layoutMode === "embedded"
+      ? "space-y-10"
+      : "relative min-h-screen overflow-hidden bg-slate-950/90 py-10";
   const mainClasses =
     layoutMode === "embedded"
       ? "space-y-10"
-      : "container mx-auto space-y-10 px-4";
+      : "relative container mx-auto space-y-10 px-4";
 
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
       <div className={containerClasses}>
-      {layoutMode === "standalone" ? (
-        <SEO
-          title="Lesson Builder"
-          description="Plan lesson logistics and craft each instructional step from a single workspace."
-        />
-      ) : null}
-      <div className={mainClasses}>
+        {layoutMode === "standalone" ? (
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.28),_rgba(15,23,42,0.92))]" />
+        ) : null}
+        {layoutMode === "standalone" ? (
+          <SEO
+            title="Lesson Builder"
+            description="Plan lesson logistics and craft each instructional step from a single workspace."
+          />
+        ) : null}
+        <div className={mainClasses}>
         <header className="mx-auto max-w-3xl space-y-3 text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Lesson Builder</h1>
           <div className="flex justify-center text-sm text-muted-foreground">
@@ -1056,7 +1061,7 @@ const LessonBuilderPage = ({
           </p>
         </header>
 
-        <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+        <section className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-foreground">{contextCopy.title}</h2>
             <p className="text-sm text-muted-foreground">{contextCopy.description}</p>
@@ -1150,7 +1155,7 @@ const LessonBuilderPage = ({
 
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)] xl:items-start">
           <div className="space-y-6">
-            <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+            <section className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
               <div className="space-y-8">
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">Lesson details</h2>
@@ -1172,6 +1177,7 @@ const LessonBuilderPage = ({
                       value={meta.objective}
                       onChange={event => handleObjectiveChange(event.target.value)}
                       placeholder="What knowledge or skills will students gain?"
+                      className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
                     />
                   </div>
                   <div className="space-y-2">
@@ -1184,13 +1190,14 @@ const LessonBuilderPage = ({
                       value={meta.successCriteria}
                       onChange={event => handleSuccessCriteriaChange(event.target.value)}
                       placeholder="How will students demonstrate mastery?"
+                      className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
                     />
                   </div>
                 </div>
               </div>
             </section>
 
-            <section className="space-y-6 rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+            <section className="space-y-6 rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">Lesson plan document</h2>
                 <p className="text-sm text-muted-foreground">
@@ -1217,7 +1224,7 @@ const LessonBuilderPage = ({
               </div>
             </section>
 
-            <section className="space-y-6 rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+            <section className="space-y-6 rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-foreground">Lesson steps</h2>
                 <p className="text-sm text-muted-foreground">
@@ -1233,7 +1240,7 @@ const LessonBuilderPage = ({
           </div>
 
           <div className="space-y-6 xl:sticky xl:top-6">
-            <aside className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+            <aside className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
               <h2 className="text-xl font-semibold text-foreground">Lesson overview preview</h2>
               <p className="mt-3 text-sm text-muted-foreground">
                 This pane mirrors what teachers see. As you update details, the summary refreshes automatically.
@@ -1246,7 +1253,7 @@ const LessonBuilderPage = ({
           </div>
         </div>
 
-        <section className="rounded-2xl border border-border/60 bg-background p-6 shadow-sm">
+        <section className="rounded-3xl border border-white/20 bg-white/10 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl">
           <div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold text-foreground">Export your lesson</h2>
@@ -1260,6 +1267,7 @@ const LessonBuilderPage = ({
                 variant="outline"
                 onClick={() => void handleDownload("pdf")}
                 disabled={Boolean(activeExport)}
+                className="border-white/20 bg-white/10 text-foreground shadow-[0_12px_40px_-20px_rgba(56,189,248,0.85)] backdrop-blur"
               >
                 {activeExport === "pdf" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Download PDF
@@ -1269,6 +1277,7 @@ const LessonBuilderPage = ({
                 variant="outline"
                 onClick={() => void handleDownload("docx")}
                 disabled={Boolean(activeExport)}
+                className="border-white/20 bg-white/10 text-foreground shadow-[0_12px_40px_-20px_rgba(129,140,248,0.85)] backdrop-blur"
               >
                 {activeExport === "docx" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Download DOCX

@@ -81,8 +81,8 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
     <div
       id="lesson-resource-finder"
       className={cn(
-        "flex h-full flex-col gap-4 rounded-lg border bg-background/40 p-2",
-        highlighted && "ring-2 ring-primary/80 ring-offset-2 ring-offset-background",
+        "flex h-full flex-col gap-4 rounded-3xl border border-white/20 bg-white/10 p-4 shadow-[0_30px_90px_-40px_rgba(15,23,42,0.85)] backdrop-blur-2xl",
+        highlighted && "ring-2 ring-sky-300/80 ring-offset-4 ring-offset-[rgba(255,255,255,0.08)]",
       )}
     >
       <div className="space-y-3">
@@ -99,8 +99,9 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
             value={query}
             onChange={event => setQuery(event.target.value)}
             placeholder={t.lessonBuilder.resources.searchPlaceholder}
+            className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
           />
-          <div className="grid gap-3 rounded-lg border bg-background/60 p-3">
+          <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <span>{t.lessonBuilder.resources.filtersTitle}</span>
@@ -112,6 +113,7 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
                   type="button"
                   variant={types.includes(type) ? "default" : "outline"}
                   size="sm"
+                  className="border-white/20 bg-white/10 text-foreground shadow-[0_10px_25px_-18px_rgba(15,23,42,0.8)] backdrop-blur"
                   onClick={() => toggleType(type)}
                   aria-pressed={types.includes(type)}
                   aria-label={t.lessonBuilder.resources.typeFilter[type]}
@@ -131,16 +133,17 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
                   onChange={event => setTagInput(event.target.value)}
                   onKeyDown={handleTagKeyDown}
                   placeholder={t.lessonBuilder.resources.tagsPlaceholder}
+                  className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
                 />
                 {tags.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {tags.map(tag => (
-                      <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={tag} variant="secondary" className="flex items-center gap-1 border-white/20 bg-white/10 backdrop-blur">
                         <span>{tag}</span>
                         <button
                           type="button"
                           onClick={() => removeTag(tag)}
-                          className="rounded-full p-0.5 hover:bg-secondary-foreground/10"
+                          className="rounded-full p-0.5 hover:bg-white/20"
                           aria-label={t.lessonBuilder.resources.removeTagLabel.replace("{tag}", tag)}
                         >
                           <X className="h-3 w-3" />
@@ -160,6 +163,7 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
                       type="button"
                       variant={cost === option.value ? "default" : "outline"}
                       size="sm"
+                      className="border-white/20 bg-white/10 text-foreground shadow-[0_10px_25px_-18px_rgba(15,23,42,0.8)] backdrop-blur"
                       onClick={() => setCost(option.value)}
                     >
                       {option.label}
@@ -176,6 +180,7 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
                   value={stage}
                   onChange={event => setStage(event.target.value)}
                   placeholder={t.lessonBuilder.resources.stagePlaceholder}
+                  className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
                 />
               </div>
               <div className="grid gap-2">
@@ -187,21 +192,22 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
                   value={subject}
                   onChange={event => setSubject(event.target.value)}
                   placeholder={t.lessonBuilder.resources.subjectPlaceholder}
+                  className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
                 />
               </div>
             </div>
           </div>
         </div>
       </div>
-      <Separator />
+      <Separator className="bg-white/10" />
       <ScrollArea className="flex-1">
         <div className="space-y-3 pr-4">
           {loading ? (
-            <div className="rounded-lg border bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl border border-white/20 bg-white/10 p-6 text-center text-sm text-muted-foreground backdrop-blur">
               {t.lessonBuilder.resources.loading}
             </div>
           ) : resources.length === 0 ? (
-            <div className="rounded-lg border border-dashed bg-muted/10 p-6 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl border border-dashed border-white/30 bg-white/5 p-6 text-center text-sm text-muted-foreground backdrop-blur">
               {t.lessonBuilder.resources.empty}
             </div>
           ) : (
@@ -217,7 +223,10 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
                 : [];
 
               return (
-                <article key={resource.id} className="rounded-lg border bg-background p-4 shadow-sm">
+                <article
+                  key={resource.id}
+                  className="rounded-2xl border border-white/15 bg-white/10 p-4 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.8)] backdrop-blur"
+                >
                   <div className="flex items-center justify-between gap-4">
                     <div className="space-y-1">
                       <h4 className="text-base font-semibold">{resource.title}</h4>
@@ -225,19 +234,37 @@ export function ResourceSearch({ resources, loading, onFilterChange, onInsert, h
                         {resource.instructions ?? t.lessonBuilder.resources.noInstructions}
                       </p>
                       <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                        <Badge variant="outline" className={cn("capitalize", resource.type === "video" ? "text-red-500" : undefined)}>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "capitalize border-white/30 bg-white/10 text-foreground backdrop-blur",
+                            resource.type === "video" ? "text-red-400" : undefined,
+                          )}
+                        >
                           {t.lessonBuilder.resources.typeFilter[resource.type]}
                         </Badge>
-                        {stageValue ? <Badge variant="secondary">{String(stageValue)}</Badge> : null}
-                        {subjectValue ? <Badge variant="secondary">{String(subjectValue)}</Badge> : null}
+                        {stageValue ? (
+                          <Badge variant="secondary" className="border-white/20 bg-white/10 backdrop-blur">
+                            {String(stageValue)}
+                          </Badge>
+                        ) : null}
+                        {subjectValue ? (
+                          <Badge variant="secondary" className="border-white/20 bg-white/10 backdrop-blur">
+                            {String(subjectValue)}
+                          </Badge>
+                        ) : null}
                         {normalizedTags.map(tag => (
-                          <Badge key={tag} variant="secondary">
+                          <Badge key={tag} variant="secondary" className="border-white/20 bg-white/10 backdrop-blur">
                             #{tag}
                           </Badge>
                         ))}
                       </div>
                     </div>
-                    <Button onClick={() => onInsert(resource)} aria-label={t.lessonBuilder.resources.insert}>
+                    <Button
+                      onClick={() => onInsert(resource)}
+                      className="border-white/30 bg-white/20 text-foreground shadow-[0_12px_30px_-18px_rgba(15,23,42,0.85)] backdrop-blur"
+                      aria-label={t.lessonBuilder.resources.insert}
+                    >
                       {t.lessonBuilder.resources.insert}
                     </Button>
                   </div>

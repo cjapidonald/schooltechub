@@ -101,6 +101,7 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
           onChange={event => handleTitleChange(event.target.value)}
           placeholder="e.g. Exploring fractions"
           required
+          className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
         />
       </div>
 
@@ -111,6 +112,7 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
           value={value.teacher ?? ""}
           onChange={event => onChange({ ...value, teacher: event.target.value })}
           placeholder="Prefilled from saved context"
+          className="border-white/20 bg-white/10 text-foreground placeholder:text-slate-200/60 backdrop-blur"
         />
       </div>
 
@@ -118,7 +120,10 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
         <div className="space-y-2">
           <Label htmlFor="lesson-meta-subject">Subject</Label>
           <Select value={value.subject ?? undefined} onValueChange={handleSubjectChange}>
-            <SelectTrigger id="lesson-meta-subject">
+            <SelectTrigger
+              id="lesson-meta-subject"
+              className="border-white/20 bg-white/10 text-foreground backdrop-blur"
+            >
               <SelectValue placeholder="Choose a subject" />
             </SelectTrigger>
             <SelectContent>
@@ -142,7 +147,7 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
               type="button"
               variant="outline"
               className={cn(
-                "w-full justify-start text-left font-normal",
+                "w-full justify-start text-left font-normal border-white/20 bg-white/10 text-foreground backdrop-blur",
                 !selectedDate && "text-muted-foreground",
               )}
             >
@@ -150,7 +155,7 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
               {formattedDate}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto border-white/20 bg-white/10 p-0 backdrop-blur" align="start">
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -163,7 +168,11 @@ export function LessonMetaForm({ value, onChange, onSubmit, isSubmitting }: Less
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={!canSubmit}>
+        <Button
+          type="submit"
+          disabled={!canSubmit}
+          className="border-white/30 bg-gradient-to-r from-sky-300/30 via-white/30 to-indigo-300/30 text-foreground shadow-[0_12px_35px_-18px_rgba(56,189,248,0.9)] backdrop-blur"
+        >
           {isSubmitting ? "Saving…" : "Save"}
         </Button>
       </div>
