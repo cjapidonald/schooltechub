@@ -33,7 +33,7 @@ import {
 } from "@/lib/avatar";
 import { createFileIdentifier } from "@/lib/files";
 import { cn } from "@/lib/utils";
-import type { Salutation } from "@/types/supabase-tables";
+import type { Salutation } from "../../../../types/supabase-tables";
 
 type ThemePreference = "system" | "light" | "dark";
 type SettingsPanelProps = {

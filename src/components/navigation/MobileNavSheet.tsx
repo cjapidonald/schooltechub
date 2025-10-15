@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, LogOut } from "lucide-react";
-import type { SupabaseUser } from "@supabase/supabase-js";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import type { AuthRole } from "@/components/auth/RoleAuthDialog";
 import useNavItemActiveState from "./useNavItemActiveState";
 import type { NavItem } from "./types";

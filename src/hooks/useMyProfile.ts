@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { supabase } from "@/integrations/supabase/client";
-import type { Salutation } from "@/types/supabase-tables";
+import type { Salutation } from "../../types/supabase-tables";
 
 interface MyProfileData {
   fullName: string | null;
