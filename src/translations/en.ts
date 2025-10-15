@@ -106,6 +106,8 @@ export const en = {
         "Jump straight into the teacher workspace preview—no secure credentials required yet.",
       error: "Something went wrong. Please try again.",
       blogUnavailable: "Blog submissions are currently unavailable.",
+      classError: "Unable to create class. Please try again.",
+      communityUnavailable: "Community features will be available soon.",
     },
     classes: {
       title: "My Classes",
@@ -222,6 +224,9 @@ export const en = {
     lessonBuilder: {
       contextTitle: "Planning details",
       fallback: "—",
+      clearContext: "Clear planning context",
+      emptyStateTitle: "Choose a lesson to start planning",
+      emptyStateDescription: "Select a lesson from your curriculum tab to prefill the builder. We'll load the workspace here once you've chosen one.",
       labels: {
         lesson: "Lesson",
         class: "Class",
@@ -493,6 +498,7 @@ export const en = {
     },
     values: {
       title: "Our Values",
+      subtitle: "What drives everything we do",
       items: [
         {
           title: "Practical First",
@@ -696,6 +702,7 @@ export const en = {
     },
     steps: {
       title: "How It Works",
+      subtitle: "Your journey from booking to implementation",
       tabs: [
         {
           value: "before",
@@ -745,6 +752,7 @@ export const en = {
     },
     faq: {
       title: "Frequently Asked Questions",
+      description: "Common questions about our services",
       items: [
         {
           question: "What devices do I need?",

@@ -694,7 +694,7 @@ const Blog = () => {
         canonicalUrl={`https://schooltechub.com${getLocalizedPath("/blog", language)}`}
       />
 
-      {structuredData ? <StructuredData data={structuredData} /> : null}
+      {structuredData ? <StructuredData type="BreadcrumbList" data={structuredData} /> : null}
 
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-40 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-sky-500/20 blur-3xl" />

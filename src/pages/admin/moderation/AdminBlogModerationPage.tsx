@@ -164,14 +164,14 @@ export default function AdminBlogModerationPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => rejectMutation.mutate(post.id)}
-                          disabled={rejectMutation.isLoading || approveMutation.isLoading}
+                          disabled={rejectMutation.isPending || approveMutation.isPending}
                         >
                           Reject
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => approveMutation.mutate(post.id)}
-                          disabled={approveMutation.isLoading || rejectMutation.isLoading}
+                          disabled={approveMutation.isPending || rejectMutation.isPending}
                         >
                           Approve
                         </Button>

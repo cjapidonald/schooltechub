@@ -343,8 +343,8 @@ export default function BlogBuilderPage() {
           </Card>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" disabled={mutation.isLoading}>
-              {mutation.isLoading ? t.blogBuilder.actions.submitting : t.blogBuilder.actions.submit}
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? t.blogBuilder.actions.submitting : t.blogBuilder.actions.submit}
             </Button>
             <p className="text-sm text-muted-foreground">
               {t.blogBuilder.actions.helper.replace("{bucket}", BLOG_IMAGE_BUCKET)}
