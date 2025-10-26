@@ -31,6 +31,7 @@ export const BuilderShell = () => {
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
+  const linkLookupRequestId = useRef(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -115,6 +116,7 @@ export const BuilderShell = () => {
 
   useEffect(() => {
     let cancelled = false;
+    const requestId = ++linkLookupRequestId.current;
 
     const urls = Array.from(
       new Set(
@@ -125,7 +127,9 @@ export const BuilderShell = () => {
     );
 
     if (!urls.length) {
-      setLinkLookup({});
+      if (!cancelled && linkLookupRequestId.current === requestId) {
+        setLinkLookup({});
+      }
       return () => {
         cancelled = true;
       };
@@ -133,7 +137,7 @@ export const BuilderShell = () => {
 
     fetchLinkStatuses(urls)
       .then(result => {
-        if (!cancelled) {
+        if (!cancelled && linkLookupRequestId.current === requestId) {
           setLinkLookup(result);
         }
       })
